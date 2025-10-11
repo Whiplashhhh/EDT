@@ -8,7 +8,7 @@ afin de visionner simplement l'emploi du temps
 Copie-colle tout ce texte dans une nouvelle conversation avec ChatGPT avant de commencer à travailler sur ton projet.
 
 
-🎯 CONTEXTE GÉNÉRAL
+🎯 CONTEXTE GÉNÉRAL ..
 Je suis développeur junior et je veux m’exercer sur un projet complet :
 Créer une application web qui me permet de consulter automatiquement mon emploi du temps universitaire sans devoir à chaque fois sélectionner la classe, la semaine, etc.
 L’application doit être hébergée sur le web, accessible depuis mon iPhone, et je veux pouvoir l’ajouter facilement en raccourci sur l’écran d’accueil (type PWA).
