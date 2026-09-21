@@ -1,0 +1,12 @@
+{
+  "$comment": "Sources ADE. Chaque entrée correspond à un lien ADE « direct planning » public. Le jeton peut être remplacé par la variable d'environnement ADE_TOKEN_<ID en majuscules>.",
+  "departments": [
+    {
+      "id": "iut-info",
+      "label": "IUT Informatique",
+      "origin": "https://edt.univ-littoral.fr",
+      "projectId": 5,
+      "token": "6b052c86649c89d6314052e0c2e2410df83de816b8eb8f3b30bcbbeda1e00a2707dd302e5e5e44dba7dd1d493bd139047bbd5a6df9dc5274010fd1cf0671c9ff0a59170d199a10cf4386a3f2eb1f9d2ed9228198d14893f6"
+    }
+  ]
+}

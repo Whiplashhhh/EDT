@@ -1,0 +1,139 @@
+import type { FastifyInstance } from 'fastify';
+import type { AdeService } from '../ade/service.ts';
+
+const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Lundi de la semaine contenant `date`, en heure de Paris. */
+export function mondayOf(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const shift = days.indexOf(map.weekday as string);
+  const local = new Date(`${map.year}-${map.month}-${map.day}T00:00:00Z`);
+  local.setUTCDate(local.getUTCDate() - (shift < 0 ? 0 : shift));
+  return local.toISOString().slice(0, 10);
+}
+
+/** Valide et normalise le paramètre `from` : une date ISO, ramenée au lundi. */
+function normalizeFrom(raw: unknown): string {
+  if (raw === undefined || raw === null || raw === '') return mondayOf(new Date());
+  if (typeof raw !== 'string' || !DATE_RE.test(raw)) {
+    throw Object.assign(new Error('Paramètre `from` invalide (format attendu : AAAA-MM-JJ).'), { statusCode: 400 });
+  }
+  const parsed = new Date(`${raw}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    throw Object.assign(new Error('Paramètre `from` invalide.'), { statusCode: 400 });
+  }
+  // Fenêtre raisonnable : deux ans autour d'aujourd'hui.
+  const delta = Math.abs(parsed.getTime() - Date.now());
+  if (delta > 2 * 365 * 24 * 60 * 60 * 1000) {
+    throw Object.assign(new Error('Paramètre `from` hors de la plage autorisée.'), { statusCode: 400 });
+  }
+  return mondayOf(parsed);
+}
+
+function parseIds(params: Record<string, string>): { department: string; groupId: number } {
+  const department = params.department ?? '';
+  if (!DEPARTMENT_RE.test(department)) {
+    throw Object.assign(new Error('Département invalide.'), { statusCode: 400 });
+  }
+  const groupId = Number(params.groupId);
+  if (!Number.isInteger(groupId) || groupId <= 0 || groupId > 10_000_000) {
+    throw Object.assign(new Error('Identifiant de groupe invalide.'), { statusCode: 400 });
+  }
+  return { department, groupId };
+}
+
+export async function registerApi(
+  app: FastifyInstance,
+  opts: { service: AdeService },
+): Promise<void> {
+  const { service } = opts;
+
+  app.get('/health', async () => ({ status: 'ok' }));
+
+  app.get('/departments', async (_req, reply) => {
+    reply.header('Cache-Control', 'public, max-age=3600');
+    return { departments: service.departments() };
+  });
+
+  app.get<{ Params: Record<string, string> }>('/:department/groups', async (req, reply) => {
+    const { department } = parseIds({ ...req.params, groupId: '1' });
+    const catalog = await service.catalog(department);
+    reply.header('Cache-Control', 'public, max-age=1800');
+    return catalog;
+  });
+
+  app.get<{ Params: Record<string, string>; Querystring: { from?: string } }>(
+    '/:department/groups/:groupId/schedule',
+    async (req, reply) => {
+      const { department, groupId } = parseIds(req.params);
+      const from = normalizeFrom(req.query.from);
+      const schedule = await service.schedule(department, groupId, from);
+      reply.header('Cache-Control', 'public, max-age=300');
+      return schedule;
+    },
+  );
+
+  // Flux iCalendar réexposé : permet de s'abonner depuis l'app Calendrier du téléphone.
+  app.get<{ Params: Record<string, string> }>(
+    '/:department/groups/:groupId/calendar.ics',
+    async (req, reply) => {
+      const { department, groupId } = parseIds(req.params);
+      const from = mondayOf(new Date());
+      const schedule = await service.schedule(department, groupId, from);
+      reply
+        .header('Content-Type', 'text/calendar; charset=utf-8')
+        // Le nom vient d'ADE : on le réduit à un jeu de caractères sûr pour un en-tête.
+        .header('Content-Disposition', `inline; filename="edt-${safeFilename(schedule.groupName)}.ics"`)
+        .header('Cache-Control', 'public, max-age=900');
+      return toIcs(schedule.groupName, schedule.events);
+    },
+  );
+}
+
+function safeFilename(value: string): string {
+  return value.replace(/[^A-Za-z0-9._-]/g, '-').slice(0, 64) || 'calendrier';
+}
+
+function icsEscape(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r\n?|\n/g, '\\n');
+}
+
+function icsStamp(iso: string): string {
+  return `${iso.slice(0, 19).replace(/[-:]/g, '')}Z`;
+}
+
+function toIcs(groupName: string, events: Array<import('../ade/ics.ts').CourseEvent>): string {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//EDT ULCO//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `X-WR-CALNAME:${icsEscape(`EDT ${groupName}`)}`,
+  ];
+  for (const event of events) {
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${icsEscape(event.uid)}`,
+      `DTSTAMP:${icsStamp(new Date().toISOString())}`,
+      `DTSTART:${icsStamp(event.start)}`,
+      `DTEND:${icsStamp(event.end)}`,
+      `SUMMARY:${icsEscape(event.title)}`,
+      ...(event.room ? [`LOCATION:${icsEscape(event.room)}`] : []),
+      `DESCRIPTION:${icsEscape([event.kind, event.groups.join(', '), event.teachers.join(', ')].filter(Boolean).join('\n'))}`,
+      'END:VEVENT',
+    );
+  }
+  lines.push('END:VCALENDAR');
+  // RFC 5545 : les lignes se terminent par CRLF.
+  return `${lines.join('\r\n')}\r\n`;
+}
