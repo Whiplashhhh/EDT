@@ -6,7 +6,7 @@ import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
-import { addDays, formatDayLong, today } from './dates.js';
+import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, setLocale, t } from './i18n.js';
 
@@ -86,6 +86,20 @@ watch(eventsByDay, (map) => {
 
 const dayEvents = computed(() => eventsByDay.value.get(focusedDay.value) || []);
 const isToday = computed(() => focusedDay.value === today());
+
+/*
+ * Glissement d'un jour (ou d'une semaine) à l'autre : le sens du mouvement suit
+ * le sens de la navigation, pour que l'écran se lise comme une bande continue.
+ * La vue jour change à chaque date, la vue semaine seulement au changement de
+ * semaine — sélectionner un jour déjà visible n'a rien à faire glisser.
+ */
+const slideName = ref('slide-next');
+const weekKey = computed(() => mondayOf(focusedDay.value));
+const viewKey = computed(() => (settings.value.view === 'day' ? focusedDay.value : weekKey.value));
+
+watch(focusedDay, (day, previous) => {
+  slideName.value = day < previous ? 'slide-prev' : 'slide-next';
+});
 const calendarUrl = computed(() =>
   department.value && resourceId.value ? api.calendarUrl(department.value, kind.value, resourceId.value) : null,
 );
@@ -255,19 +269,33 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
     </div>
 
     <main v-if="settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
-      <WeekStrip :focused="focusedDay" :events-by-day="eventsByDay" @select="focusedDay = $event" @shift="shiftDay" />
+      <div class="strip-stage">
+        <Transition :name="slideName">
+          <WeekStrip
+            :key="weekKey"
+            :focused="focusedDay"
+            :events-by-day="eventsByDay"
+            @select="focusedDay = $event"
+            @shift="shiftDay"
+          />
+        </Transition>
+      </div>
 
       <p v-if="error" class="banner error" role="status">{{ error }}</p>
       <p v-else-if="stale" class="banner" role="status">{{ t('app.stale') }}</p>
 
-      <template v-if="settings.view === 'day'">
-        <h2 class="day-title">
-          {{ formatDayLong(focusedDay) }}
-          <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
-        </h2>
-        <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
-      </template>
-      <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
+      <Transition :name="slideName" mode="out-in">
+        <div :key="viewKey" class="view">
+          <template v-if="settings.view === 'day'">
+            <h2 class="day-title">
+              {{ formatDayLong(focusedDay) }}
+              <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
+            </h2>
+            <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
+          </template>
+          <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
+        </div>
+      </Transition>
 
       <p v-if="loading && !dayEvents.length" class="banner" role="status">{{ t('app.loading') }}</p>
     </main>
@@ -401,7 +429,39 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
 .segmented button:hover { color: var(--text); }
 .segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
 
-.main { flex: 1; padding-top: 0.6rem; }
+.main { flex: 1; padding-top: 0.6rem; overflow-x: clip; }
+
+/*
+ * Le bandeau des jours garde une hauteur constante : les deux semaines peuvent
+ * donc se croiser, celle qui part étant retirée du flux le temps du glissement.
+ */
+.strip-stage { position: relative; }
+.strip-stage .slide-next-leave-active,
+.strip-stage .slide-prev-leave-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Le contenu, lui, change de hauteur : il glisse en relais plutôt qu'en croisé. */
+.slide-next-enter-active,
+.slide-prev-enter-active { transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.slide-next-leave-active,
+.slide-prev-leave-active { transition: opacity 0.14s ease, transform 0.16s ease-in; }
+
+.slide-next-enter-from { opacity: 0; transform: translateX(24px); }
+.slide-next-leave-to { opacity: 0; transform: translateX(-18px); }
+.slide-prev-enter-from { opacity: 0; transform: translateX(-24px); }
+.slide-prev-leave-to { opacity: 0; transform: translateX(18px); }
+
+/* Un mouvement qui dérange se réduit à un fondu. */
+@media (prefers-reduced-motion: reduce) {
+  .slide-next-enter-from,
+  .slide-next-leave-to,
+  .slide-prev-enter-from,
+  .slide-prev-leave-to { transform: none; }
+}
 
 .welcome {
   flex: 1;
