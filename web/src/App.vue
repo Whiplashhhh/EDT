@@ -42,21 +42,47 @@ const calendarUrl = computed(() =>
 );
 
 let ticker;
+let refresher;
+// Dernier jour calendaire connu, pour détecter le passage de minuit.
+let currentDay = today();
+
 onMounted(() => {
   load();
   // L'état « cours en cours » se rafraîchit sans recharger les données.
-  ticker = setInterval(() => { now.value = Date.now(); }, 30_000);
+  ticker = setInterval(() => {
+    now.value = Date.now();
+    rollOverDay();
+  }, 30_000);
+  /*
+   * Rechargement périodique tant que la page est visible : sans lui, un onglet
+   * laissé ouvert garde indéfiniment les données de son premier chargement.
+   * Dix minutes, c'est la durée de vie du cache serveur : demander plus souvent
+   * ne rapporterait rien de plus frais.
+   */
+  refresher = setInterval(() => {
+    if (document.visibilityState === 'visible') load(true);
+  }, 10 * 60_000);
   document.addEventListener('visibilitychange', onVisible);
 });
 onUnmounted(() => {
   clearInterval(ticker);
+  clearInterval(refresher);
   document.removeEventListener('visibilitychange', onVisible);
 });
+
+/** Suit l'utilisateur sur le nouveau jour à minuit, sauf s'il consulte une autre date. */
+function rollOverDay() {
+  const day = today();
+  if (day === currentDay) return;
+  if (focusedDay.value === currentDay) focusedDay.value = day;
+  currentDay = day;
+}
 
 function onVisible() {
   if (document.visibilityState !== 'visible') return;
   now.value = Date.now();
   // Au retour dans l'application, on revient sur aujourd'hui si le jour a changé.
+  rollOverDay();
   if (focusedDay.value < today()) focusedDay.value = today();
   load(true);
 }
@@ -94,12 +120,18 @@ function onTouchEnd(event) {
 }
 
 function onKeydown(event) {
+  if (event.key === 'Escape') {
+    pickerOpen.value = false;
+    menuOpen.value = false;
+    return;
+  }
   if (pickerOpen.value || menuOpen.value) return;
   if (event.key === 'ArrowRight') shiftDay(1);
   if (event.key === 'ArrowLeft') shiftDay(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
 }
 watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
+watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
 </script>
 
 <template>
@@ -107,7 +139,7 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
     <header class="top">
       <div class="identity">
         <p class="eyebrow">Emploi du temps</p>
-        <button class="group-btn" type="button" @click="pickerOpen = true">
+        <button class="group-btn" type="button" :aria-expanded="pickerOpen" @click="pickerOpen = !pickerOpen">
           {{ settings.groupName || 'Choisir sa classe' }}
           <span class="chev" aria-hidden="true">▾</span>
         </button>
@@ -123,8 +155,18 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
       </div>
     </header>
 
+    <div v-if="pickerOpen" class="menu-backdrop" @click="pickerOpen = false"></div>
+    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" aria-label="Choisir sa classe">
+      <GroupPicker
+        :department="settings.department"
+        :group-id="settings.groupId"
+        @choose="choose"
+        @close="pickerOpen = false"
+      />
+    </div>
+
     <div v-if="menuOpen" class="menu-backdrop" @click="menuOpen = false"></div>
-    <div v-if="menuOpen" class="menu" role="menu">
+    <div v-if="menuOpen" class="dropdown menu" role="menu">
       <button type="button" role="menuitem" @click="setView(settings.view === 'day' ? 'week' : 'day'); menuOpen = false">
         {{ settings.view === 'day' ? 'Vue semaine' : 'Vue jour' }}
       </button>
@@ -151,19 +193,24 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
       <p v-if="loading && !dayEvents.length" class="banner" role="status">Chargement…</p>
     </main>
 
-    <div v-if="pickerOpen" class="sheet" role="dialog" aria-modal="true" aria-label="Choisir sa classe">
-      <GroupPicker
-        :department="settings.department"
-        :group-id="settings.groupId"
-        @choose="choose"
-        @close="pickerOpen = false"
-      />
-    </div>
+    <!-- Première ouverture : le panneau est déjà déroulé, on dit juste quoi y faire. -->
+    <p v-else class="welcome">
+      <span class="emoji" aria-hidden="true">🎓</span>
+      Choisis ta classe pour afficher son emploi du temps.
+    </p>
   </div>
 </template>
 
 <style scoped>
-.app { min-height: 100%; display: flex; flex-direction: column; outline: none; }
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  /* Repère des panneaux déroulants : sans lui ils s'ancreraient à la fenêtre,
+     donc de travers dès que l'application est centrée sur grand écran. */
+  position: relative;
+}
 
 .top {
   position: sticky;
@@ -210,19 +257,32 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
 
 .menu-backdrop { position: fixed; inset: 0; z-index: 3; }
 
-.menu {
+.dropdown {
   position: absolute;
   z-index: 4;
-  right: 0.85rem;
   top: calc(3.9rem + var(--safe-top));
-  display: flex;
-  flex-direction: column;
-  min-width: 15rem;
-  padding: 0.35rem;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 16px 40px rgb(0 0 0 / 0.28);
+}
+
+.menu {
+  right: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 15rem;
+  padding: 0.35rem;
+}
+
+.picker-panel {
+  left: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  width: min(24rem, calc(100vw - 1.7rem));
+  /* Le panneau ne dépasse jamais l'écran : c'est l'arbre qui défile. */
+  max-height: min(70vh, 30rem);
+  overflow: hidden;
 }
 .menu > * {
   padding: 0.6rem 0.7rem;
@@ -235,6 +295,20 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
 .menu > *:hover { background: var(--bg-sunken); }
 
 .main { flex: 1; padding-top: 0.6rem; }
+
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.welcome .emoji { font-size: 1.8rem; }
 
 .day-title::first-letter { text-transform: uppercase; }
 
@@ -269,18 +343,8 @@ watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
 }
 .banner.error { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
 
-.sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  overflow-y: auto;
-  background: var(--bg);
-  padding-top: var(--safe-top);
-}
 
 @media (min-width: 760px) {
   .app { max-width: 62rem; margin: 0 auto; width: 100%; }
-  .sheet { inset: 0; display: grid; place-items: start center; background: color-mix(in srgb, var(--bg-sunken) 92%, transparent); padding: 3rem 1rem; }
-  .sheet > * { width: min(34rem, 100%); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); }
 }
 </style>

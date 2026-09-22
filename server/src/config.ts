@@ -19,6 +19,12 @@ export interface AppConfig {
   catalogTtlMs: number;
   /** Durée de vie d'un emploi du temps en cache (ms). */
   scheduleTtlMs: number;
+  /** Base de l'API publique qui republie les menus Crous. */
+  crousApiBase: string;
+  /** Restaurant universitaire affiché (identifiant CROUStillant), non modifiable côté client. */
+  crousRestaurantId: number;
+  /** Durée de vie du menu en cache (ms). Le Crous publie une fois par jour. */
+  crousTtlMs: number;
 }
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -62,5 +68,9 @@ export function loadConfig(): AppConfig {
     departments: readDepartments(),
     catalogTtlMs: positiveInt(process.env.CATALOG_TTL_MS, 12 * 60 * 60 * 1000),
     scheduleTtlMs: positiveInt(process.env.SCHEDULE_TTL_MS, 10 * 60 * 1000),
+    crousApiBase: (process.env.CROUS_API_BASE ?? 'https://api.croustillant.menu/v1').replace(/\/+$/, ''),
+    // 1164 = R.U. de la Mi-Voix, le restaurant du campus de Calais.
+    crousRestaurantId: positiveInt(process.env.CROUS_RESTAURANT_ID, 1164),
+    crousTtlMs: positiveInt(process.env.CROUS_TTL_MS, 60 * 60 * 1000),
   };
 }

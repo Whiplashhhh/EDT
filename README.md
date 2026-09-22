@@ -83,6 +83,13 @@ Pour ajouter une formation, il suffit de récupérer son lien ADE public et d'en
 le paramètre `data=`. Le jeton peut rester hors du dépôt via la variable d'environnement
 `ADE_TOKEN_<ID>` (ex. `ADE_TOKEN_IUT_INFO`), qui a la priorité sur le fichier.
 
+Le menu du midi vient de l'API publique [CROUStillant](https://croustillant.menu), qui
+republie les menus du réseau Crous. Un seul restaurant est affiché — celui du campus,
+`CROUS_RESTAURANT_ID` (1164 = R.U. de la Mi-Voix, Calais) — et l'application ne propose
+pas d'en changer. Il apparaît dans la vue jour, calé sur le service de 11 h 15 à 13 h 45 :
+dans le trou entre deux cours qui recouvre le service, sinon avant un premier cours qui
+commence après 11 h 15, sinon après un dernier cours qui finit avant 13 h 45.
+
 Les autres réglages sont dans `.env.example`.
 
 ## API
@@ -90,6 +97,7 @@ Les autres réglages sont dans `.env.example`.
 | Route | Description |
 |---|---|
 | `GET /api/health` | état du service |
+| `GET /api/crous/menu` | menu du restaurant universitaire (jours à venir) |
 | `GET /api/departments` | formations disponibles |
 | `GET /api/:dept/groups` | arbre des groupes |
 | `GET /api/:dept/groups/:id/schedule?from=AAAA-MM-JJ` | cours normalisés en JSON |

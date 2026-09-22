@@ -1,13 +1,24 @@
 <script setup>
 import { computed } from 'vue';
 import EventCard from './EventCard.vue';
-import { formatTime } from '../dates.js';
+import CrousMenu from './CrousMenu.vue';
+import { formatTime, minutesOfDay } from '../dates.js';
 
 const props = defineProps({
   day: { type: String, required: true },
   events: { type: Array, default: () => [] },
   now: { type: Number, default: 0 },
 });
+
+/* Service du restaurant universitaire (11h15 → 13h45) : la pause qui recouvre
+   cette plage reçoit le menu du Crous à la place du simple libellé de trou. */
+const LUNCH_FROM = 11 * 60 + 15;
+const LUNCH_TO = 13 * 60 + 45;
+
+/** Minutes de recouvrement entre un trou et le service du midi. */
+function lunchOverlap(from, to) {
+  return Math.min(minutesOfDay(to), LUNCH_TO) - Math.max(minutesOfDay(from), LUNCH_FROM);
+}
 
 /** Insère un séparateur quand deux cours sont séparés par au moins 45 minutes. */
 const rows = computed(() => {
@@ -25,6 +36,32 @@ const rows = computed(() => {
       minutes: (new Date(event.end) - new Date(event.start)) / 60_000,
     });
   });
+
+  // Une seule pause porte le menu : celle qui déborde le plus sur le service.
+  let lunch = null;
+  for (const row of out) {
+    if (row.type !== 'gap') continue;
+    const overlap = lunchOverlap(row.from, row.to);
+    if (overlap > 0 && (!lunch || overlap > lunch.overlap)) lunch = { row, overlap };
+  }
+  if (lunch) {
+    lunch.row.lunch = true;
+    return out;
+  }
+
+  /*
+   * Sans trou à midi, le menu se pose au bord de la journée quand le service
+   * reste accessible : avant un premier cours qui commence après l'ouverture,
+   * sinon après un dernier cours qui finit avant la fermeture.
+   */
+  const first = props.events[0];
+  const last = props.events[props.events.length - 1];
+  if (first && minutesOfDay(first.start) > LUNCH_FROM) {
+    out.unshift({ type: 'crous', key: 'crous-before' });
+  } else if (last && minutesOfDay(last.end) < LUNCH_TO) {
+    out.push({ type: 'crous', key: 'crous-after' });
+  }
+
   return out;
 });
 
@@ -60,10 +97,11 @@ function gapLabel(minutes) {
       <li
         v-for="row in rows"
         :key="row.key"
-        :class="row.type"
-        :style="{ minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) }"
+        :class="[row.type, { lunch: row.lunch }]"
+        :style="row.lunch || row.type === 'crous' ? null : { minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) }"
       >
         <EventCard v-if="row.type === 'event'" :event="row.event" :now="now" />
+        <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" />
         <p v-else class="gap-label">{{ gapLabel(row.minutes) }}</p>
       </li>
     </ol>
@@ -92,6 +130,13 @@ function gapLabel(minutes) {
   /* Le trait pointillé montre le trou à l'échelle, comme sur la grille semaine. */
   border-left: 2px dashed var(--line);
   margin-left: 4.9rem;
+}
+.list > li.gap.lunch,
+.list > li.crous {
+  /* Le menu remplace le trait pointillé : il s'aligne sur les cartes de cours. */
+  display: flex;
+  border-left: none;
+  margin: 0.15rem 0;
 }
 .gap-label {
   margin: 0 0 0 0.6rem;

@@ -17,6 +17,8 @@ export const api = {
       `/api/${encodeURIComponent(department)}/groups/${encodeURIComponent(groupId)}/schedule?from=${encodeURIComponent(from)}`,
       signal,
     ),
+  // Le restaurant universitaire est fixé côté serveur : aucun paramètre ici.
+  crousMenu: (signal) => getJson('/api/crous/menu', signal),
   calendarUrl: (department, groupId) =>
     `${location.origin}/api/${encodeURIComponent(department)}/groups/${encodeURIComponent(groupId)}/calendar.ics`,
 };

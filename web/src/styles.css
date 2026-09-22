@@ -13,6 +13,10 @@
   --td: #37c2a4;
   --tp: #f0a43a;
   --ds: #ff6b6b;
+  /* Rouge du Crous (#e2001a), éclairci pour rester lisible sur fond sombre. */
+  --crous: #ff5566;
+  --crous-strong: #e2001a;
+  --crous-soft: #2a1014;
   /* Saturation / clarté des couleurs de ressource (cf. colors.js) ;
      le second ton les décale pour doubler le nombre de couleurs distinctes. */
   --tint-s: 62%;
@@ -42,6 +46,9 @@
     --td: #0d8f76;
     --tp: #b8720a;
     --ds: #d13a3a;
+    --crous: #c30017;
+    --crous-strong: #e2001a;
+    --crous-soft: #ffeaec;
     --tint-s: 58%;
     --tint-l: 40%;
     /* En thème clair les tons s'assombrissent et se saturent : le contraste reste bon. */

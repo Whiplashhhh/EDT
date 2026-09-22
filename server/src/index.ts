@@ -7,11 +7,13 @@ import compress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import { loadConfig } from './config.ts';
 import { AdeService, NotFoundError } from './ade/service.ts';
+import { CrousService, CrousError } from './crous/service.ts';
 import { AdeError } from './ade/gwt.ts';
 import { registerApi } from './routes/api.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
+const crous = new CrousService(config);
 
 const app = Fastify({
   // À n'activer que derrière un reverse proxy de confiance : sinon un client
@@ -66,6 +68,10 @@ if (config.allowedOrigins.length > 0) {
 
 app.setErrorHandler((error, req, reply) => {
   if (error instanceof NotFoundError) return reply.code(404).send({ error: error.message });
+  if (error instanceof CrousError) {
+    req.log.warn({ err: error }, 'menu Crous indisponible');
+    return reply.code(502).send({ error: 'Le menu du Crous est momentanément indisponible.' });
+  }
   if (error instanceof AdeError) {
     req.log.warn({ err: error }, 'ADE indisponible');
     return reply.code(502).send({ error: "Le serveur d'emploi du temps de l'ULCO est injoignable." });
@@ -77,7 +83,7 @@ app.setErrorHandler((error, req, reply) => {
   return reply.code(500).send({ error: 'Erreur interne.' });
 });
 
-await app.register(registerApi, { prefix: '/api', service });
+await app.register(registerApi, { prefix: '/api', service, crous });
 
 // En production, le serveur sert aussi le front compilé (web/dist).
 const distDir = fileURLToPath(new URL('../../web/dist', import.meta.url));

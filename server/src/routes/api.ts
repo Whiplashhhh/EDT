@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { AdeService } from '../ade/service.ts';
+import type { CrousService } from '../crous/service.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -49,11 +50,19 @@ function parseIds(params: Record<string, string>): { department: string; groupId
 
 export async function registerApi(
   app: FastifyInstance,
-  opts: { service: AdeService },
+  opts: { service: AdeService; crous: CrousService },
 ): Promise<void> {
-  const { service } = opts;
+  const { service, crous } = opts;
 
   app.get('/health', async () => ({ status: 'ok' }));
+
+  // Menu du restaurant universitaire de l'établissement : un seul restaurant,
+  // fixé par la configuration, donc pas de paramètre côté client.
+  app.get('/crous/menu', async (_req, reply) => {
+    const menu = await crous.menu();
+    reply.header('Cache-Control', 'public, max-age=1800');
+    return menu;
+  });
 
   app.get('/departments', async (_req, reply) => {
     reply.header('Cache-Control', 'public, max-age=3600');

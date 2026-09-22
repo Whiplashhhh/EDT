@@ -14,12 +14,15 @@ const catalog = ref(null);
 const query = ref('');
 const loading = ref(false);
 const error = ref(null);
+/** Identifiants des nœuds dépliés. */
+const expanded = ref(new Set());
+const searchInput = ref(null);
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */
 function flatten(nodes, trail = []) {
   return nodes.flatMap((node) => {
     const path = [...trail, node.name];
-    return [{ id: node.id, name: node.name, depth: node.depth, parents: trail, label: path.join(' › ') }, ...flatten(node.children, path)];
+    return [{ id: node.id, name: node.name, parents: trail, label: path.join(' › ') }, ...flatten(node.children, path)];
   });
 }
 
@@ -27,9 +30,46 @@ const allGroups = computed(() => (catalog.value ? flatten(catalog.value.groups) 
 
 const results = computed(() => {
   const q = query.value.trim().toLowerCase();
-  if (!q) return allGroups.value;
-  return allGroups.value.filter((g) => g.label.toLowerCase().includes(q));
+  return q ? allGroups.value.filter((g) => g.label.toLowerCase().includes(q)) : [];
 });
+
+/** Chemin d'identifiants menant à chaque nœud, pour déplier la branche du groupe courant. */
+const ancestors = computed(() => {
+  const map = new Map();
+  const walk = (nodes, trail) => {
+    for (const node of nodes) {
+      map.set(node.id, trail);
+      walk(node.children, [...trail, node.id]);
+    }
+  };
+  if (catalog.value) walk(catalog.value.groups, []);
+  return map;
+});
+
+/** L'arbre à plat, réduit aux branches dépliées : plus simple qu'un composant récursif. */
+const visible = computed(() => {
+  const out = [];
+  const walk = (nodes, depth) => {
+    for (const node of nodes) {
+      const open = expanded.value.has(node.id);
+      out.push({ id: node.id, name: node.name, depth, children: node.children.length, open });
+      if (node.children.length && open) walk(node.children, depth + 1);
+    }
+  };
+  if (catalog.value) walk(catalog.value.groups, 0);
+  return out;
+});
+
+const isCurrent = (id) => id === props.groupId && selectedDept.value === props.department;
+
+function toggle(id) {
+  if (expanded.value.has(id)) expanded.value.delete(id);
+  else expanded.value.add(id);
+}
+
+function pick(id, name) {
+  emit('choose', { department: selectedDept.value, groupId: id, groupName: name });
+}
 
 async function loadCatalog(id) {
   if (!id) return;
@@ -37,6 +77,10 @@ async function loadCatalog(id) {
   error.value = null;
   try {
     catalog.value = await api.groups(id);
+    // À l'ouverture : racines dépliées, et la branche du groupe déjà choisi.
+    const open = new Set(catalog.value.groups.map((node) => node.id));
+    for (const parent of ancestors.value.get(props.groupId) ?? []) open.add(parent);
+    expanded.value = open;
   } catch (err) {
     error.value = err.message || 'Impossible de charger la liste des groupes.';
     catalog.value = null;
@@ -46,6 +90,7 @@ async function loadCatalog(id) {
 }
 
 onMounted(async () => {
+  searchInput.value?.focus();
   try {
     const data = await api.departments();
     departments.value = data.departments;
@@ -59,86 +104,122 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
 </script>
 
 <template>
-  <div class="picker">
-    <header class="head">
-      <h2>Choisir sa classe</h2>
-      <button v-if="groupId" class="close" type="button" aria-label="Fermer" @click="emit('close')">✕</button>
-    </header>
-
-    <p class="hint">Le choix est mémorisé sur cet appareil : la prochaine ouverture affichera directement cet emploi du temps.</p>
-
-    <label v-if="departments.length > 1" class="field">
-      <span>Formation</span>
-      <select v-model="selectedDept">
+  <div class="picker" @keydown.esc.stop="emit('close')">
+    <div class="fields">
+      <select v-if="departments.length > 1" v-model="selectedDept" aria-label="Formation">
         <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.label }}</option>
       </select>
-    </label>
-
-    <label class="field">
-      <span>Rechercher</span>
-      <input v-model="query" type="search" inputmode="search" placeholder="BUT1-TD1, BUT2…" autocomplete="off" />
-    </label>
+      <input
+        ref="searchInput"
+        v-model="query"
+        type="search"
+        inputmode="search"
+        placeholder="Rechercher un groupe…"
+        aria-label="Rechercher un groupe"
+        autocomplete="off"
+      />
+    </div>
 
     <p v-if="loading" class="state">Chargement des groupes…</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
 
-    <ul v-else class="groups">
+    <!-- Pendant une recherche, l'arbre laisse place à la liste des correspondances. -->
+    <ul v-else-if="query.trim()" class="tree" role="listbox">
       <li v-for="group in results" :key="group.id">
-        <button
-          type="button"
-          class="group"
-          :class="{ current: group.id === groupId && selectedDept === department }"
-          :style="{ paddingLeft: `${0.9 + (group.depth - 1) * 0.85}rem` }"
-          @click="emit('choose', { department: selectedDept, groupId: group.id, groupName: group.name })"
-        >
+        <button type="button" class="row lone" :class="{ current: isCurrent(group.id) }" @click="pick(group.id, group.name)">
           <span class="name">{{ group.name }}</span>
-          <span v-if="query && group.parents.length" class="trail">{{ group.parents.join(' › ') }}</span>
+          <span v-if="group.parents.length" class="trail">{{ group.parents.join(' › ') }}</span>
         </button>
       </li>
       <li v-if="!results.length" class="state">Aucun groupe ne correspond.</li>
     </ul>
+
+    <ul v-else class="tree" role="tree">
+      <li v-for="node in visible" :key="node.id" :style="{ '--depth': node.depth }">
+        <button
+          v-if="node.children"
+          type="button"
+          class="twist"
+          :aria-expanded="node.open"
+          :aria-label="`${node.open ? 'Replier' : 'Déplier'} ${node.name}`"
+          @click="toggle(node.id)"
+        >▸</button>
+        <span v-else class="twist dot" aria-hidden="true">•</span>
+
+        <button type="button" class="row" :class="{ current: isCurrent(node.id) }" @click="pick(node.id, node.name)">
+          <span class="name">{{ node.name }}</span>
+          <span v-if="isCurrent(node.id)" class="check" aria-hidden="true">✓</span>
+        </button>
+      </li>
+    </ul>
+
+    <p v-if="!groupId" class="hint">Le choix est mémorisé sur cet appareil.</p>
   </div>
 </template>
 
 <style scoped>
-.picker { padding: 1rem 0.95rem calc(1.5rem + var(--safe-bottom)); }
-.head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-h2 { margin: 0; font-size: 1.15rem; }
-.close { width: 2.2rem; height: 2.2rem; border-radius: 999px; color: var(--text-muted); font-size: 1rem; }
-.close:hover { background: var(--bg-elevated); color: var(--text); }
+.picker { display: flex; flex-direction: column; min-height: 0; padding: 0.5rem; }
 
-.hint { margin: 0.4rem 0 1rem; font-size: 0.85rem; color: var(--text-muted); }
-
-.field { display: block; margin-bottom: 0.8rem; }
-.field > span { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.3rem; }
-.field input, .field select {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
+.fields { display: flex; gap: 0.4rem; padding: 0.15rem 0.15rem 0.45rem; }
+.fields select, .fields input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
   font: inherit;
+  font-size: 0.9rem;
   color: var(--text);
-  background: var(--bg-elevated);
+  background: var(--bg-sunken);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
 }
-.field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fields select { flex: 0 1 auto; }
+.fields input:focus, .fields select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.groups { list-style: none; margin: 0.4rem 0 0; padding: 0; }
-.group {
-  width: 100%;
+.tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.tree > li { display: flex; align-items: center; gap: 0.1rem; padding-left: calc(var(--depth, 0) * 0.9rem); }
+
+.twist {
+  flex: none;
+  width: 1.5rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  /* La flèche pivote plutôt que de changer de glyphe : pas de saut de largeur. */
+  transition: transform 0.12s ease;
+}
+.twist[aria-expanded='true'] { transform: rotate(90deg); }
+.twist:not(.dot):hover { background: var(--bg-sunken); color: var(--text); }
+.dot { font-size: 0.6rem; opacity: 0.55; cursor: default; }
+
+.row {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  padding: 0.7rem 0.9rem;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
   border-radius: var(--radius-sm);
   text-align: left;
+  font-size: 0.92rem;
+  color: var(--text);
 }
-.group:hover { background: var(--bg-elevated); }
-.group.current { background: var(--accent-soft); }
-.group.current .name { color: var(--accent); font-weight: 650; }
-.name { font-size: 1rem; }
-.trail { font-size: 0.76rem; color: var(--text-muted); }
+.row.lone { margin-left: 1.6rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
+.row:hover { background: var(--bg-sunken); }
+.row.current { background: var(--accent-soft); color: var(--accent); font-weight: 650; }
+.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check { margin-left: auto; font-size: 0.8rem; }
+.trail { font-size: 0.74rem; color: var(--text-muted); }
 
-.state { padding: 1rem 0.2rem; color: var(--text-muted); font-size: 0.9rem; }
+.state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }
 .error { color: var(--danger); }
+.hint { margin: 0.35rem 0.6rem 0.2rem; font-size: 0.74rem; color: var(--text-muted); }
 </style>
