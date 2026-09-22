@@ -27,7 +27,6 @@ const remaining = computed(() => {
 
 <template>
   <article class="card tinted" :class="state" :style="tint">
-    <div class="rail" aria-hidden="true"></div>
     <div class="hours">
       <time :datetime="event.start">{{ formatTime(event.start) }}</time>
       <span class="dash" aria-hidden="true"></span>
@@ -53,17 +52,18 @@ const remaining = computed(() => {
 <style scoped>
 .card {
   display: grid;
-  grid-template-columns: 4px 4.6rem 1fr;
+  grid-template-columns: 4.6rem 1fr;
   gap: 0 0.85rem;
   align-items: start;
-  padding: 0.85rem 0.95rem 0.85rem 0;
+  padding: 0.85rem 0.95rem;
   background: color-mix(in srgb, var(--kind) var(--tint-bg), var(--bg-elevated));
   border: 1px solid color-mix(in srgb, var(--kind) 28%, var(--line));
+  /* La barre de couleur court sur toute la hauteur : une bordure, pas un bloc
+     enfermé dans le padding vertical de la carte. */
+  border-left: 4px solid var(--kind);
   border-radius: var(--radius);
   overflow: hidden;
 }
-
-.rail { align-self: stretch; background: var(--kind); border-radius: 4px 0 0 4px; }
 .card.past { opacity: 0.52; }
 .card.now { border-color: var(--kind); box-shadow: 0 0 0 1px var(--kind); }
 
