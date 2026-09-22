@@ -66,21 +66,26 @@ if (config.allowedOrigins.length > 0) {
   });
 }
 
+/*
+ * Chaque réponse d'erreur porte un `code` stable en plus de son message français :
+ * le front est bilingue et traduit le code lui-même plutôt que d'afficher la prose
+ * du serveur. Le message reste utile dans les journaux et pour les appels directs.
+ */
 app.setErrorHandler((error, req, reply) => {
-  if (error instanceof NotFoundError) return reply.code(404).send({ error: error.message });
+  if (error instanceof NotFoundError) return reply.code(404).send({ code: 'generic', error: error.message });
   if (error instanceof CrousError) {
     req.log.warn({ err: error }, 'menu Crous indisponible');
-    return reply.code(502).send({ error: 'Le menu du Crous est momentanément indisponible.' });
+    return reply.code(502).send({ code: 'crous', error: 'Le menu du Crous est momentanément indisponible.' });
   }
   if (error instanceof AdeError) {
     req.log.warn({ err: error }, 'ADE indisponible');
-    return reply.code(502).send({ error: "Le serveur d'emploi du temps de l'ULCO est injoignable." });
+    return reply.code(502).send({ code: 'ade', error: "Le serveur d'emploi du temps de l'ULCO est injoignable." });
   }
   if (typeof error.statusCode === 'number' && error.statusCode < 500) {
-    return reply.code(error.statusCode).send({ error: error.message });
+    return reply.code(error.statusCode).send({ code: 'generic', error: error.message });
   }
   req.log.error({ err: error }, 'erreur inattendue');
-  return reply.code(500).send({ error: 'Erreur interne.' });
+  return reply.code(500).send({ code: 'generic', error: 'Erreur interne.' });
 });
 
 await app.register(registerApi, { prefix: '/api', service, crous });
@@ -100,7 +105,7 @@ if (existsSync(distDir)) {
   });
 
   app.setNotFoundHandler((req, reply) => {
-    if (req.url.startsWith('/api/')) return reply.code(404).send({ error: 'Route inconnue.' });
+    if (req.url.startsWith('/api/')) return reply.code(404).send({ code: 'generic', error: 'Route inconnue.' });
     return reply.sendFile('index.html');
   });
 } else {

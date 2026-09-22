@@ -4,7 +4,10 @@
  */
 const KEY = 'edt-ulco:v1';
 
-const EMPTY = { department: null, groupId: null, groupName: null, view: 'day' };
+const EMPTY = { department: null, groupId: null, groupName: null, view: 'day', theme: 'system', lang: 'fr' };
+
+const THEMES = ['system', 'light', 'dark'];
+const LANGS = ['fr', 'en'];
 
 export function readSettings() {
   try {
@@ -16,6 +19,8 @@ export function readSettings() {
       groupId: Number.isInteger(parsed.groupId) ? parsed.groupId : null,
       groupName: typeof parsed.groupName === 'string' ? parsed.groupName : null,
       view: parsed.view === 'week' ? 'week' : 'day',
+      theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
+      lang: LANGS.includes(parsed.lang) ? parsed.lang : 'fr',
     };
   } catch {
     return { ...EMPTY };

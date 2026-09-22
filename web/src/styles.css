@@ -32,8 +32,13 @@
   color-scheme: dark;
 }
 
+/*
+ * Palette claire. Elle s'applique dans deux cas, d'où les deux blocs jumeaux :
+ * le système la demande et l'utilisateur n'a pas imposé le thème sombre,
+ * ou l'utilisateur l'a explicitement choisie. Garder les deux synchronisés.
+ */
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme='dark']) {
     --bg: #f6f7f9;
     --bg-elevated: #ffffff;
     --bg-sunken: #eceff3;
@@ -57,6 +62,31 @@
     --tint-bg: 11%;
     color-scheme: light;
   }
+}
+
+:root[data-theme='light'] {
+  --bg: #f6f7f9;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #eceff3;
+  --line: #dfe3ea;
+  --text: #131720;
+  --text-muted: #5d6675;
+  --accent: #1b6fe0;
+  --accent-soft: #e3edfd;
+  --cm: #4a5ae0;
+  --td: #0d8f76;
+  --tp: #b8720a;
+  --ds: #d13a3a;
+  --crous: #c30017;
+  --crous-strong: #e2001a;
+  --crous-soft: #ffeaec;
+  --tint-s: 58%;
+  --tint-l: 40%;
+  /* En thème clair les tons s'assombrissent et se saturent : le contraste reste bon. */
+  --tone-s: -6%;
+  --tone-l: 13%;
+  --tint-bg: 11%;
+  color-scheme: light;
 }
 
 /* Couleur d'un cours : teinte de la ressource, décalée par son ton. */

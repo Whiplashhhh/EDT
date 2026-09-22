@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
-import { formatTime, formatDuration } from '../dates.js';
+import { formatTime, formatDuration, formatMinutesSpan } from '../dates.js';
+import { t } from '../i18n.js';
 import { courseStyle } from '../colors.js';
 
 const props = defineProps({
@@ -21,7 +22,7 @@ const state = computed(() => {
 const remaining = computed(() => {
   if (state.value !== 'now') return null;
   const minutes = Math.max(1, Math.round((new Date(props.event.end).getTime() - props.now) / 60_000));
-  return minutes >= 60 ? `encore ${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}` : `encore ${minutes} min`;
+  return t('card.remaining', { duration: formatMinutesSpan(minutes) });
 });
 </script>
 

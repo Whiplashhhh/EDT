@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { mondayOf } from '../dates.js';
+import { errorMessage, t } from '../i18n.js';
 import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 
 /**
@@ -57,9 +58,7 @@ export function useSchedule(department, groupId, focusedDay) {
       writeCachedSchedule({ ...data, from });
     } catch (err) {
       if (err.name === 'AbortError') return;
-      error.value = cached
-        ? 'Données hors ligne : impossible de contacter le serveur.'
-        : err.message || 'Impossible de charger l’emploi du temps.';
+      error.value = cached ? t('error.offline') : errorMessage(err, 'error.schedule');
       stale.value = Boolean(cached);
     } finally {
       loading.value = false;

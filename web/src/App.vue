@@ -8,6 +8,9 @@ import { useSchedule } from './composables/useSchedule.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, today } from './dates.js';
 import { api } from './api.js';
+import { LOCALES, setLocale, t } from './i18n.js';
+
+const THEMES = ['system', 'light', 'dark'];
 
 const settings = ref(readSettings());
 const department = computed(() => settings.value.department);
@@ -19,6 +22,51 @@ const menuOpen = ref(false);
 const now = ref(Date.now());
 
 const { eventsByDay, loading, error, stale, load } = useSchedule(department, groupId, focusedDay);
+
+/*
+ * Thème et langue sont appliqués au document lui-même : le thème par un attribut
+ * que la feuille de style écoute, la langue par le module de traduction.
+ * « system » retire l'attribut et laisse `prefers-color-scheme` décider.
+ */
+watch(() => settings.value.theme, (theme) => {
+  const explicit = theme === 'light' || theme === 'dark';
+  if (explicit) document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+  paintBrowserChrome(explicit ? theme : null);
+}, { immediate: true });
+
+/*
+ * La barre du navigateur suit le thème choisi. Les deux balises `theme-color`
+ * de l'index sont conditionnées à `prefers-color-scheme` : on en insère une
+ * troisième, sans media et donc prioritaire, tant qu'un thème est imposé.
+ */
+const CHROME_COLORS = { dark: '#0f1115', light: '#f6f7f9' };
+function paintBrowserChrome(theme) {
+  const head = document.head;
+  let meta = head.querySelector('meta[name="theme-color"]:not([media])');
+  if (!theme) {
+    meta?.remove();
+    return;
+  }
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    head.prepend(meta);
+  }
+  meta.content = CHROME_COLORS[theme];
+}
+
+watch(() => settings.value.lang, setLocale, { immediate: true });
+
+function setTheme(theme) {
+  settings.value = { ...settings.value, theme };
+  writeSettings(settings.value);
+}
+
+function setLang(lang) {
+  settings.value = { ...settings.value, lang };
+  writeSettings(settings.value);
+}
 
 /*
  * Au premier affichage, si la journée en cours est vide (week-end, vacances),
@@ -138,9 +186,9 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
   <div class="app" tabindex="-1" @keydown="onKeydown">
     <header class="top">
       <div class="identity">
-        <p class="eyebrow">Emploi du temps</p>
+        <p class="eyebrow">{{ t('app.eyebrow') }}</p>
         <button class="group-btn" type="button" :aria-expanded="pickerOpen" @click="pickerOpen = !pickerOpen">
-          {{ settings.groupName || 'Choisir sa classe' }}
+          {{ settings.groupName || t('app.pickClass') }}
           <span class="chev" aria-hidden="true">▾</span>
         </button>
       </div>
@@ -150,13 +198,13 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
           class="pill"
           type="button"
           @click="focusedDay = today()"
-        >Aujourd’hui</button>
-        <button class="icon" type="button" :aria-expanded="menuOpen" aria-label="Options" @click="menuOpen = !menuOpen">⋯</button>
+        >{{ t('app.today') }}</button>
+        <button class="icon" type="button" :aria-expanded="menuOpen" :aria-label="t('app.options')" @click="menuOpen = !menuOpen">⋯</button>
       </div>
     </header>
 
     <div v-if="pickerOpen" class="menu-backdrop" @click="pickerOpen = false"></div>
-    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" aria-label="Choisir sa classe">
+    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" :aria-label="t('app.pickClass')">
       <GroupPicker
         :department="settings.department"
         :group-id="settings.groupId"
@@ -168,35 +216,64 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
     <div v-if="menuOpen" class="menu-backdrop" @click="menuOpen = false"></div>
     <div v-if="menuOpen" class="dropdown menu" role="menu">
       <button type="button" role="menuitem" @click="setView(settings.view === 'day' ? 'week' : 'day'); menuOpen = false">
-        {{ settings.view === 'day' ? 'Vue semaine' : 'Vue jour' }}
+        {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
       </button>
-      <button type="button" role="menuitem" @click="pickerOpen = true">Changer de classe</button>
-      <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">S’abonner au calendrier (.ics)</a>
-      <button type="button" role="menuitem" @click="load(true); menuOpen = false">Actualiser</button>
+      <button type="button" role="menuitem" @click="pickerOpen = true">{{ t('app.changeClass') }}</button>
+      <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">{{ t('app.subscribe') }}</a>
+      <button type="button" role="menuitem" @click="load(true); menuOpen = false">{{ t('app.refresh') }}</button>
+
+      <div class="setting" role="group" :aria-label="t('app.theme')">
+        <span class="setting-label">{{ t('app.theme') }}</span>
+        <div class="segmented">
+          <button
+            v-for="mode in THEMES"
+            :key="mode"
+            type="button"
+            :class="{ on: settings.theme === mode }"
+            :aria-pressed="settings.theme === mode"
+            @click="setTheme(mode)"
+          >{{ t(`app.theme${mode[0].toUpperCase()}${mode.slice(1)}`) }}</button>
+        </div>
+      </div>
+
+      <div class="setting" role="group" :aria-label="t('app.language')">
+        <span class="setting-label">{{ t('app.language') }}</span>
+        <div class="segmented">
+          <button
+            v-for="option in LOCALES"
+            :key="option.id"
+            type="button"
+            :class="{ on: settings.lang === option.id }"
+            :aria-pressed="settings.lang === option.id"
+            :aria-label="option.label"
+            @click="setLang(option.id)"
+          >{{ option.short }}</button>
+        </div>
+      </div>
     </div>
 
     <main v-if="settings.groupId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <WeekStrip :focused="focusedDay" :events-by-day="eventsByDay" @select="focusedDay = $event" @shift="shiftDay" />
 
       <p v-if="error" class="banner error" role="status">{{ error }}</p>
-      <p v-else-if="stale" class="banner" role="status">Données enregistrées sur l’appareil — actualisation en cours…</p>
+      <p v-else-if="stale" class="banner" role="status">{{ t('app.stale') }}</p>
 
       <template v-if="settings.view === 'day'">
         <h2 class="day-title">
           {{ formatDayLong(focusedDay) }}
-          <span v-if="isToday" class="badge">aujourd’hui</span>
+          <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
         </h2>
         <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" />
       </template>
       <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" @select="focusedDay = $event; setView('day')" />
 
-      <p v-if="loading && !dayEvents.length" class="banner" role="status">Chargement…</p>
+      <p v-if="loading && !dayEvents.length" class="banner" role="status">{{ t('app.loading') }}</p>
     </main>
 
     <!-- Première ouverture : le panneau est déjà déroulé, on dit juste quoi y faire. -->
     <p v-else class="welcome">
       <span class="emoji" aria-hidden="true">🎓</span>
-      Choisis ta classe pour afficher son emploi du temps.
+      {{ t('app.welcome') }}
     </p>
   </div>
 </template>
@@ -284,7 +361,7 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
   max-height: min(70vh, 30rem);
   overflow: hidden;
 }
-.menu > * {
+.menu > :where(button, a) {
   padding: 0.6rem 0.7rem;
   border-radius: var(--radius-sm);
   text-align: left;
@@ -292,7 +369,35 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
   color: var(--text);
   text-decoration: none;
 }
-.menu > *:hover { background: var(--bg-sunken); }
+.menu > :where(button, a):hover { background: var(--bg-sunken); }
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0.7rem;
+}
+/* Un filet sépare les réglages permanents des actions ponctuelles. */
+.setting:first-of-type { margin-top: 0.3rem; border-top: 1px solid var(--line); padding-top: 0.6rem; }
+.setting-label { font-size: 0.82rem; color: var(--text-muted); }
+
+.segmented {
+  display: flex;
+  padding: 2px;
+  background: var(--bg-sunken);
+  border-radius: 999px;
+}
+.segmented button {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.segmented button:hover { color: var(--text); }
+.segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
 
 .main { flex: 1; padding-top: 0.6rem; }
 

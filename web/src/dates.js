@@ -1,4 +1,5 @@
 /** Utilitaires de date, tous calés sur le fuseau de l'établissement. */
+import { computed, ref } from 'vue';
 
 export const TZ = 'Europe/Paris';
 
@@ -37,13 +38,31 @@ export function weekNumber(iso) {
   return 1 + Math.round((d - firstThursday) / (7 * DAY_MS));
 }
 
-const timeFmt = new Intl.DateTimeFormat('fr-FR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
-const dayLongFmt = new Intl.DateTimeFormat('fr-FR', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' });
-const dayShortFmt = new Intl.DateTimeFormat('fr-FR', { timeZone: TZ, weekday: 'short' });
+/*
+ * Les formats suivent la langue de l'interface. Les heures restent en 24 h même
+ * en anglais : c'est ainsi qu'ADE et les salles de cours les affichent.
+ */
+const TAGS = { fr: 'fr-FR', en: 'en-GB' };
+/*
+ * La langue est une ref : les `computed` qui mettent en forme une date en
+ * dépendent donc, et se recalculent d'eux-mêmes au changement de langue.
+ */
+const tag = ref(TAGS.fr);
 
-export const formatTime = (iso) => timeFmt.format(new Date(iso));
-export const formatDayLong = (iso) => dayLongFmt.format(new Date(`${iso}T12:00:00Z`));
-export const formatDayShort = (iso) => dayShortFmt.format(new Date(`${iso}T12:00:00Z`)).replace('.', '');
+const fmt = computed(() => ({
+  time: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }),
+  dayLong: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' }),
+  dayShort: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'short' }),
+}));
+
+/** Appelé par le module de traduction quand la langue change. */
+export function setDateLocale(locale) {
+  tag.value = TAGS[locale] ?? TAGS.fr;
+}
+
+export const formatTime = (iso) => fmt.value.time.format(new Date(iso));
+export const formatDayLong = (iso) => fmt.value.dayLong.format(new Date(`${iso}T12:00:00Z`));
+export const formatDayShort = (iso) => fmt.value.dayShort.format(new Date(`${iso}T12:00:00Z`)).replace('.', '');
 export const dayNumber = (iso) => Number(iso.slice(8, 10));
 
 /** Durée en minutes entre deux instants ISO. */
@@ -52,11 +71,16 @@ export function durationMinutes(start, end) {
 }
 
 export function formatDuration(start, end) {
-  const total = durationMinutes(start, end);
+  return formatMinutesSpan(durationMinutes(start, end));
+}
+
+/** Une durée en minutes, écrite dans la langue courante (« 1 h 30 », « 1h 30 »). */
+export function formatMinutesSpan(total) {
   const h = Math.floor(total / 60);
-  const m = total % 60;
-  if (h && m) return `${h} h ${String(m).padStart(2, '0')}`;
-  if (h) return `${h} h`;
+  const m = Math.round(total % 60);
+  const hour = tag.value === TAGS.fr ? `${h} h` : `${h}h`;
+  if (h && m) return `${hour} ${String(m).padStart(2, '0')}`;
+  if (h) return hour;
   return `${m} min`;
 }
 

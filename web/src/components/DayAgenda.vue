@@ -2,7 +2,8 @@
 import { computed } from 'vue';
 import EventCard from './EventCard.vue';
 import CrousMenu from './CrousMenu.vue';
-import { formatTime, minutesOfDay } from '../dates.js';
+import { formatTime, formatMinutesSpan, minutesOfDay } from '../dates.js';
+import { t } from '../i18n.js';
 
 const props = defineProps({
   day: { type: String, required: true },
@@ -65,12 +66,9 @@ const rows = computed(() => {
   return out;
 });
 
-const totalHours = computed(() => {
-  const minutes = props.events.reduce((sum, e) => sum + (new Date(e.end) - new Date(e.start)) / 60_000, 0);
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
-  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
-});
+const totalHours = computed(() =>
+  formatMinutesSpan(props.events.reduce((sum, e) => sum + (new Date(e.end) - new Date(e.start)) / 60_000, 0)),
+);
 
 /* Hauteur proportionnelle : un cours de 2 h occupe deux fois la place d'un cours d'1 h. */
 const PX_PER_MIN = 0.95;
@@ -78,19 +76,13 @@ const blockHeight = (minutes) => `${Math.round(minutes * PX_PER_MIN)}px`;
 /* Les longues pauses sont plafonnées pour ne pas repousser la suite hors de l'écran. */
 const gapHeight = (minutes) => `${Math.min(140, Math.max(26, Math.round(minutes * PX_PER_MIN)))}px`;
 
-function gapLabel(minutes) {
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
-  if (h && m) return `${h} h ${String(m).padStart(2, '0')} de pause`;
-  if (h) return `${h} h de pause`;
-  return `${m} min de pause`;
-}
+const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minutes) });
 </script>
 
 <template>
-  <section class="agenda" :aria-label="`Cours du ${day}`">
+  <section class="agenda" :aria-label="t('day.aria', { day })">
     <p v-if="events.length" class="summary">
-      {{ events.length }} cours · {{ totalHours }} · {{ formatTime(events[0].start) }} → {{ formatTime(events[events.length - 1].end) }}
+      {{ t('day.courses', { n: events.length }) }} · {{ totalHours }} · {{ formatTime(events[0].start) }} → {{ formatTime(events[events.length - 1].end) }}
     </p>
 
     <ol v-if="events.length" class="list">
@@ -108,7 +100,7 @@ function gapLabel(minutes) {
 
     <p v-else class="empty">
       <span class="emoji" aria-hidden="true">🌤️</span>
-      Aucun cours ce jour-là.
+      {{ t('day.empty') }}
     </p>
   </section>
 </template>

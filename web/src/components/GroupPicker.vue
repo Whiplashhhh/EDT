@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
+import { errorMessage, t } from '../i18n.js';
 
 const props = defineProps({
   department: { type: String, default: null },
@@ -82,7 +83,7 @@ async function loadCatalog(id) {
     for (const parent of ancestors.value.get(props.groupId) ?? []) open.add(parent);
     expanded.value = open;
   } catch (err) {
-    error.value = err.message || 'Impossible de charger la liste des groupes.';
+    error.value = errorMessage(err, 'error.groups');
     catalog.value = null;
   } finally {
     loading.value = false;
@@ -96,7 +97,7 @@ onMounted(async () => {
     departments.value = data.departments;
     if (!selectedDept.value && data.departments.length > 0) selectedDept.value = data.departments[0].id;
   } catch (err) {
-    error.value = err.message || 'Impossible de contacter le serveur.';
+    error.value = errorMessage(err, 'error.network');
   }
 });
 
@@ -106,7 +107,7 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
 <template>
   <div class="picker" @keydown.esc.stop="emit('close')">
     <div class="fields">
-      <select v-if="departments.length > 1" v-model="selectedDept" aria-label="Formation">
+      <select v-if="departments.length > 1" v-model="selectedDept" :aria-label="t('picker.department')">
         <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.label }}</option>
       </select>
       <input
@@ -114,13 +115,13 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
         v-model="query"
         type="search"
         inputmode="search"
-        placeholder="Rechercher un groupe…"
-        aria-label="Rechercher un groupe"
+        :placeholder="t('picker.search')"
+        :aria-label="t('picker.search')"
         autocomplete="off"
       />
     </div>
 
-    <p v-if="loading" class="state">Chargement des groupes…</p>
+    <p v-if="loading" class="state">{{ t('picker.loading') }}</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
 
     <!-- Pendant une recherche, l'arbre laisse place à la liste des correspondances. -->
@@ -131,7 +132,7 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
           <span v-if="group.parents.length" class="trail">{{ group.parents.join(' › ') }}</span>
         </button>
       </li>
-      <li v-if="!results.length" class="state">Aucun groupe ne correspond.</li>
+      <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
     </ul>
 
     <ul v-else class="tree" role="tree">
@@ -141,7 +142,7 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
           type="button"
           class="twist"
           :aria-expanded="node.open"
-          :aria-label="`${node.open ? 'Replier' : 'Déplier'} ${node.name}`"
+          :aria-label="t(node.open ? 'picker.collapse' : 'picker.expand', { name: node.name })"
           @click="toggle(node.id)"
         >▸</button>
         <span v-else class="twist dot" aria-hidden="true">•</span>
@@ -153,7 +154,7 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
       </li>
     </ul>
 
-    <p v-if="!groupId" class="hint">Le choix est mémorisé sur cet appareil.</p>
+    <p v-if="!groupId" class="hint">{{ t('picker.hint') }}</p>
   </div>
 </template>
 

@@ -90,6 +90,11 @@ pas d'en changer. Il apparaît dans la vue jour, calé sur le service de 11 h 15
 dans le trou entre deux cours qui recouvre le service, sinon avant un premier cours qui
 commence après 11 h 15, sinon après un dernier cours qui finit avant 13 h 45.
 
+Côté navigateur, le thème (système / clair / sombre) et la langue (français /
+anglais) se règlent dans le menu ⋯ et sont mémorisés sur l'appareil. Les textes
+de l'interface vivent dans `web/src/i18n.js` ; ce qui vient d'ADE ou du Crous
+(intitulés de cours, plats) n'est pas traduit, ce sont des données.
+
 Les autres réglages sont dans `.env.example`.
 
 ## API

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { addDays, dayNumber, formatDayShort, mondayOf, today, weekNumber } from '../dates.js';
+import { t } from '../i18n.js';
 
 const props = defineProps({
   focused: { type: String, required: true },
@@ -11,15 +12,15 @@ const emit = defineEmits(['select', 'shift']);
 const monday = computed(() => mondayOf(props.focused));
 // Samedi et dimanche restent visibles : l'ULCO y place parfois des rattrapages.
 const days = computed(() => Array.from({ length: 7 }, (_, i) => addDays(monday.value, i)));
-const label = computed(() => `Semaine ${weekNumber(monday.value)}`);
+const label = computed(() => t('week.label', { n: weekNumber(monday.value) }));
 </script>
 
 <template>
-  <nav class="strip" aria-label="Semaine">
+  <nav class="strip" :aria-label="t('week.nav')">
     <div class="head">
-      <button class="nav" type="button" aria-label="Semaine précédente" @click="emit('shift', -7)">‹</button>
+      <button class="nav" type="button" :aria-label="t('week.previous')" @click="emit('shift', -7)">‹</button>
       <span class="week">{{ label }}</span>
-      <button class="nav" type="button" aria-label="Semaine suivante" @click="emit('shift', 7)">›</button>
+      <button class="nav" type="button" :aria-label="t('week.next')" @click="emit('shift', 7)">›</button>
     </div>
     <ol class="days">
       <li v-for="day in days" :key="day">
@@ -35,7 +36,7 @@ const label = computed(() => `Semaine ${weekNumber(monday.value)}`);
           <span class="dots" aria-hidden="true">
             <i v-for="n in Math.min(3, (eventsByDay.get(day) || []).length)" :key="n"></i>
           </span>
-          <span class="sr-only">{{ (eventsByDay.get(day) || []).length }} cours</span>
+          <span class="sr-only">{{ t('day.courses', { n: (eventsByDay.get(day) || []).length }) }}</span>
         </button>
       </li>
     </ol>

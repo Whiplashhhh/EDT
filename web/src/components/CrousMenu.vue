@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue';
 import { useCrousMenu } from '../composables/useCrousMenu.js';
+import { t } from '../i18n.js';
 
 const props = defineProps({
   /** Jour affiché (`AAAA-MM-JJ`). */
@@ -13,8 +14,8 @@ onMounted(() => load());
 watch(() => props.day, () => load());
 
 const menu = computed(() => menuFor(props.day));
-const name = computed(() => restaurant.value?.name || 'Restaurant universitaire');
-const hours = computed(() => restaurant.value?.hours?.[0] || 'Service de 11h15 à 13h45');
+const name = computed(() => restaurant.value?.name || t('crous.fallbackName'));
+const hours = computed(() => restaurant.value?.hours?.[0] || t('crous.fallbackHours'));
 
 /* Trois états seulement : fermé, menu publié, rien de publié. */
 const state = computed(() => {
@@ -26,16 +27,16 @@ const state = computed(() => {
 
 <template>
   <!-- Rien à dire si l'API est injoignable : l'emploi du temps reste prioritaire. -->
-  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed' }" aria-label="Menu du Crous">
+  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed' }" :aria-label="t('crous.aria')">
     <header class="head">
-      <span class="tag">Crous</span>
+      <span class="tag">{{ t('crous.tag') }}</span>
       <span class="name">{{ name }}</span>
       <span class="hours">{{ hours }}</span>
     </header>
 
-    <p v-if="state === 'closed'" class="note">Restaurant fermé ce jour-là.</p>
-    <p v-else-if="state === 'loading'" class="note">Chargement du menu…</p>
-    <p v-else-if="state === 'unknown'" class="note">Menu non communiqué pour ce jour.</p>
+    <p v-if="state === 'closed'" class="note">{{ t('crous.closed') }}</p>
+    <p v-else-if="state === 'loading'" class="note">{{ t('crous.loading') }}</p>
+    <p v-else-if="state === 'unknown'" class="note">{{ t('crous.unknown') }}</p>
 
     <dl v-else class="courses">
       <template v-for="cat in menu.categories" :key="cat.label">
