@@ -10,6 +10,9 @@ const props = defineProps({
   focused: { type: String, required: true },
   eventsByDay: { type: Map, required: true },
   now: { type: Number, default: 0 },
+  /* Ce qu'on consulte. Sur l'emploi du temps d'un enseignant, répéter son nom
+     sur chaque bloc n'apprend rien : c'est la classe qui manque. */
+  context: { type: String, default: 'groups' },
 });
 const emit = defineEmits(['select']);
 
@@ -120,7 +123,8 @@ const nowLine = computed(() => {
   return { day: iso, top: `${(minutes - range.value.from) * PX_PER_MIN}px` };
 });
 
-const teachersOf = (event) => (event.teachers || []).join(', ');
+const peopleOf = (event) =>
+  (props.context === 'teachers' ? event.groups : event.teachers || []).join(', ');
 </script>
 
 <template>
@@ -179,7 +183,7 @@ const teachersOf = (event) => (event.teachers || []).join(', ');
             <b v-if="block.event.kind" class="tag inline">{{ block.event.kind }}</b>
           </span>
           <b v-if="block.event.room" class="room">{{ block.event.room }}</b>
-          <span v-if="teachersOf(block.event)" class="teacher">{{ teachersOf(block.event) }}</span>
+          <span v-if="peopleOf(block.event)" class="teacher">{{ peopleOf(block.event) }}</span>
         </article>
 
         <div

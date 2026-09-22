@@ -3,21 +3,28 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
 
+const KINDS = ['groups', 'rooms', 'teachers'];
+
 const props = defineProps({
   department: { type: String, default: null },
-  groupId: { type: Number, default: null },
+  kind: { type: String, default: 'groups' },
+  resourceId: { type: Number, default: null },
 });
 const emit = defineEmits(['choose', 'close']);
 
 const departments = ref([]);
 const selectedDept = ref(props.department);
+const selectedKind = ref(props.kind);
 const catalog = ref(null);
+const entries = ref([]);
 const query = ref('');
 const loading = ref(false);
 const error = ref(null);
-/** Identifiants des nœuds dépliés. */
+/** Identifiants des nœuds dépliés (arbre des classes uniquement). */
 const expanded = ref(new Set());
 const searchInput = ref(null);
+
+const isTree = computed(() => selectedKind.value === 'groups');
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */
 function flatten(nodes, trail = []) {
@@ -31,10 +38,12 @@ const allGroups = computed(() => (catalog.value ? flatten(catalog.value.groups) 
 
 const results = computed(() => {
   const q = query.value.trim().toLowerCase();
-  return q ? allGroups.value.filter((g) => g.label.toLowerCase().includes(q)) : [];
+  if (isTree.value) return q ? allGroups.value.filter((g) => g.label.toLowerCase().includes(q)) : [];
+  // Salles et enseignants : une liste plate, filtrée au fil de la frappe.
+  return q ? entries.value.filter((e) => e.name.toLowerCase().includes(q)) : entries.value;
 });
 
-/** Chemin d'identifiants menant à chaque nœud, pour déplier la branche du groupe courant. */
+/** Chemin d'identifiants menant à chaque nœud, pour déplier la branche courante. */
 const ancestors = computed(() => {
   const map = new Map();
   const walk = (nodes, trail) => {
@@ -61,7 +70,8 @@ const visible = computed(() => {
   return out;
 });
 
-const isCurrent = (id) => id === props.groupId && selectedDept.value === props.department;
+const isCurrent = (id) =>
+  id === props.resourceId && selectedDept.value === props.department && selectedKind.value === props.kind;
 
 function toggle(id) {
   if (expanded.value.has(id)) expanded.value.delete(id);
@@ -69,24 +79,44 @@ function toggle(id) {
 }
 
 function pick(id, name) {
-  emit('choose', { department: selectedDept.value, groupId: id, groupName: name });
+  emit('choose', {
+    department: selectedDept.value,
+    kind: selectedKind.value,
+    resourceId: id,
+    resourceName: name,
+  });
 }
 
-async function loadCatalog(id) {
-  if (!id) return;
+function setKind(kind) {
+  if (kind === selectedKind.value) return;
+  selectedKind.value = kind;
+  query.value = '';
+  searchInput.value?.focus();
+}
+
+async function loadResources() {
+  const dept = selectedDept.value;
+  const kind = selectedKind.value;
+  if (!dept) return;
   loading.value = true;
   error.value = null;
   try {
-    catalog.value = await api.groups(id);
-    // À l'ouverture : racines dépliées, et la branche du groupe déjà choisi.
-    const open = new Set(catalog.value.groups.map((node) => node.id));
-    for (const parent of ancestors.value.get(props.groupId) ?? []) open.add(parent);
-    expanded.value = open;
+    if (kind === 'groups') {
+      catalog.value = await api.groups(dept);
+      // À l'ouverture : racines dépliées, et la branche de la classe déjà choisie.
+      const open = new Set(catalog.value.groups.map((node) => node.id));
+      for (const parent of ancestors.value.get(props.resourceId) ?? []) open.add(parent);
+      expanded.value = open;
+    } else {
+      entries.value = (await api.directory(dept, kind)).entries;
+    }
   } catch (err) {
-    error.value = errorMessage(err, 'error.groups');
-    catalog.value = null;
+    error.value = errorMessage(err, `error.${kind}`);
+    if (kind === 'groups') catalog.value = null;
+    else entries.value = [];
   } finally {
-    loading.value = false;
+    // Une réponse arrivée après un changement d'onglet ne doit plus rien afficher.
+    if (selectedKind.value === kind && selectedDept.value === dept) loading.value = false;
   }
 }
 
@@ -101,11 +131,23 @@ onMounted(async () => {
   }
 });
 
-watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
+watch([selectedDept, selectedKind], loadResources, { immediate: true });
 </script>
 
 <template>
   <div class="picker" @keydown.esc.stop="emit('close')">
+    <div class="tabs" role="tablist" :aria-label="t('picker.mode')">
+      <button
+        v-for="option in KINDS"
+        :key="option"
+        type="button"
+        role="tab"
+        :class="{ on: selectedKind === option }"
+        :aria-selected="selectedKind === option"
+        @click="setKind(option)"
+      >{{ t(`picker.kind.${option}`) }}</button>
+    </div>
+
     <div class="fields">
       <select v-if="departments.length > 1" v-model="selectedDept" :aria-label="t('picker.department')">
         <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.label }}</option>
@@ -115,8 +157,8 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
         v-model="query"
         type="search"
         inputmode="search"
-        :placeholder="t('picker.search')"
-        :aria-label="t('picker.search')"
+        :placeholder="t(`picker.search.${selectedKind}`)"
+        :aria-label="t(`picker.search.${selectedKind}`)"
         autocomplete="off"
       />
     </div>
@@ -124,12 +166,13 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
     <p v-if="loading" class="state">{{ t('picker.loading') }}</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
 
-    <!-- Pendant une recherche, l'arbre laisse place à la liste des correspondances. -->
-    <ul v-else-if="query.trim()" class="tree" role="listbox">
-      <li v-for="group in results" :key="group.id">
-        <button type="button" class="row lone" :class="{ current: isCurrent(group.id) }" @click="pick(group.id, group.name)">
-          <span class="name">{{ group.name }}</span>
-          <span v-if="group.parents.length" class="trail">{{ group.parents.join(' › ') }}</span>
+    <!-- Salles et enseignants, ou recherche dans l'arbre : une liste plate. -->
+    <ul v-else-if="!isTree || query.trim()" class="tree" role="listbox">
+      <li v-for="item in results" :key="item.id">
+        <button type="button" class="row lone" :class="{ current: isCurrent(item.id) }" @click="pick(item.id, item.name)">
+          <span class="name">{{ item.name }}</span>
+          <span v-if="item.parents?.length" class="trail">{{ item.parents.join(' › ') }}</span>
+          <span v-else-if="item.courses" class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
         </button>
       </li>
       <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
@@ -154,14 +197,34 @@ watch(selectedDept, (id) => loadCatalog(id), { immediate: true });
       </li>
     </ul>
 
-    <p v-if="!groupId" class="hint">{{ t('picker.hint') }}</p>
+    <p v-if="!resourceId" class="hint">{{ t('picker.hint') }}</p>
   </div>
 </template>
 
 <style scoped>
 .picker { display: flex; flex-direction: column; min-height: 0; padding: 0.5rem; }
 
-.fields { display: flex; gap: 0.4rem; padding: 0.15rem 0.15rem 0.45rem; }
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin: 0.15rem 0.15rem 0.45rem;
+  background: var(--bg-sunken);
+  border-radius: 999px;
+}
+.tabs button {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.tabs button:hover { color: var(--text); }
+.tabs button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
+
+.fields { display: flex; gap: 0.4rem; padding: 0 0.15rem 0.45rem; }
 .fields select, .fields input {
   flex: 1;
   min-width: 0;

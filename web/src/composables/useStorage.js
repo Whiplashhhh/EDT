@@ -4,8 +4,18 @@
  */
 const KEY = 'edt-ulco:v1';
 
-const EMPTY = { department: null, groupId: null, groupName: null, view: 'day', theme: 'system', lang: 'fr' };
+const EMPTY = {
+  department: null,
+  /** Ce qu'on consulte : une classe, une salle ou un enseignant. */
+  kind: 'groups',
+  resourceId: null,
+  resourceName: null,
+  view: 'day',
+  theme: 'system',
+  lang: 'fr',
+};
 
+const KINDS = ['groups', 'rooms', 'teachers'];
 const THEMES = ['system', 'light', 'dark'];
 const LANGS = ['fr', 'en'];
 
@@ -14,10 +24,15 @@ export function readSettings() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return { ...EMPTY };
     const parsed = JSON.parse(raw);
+    // Avant l'arrivée des salles et des enseignants, seule une classe était
+    // mémorisée, sous `groupId` / `groupName`.
+    const id = Number.isInteger(parsed.resourceId) ? parsed.resourceId : parsed.groupId;
+    const name = parsed.resourceName ?? parsed.groupName;
     return {
       department: typeof parsed.department === 'string' ? parsed.department : null,
-      groupId: Number.isInteger(parsed.groupId) ? parsed.groupId : null,
-      groupName: typeof parsed.groupName === 'string' ? parsed.groupName : null,
+      kind: KINDS.includes(parsed.kind) ? parsed.kind : 'groups',
+      resourceId: Number.isInteger(id) ? id : null,
+      resourceName: typeof name === 'string' ? name : null,
       view: parsed.view === 'week' ? 'week' : 'day',
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : 'fr',
@@ -38,12 +53,13 @@ export function writeSettings(settings) {
 /** Dernier emploi du temps reçu, pour un affichage immédiat et hors ligne. */
 const CACHE_KEY = 'edt-ulco:schedule:v1';
 
-export function readCachedSchedule(department, groupId, from) {
+export function readCachedSchedule(department, kind, resourceId, from) {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed.department !== department || parsed.groupId !== groupId || parsed.from !== from) return null;
+    if (parsed.department !== department || parsed.kind !== kind) return null;
+    if (parsed.resourceId !== resourceId || parsed.from !== from) return null;
     return parsed;
   } catch {
     return null;

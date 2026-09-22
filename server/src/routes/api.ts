@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import type { AdeService } from '../ade/service.ts';
+import { isResourceKind, type AdeService, type ResourceKind, type Schedule } from '../ade/service.ts';
 import type { CrousService } from '../crous/service.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -36,16 +36,30 @@ function normalizeFrom(raw: unknown): string {
   return mondayOf(parsed);
 }
 
-function parseIds(params: Record<string, string>): { department: string; groupId: number } {
-  const department = params.department ?? '';
+function parseDepartment(raw: string | undefined): string {
+  const department = raw ?? '';
   if (!DEPARTMENT_RE.test(department)) {
     throw Object.assign(new Error('Département invalide.'), { statusCode: 400 });
   }
-  const groupId = Number(params.groupId);
-  if (!Number.isInteger(groupId) || groupId <= 0 || groupId > 10_000_000) {
-    throw Object.assign(new Error('Identifiant de groupe invalide.'), { statusCode: 400 });
+  return department;
+}
+
+/** Façon de consulter l'emploi du temps : `groups`, `rooms` ou `teachers`. */
+function parseKind(raw: string | undefined): ResourceKind {
+  if (!raw || !isResourceKind(raw)) {
+    throw Object.assign(new Error('Type de ressource inconnu.'), { statusCode: 404 });
   }
-  return { department, groupId };
+  return raw;
+}
+
+function parseIds(params: Record<string, string>): { department: string; kind: ResourceKind; resourceId: number } {
+  const department = parseDepartment(params.department);
+  const kind = parseKind(params.kind);
+  const resourceId = Number(params.resourceId);
+  if (!Number.isInteger(resourceId) || resourceId <= 0 || resourceId > 10_000_000) {
+    throw Object.assign(new Error('Identifiant de ressource invalide.'), { statusCode: 400 });
+  }
+  return { department, kind, resourceId };
 }
 
 export async function registerApi(
@@ -53,6 +67,17 @@ export async function registerApi(
   opts: { service: AdeService; crous: CrousService },
 ): Promise<void> {
   const { service, crous } = opts;
+
+  /** Un emploi du temps, quelle que soit la façon de le consulter. */
+  const scheduleOf = (
+    department: string,
+    kind: ResourceKind,
+    resourceId: number,
+    from: string,
+  ): Promise<Schedule> =>
+    kind === 'groups'
+      ? service.schedule(department, resourceId, from)
+      : service.facetSchedule(department, kind, resourceId, from);
 
   app.get('/health', async () => ({ status: 'ok' }));
 
@@ -70,18 +95,35 @@ export async function registerApi(
   });
 
   app.get<{ Params: Record<string, string> }>('/:department/groups', async (req, reply) => {
-    const { department } = parseIds({ ...req.params, groupId: '1' });
+    const department = parseDepartment(req.params.department);
     const catalog = await service.catalog(department);
     reply.header('Cache-Control', 'public, max-age=1800');
     return catalog;
   });
 
+  /*
+   * Annuaire des salles et des enseignants. À la différence des groupes, ce ne
+   * sont pas des branches de l'arbre ADE mais des vues transversales : elles se
+   * déduisent des cours eux-mêmes, qui portent déjà salle et intervenants.
+   */
   app.get<{ Params: Record<string, string>; Querystring: { from?: string } }>(
-    '/:department/groups/:groupId/schedule',
+    '/:department/:kind',
     async (req, reply) => {
-      const { department, groupId } = parseIds(req.params);
+      const department = parseDepartment(req.params.department);
+      const kind = parseKind(req.params.kind);
       const from = normalizeFrom(req.query.from);
-      const schedule = await service.schedule(department, groupId, from);
+      const directory = await service.directory(department, kind, from);
+      reply.header('Cache-Control', 'public, max-age=1800');
+      return directory;
+    },
+  );
+
+  app.get<{ Params: Record<string, string>; Querystring: { from?: string } }>(
+    '/:department/:kind/:resourceId/schedule',
+    async (req, reply) => {
+      const { department, kind, resourceId } = parseIds(req.params);
+      const from = normalizeFrom(req.query.from);
+      const schedule = await scheduleOf(department, kind, resourceId, from);
       reply.header('Cache-Control', 'public, max-age=300');
       return schedule;
     },
@@ -89,17 +131,17 @@ export async function registerApi(
 
   // Flux iCalendar réexposé : permet de s'abonner depuis l'app Calendrier du téléphone.
   app.get<{ Params: Record<string, string> }>(
-    '/:department/groups/:groupId/calendar.ics',
+    '/:department/:kind/:resourceId/calendar.ics',
     async (req, reply) => {
-      const { department, groupId } = parseIds(req.params);
+      const { department, kind, resourceId } = parseIds(req.params);
       const from = mondayOf(new Date());
-      const schedule = await service.schedule(department, groupId, from);
+      const schedule = await scheduleOf(department, kind, resourceId, from);
       reply
         .header('Content-Type', 'text/calendar; charset=utf-8')
         // Le nom vient d'ADE : on le réduit à un jeu de caractères sûr pour un en-tête.
-        .header('Content-Disposition', `inline; filename="edt-${safeFilename(schedule.groupName)}.ics"`)
+        .header('Content-Disposition', `inline; filename="edt-${safeFilename(schedule.resourceName)}.ics"`)
         .header('Cache-Control', 'public, max-age=900');
-      return toIcs(schedule.groupName, schedule.events);
+      return toIcs(schedule.resourceName, schedule.events);
     },
   );
 }
@@ -120,14 +162,14 @@ function icsStamp(iso: string): string {
   return `${iso.slice(0, 19).replace(/[-:]/g, '')}Z`;
 }
 
-function toIcs(groupName: string, events: Array<import('../ade/ics.ts').CourseEvent>): string {
+function toIcs(resourceName: string, events: Array<import('../ade/ics.ts').CourseEvent>): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//EDT ULCO//FR',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:${icsEscape(`EDT ${groupName}`)}`,
+    `X-WR-CALNAME:${icsEscape(`EDT ${resourceName}`)}`,
   ];
   for (const event of events) {
     lines.push(

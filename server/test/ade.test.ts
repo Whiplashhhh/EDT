@@ -109,10 +109,13 @@ test("le flux iCalendar réexposé échappe les caractères spéciaux", async ()
     departments: () => [{ id: 'test', label: 'Test' }],
     catalog: async () => ({ department: 'test', label: 'Test', fetchedAt: '', groups: [] }),
     findGroup: async () => ({ id: 1, name: 'X', path: 'X', depth: 1, children: [] }),
+    directory: async () => ({ department: 'test', kind: 'rooms', fetchedAt: '', entries: [] }),
+    facetSchedule: async () => { throw new Error('non utilisé'); },
     schedule: async () => ({
       department: 'test',
-      groupId: 1,
-      groupName: 'BUT1;TD1/../etc',
+      kind: 'groups',
+      resourceId: 1,
+      resourceName: 'BUT1;TD1/../etc',
       from: '2026-09-14',
       fetchedAt: '2026-09-14T00:00:00.000Z',
       events: [{

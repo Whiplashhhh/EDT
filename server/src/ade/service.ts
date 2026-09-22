@@ -3,6 +3,20 @@ import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { TtlCache } from '../cache.ts';
 import type { AppConfig, Department } from '../config.ts';
 
+/**
+ * Les trois façons de consulter un emploi du temps, telles qu'elles apparaissent
+ * dans l'URL de l'API. `groups` suit l'arbre ADE ; `rooms` et `teachers` sont
+ * des vues transversales, reconstruites à partir des cours de la formation
+ * (voir `directory`).
+ */
+export const RESOURCE_KINDS = ['groups', 'rooms', 'teachers'] as const;
+
+export type ResourceKind = (typeof RESOURCE_KINDS)[number];
+
+export function isResourceKind(value: string): value is ResourceKind {
+  return (RESOURCE_KINDS as readonly string[]).includes(value);
+}
+
 export interface GroupNode {
   id: number;
   name: string;
@@ -18,10 +32,25 @@ export interface Catalog {
   groups: GroupNode[];
 }
 
+/** Une salle ou un enseignant, avec le nombre de cours qui le concernent. */
+export interface DirectoryEntry {
+  id: number;
+  name: string;
+  courses: number;
+}
+
+export interface Directory {
+  department: string;
+  kind: ResourceKind;
+  fetchedAt: string;
+  entries: DirectoryEntry[];
+}
+
 export interface Schedule {
   department: string;
-  groupId: number;
-  groupName: string;
+  kind: ResourceKind;
+  resourceId: number;
+  resourceName: string;
   /** Début de la fenêtre couverte (ISO `YYYY-MM-DD`). */
   from: string;
   fetchedAt: string;
@@ -32,14 +61,58 @@ export interface Schedule {
 const MAX_DEPTH = 6;
 /** Taille maximale acceptée pour un flux ICS (10 Mo). */
 const MAX_ICS_BYTES = 10 * 1024 * 1024;
+/**
+ * Emplois du temps demandés simultanément lorsqu'on rassemble toute la formation.
+ * ADE reste un serveur partagé : on étale les requêtes plutôt que de les lancer
+ * toutes d'un coup.
+ */
+const AGGREGATE_CONCURRENCY = 4;
 
 export class NotFoundError extends Error {}
+
+/** Exécute `task` sur chaque élément, `limit` à la fois, en préservant l'ordre. */
+async function mapWithLimit<T, R>(items: T[], limit: number, task: (item: T) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    for (let i = next; i < items.length; i = next) {
+      next += 1;
+      out[i] = await task(items[i]);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
+
+/**
+ * Identifiant numérique stable dérivé d'un nom (FNV-1a). Les salles et les
+ * enseignants n'ont pas d'identifiant ADE exploitable : on leur en fabrique un,
+ * pour que toute l'API — URL, cache, préférences — manipule des entiers.
+ */
+function nameId(name: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < name.length; i += 1) {
+    h = (h ^ name.charCodeAt(i)) >>> 0;
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return (h % 9_999_999) + 1;
+}
+
+/** Une salle ADE peut en désigner plusieurs : « S201,S134 » est un cours en deux salles. */
+function roomsOf(event: CourseEvent): string[] {
+  return (event.room ?? '')
+    .split(',')
+    .map((r) => r.trim())
+    .filter(Boolean);
+}
 
 export class AdeService {
   readonly #config: AppConfig;
   readonly #catalogs: TtlCache<Catalog>;
   readonly #icsUrls: TtlCache<string>;
   readonly #schedules: TtlCache<Schedule>;
+  readonly #aggregates: TtlCache<CourseEvent[]>;
+  readonly #directories: TtlCache<Directory>;
 
   constructor(config: AppConfig) {
     this.#config = config;
@@ -47,6 +120,8 @@ export class AdeService {
     // Les URL `.shu` publiées par ADE sont stables : on les garde une journée.
     this.#icsUrls = new TtlCache<string>(24 * 60 * 60 * 1000, 500);
     this.#schedules = new TtlCache<Schedule>(config.scheduleTtlMs, 300);
+    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 32);
+    this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32);
   }
 
   departments(): Array<{ id: string; label: string }> {
@@ -122,13 +197,110 @@ export class AdeService {
       const ics = await this.#fetchIcs(dept, url, from);
       return {
         department: dept.id,
-        groupId,
-        groupName: group.name,
+        kind: 'groups',
+        resourceId: groupId,
+        resourceName: group.name,
         from,
         fetchedAt: new Date().toISOString(),
         events: parseAdeIcs(ics),
       };
     });
+  }
+
+  /**
+   * Groupes sans enfant du catalogue : ce sont eux qui portent les cours.
+   * Les nœuds intermédiaires (promotion, TD) reprendraient les mêmes séances.
+   */
+  async #leafGroups(departmentId: string): Promise<GroupNode[]> {
+    const catalog = await this.catalog(departmentId);
+    const leaves: GroupNode[] = [];
+    const walk = (nodes: GroupNode[]): void => {
+      for (const node of nodes) {
+        if (node.children.length === 0) leaves.push(node);
+        else walk(node.children);
+      }
+    };
+    walk(catalog.groups);
+    return leaves;
+  }
+
+  /**
+   * Tous les cours de la formation sur la fenêtre `from`, toutes classes confondues.
+   *
+   * ADE ne publie pas de flux par salle exploitable — son arbre des salles
+   * s'arrête à l'étage, et son arbre des enseignants est tronqué par le serveur —
+   * alors qu'un cours porte déjà sa salle et ses intervenants. On réunit donc
+   * les emplois du temps des groupes, déjà en cache, et on les dédoublonne :
+   * un cours partagé par deux groupes est une seule et même séance (même UID).
+   */
+  async #allEvents(departmentId: string, from: string): Promise<CourseEvent[]> {
+    const dept = this.#department(departmentId);
+    return this.#aggregates.get(`${dept.id}:${from}`, async () => {
+      const groups = await this.#leafGroups(dept.id);
+      const schedules = await mapWithLimit(groups, AGGREGATE_CONCURRENCY, (group) =>
+        this.schedule(dept.id, group.id, from),
+      );
+      const byUid = new Map<string, CourseEvent>();
+      for (const schedule of schedules) {
+        for (const event of schedule.events) byUid.set(event.uid, event);
+      }
+      return [...byUid.values()].sort((a, b) => a.start.localeCompare(b.start));
+    });
+  }
+
+  /**
+   * Liste des salles ou des enseignants de la formation, avec leur charge.
+   * Construite sur la fenêtre en cours — soit environ douze semaines, assez
+   * pour que la liste soit stable d'un jour à l'autre.
+   */
+  async directory(departmentId: string, kind: ResourceKind, from: string): Promise<Directory> {
+    const dept = this.#department(departmentId);
+    if (kind === 'groups') throw new NotFoundError('Les groupes se consultent via le catalogue.');
+
+    return this.#directories.get(`${dept.id}:${kind}:${from}`, async () => {
+      const events = await this.#allEvents(dept.id, from);
+      const counts = new Map<string, number>();
+      for (const event of events) {
+        for (const name of kind === 'rooms' ? roomsOf(event) : event.teachers) {
+          counts.set(name, (counts.get(name) ?? 0) + 1);
+        }
+      }
+      const entries = [...counts.entries()]
+        .map(([name, courses]) => ({ id: nameId(name), name, courses }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+      return { department: dept.id, kind, fetchedAt: new Date().toISOString(), entries };
+    });
+  }
+
+  /**
+   * Emploi du temps d'une salle ou d'un enseignant : tous les cours de la
+   * formation qui la — ou le — concernent, sans distinction de classe.
+   */
+  async facetSchedule(
+    departmentId: string,
+    kind: ResourceKind,
+    resourceId: number,
+    from: string,
+  ): Promise<Schedule> {
+    const dept = this.#department(departmentId);
+    const directory = await this.directory(dept.id, kind, from);
+    const entry = directory.entries.find((e) => e.id === resourceId);
+    if (!entry) throw new NotFoundError(`Ressource inconnue : ${resourceId}`);
+
+    const events = await this.#allEvents(dept.id, from);
+    const matches = events.filter((event) =>
+      kind === 'rooms' ? roomsOf(event).includes(entry.name) : event.teachers.includes(entry.name),
+    );
+
+    return {
+      department: dept.id,
+      kind,
+      resourceId,
+      resourceName: entry.name,
+      from,
+      fetchedAt: new Date().toISOString(),
+      events: matches,
+    };
   }
 
   async #fetchIcs(dept: Department, url: string, from: string): Promise<string> {

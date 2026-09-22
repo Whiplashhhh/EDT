@@ -9,6 +9,10 @@ const props = defineProps({
   day: { type: String, required: true },
   events: { type: Array, default: () => [] },
   now: { type: Number, default: 0 },
+  /* Le menu du Crous accompagne la journée d'une classe ; sur l'emploi du temps
+     d'une salle ou d'un enseignant, il n'a rien à y faire. */
+  showMenu: { type: Boolean, default: true },
+  context: { type: String, default: 'groups' },
 });
 
 /* Service du restaurant universitaire (11h15 → 13h45) : la pause qui recouvre
@@ -37,6 +41,8 @@ const rows = computed(() => {
       minutes: (new Date(event.end) - new Date(event.start)) / 60_000,
     });
   });
+
+  if (!props.showMenu) return out;
 
   // Une seule pause porte le menu : celle qui déborde le plus sur le service.
   let lunch = null;
@@ -92,7 +98,7 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
         :class="[row.type, { lunch: row.lunch }]"
         :style="row.lunch || row.type === 'crous' ? null : { minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) }"
       >
-        <EventCard v-if="row.type === 'event'" :event="row.event" :now="now" />
+        <EventCard v-if="row.type === 'event'" :event="row.event" :now="now" :context="context" />
         <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" />
         <p v-else class="gap-label">{{ gapLabel(row.minutes) }}</p>
       </li>

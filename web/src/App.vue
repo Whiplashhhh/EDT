@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import GroupPicker from './components/GroupPicker.vue';
+import ResourcePicker from './components/ResourcePicker.vue';
 import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
@@ -14,14 +14,15 @@ const THEMES = ['system', 'light', 'dark'];
 
 const settings = ref(readSettings());
 const department = computed(() => settings.value.department);
-const groupId = computed(() => settings.value.groupId);
+const kind = computed(() => settings.value.kind);
+const resourceId = computed(() => settings.value.resourceId);
 
 const focusedDay = ref(today());
-const pickerOpen = ref(!settings.value.groupId);
+const pickerOpen = ref(!settings.value.resourceId);
 const menuOpen = ref(false);
 const now = ref(Date.now());
 
-const { eventsByDay, loading, error, stale, load } = useSchedule(department, groupId, focusedDay);
+const { eventsByDay, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
 /*
  * Thème et langue sont appliqués au document lui-même : le thème par un attribut
@@ -86,7 +87,7 @@ watch(eventsByDay, (map) => {
 const dayEvents = computed(() => eventsByDay.value.get(focusedDay.value) || []);
 const isToday = computed(() => focusedDay.value === today());
 const calendarUrl = computed(() =>
-  department.value && groupId.value ? api.calendarUrl(department.value, groupId.value) : null,
+  department.value && resourceId.value ? api.calendarUrl(department.value, kind.value, resourceId.value) : null,
 );
 
 let ticker;
@@ -135,8 +136,8 @@ function onVisible() {
   load(true);
 }
 
-function choose({ department: dept, groupId: id, groupName }) {
-  settings.value = { ...settings.value, department: dept, groupId: id, groupName };
+function choose({ department: dept, kind: pickedKind, resourceId: id, resourceName }) {
+  settings.value = { ...settings.value, department: dept, kind: pickedKind, resourceId: id, resourceName };
   writeSettings(settings.value);
   pickerOpen.value = false;
   menuOpen.value = false;
@@ -186,9 +187,9 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
   <div class="app" tabindex="-1" @keydown="onKeydown">
     <header class="top">
       <div class="identity">
-        <p class="eyebrow">{{ t('app.eyebrow') }}</p>
+        <p class="eyebrow">{{ t(`app.eyebrow.${settings.kind}`) }}</p>
         <button class="group-btn" type="button" :aria-expanded="pickerOpen" @click="pickerOpen = !pickerOpen">
-          {{ settings.groupName || t('app.pickClass') }}
+          {{ settings.resourceName || t('app.pickResource') }}
           <span class="chev" aria-hidden="true">▾</span>
         </button>
       </div>
@@ -204,10 +205,11 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
     </header>
 
     <div v-if="pickerOpen" class="menu-backdrop" @click="pickerOpen = false"></div>
-    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" :aria-label="t('app.pickClass')">
-      <GroupPicker
+    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" :aria-label="t('app.pickResource')">
+      <ResourcePicker
         :department="settings.department"
-        :group-id="settings.groupId"
+        :kind="settings.kind"
+        :resource-id="settings.resourceId"
         @choose="choose"
         @close="pickerOpen = false"
       />
@@ -218,7 +220,7 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
       <button type="button" role="menuitem" @click="setView(settings.view === 'day' ? 'week' : 'day'); menuOpen = false">
         {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
       </button>
-      <button type="button" role="menuitem" @click="pickerOpen = true">{{ t('app.changeClass') }}</button>
+      <button type="button" role="menuitem" @click="pickerOpen = true">{{ t('app.changeResource') }}</button>
       <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">{{ t('app.subscribe') }}</a>
       <button type="button" role="menuitem" @click="load(true); menuOpen = false">{{ t('app.refresh') }}</button>
 
@@ -252,7 +254,7 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
       </div>
     </div>
 
-    <main v-if="settings.groupId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+    <main v-if="settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <WeekStrip :focused="focusedDay" :events-by-day="eventsByDay" @select="focusedDay = $event" @shift="shiftDay" />
 
       <p v-if="error" class="banner error" role="status">{{ error }}</p>
@@ -263,9 +265,9 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
           {{ formatDayLong(focusedDay) }}
           <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
         </h2>
-        <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" />
+        <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
       </template>
-      <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" @select="focusedDay = $event; setView('day')" />
+      <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
 
       <p v-if="loading && !dayEvents.length" class="banner" role="status">{{ t('app.loading') }}</p>
     </main>

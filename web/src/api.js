@@ -10,16 +10,18 @@ async function getJson(path, signal) {
   return res.json();
 }
 
+const seg = encodeURIComponent;
+
 export const api = {
   departments: (signal) => getJson('/api/departments', signal),
-  groups: (department, signal) => getJson(`/api/${encodeURIComponent(department)}/groups`, signal),
-  schedule: (department, groupId, from, signal) =>
-    getJson(
-      `/api/${encodeURIComponent(department)}/groups/${encodeURIComponent(groupId)}/schedule?from=${encodeURIComponent(from)}`,
-      signal,
-    ),
+  /** Arbre des groupes du département. */
+  groups: (department, signal) => getJson(`/api/${seg(department)}/groups`, signal),
+  /** Liste plate des salles (`rooms`) ou des enseignants (`teachers`). */
+  directory: (department, kind, signal) => getJson(`/api/${seg(department)}/${seg(kind)}`, signal),
+  schedule: (department, kind, resourceId, from, signal) =>
+    getJson(`/api/${seg(department)}/${seg(kind)}/${seg(resourceId)}/schedule?from=${seg(from)}`, signal),
   // Le restaurant universitaire est fixé côté serveur : aucun paramètre ici.
   crousMenu: (signal) => getJson('/api/crous/menu', signal),
-  calendarUrl: (department, groupId) =>
-    `${location.origin}/api/${encodeURIComponent(department)}/groups/${encodeURIComponent(groupId)}/calendar.ics`,
+  calendarUrl: (department, kind, resourceId) =>
+    `${location.origin}/api/${seg(department)}/${seg(kind)}/${seg(resourceId)}/calendar.ics`,
 };

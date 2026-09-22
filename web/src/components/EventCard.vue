@@ -7,7 +7,14 @@ import { courseStyle } from '../colors.js';
 const props = defineProps({
   event: { type: Object, required: true },
   now: { type: Number, default: 0 },
+  /* Ce qu'on consulte — à ne pas confondre avec `event.kind`, le type de séance.
+     Sur l'emploi du temps d'un enseignant, son nom est déjà dans l'en-tête et
+     n'a pas besoin d'être répété sur chaque carte. */
+  context: { type: String, default: 'groups' },
 });
+
+const showTeachers = computed(() => props.context !== 'teachers' && props.event.teachers?.length > 0);
+const showGroups = computed(() => props.event.groups?.length > 0);
 
 const tint = computed(() => courseStyle(props.event));
 
@@ -40,10 +47,10 @@ const remaining = computed(() => {
         <span v-if="event.kind" class="tag">{{ event.kind }}</span>
         <span class="duration">{{ formatDuration(event.start, event.end) }}</span>
       </p>
-      <p v-if="event.teachers?.length || event.groups?.length" class="people">
-        <span v-if="event.teachers?.length" class="teachers">{{ event.teachers.join(', ') }}</span>
-        <span v-if="event.teachers?.length && event.groups?.length" aria-hidden="true"> · </span>
-        <span v-if="event.groups?.length" class="groups">{{ event.groups.join(', ') }}</span>
+      <p v-if="showTeachers || showGroups" class="people">
+        <span v-if="showTeachers" class="teachers">{{ event.teachers.join(', ') }}</span>
+        <span v-if="showTeachers && showGroups" aria-hidden="true"> · </span>
+        <span v-if="showGroups" class="groups">{{ event.groups.join(', ') }}</span>
       </p>
       <p v-if="remaining" class="live">{{ remaining }}</p>
     </div>

@@ -5,11 +5,12 @@ import { errorMessage, t } from '../i18n.js';
 import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 
 /**
- * Charge l'emploi du temps du groupe sélectionné.
- * ADE publie une fenêtre d'environ douze semaines à partir d'un lundi donné :
- * on recharge seulement quand on sort de la fenêtre déjà en mémoire.
+ * Charge l'emploi du temps de la ressource sélectionnée — une classe, une salle
+ * ou un enseignant. ADE publie une fenêtre d'environ douze semaines à partir
+ * d'un lundi donné : on recharge seulement quand on sort de la fenêtre déjà
+ * en mémoire.
  */
-export function useSchedule(department, groupId, focusedDay) {
+export function useSchedule(department, kind, resourceId, focusedDay) {
   const events = ref([]);
   const loading = ref(false);
   const error = ref(null);
@@ -29,7 +30,7 @@ export function useSchedule(department, groupId, focusedDay) {
   });
 
   async function load(force = false) {
-    if (!department.value || !groupId.value) {
+    if (!department.value || !resourceId.value) {
       events.value = [];
       return;
     }
@@ -39,7 +40,7 @@ export function useSchedule(department, groupId, focusedDay) {
     controller?.abort();
     controller = new AbortController();
 
-    const cached = readCachedSchedule(department.value, groupId.value, from);
+    const cached = readCachedSchedule(department.value, kind.value, resourceId.value, from);
     if (cached) {
       events.value = cached.events;
       fetchedAt.value = cached.fetchedAt;
@@ -50,7 +51,7 @@ export function useSchedule(department, groupId, focusedDay) {
     loading.value = true;
     error.value = null;
     try {
-      const data = await api.schedule(department.value, groupId.value, from, controller.signal);
+      const data = await api.schedule(department.value, kind.value, resourceId.value, from, controller.signal);
       events.value = data.events;
       fetchedAt.value = data.fetchedAt;
       windowStart.value = from;
@@ -65,7 +66,7 @@ export function useSchedule(department, groupId, focusedDay) {
     }
   }
 
-  watch([department, groupId], () => {
+  watch([department, kind, resourceId], () => {
     windowStart.value = null;
     events.value = [];
     load();
