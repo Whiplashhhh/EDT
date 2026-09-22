@@ -22,6 +22,11 @@ const loading = ref(false);
 const error = ref(null);
 /** Identifiants des nœuds dépliés (arbre des classes uniquement). */
 const expanded = ref(new Set());
+/** Branche dépliée temporairement par le survol de la souris. */
+const hovered = ref(new Set());
+/** Nœuds repliés à la main pendant le survol : on ne les rouvre pas tout seuls. */
+const hoverBlocked = ref(new Set());
+let hoverTimer = null;
 const searchInput = ref(null);
 
 const isTree = computed(() => selectedKind.value === 'groups');
@@ -61,7 +66,7 @@ const visible = computed(() => {
   const out = [];
   const walk = (nodes, depth) => {
     for (const node of nodes) {
-      const open = expanded.value.has(node.id);
+      const open = isOpen(node.id);
       out.push({ id: node.id, name: node.name, depth, children: node.children.length, open });
       if (node.children.length && open) walk(node.children, depth + 1);
     }
@@ -73,9 +78,53 @@ const visible = computed(() => {
 const isCurrent = (id) =>
   id === props.resourceId && selectedDept.value === props.department && selectedKind.value === props.kind;
 
+const isOpen = (id) => expanded.value.has(id) || hovered.value.has(id);
+
 function toggle(id) {
-  if (expanded.value.has(id)) expanded.value.delete(id);
-  else expanded.value.add(id);
+  if (isOpen(id)) {
+    expanded.value.delete(id);
+    hovered.value.delete(id);
+    // Repli explicite : le survol ne doit pas le contredire dans la foulée.
+    hoverBlocked.value = new Set(hoverBlocked.value).add(id);
+    hovered.value = new Set(hovered.value);
+  } else {
+    expanded.value.add(id);
+    hoverBlocked.value.delete(id);
+  }
+  expanded.value = new Set(expanded.value);
+}
+
+/** Survol : déplie la branche pointée après une courte pause, sans gêner le clic. */
+function hoverNode(node, event) {
+  if (event.pointerType === 'touch') return;
+  clearTimeout(hoverTimer);
+  if (!node.children) {
+    // Sur une feuille, on garde seulement la branche qui y mène.
+    hoverTimer = setTimeout(() => openBranch(node.id, false), 140);
+    return;
+  }
+  hoverTimer = setTimeout(() => openBranch(node.id, true), 140);
+}
+
+function openBranch(id, self) {
+  const next = new Set(ancestors.value.get(id) ?? []);
+  if (self && !hoverBlocked.value.has(id)) next.add(id);
+  for (const parent of next) hoverBlocked.value.delete(parent);
+  hovered.value = next;
+}
+
+function leaveTree() {
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(() => {
+    hovered.value = new Set();
+    hoverBlocked.value = new Set();
+  }, 220);
+}
+
+function resetHover() {
+  clearTimeout(hoverTimer);
+  hovered.value = new Set();
+  hoverBlocked.value = new Set();
 }
 
 function pick(id, name) {
@@ -91,6 +140,7 @@ function setKind(kind) {
   if (kind === selectedKind.value) return;
   selectedKind.value = kind;
   query.value = '';
+  resetHover();
   searchInput.value?.focus();
 }
 
@@ -107,6 +157,7 @@ async function loadResources() {
       const open = new Set(catalog.value.groups.map((node) => node.id));
       for (const parent of ancestors.value.get(props.resourceId) ?? []) open.add(parent);
       expanded.value = open;
+      resetHover();
     } else {
       entries.value = (await api.directory(dept, kind)).entries;
     }
@@ -178,8 +229,13 @@ watch([selectedDept, selectedKind], loadResources, { immediate: true });
       <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
     </ul>
 
-    <ul v-else class="tree" role="tree">
-      <li v-for="node in visible" :key="node.id" :style="{ '--depth': node.depth }">
+    <ul v-else class="tree" role="tree" @pointerleave="leaveTree">
+      <li
+        v-for="node in visible"
+        :key="node.id"
+        :style="{ '--depth': node.depth }"
+        @pointerenter="hoverNode(node, $event)"
+      >
         <button
           v-if="node.children"
           type="button"
