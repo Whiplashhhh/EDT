@@ -100,10 +100,10 @@ function hoverNode(node, event) {
   clearTimeout(hoverTimer);
   if (!node.children) {
     // Sur une feuille, on garde seulement la branche qui y mène.
-    hoverTimer = setTimeout(() => openBranch(node.id, false), 140);
+    hoverTimer = setTimeout(() => openBranch(node.id, false), 450);
     return;
   }
-  hoverTimer = setTimeout(() => openBranch(node.id, true), 140);
+  hoverTimer = setTimeout(() => openBranch(node.id, true), 450);
 }
 
 function openBranch(id, self) {
