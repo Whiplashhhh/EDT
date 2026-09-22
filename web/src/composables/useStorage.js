@@ -28,9 +28,16 @@ export function readSettings() {
     // mémorisée, sous `groupId` / `groupName`.
     const id = Number.isInteger(parsed.resourceId) ? parsed.resourceId : parsed.groupId;
     const name = parsed.resourceName ?? parsed.groupName;
+    const kind = KINDS.includes(parsed.kind) ? parsed.kind : 'groups';
+    const department = typeof parsed.department === 'string' ? parsed.department : null;
     return {
-      department: typeof parsed.department === 'string' ? parsed.department : null,
-      kind: KINDS.includes(parsed.kind) ? parsed.kind : 'groups',
+      /*
+       * Les enseignants se consultent toutes formations confondues : un prof
+       * mémorisé sous un département précis bascule sur la vue transversale.
+       * Son identifiant vient de son nom, il ne change donc pas.
+       */
+      department: kind === 'teachers' && department ? 'all' : department,
+      kind,
       resourceId: Number.isInteger(id) ? id : null,
       resourceName: typeof name === 'string' ? name : null,
       view: parsed.view === 'week' ? 'week' : 'day',

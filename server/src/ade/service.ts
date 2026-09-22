@@ -17,6 +17,14 @@ export function isResourceKind(value: string): value is ResourceKind {
   return (RESOURCE_KINDS as readonly string[]).includes(value);
 }
 
+/**
+ * Département fictif qui réunit toutes les formations configurées. Un
+ * enseignant intervient souvent dans plusieurs départements : le chercher
+ * n'aurait pas de sens formation par formation. Réservé aux vues transversales
+ * (`rooms`, `teachers`) — l'arbre des groupes, lui, reste propre à une formation.
+ */
+export const ALL_DEPARTMENTS = 'all';
+
 export interface GroupNode {
   id: number;
   name: string;
@@ -134,6 +142,15 @@ export class AdeService {
     return found;
   }
 
+  /**
+   * Départements visés par une requête : un seul, ou tous quand l'appelant
+   * demande `all`.
+   */
+  #departmentIds(id: string): string[] {
+    if (id === ALL_DEPARTMENTS) return this.#config.departments.map((d) => d.id);
+    return [this.#department(id).id];
+  }
+
   #client(dept: Department): AdeClient {
     return new AdeClient({ origin: dept.origin, token: dept.token, projectId: dept.projectId });
   }
@@ -234,6 +251,19 @@ export class AdeService {
    * un cours partagé par deux groupes est une seule et même séance (même UID).
    */
   async #allEvents(departmentId: string, from: string): Promise<CourseEvent[]> {
+    if (departmentId === ALL_DEPARTMENTS) {
+      const perDepartment = await Promise.all(
+        this.#departmentIds(ALL_DEPARTMENTS).map((id) => this.#allEvents(id, from)),
+      );
+      // Un cours mutualisé entre deux formations garde le même UID ADE :
+      // le dédoublonnage vaut donc aussi entre départements.
+      const byUid = new Map<string, CourseEvent>();
+      for (const events of perDepartment) {
+        for (const event of events) byUid.set(event.uid, event);
+      }
+      return [...byUid.values()].sort((a, b) => a.start.localeCompare(b.start));
+    }
+
     const dept = this.#department(departmentId);
     return this.#aggregates.get(`${dept.id}:${from}`, async () => {
       const groups = await this.#leafGroups(dept.id);
@@ -254,11 +284,12 @@ export class AdeService {
    * pour que la liste soit stable d'un jour à l'autre.
    */
   async directory(departmentId: string, kind: ResourceKind, from: string): Promise<Directory> {
-    const dept = this.#department(departmentId);
     if (kind === 'groups') throw new NotFoundError('Les groupes se consultent via le catalogue.');
+    // Valide `departmentId` : `all`, ou une formation connue.
+    this.#departmentIds(departmentId);
 
-    return this.#directories.get(`${dept.id}:${kind}:${from}`, async () => {
-      const events = await this.#allEvents(dept.id, from);
+    return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
+      const events = await this.#allEvents(departmentId, from);
       const counts = new Map<string, number>();
       for (const event of events) {
         for (const name of kind === 'rooms' ? roomsOf(event) : event.teachers) {
@@ -268,7 +299,7 @@ export class AdeService {
       const entries = [...counts.entries()]
         .map(([name, courses]) => ({ id: nameId(name), name, courses }))
         .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-      return { department: dept.id, kind, fetchedAt: new Date().toISOString(), entries };
+      return { department: departmentId, kind, fetchedAt: new Date().toISOString(), entries };
     });
   }
 
@@ -282,18 +313,17 @@ export class AdeService {
     resourceId: number,
     from: string,
   ): Promise<Schedule> {
-    const dept = this.#department(departmentId);
-    const directory = await this.directory(dept.id, kind, from);
+    const directory = await this.directory(departmentId, kind, from);
     const entry = directory.entries.find((e) => e.id === resourceId);
     if (!entry) throw new NotFoundError(`Ressource inconnue : ${resourceId}`);
 
-    const events = await this.#allEvents(dept.id, from);
+    const events = await this.#allEvents(departmentId, from);
     const matches = events.filter((event) =>
       kind === 'rooms' ? roomsOf(event).includes(entry.name) : event.teachers.includes(entry.name),
     );
 
     return {
-      department: dept.id,
+      department: departmentId,
       kind,
       resourceId,
       resourceName: entry.name,
