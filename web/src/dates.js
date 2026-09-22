@@ -53,6 +53,8 @@ const fmt = computed(() => ({
   time: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }),
   dayLong: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' }),
   dayShort: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'short' }),
+  month: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long' }),
+  monthYear: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long', year: 'numeric' }),
 }));
 
 /** Appelé par le module de traduction quand la langue change. */
@@ -64,6 +66,22 @@ export const formatTime = (iso) => fmt.value.time.format(new Date(iso));
 export const formatDayLong = (iso) => fmt.value.dayLong.format(new Date(`${iso}T12:00:00Z`));
 export const formatDayShort = (iso) => fmt.value.dayShort.format(new Date(`${iso}T12:00:00Z`)).replace('.', '');
 export const dayNumber = (iso) => Number(iso.slice(8, 10));
+
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/*
+ * Titre du mois couvert par la semaine du `lundi`. Une semaine peut chevaucher
+ * deux mois (et deux années) : on nomme alors les deux, sans répéter l'année
+ * quand elle est commune.
+ */
+export function formatMonthSpan(monday) {
+  const sunday = addDays(monday, 6);
+  const [startYear, endYear] = [monday.slice(0, 4), sunday.slice(0, 4)];
+  const end = capitalize(fmt.value.monthYear.format(new Date(`${sunday}T12:00:00Z`)));
+  if (monday.slice(0, 7) === sunday.slice(0, 7)) return end;
+  const startFmt = startYear === endYear ? fmt.value.month : fmt.value.monthYear;
+  return `${capitalize(startFmt.format(new Date(`${monday}T12:00:00Z`)))} – ${end}`;
+}
 
 /** Durée en minutes entre deux instants ISO. */
 export function durationMinutes(start, end) {
