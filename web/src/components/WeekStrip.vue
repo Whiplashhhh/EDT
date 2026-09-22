@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { addDays, dayNumber, formatDayShort, mondayOf, today, weekNumber } from '../dates.js';
+import { addDays, dayNumber, formatDayShort, formatMonthSpan, mondayOf, today, weekNumber } from '../dates.js';
 import { t } from '../i18n.js';
 
 const props = defineProps({
@@ -13,13 +13,17 @@ const monday = computed(() => mondayOf(props.focused));
 // Samedi et dimanche restent visibles : l'ULCO y place parfois des rattrapages.
 const days = computed(() => Array.from({ length: 7 }, (_, i) => addDays(monday.value, i)));
 const label = computed(() => t('week.label', { n: weekNumber(monday.value) }));
+const month = computed(() => formatMonthSpan(monday.value));
 </script>
 
 <template>
   <nav class="strip" :aria-label="t('week.nav')">
     <div class="head">
       <button class="nav" type="button" :aria-label="t('week.previous')" @click="emit('shift', -7)">‹</button>
-      <span class="week">{{ label }}</span>
+      <span class="title">
+        <span class="month">{{ month }}</span>
+        <span class="week">{{ label }}</span>
+      </span>
       <button class="nav" type="button" :aria-label="t('week.next')" @click="emit('shift', 7)">›</button>
     </div>
     <ol class="days">
@@ -50,9 +54,11 @@ const label = computed(() => t('week.label', { n: weekNumber(monday.value) }));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.1rem 0 0.45rem;
+  padding: 0.25rem 0 0.5rem;
 }
-.week { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.01em; }
+.title { display: grid; justify-items: center; gap: 0.05rem; line-height: 1.2; }
+.month { font-size: 1rem; font-weight: 700; letter-spacing: 0.01em; }
+.week { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
 .nav {
   width: 2rem; height: 2rem;
   display: grid; place-items: center;
