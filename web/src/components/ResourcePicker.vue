@@ -4,6 +4,12 @@ import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
 
 const KINDS = ['groups', 'rooms', 'teachers'];
+/**
+ * Département fictif du serveur : toutes les formations réunies. Un enseignant
+ * peut intervenir dans plusieurs départements — on le cherche donc partout,
+ * et son emploi du temps les réunit tous.
+ */
+const ALL_DEPARTMENTS = 'all';
 
 const props = defineProps({
   department: { type: String, default: null },
@@ -13,7 +19,8 @@ const props = defineProps({
 const emit = defineEmits(['choose', 'close']);
 
 const departments = ref([]);
-const selectedDept = ref(props.department);
+// Un enseignant n'appartient pas à une formation : `all` n'est pas un choix à mémoriser ici.
+const selectedDept = ref(props.department === ALL_DEPARTMENTS ? null : props.department);
 const selectedKind = ref(props.kind);
 const catalog = ref(null);
 const entries = ref([]);
@@ -30,6 +37,9 @@ let hoverTimer = null;
 const searchInput = ref(null);
 
 const isTree = computed(() => selectedKind.value === 'groups');
+/** Les enseignants se cherchent toutes formations confondues. */
+const isCrossDepartment = computed(() => selectedKind.value === 'teachers');
+const effectiveDept = computed(() => (isCrossDepartment.value ? ALL_DEPARTMENTS : selectedDept.value));
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */
 function flatten(nodes, trail = []) {
@@ -76,7 +86,7 @@ const visible = computed(() => {
 });
 
 const isCurrent = (id) =>
-  id === props.resourceId && selectedDept.value === props.department && selectedKind.value === props.kind;
+  id === props.resourceId && effectiveDept.value === props.department && selectedKind.value === props.kind;
 
 const isOpen = (id) => expanded.value.has(id) || hovered.value.has(id);
 
@@ -129,7 +139,7 @@ function resetHover() {
 
 function pick(id, name) {
   emit('choose', {
-    department: selectedDept.value,
+    department: effectiveDept.value,
     kind: selectedKind.value,
     resourceId: id,
     resourceName: name,
@@ -145,7 +155,7 @@ function setKind(kind) {
 }
 
 async function loadResources() {
-  const dept = selectedDept.value;
+  const dept = effectiveDept.value;
   const kind = selectedKind.value;
   if (!dept) return;
   loading.value = true;
@@ -167,7 +177,7 @@ async function loadResources() {
     else entries.value = [];
   } finally {
     // Une réponse arrivée après un changement d'onglet ne doit plus rien afficher.
-    if (selectedKind.value === kind && selectedDept.value === dept) loading.value = false;
+    if (selectedKind.value === kind && effectiveDept.value === dept) loading.value = false;
   }
 }
 
@@ -182,7 +192,7 @@ onMounted(async () => {
   }
 });
 
-watch([selectedDept, selectedKind], loadResources, { immediate: true });
+watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 </script>
 
 <template>
@@ -200,7 +210,11 @@ watch([selectedDept, selectedKind], loadResources, { immediate: true });
     </div>
 
     <div class="fields">
-      <select v-if="departments.length > 1" v-model="selectedDept" :aria-label="t('picker.department')">
+      <select
+        v-if="departments.length > 1 && !isCrossDepartment"
+        v-model="selectedDept"
+        :aria-label="t('picker.department')"
+      >
         <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.label }}</option>
       </select>
       <input

@@ -37,6 +37,8 @@ function readDepartments(): Department[] {
   return parsed.departments.map((raw, index) => {
     const d = raw as Partial<Department>;
     if (!d.id || !ID_RE.test(d.id)) throw new Error(`departments.json[${index}] : id invalide`);
+    // `all` est réservé : c'est le département fictif qui réunit toutes les formations.
+    if (d.id === 'all') throw new Error(`departments.json[${index}] : l'id « all » est réservé`);
     if (!d.label) throw new Error(`departments.json[${index}] : label manquant`);
     const origin = String(d.origin ?? '');
     if (!/^https:\/\/[a-z0-9.-]+$/i.test(origin)) {
