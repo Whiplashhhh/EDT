@@ -7,6 +7,20 @@
       "origin": "https://edt.univ-littoral.fr",
       "projectId": 5,
       "token": "6b052c86649c89d6314052e0c2e2410df83de816b8eb8f3b30bcbbeda1e00a2707dd302e5e5e44dba7dd1d493bd139047bbd5a6df9dc5274010fd1cf0671c9ff0a59170d199a10cf4386a3f2eb1f9d2ed9228198d14893f6"
+    },
+    {
+      "id": "iut-gea",
+      "label": "IUT GEA",
+      "origin": "https://edt.univ-littoral.fr",
+      "projectId": 5,
+      "token": "6b052c86649c89d6314052e0c2e2410df83de816b8eb8f3bd066c7c3ff96eae0d96b081fc1a619e28edcb5b52c18281858d9e3fb46f326fdf9355e402da57010a9a3c2453eebfdfdb3a09e7f1c48b6784ac7528f840cddad"
+    },
+    {
+      "id": "iut-geii",
+      "label": "IUT GEII",
+      "origin": "https://edt.univ-littoral.fr",
+      "projectId": 5,
+      "token": "6b052c86649c89d6314052e0c2e2410df83de816b8eb8f3bcd2570356d1bfad507dd302e5e5e44dba7dd1d493bd139047bbd5a6df9dc5274010fd1cf0671c9ff0a59170d199a10cf4386a3f2eb1f9d2ed9228198d14893f6"
     }
   ]
 }
