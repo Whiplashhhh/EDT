@@ -293,7 +293,7 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
             </h2>
             <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
           </template>
-          <WeekGrid v-else :focused="focusedDay" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
+          <WeekGrid v-else :focused="focusedDay" :department="settings.department" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
         </div>
       </Transition>
 
