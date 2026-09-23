@@ -21,10 +21,20 @@ const SLOTS = {
   ],
 };
 
+const toMinutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+
 /* Fin du dernier bloc ADE de la journée : un cours peut s'y terminer. */
 const DAY_END = { 'iut-info': '19:00' };
 
-const toMinutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+/*
+ * Traduction d'une borne ADE en horaire réel. Il en faut deux : une même borne ne
+ * se lit pas pareil selon qu'un cours y commence ou s'y termine — à 10 h, le cours
+ * précédent s'est arrêté à 9h55 et le suivant ne démarre qu'à 10h10.
+ */
+const GRIDS = Object.fromEntries(Object.entries(SLOTS).map(([id, slots]) => [id, {
+  starts: new Map(slots.map((slot) => [toMinutes(slot.ade), toMinutes(slot.from)])),
+  ends: new Map(slots.map((slot, i) => [toMinutes(slots[i + 1]?.ade ?? DAY_END[id]), toMinutes(slot.to)])),
+}]));
 
 /** Bornes de créneaux du département, triées et dédoublonnées, ou `null` si inconnues. */
 export function boundariesOf(department) {
@@ -71,18 +81,17 @@ export function breaksOf(department) {
 }
 
 /**
- * Horaires réels d'un cours publié sur la grille ADE, ou `null` si ses bornes ne
- * tombent pas sur des blocs ADE : un cours à l'horaire inhabituel — une soutenance
- * de 8h30 à 9h, par exemple — est annoncé tel quel et ne se recale sur rien.
+ * Horaires réels d'un cours publié sur la grille ADE. Chaque borne se recale de son
+ * côté : celle qui ne tombe pas sur un bloc ADE est un horaire inhabituel — une
+ * soutenance jusqu'à 9 h, par exemple — et reste telle quelle. Recaler les deux
+ * ensemble, ou pas du tout, ferait chevaucher un tel cours avec son voisin.
  */
 export function realHours(department, from, to) {
-  const slots = SLOTS[department];
-  if (!slots) return null;
-  const first = slots.findIndex((slot) => toMinutes(slot.ade) === from);
-  const blockEnds = [...slots.slice(1).map((slot) => slot.ade), DAY_END[department]];
-  const last = blockEnds.findIndex((end) => toMinutes(end) === to);
-  if (first < 0 || last < first) return null;
-  return { from: toMinutes(slots[first].from), to: toMinutes(slots[last].to) };
+  const grid = GRIDS[department];
+  if (!grid) return null;
+  const real = { from: grid.starts.get(from) ?? from, to: grid.ends.get(to) ?? to };
+  // Un cours plus court que l'inter-cours qui le précède se recalerait à l'envers.
+  return real.from < real.to ? real : null;
 }
 
 const shift = (iso, minutes) =>
