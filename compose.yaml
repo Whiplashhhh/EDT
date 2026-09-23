@@ -1,0 +1,16 @@
+# Équivalent de : docker build -t edt-ulco . && docker run -d --name edt \
+#   --restart unless-stopped -p 127.0.0.1:3100:3000 -e TRUST_PROXY=true edt-ulco
+services:
+  edt:
+    build: .
+    image: edt-ulco
+    container_name: edt
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3000"
+    environment:
+      TRUST_PROXY: "true"
+    # Jetons ADE et réglages optionnels (voir .env.example) ; ignoré si le fichier n'existe pas.
+    env_file:
+      - path: .env
+        required: false
