@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { mondayOf } from '../dates.js';
+import { alignToSlots } from '../slots.js';
 import { errorMessage, t } from '../i18n.js';
 import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 
@@ -11,13 +12,17 @@ import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
  * en mémoire.
  */
 export function useSchedule(department, kind, resourceId, focusedDay) {
-  const events = ref([]);
+  const published = ref([]);
   const loading = ref(false);
   const error = ref(null);
   const stale = ref(false);
   const fetchedAt = ref(null);
   const windowStart = ref(null);
   let controller = null;
+
+  /* ADE publie des blocs d'une heure et demie : on leur rend l'horaire réel du
+     département avant de les montrer. */
+  const events = computed(() => alignToSlots(department.value, published.value));
 
   const eventsByDay = computed(() => {
     const map = new Map();
@@ -31,7 +36,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
 
   async function load(force = false) {
     if (!department.value || !resourceId.value) {
-      events.value = [];
+      published.value = [];
       return;
     }
     const from = mondayOf(focusedDay.value);
@@ -42,7 +47,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
 
     const cached = readCachedSchedule(department.value, kind.value, resourceId.value, from);
     if (cached) {
-      events.value = cached.events;
+      published.value = cached.events;
       fetchedAt.value = cached.fetchedAt;
       windowStart.value = from;
       stale.value = true;
@@ -52,7 +57,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
     error.value = null;
     try {
       const data = await api.schedule(department.value, kind.value, resourceId.value, from, controller.signal);
-      events.value = data.events;
+      published.value = data.events;
       fetchedAt.value = data.fetchedAt;
       windowStart.value = from;
       stale.value = false;
@@ -68,7 +73,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
 
   watch([department, kind, resourceId], () => {
     windowStart.value = null;
-    events.value = [];
+    published.value = [];
     load();
   });
   watch(focusedDay, () => load());
