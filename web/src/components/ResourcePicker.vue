@@ -316,23 +316,40 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.tree > li { display: flex; align-items: center; gap: 0.1rem; padding-left: calc(var(--depth, 0) * 0.9rem); }
+.tree > li { display: flex; align-items: center; gap: 0.3rem; padding-left: calc(var(--depth, 0) * 0.9rem); }
 
+/*
+ * Le chevron est le seul moyen de déplier : cliquer sur le nom ouvre l'emploi
+ * du temps du groupe entier. Il se lit donc comme un bouton à part entière
+ * (cadre, fond, contraste) pour qu'on ne le confonde pas avec une décoration.
+ */
 .twist {
   flex: none;
-  width: 1.5rem;
-  height: 1.9rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: grid;
   place-items: center;
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   /* La flèche pivote plutôt que de changer de glyphe : pas de saut de largeur. */
-  transition: transform 0.12s ease;
+  transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
 }
 .twist[aria-expanded='true'] { transform: rotate(90deg); }
-.twist:not(.dot):hover { background: var(--bg-sunken); color: var(--text); }
-.dot { font-size: 0.6rem; opacity: 0.55; cursor: default; }
+.twist:not(.dot):hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.twist:not(.dot):focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dot {
+  width: 1.75rem;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  opacity: 0.55;
+  cursor: default;
+}
 
 .row {
   flex: 1;
@@ -346,7 +363,7 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   font-size: 0.92rem;
   color: var(--text);
 }
-.row.lone { margin-left: 1.6rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
+.row.lone { margin-left: 2.05rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
 .row:hover { background: var(--bg-sunken); }
 .row.current { background: var(--accent-soft); color: var(--accent); font-weight: 650; }
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
