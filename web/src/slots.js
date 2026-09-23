@@ -7,7 +7,7 @@
  * Un créneau `optional` n'est utilisé qu'en cas de besoin : il ne compte pas dans
  * la plage affichée par défaut, mais reste gradué s'il porte un cours.
  */
-import { formatMinutes, minutesOfDay } from './dates.js';
+import { minutesOfDay } from './dates.js';
 
 const SLOTS = {
   'iut-info': [
@@ -23,9 +23,6 @@ const SLOTS = {
 
 /* Fin du dernier bloc ADE de la journée : un cours peut s'y terminer. */
 const DAY_END = { 'iut-info': '19:00' };
-
-/** Deux graduations plus rapprochées que cela ne peuvent pas porter chacune leur heure. */
-const LABEL_MIN_GAP = 12;
 
 const toMinutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 
@@ -56,22 +53,21 @@ export function snapRange(department, from, to) {
   };
 }
 
-/**
- * Graduations de l'axe entre `from` et `to`. `label` est vide quand la précédente
- * est trop proche pour être lisible : le trait reste, l'heure passe à la suivante.
- */
+/** Instants où graduer l'axe entre `from` et `to` : les bornes de créneaux, à défaut les heures. */
 export function ticksBetween(department, from, to) {
   const marks = boundariesOf(department);
-  if (!marks) {
-    const out = [];
-    for (let m = from; m <= to; m += 60) out.push({ at: m, label: formatMinutes(m) });
-    return out;
-  }
-  const inRange = marks.filter((m) => m >= from && m <= to);
-  return inRange.map((at, i) => ({
-    at,
-    label: inRange[i + 1] - at < LABEL_MIN_GAP ? '' : formatMinutes(at),
-  }));
+  if (marks) return marks.filter((m) => m >= from && m <= to);
+  const out = [];
+  for (let m = from; m <= to; m += 60) out.push(m);
+  return out;
+}
+
+/** Les inter-cours du département : les trous entre deux créneaux qui se suivent. */
+export function breaksOf(department) {
+  const slots = SLOTS[department] || [];
+  return slots.slice(1)
+    .map((slot, i) => ({ from: toMinutes(slots[i].to), to: toMinutes(slot.from) }))
+    .filter((pause) => pause.to > pause.from);
 }
 
 /**

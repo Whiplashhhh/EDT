@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue';
 import {
-  addDays, dayNumber, formatDayShort, formatTime,
+  addDays, dayNumber, formatDayShort, formatMinutes, formatTime,
   minutesOfDay, mondayOf, today,
 } from '../dates.js';
-import { defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
+import { breaksOf, defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
 import { courseStyle } from '../colors.js';
 
 const props = defineProps({
@@ -28,6 +28,15 @@ const PX_PER_MIN = 56 / 60;
 const GUTTER = 1;
 /** Plage affichée par défaut quand la semaine est vide, faute de créneaux connus. */
 const DEFAULT_RANGE = { from: 8 * 60, to: 18 * 60 };
+/**
+ * Hauteur d'un inter-cours, en pixels. Le déplacer n'est pas du temps de cours :
+ * l'étirer à l'échelle de la journée ne ferait qu'éloigner les blocs pour rien.
+ * Les quelques minutes d'un changement de salle disparaissent, les vraies pauses
+ * gardent un liseré qui les signale sans creuser la colonne.
+ */
+const BREAK_PX = (minutes) => (minutes <= 10 ? 0 : 5);
+/** En deçà, deux graduations sont trop proches pour porter chacune leur heure. */
+const LABEL_MIN_PX = 13;
 
 const days = computed(() => {
   const monday = mondayOf(props.focused);
@@ -52,9 +61,39 @@ const range = computed(() => {
   return snapRange(props.department, from, to);
 });
 
-const ticks = computed(() => ticksBetween(props.department, range.value.from, range.value.to));
+/** Les inter-cours visibles, dans l'ordre : ce sont eux qui déforment l'échelle. */
+const breaks = computed(() => breaksOf(props.department)
+  .filter((pause) => pause.from >= range.value.from && pause.to <= range.value.to));
 
-const bodyHeight = computed(() => (range.value.to - range.value.from) * PX_PER_MIN);
+/**
+ * Ordonnée d'un instant, en pixels depuis le haut de la grille. Proportionnelle au
+ * temps partout, sauf dans les inter-cours : chacun est ramené à sa hauteur fixe,
+ * et la journée se resserre d'autant.
+ */
+function y(minutes) {
+  let px = (minutes - range.value.from) * PX_PER_MIN;
+  for (const pause of breaks.value) {
+    if (minutes <= pause.from) break;
+    const length = pause.to - pause.from;
+    const inside = Math.min(minutes, pause.to) - pause.from;
+    px -= inside * PX_PER_MIN - (inside / length) * BREAK_PX(length);
+  }
+  return px;
+}
+
+/* Une graduation perd son heure quand la suivante la serre de trop près : le trait
+   reste — c'est lui qui borne le créneau —, l'heure passe à la suivante. */
+const ticks = computed(() => {
+  const marks = ticksBetween(props.department, range.value.from, range.value.to);
+  const tops = marks.map(y);
+  return marks.map((at, i) => ({
+    at,
+    top: tops[i],
+    label: tops[i + 1] - tops[i] < LABEL_MIN_PX ? '' : formatMinutes(at),
+  }));
+});
+
+const bodyHeight = computed(() => y(range.value.to));
 
 /**
  * Place les cours d'une journée : position et hauteur proportionnelles à l'horaire,
@@ -95,15 +134,15 @@ function layout(day) {
   if (cluster.length) flush();
 
   return placed.map((item) => {
-    const minutes = Math.max(15, item.to - item.from);
+    const height = Math.max(y(item.to) - y(item.from), 15 * PX_PER_MIN);
     return {
       event: item.event,
       minutes: item.to - item.from,
       narrow: item.lanes > 1,
       style: {
         // GUTTER creuse un écart visible entre deux cours qui s'enchaînent.
-        top: `${(item.from - range.value.from) * PX_PER_MIN + GUTTER}px`,
-        height: `${minutes * PX_PER_MIN - 2 * GUTTER}px`,
+        top: `${y(item.from) + GUTTER}px`,
+        height: `${height - 2 * GUTTER}px`,
         left: `${(item.lane / item.lanes) * 100}%`,
         width: `${100 / item.lanes}%`,
       },
@@ -119,7 +158,7 @@ const nowLine = computed(() => {
   if (!props.now || !days.value.includes(iso)) return null;
   const minutes = minutesOfDay(new Date(props.now).toISOString());
   if (minutes < range.value.from || minutes > range.value.to) return null;
-  return { day: iso, top: `${(minutes - range.value.from) * PX_PER_MIN}px` };
+  return { day: iso, top: `${y(minutes)}px` };
 });
 
 const peopleOf = (event) =>
@@ -147,7 +186,7 @@ const peopleOf = (event) =>
           v-for="tick in ticks"
           :key="tick.at"
           class="axis-hour"
-          :style="{ top: `${(tick.at - range.from) * PX_PER_MIN}px` }"
+          :style="{ top: `${tick.top}px` }"
         >{{ tick.label }}</span>
       </div>
 
@@ -161,7 +200,7 @@ const peopleOf = (event) =>
           v-for="tick in ticks"
           :key="`l-${tick.at}`"
           class="hour-line"
-          :style="{ top: `${(tick.at - range.from) * PX_PER_MIN}px` }"
+          :style="{ top: `${tick.top}px` }"
         ></div>
 
         <article
