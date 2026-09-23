@@ -1,13 +1,16 @@
 <script setup>
 import { computed } from 'vue';
 import {
-  addDays, dayNumber, formatDayShort, formatMinutes, formatTime,
+  addDays, dayNumber, formatDayShort, formatTime,
   minutesOfDay, mondayOf, today,
 } from '../dates.js';
+import { defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
 import { courseStyle } from '../colors.js';
 
 const props = defineProps({
   focused: { type: String, required: true },
+  /* Le département fixe la graduation de l'axe : ses créneaux, à défaut les heures. */
+  department: { type: String, default: '' },
   eventsByDay: { type: Map, required: true },
   now: { type: Number, default: 0 },
   /* Ce qu'on consulte. Sur l'emploi du temps d'un enseignant, répéter son nom
@@ -23,7 +26,7 @@ const PX_PER_MIN = 56 / 60;
  * un cheveu suffit pour que deux cours collés ne se confondent pas.
  */
 const GUTTER = 1;
-/** Plage affichée par défaut quand la semaine est vide. */
+/** Plage affichée par défaut quand la semaine est vide, faute de créneaux connus. */
 const DEFAULT_RANGE = { from: 8 * 60, to: 18 * 60 };
 
 const days = computed(() => {
@@ -35,9 +38,9 @@ const days = computed(() => {
 
 const weekEvents = computed(() => days.value.flatMap((day) => props.eventsByDay.get(day) || []));
 
-/** Bornes de la grille, arrondies à l'heure pleine pour aligner l'axe horaire. */
+/** Bornes de la grille, élargies jusqu'aux graduations qui encadrent les cours. */
 const range = computed(() => {
-  if (!weekEvents.value.length) return DEFAULT_RANGE;
+  if (!weekEvents.value.length) return defaultRangeOf(props.department) || DEFAULT_RANGE;
   let from = Infinity;
   let to = -Infinity;
   for (const event of weekEvents.value) {
@@ -46,14 +49,10 @@ const range = computed(() => {
     const end = minutesOfDay(event.end) || 24 * 60;
     to = Math.max(to, end);
   }
-  return { from: Math.floor(from / 60) * 60, to: Math.ceil(to / 60) * 60 };
+  return snapRange(props.department, from, to);
 });
 
-const hours = computed(() => {
-  const out = [];
-  for (let m = range.value.from; m <= range.value.to; m += 60) out.push(m);
-  return out;
-});
+const ticks = computed(() => ticksBetween(props.department, range.value.from, range.value.to));
 
 const bodyHeight = computed(() => (range.value.to - range.value.from) * PX_PER_MIN);
 
@@ -145,11 +144,11 @@ const peopleOf = (event) =>
 
       <div class="axis">
         <span
-          v-for="hour in hours"
-          :key="hour"
+          v-for="tick in ticks"
+          :key="tick.at"
           class="axis-hour"
-          :style="{ top: `${(hour - range.from) * PX_PER_MIN}px` }"
-        >{{ formatMinutes(hour) }}</span>
+          :style="{ top: `${(tick.at - range.from) * PX_PER_MIN}px` }"
+        >{{ tick.label }}</span>
       </div>
 
       <div
@@ -159,10 +158,10 @@ const peopleOf = (event) =>
         :class="{ today: column.day === today() }"
       >
         <div
-          v-for="hour in hours"
-          :key="`l-${hour}`"
+          v-for="tick in ticks"
+          :key="`l-${tick.at}`"
           class="hour-line"
-          :style="{ top: `${(hour - range.from) * PX_PER_MIN}px` }"
+          :style="{ top: `${(tick.at - range.from) * PX_PER_MIN}px` }"
         ></div>
 
         <article
