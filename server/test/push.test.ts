@@ -608,10 +608,22 @@ test('le menu part 5 minutes avant la fin du dernier cours de la matinée', () =
 });
 
 test('une journée sans cours autour de midi n’annonce pas de menu', () => {
-  // Uniquement l'après-midi : on ne passe pas au restaurant entre deux cours.
-  assert.deepEqual(menuRemindersFor([AFTERNOON]), []);
-  // Uniquement le début de matinée : trop tôt pour parler du déjeuner.
+  // Uniquement le début de matinée, fini à 9 h 30 : on ne déjeunera pas ici.
   assert.deepEqual(menuRemindersFor([MORNING]), []);
+  // Un cours isolé en fin de journée non plus : on arrive bien après le repas.
+  const evening = course({ start: '2026-09-21T15:30:00.000Z', end: '2026-09-21T17:00:00.000Z', uid: 'soir' });
+  assert.deepEqual(menuRemindersFor([evening]), []);
+  // Et une journée vide encore moins.
+  assert.deepEqual(menuRemindersFor([]), []);
+});
+
+test('une journée qui ne commence que l’après-midi annonce le menu à 11 h', () => {
+  // Pas de cours avant le repas, mais on arrive à 14 h : le menu part à temps
+  // pour décider où déjeuner avant de venir.
+  const reminders = menuRemindersFor([AFTERNOON]);
+  assert.equal(reminders.length, 1);
+  assert.equal(reminders[0].at, Date.parse('2026-09-21T09:00:00.000Z'));
+  assert.equal(reminders[0].day, '2026-09-21');
 });
 
 test('une journée qui court jusqu’à 13 h annonce le menu à 12 h 55', () => {
