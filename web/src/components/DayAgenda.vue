@@ -51,10 +51,25 @@ const clusters = computed(() => {
 /* Hauteur proportionnelle : un cours de 2 h occupe deux fois la place d'un cours d'1 h. */
 const PX_PER_MIN = 0.95;
 
-/* La classe tient la colonne : ses cours se suivent de haut en bas, comme dans la
-   journée telle qu'elle est vécue. Sans classe — deux enseignants dans la même
-   salle —, c'est le nom du cours qui sert de repère. */
-const columnKey = (event) => (event.groups?.length ? event.groups.join(', ') : event.subject || '');
+/*
+ * La classe tient la colonne : ses cours se suivent de haut en bas, comme dans la
+ * journée telle qu'elle est vécue. Un TD et ses TP y comptent pour une seule
+ * classe — BUT3-TD2-APP et BUT3-TD2-PA, ce sont les mêmes étudiants, séparés
+ * seulement parce que le cours a été déposé à deux niveaux de l'arbre ADE. Faute
+ * d'avoir cet arbre ici, c'est le nom qui le dit : son dernier segment est le
+ * sous-groupe, ce qui précède est la classe. Deux cours réellement simultanés
+ * restent côte à côte, la répartition en colonnes les sépare d'elle-même.
+ */
+function familyOf(group) {
+  const parts = group.split('-');
+  return parts.length >= 3 ? parts.slice(0, -1).join('-') : group;
+}
+
+/* Sans classe — deux enseignants dans la même salle —, c'est le nom du cours qui
+   sert de repère. */
+const columnKey = (event) => (event.groups?.length
+  ? [...new Set(event.groups.map(familyOf))].sort().join(', ')
+  : event.subject || '');
 
 /**
  * Dispose les cours d'un bloc en grille : une colonne par classe, et une ligne par
