@@ -10,10 +10,22 @@ import { AdeService, NotFoundError } from './ade/service.ts';
 import { CrousService, CrousError } from './crous/service.ts';
 import { AdeError } from './ade/gwt.ts';
 import { registerApi } from './routes/api.ts';
+import { registerPushRoutes } from './routes/push.ts';
+import { SubscriptionStore } from './push/store.ts';
+import { PushSender } from './push/sender.ts';
+import { Notifier } from './push/notifier.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
 const crous = new CrousService(config);
+
+/*
+ * Notifications push. Le registre des abonnements est chargé même quand les
+ * clés VAPID manquent : les routes restent alors fermées, mais les abonnements
+ * déjà enregistrés survivent à un démarrage sans clés — une variable oubliée
+ * ne doit pas désabonner tout le monde.
+ */
+const subscriptions = new SubscriptionStore(config.push.storePath);
 
 const app = Fastify({
   // À n'activer que derrière un reverse proxy de confiance : sinon un client
@@ -89,6 +101,34 @@ app.setErrorHandler((error, req, reply) => {
 });
 
 await app.register(registerApi, { prefix: '/api', service, crous });
+await app.register(registerPushRoutes, {
+  prefix: '/api',
+  service,
+  store: subscriptions,
+  publicKey: config.push.enabled ? config.push.publicKey : null,
+});
+
+if (config.push.enabled) {
+  const sender = new PushSender(
+    { publicKey: config.push.publicKey, privateKey: config.push.privateKey, subject: config.push.subject },
+    subscriptions,
+  );
+  const notifier = new Notifier(service, subscriptions, sender, app.log, {
+    tickMs: config.push.tickMs,
+    pollMs: config.push.pollMs,
+    changeWindowMs: config.push.changeWindowMs,
+  });
+  notifier.start();
+  app.log.info({ subscriptions: subscriptions.size }, 'notifications push actives');
+
+  app.addHook('onClose', async () => {
+    notifier.stop();
+    // Le registre est écrit en différé : on force l'écriture avant de rendre la main.
+    subscriptions.flush();
+  });
+} else {
+  app.log.info('notifications push désactivées (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY absentes)');
+}
 
 // En production, le serveur sert aussi le front compilé (web/dist).
 const distDir = fileURLToPath(new URL('../../web/dist', import.meta.url));
@@ -110,6 +150,16 @@ if (existsSync(distDir)) {
   });
 } else {
   app.log.warn('web/dist absent : lancez `npm run build` pour servir le front depuis ce serveur.');
+}
+
+// Arrêt propre : un conteneur qu'on remplace ne doit pas perdre les derniers abonnements.
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+  process.once(signal, () => {
+    app.close().then(
+      () => process.exit(0),
+      () => process.exit(1),
+    );
+  });
 }
 
 await app.listen({ host: config.host, port: config.port });

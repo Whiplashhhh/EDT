@@ -5,6 +5,11 @@ import { errorMessage, t } from '../i18n.js';
 
 const KINDS = ['groups', 'rooms', 'teachers'];
 /**
+ * Quand on choisit qui l'on est, les salles disparaissent : une salle n'a pas
+ * d'emploi du temps « à soi », et personne ne reçoit de notification pour elle.
+ */
+const IDENTITY_KINDS = ['groups', 'teachers'];
+/**
  * Département fictif du serveur : toutes les formations réunies. Un enseignant
  * peut intervenir dans plusieurs départements — on le cherche donc partout,
  * et son emploi du temps les réunit tous.
@@ -15,13 +20,18 @@ const props = defineProps({
   department: { type: String, default: null },
   kind: { type: String, default: 'groups' },
   resourceId: { type: Number, default: null },
+  /** Choix de l'identité : classe ou enseignant seulement, et un autre texte d'aide. */
+  identityMode: { type: Boolean, default: false },
 });
 const emit = defineEmits(['choose', 'close']);
+
+const kinds = computed(() => (props.identityMode ? IDENTITY_KINDS : KINDS));
 
 const departments = ref([]);
 // Un enseignant n'appartient pas à une formation : `all` n'est pas un choix à mémoriser ici.
 const selectedDept = ref(props.department === ALL_DEPARTMENTS ? null : props.department);
-const selectedKind = ref(props.kind);
+// En mode identité, une salle mémorisée ne peut pas servir de point de départ.
+const selectedKind = ref(props.identityMode && !IDENTITY_KINDS.includes(props.kind) ? 'groups' : props.kind);
 const catalog = ref(null);
 const entries = ref([]);
 const query = ref('');
@@ -199,7 +209,7 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   <div class="picker" @keydown.esc.stop="emit('close')">
     <div class="tabs" role="tablist" :aria-label="t('picker.mode')">
       <button
-        v-for="option in KINDS"
+        v-for="option in kinds"
         :key="option"
         type="button"
         role="tab"
@@ -267,7 +277,9 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
       </li>
     </ul>
 
-    <p v-if="!resourceId" class="hint">{{ t('picker.hint') }}</p>
+    <p v-if="identityMode || !resourceId" class="hint">
+      {{ t(identityMode ? 'picker.identityHint' : 'picker.hint') }}
+    </p>
   </div>
 </template>
 

@@ -11,6 +11,7 @@ sa classe une fois, elle est mémorisée, et l'emploi du temps du jour s'affiche
 - La classe choisie est enregistrée en `localStorage`, uniquement sur l'appareil.
 - Installable sur l'écran d'accueil (PWA) et consultable hors ligne (dernières données vues).
 - Abonnement possible depuis l'app Calendrier du téléphone (flux `.ics`).
+- Notifications facultatives : prochain cours, et changements des deux prochains jours.
 
 ## Architecture
 
@@ -107,6 +108,76 @@ Les autres réglages sont dans `.env.example`.
 | `GET /api/:dept/groups` | arbre des groupes |
 | `GET /api/:dept/groups/:id/schedule?from=AAAA-MM-JJ` | cours normalisés en JSON |
 | `GET /api/:dept/groups/:id/calendar.ics` | flux iCalendar à ajouter à son calendrier |
+| `GET /api/push/config` | notifications proposées ? clé publique VAPID |
+| `POST /api/push/subscribe` | enregistre ou met à jour l'abonnement d'un appareil |
+| `POST /api/push/unsubscribe` | supprime l'abonnement d'un appareil |
+
+## Identité et notifications
+
+### Se définir une fois
+
+À la première ouverture, l'application demande **qui l'on est** : sa classe, ou
+son nom si l'on enseigne — certains enseignants utilisent l'application, et il
+n'y aurait aucun sens à leur faire choisir une classe. Tant que ce choix n'est
+pas fait, il n'y a rien à afficher : l'écran est bloquant.
+
+Ce choix n'empêche rien. On peut ensuite consulter l'emploi du temps d'une autre
+classe, d'un enseignant ou d'une salle : l'identité reste mémorisée, et un
+bouton dans l'en-tête ramène d'un geste à son propre emploi du temps. Elle se
+change à tout moment depuis le menu ⋯.
+
+L'identité est distincte de la ressource affichée, et c'est elle — et elle
+seule — qui décide des notifications reçues : aller regarder l'emploi du temps
+du voisin ne doit pas changer les cours dont on est prévenu.
+
+### Les deux notifications
+
+Elles sont **éteintes par défaut** et s'activent séparément dans le menu ⋯.
+
+**Prochain cours.** Le premier cours de la journée est annoncé 30 minutes avant
+son début ; les suivants, 10 minutes avant la fin du cours précédent — on est
+alors encore en cours, et c'est le moment utile pour savoir où aller en sortant.
+Un trou dans la journée fait donc arriver le rappel longtemps à l'avance : il
+annonce la reprise dès la fin du cours d'avant.
+
+**Changements.** Salle, horaire, intervenant, cours ajouté ou annulé : les
+abonnés de la classe concernée sont prévenus, mais **uniquement pour les cours
+des deux prochains jours**. Au-delà, un réaménagement se découvre en ouvrant
+l'application plutôt qu'en faisant sonner un téléphone.
+
+### Mise en service
+
+Les notifications restent éteintes tant que le serveur n'a pas de clés VAPID :
+les routes d'abonnement répondent 503 et l'application ne propose pas les
+réglages. Pour les activer, générer une paire **une seule fois** :
+
+```bash
+npm run vapid --workspace=server
+```
+
+puis reporter `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` et `VAPID_SUBJECT` dans
+l'environnement. **Ne plus en changer ensuite** : les abonnements en cours
+seraient invalidés et les téléphones cesseraient d'être prévenus sans rien
+signaler.
+
+### Ce qui est conservé
+
+C'est la seule entorse au « rien sur disque ». Un abonnement push ne se
+recalcule pas : le navigateur ne le donne qu'une fois, à l'instant où
+l'utilisateur accepte. Le fichier `server/data/subscriptions.json`
+(`PUSH_STORE_PATH`) contient, par appareil abonné :
+
+- l'URL opaque de son service de push et les deux clés de chiffrement imposées
+  par le protocole ;
+- la classe ou l'enseignant suivi, les deux options activées, la langue.
+
+Ni nom, ni adresse, ni adresse IP, ni historique. Couper les notifications
+supprime l'enregistrement, et un service de push qui répond 404 ou 410 le fait
+supprimer aussi. En conteneur, ce fichier doit vivre sur un volume — c'est déjà
+le cas dans `compose.yaml`.
+
+Le contenu des notifications est chiffré de bout en bout (RFC 8291) : le service
+de push relaie un message qu'il ne peut pas lire.
 
 ## Sécurité
 
@@ -114,7 +185,11 @@ Choix faits pour que l'application puisse être exposée publiquement :
 
 - **Aucune authentification, aucune donnée personnelle.** Les emplois du temps de l'ULCO
   sont déjà publics via le lien ADE ; l'application n'ajoute ni compte, ni cookie, ni
-  journal nominatif.
+  journal nominatif. Seuls les abonnements aux notifications sont conservés, et
+  uniquement pour qui les demande (voir plus haut).
+- **Les routes d'abonnement valident la ressource auprès d'ADE** avant d'enregistrer
+  quoi que ce soit, n'acceptent qu'une URL de push `https`, et refusent les salles :
+  une salle n'a pas d'élèves à prévenir.
 - **Le jeton ADE reste côté serveur** et n'apparaît jamais dans une réponse.
 - **Pas de SSRF.** L'identifiant de groupe demandé par le client est vérifié dans le
   catalogue avant tout appel sortant, l'URL du flux est re-vérifiée contre le domaine
@@ -134,12 +209,17 @@ Choix faits pour que l'application puisse être exposée publiquement :
 
 ```bash
 docker build -t edt-ulco .
-docker run -p 3000:3000 -e TRUST_PROXY=true edt-ulco
+docker run -p 3000:3000 -e TRUST_PROXY=true -v edt-data:/app/server/data edt-ulco
 ```
 
 Derrière un reverse proxy en HTTPS (nginx, Traefik), mettre `TRUST_PROXY=true`.
-Le service ne stocke rien sur disque : il est sans état et peut être redémarré ou
-répliqué librement.
+HTTPS n'est pas optionnel si l'on veut les notifications : les navigateurs
+refusent le service worker hors contexte sûr (`localhost` excepté).
+
+Hors notifications, le service ne stocke rien et peut être redémarré librement.
+Avec elles, il tient un fichier d'abonnements : le volume `edt-data` doit suivre
+le conteneur. Le planificateur suppose par ailleurs **une seule instance** —
+plusieurs répliques enverraient chacune leur copie de la même notification.
 
 ## Limites connues
 
@@ -150,3 +230,10 @@ répliqué librement.
   demandent un nouvel appel (transparent pour l'utilisateur).
 - Le dialogue GWT dépend de la version d'ADE (ici 6.13 / client 2022.2). Une mise à jour
   de l'ULCO peut demander de relever à nouveau les signatures dans `server/src/ade/gwt.ts`.
+- Les changements sont détectés en comparant deux relevés successifs, gardés en mémoire.
+  Un redémarrage repart d'une page blanche : ce qui a bougé pendant l'arrêt ne sera pas
+  annoncé. C'est le prix à payer pour ne rien accumuler sur disque.
+- Les notifications de changement ne peuvent pas être plus fraîches que le relevé
+  (`PUSH_POLL_MS`, cinq minutes par défaut) ni que le cache d'ADE.
+- iOS n'accepte les notifications push que si l'application a été ajoutée à l'écran
+  d'accueil (iOS 16.4 ou plus récent). Dans Safari, l'interrupteur restera sans effet.

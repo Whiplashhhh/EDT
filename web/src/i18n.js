@@ -38,6 +38,25 @@ const messages = {
     'app.themeLight': 'Clair',
     'app.themeDark': 'Sombre',
     'app.language': 'Langue',
+    'app.changeIdentity': 'Ma classe / mon nom',
+    'app.backToMine': ({ name }) => `Revenir à ${name}`,
+    'app.viewingOther': 'Vous consultez un autre emploi du temps',
+
+    'gate.title': 'Qui es-tu ?',
+    'gate.intro':
+      'Choisis ta classe pour commencer. Si tu enseignes, choisis ton nom : c’est ton emploi du temps qui s’affichera.',
+    'gate.why': 'Ce choix reste sur cet appareil. Il sert d’emploi du temps par défaut et décide des notifications.',
+    'gate.action': 'Choisir ma classe ou mon nom',
+
+    'push.section': 'Notifications',
+    'push.nextCourse': 'Prochain cours',
+    'push.nextCourseHint': '30 min avant le premier cours du jour, 10 min avant la fin du cours précédent.',
+    'push.changes': 'Changements',
+    'push.changesHint': 'Salle, horaire, ajout ou annulation, pour les deux prochains jours.',
+    'push.unsupported': 'Ce navigateur ne sait pas recevoir de notifications.',
+    'push.unavailable': 'Les notifications ne sont pas activées sur ce serveur.',
+    'push.denied': 'Les notifications sont bloquées. Autorise-les dans les réglages du navigateur.',
+    'push.failed': 'Impossible d’activer les notifications pour le moment.',
 
     'picker.mode': 'Que consulter',
     'picker.kind.groups': 'Classes',
@@ -51,6 +70,7 @@ const messages = {
     'picker.loading': 'Chargement…',
     'picker.empty': 'Aucun résultat.',
     'picker.hint': 'Le choix est mémorisé sur cet appareil.',
+    'picker.identityHint': 'Modifiable à tout moment depuis le menu ⋯.',
     'picker.expand': ({ name }) => `Déplier ${name}`,
     'picker.collapse': ({ name }) => `Replier ${name}`,
 
@@ -105,6 +125,25 @@ const messages = {
     'app.themeLight': 'Light',
     'app.themeDark': 'Dark',
     'app.language': 'Language',
+    'app.changeIdentity': 'My class / my name',
+    'app.backToMine': ({ name }) => `Back to ${name}`,
+    'app.viewingOther': 'You are viewing another timetable',
+
+    'gate.title': 'Who are you?',
+    'gate.intro':
+      'Pick your class to get started. If you teach, pick your name instead — your own timetable will be shown.',
+    'gate.why': 'This stays on your device. It is your default timetable, and it decides what you get notified about.',
+    'gate.action': 'Pick my class or my name',
+
+    'push.section': 'Notifications',
+    'push.nextCourse': 'Next class',
+    'push.nextCourseHint': '30 min before the first class of the day, 10 min before the previous one ends.',
+    'push.changes': 'Changes',
+    'push.changesHint': 'Room, time, added or cancelled classes, for the next two days.',
+    'push.unsupported': 'This browser cannot receive notifications.',
+    'push.unavailable': 'Notifications are not enabled on this server.',
+    'push.denied': 'Notifications are blocked. Allow them in your browser settings.',
+    'push.failed': 'Could not turn notifications on right now.',
 
     'picker.mode': 'What to show',
     'picker.kind.groups': 'Classes',
@@ -118,6 +157,7 @@ const messages = {
     'picker.loading': 'Loading…',
     'picker.empty': 'No match.',
     'picker.hint': 'Your choice is saved on this device.',
+    'picker.identityHint': 'You can change this any time from the ⋯ menu.',
     'picker.expand': ({ name }) => `Expand ${name}`,
     'picker.collapse': ({ name }) => `Collapse ${name}`,
 

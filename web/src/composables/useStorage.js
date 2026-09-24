@@ -10,14 +10,44 @@ const EMPTY = {
   kind: 'groups',
   resourceId: null,
   resourceName: null,
+  /**
+   * Qui l'on est : sa classe, ou son nom si l'on enseigne. À la différence de
+   * la ressource consultée, qui change au gré des recherches, celle-ci ne bouge
+   * que si on la change explicitement. C'est elle qui décide des notifications.
+   */
+  identity: null,
+  /** Notifications push, éteintes tant qu'on ne les a pas demandées. */
+  push: { nextCourse: false, changes: false },
   view: 'day',
   theme: 'system',
   lang: 'fr',
 };
 
 const KINDS = ['groups', 'rooms', 'teachers'];
+/** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
+export const IDENTITY_KINDS = ['groups', 'teachers'];
 const THEMES = ['system', 'light', 'dark'];
 const LANGS = ['fr', 'en'];
+
+/** Relit une identité enregistrée, ou `null` si elle est incomplète. */
+function readIdentity(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (!IDENTITY_KINDS.includes(raw.kind)) return null;
+  if (!Number.isInteger(raw.resourceId) || typeof raw.department !== 'string') return null;
+  return {
+    department: raw.department,
+    kind: raw.kind,
+    resourceId: raw.resourceId,
+    resourceName: typeof raw.resourceName === 'string' ? raw.resourceName : '',
+  };
+}
+
+function readPush(raw) {
+  return {
+    nextCourse: raw?.nextCourse === true,
+    changes: raw?.changes === true,
+  };
+}
 
 export function readSettings() {
   try {
@@ -30,6 +60,16 @@ export function readSettings() {
     const name = parsed.resourceName ?? parsed.groupName;
     const kind = KINDS.includes(parsed.kind) ? parsed.kind : 'groups';
     const department = typeof parsed.department === 'string' ? parsed.department : null;
+    /*
+     * Les versions précédentes ne mémorisaient que la ressource consultée.
+     * Quand c'était une classe ou un enseignant, elle devient l'identité : il
+     * n'y a aucune raison de redemander à quelqu'un ce qu'il avait déjà choisi.
+     */
+    const identity =
+      readIdentity(parsed.identity) ??
+      (IDENTITY_KINDS.includes(kind) && department && Number.isInteger(id)
+        ? { department: kind === 'teachers' ? 'all' : department, kind, resourceId: id, resourceName: name ?? '' }
+        : null);
     return {
       /*
        * Les enseignants se consultent toutes formations confondues : un prof
@@ -40,6 +80,8 @@ export function readSettings() {
       kind,
       resourceId: Number.isInteger(id) ? id : null,
       resourceName: typeof name === 'string' ? name : null,
+      identity,
+      push: readPush(parsed.push),
       view: parsed.view === 'week' ? 'week' : 'day',
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : 'fr',

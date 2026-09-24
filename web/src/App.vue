@@ -5,22 +5,69 @@ import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
 import { useSchedule } from './composables/useSchedule.js';
+import { usePush } from './composables/usePush.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, setLocale, t } from './i18n.js';
 
 const THEMES = ['system', 'light', 'dark'];
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const settings = ref(readSettings());
 const department = computed(() => settings.value.department);
 const kind = computed(() => settings.value.kind);
 const resourceId = computed(() => settings.value.resourceId);
 
-const focusedDay = ref(today());
-const pickerOpen = ref(!settings.value.resourceId);
+/**
+ * L'identité — sa classe, ou son nom si l'on enseigne — n'est pas la ressource
+ * affichée. On peut aller voir l'emploi du temps d'une autre classe, d'un
+ * enseignant ou d'une salle sans cesser d'être soi : c'est l'identité qui sert
+ * de point de retour, et c'est elle, et elle seule, qui décide des
+ * notifications reçues.
+ */
+const identity = computed(() => settings.value.identity);
+const hasIdentity = computed(() => Boolean(identity.value));
+
+/** Vrai quand la ressource affichée n'est pas la sienne. */
+const viewingOther = computed(() => {
+  const mine = identity.value;
+  if (!mine) return false;
+  return (
+    mine.department !== settings.value.department ||
+    mine.kind !== settings.value.kind ||
+    mine.resourceId !== settings.value.resourceId
+  );
+});
+
+/*
+ * Une notification touchée ouvre l'application sur le jour concerné. Le
+ * paramètre est retiré de l'URL aussitôt lu : rafraîchir la page ne doit pas
+ * ramener indéfiniment à ce jour-là.
+ */
+function dayFromUrl() {
+  const day = new URLSearchParams(location.search).get('day');
+  if (!day || !DAY_RE.test(day)) return null;
+  history.replaceState(null, '', location.pathname);
+  return day;
+}
+const requestedDay = dayFromUrl();
+
+const focusedDay = ref(requestedDay ?? today());
+/** Choix de l'identité. Bloquant tant qu'elle n'est pas faite. */
+const identityOpen = ref(!settings.value.identity);
+const pickerOpen = ref(false);
 const menuOpen = ref(false);
 const now = ref(Date.now());
+
+const {
+  supported: pushSupported,
+  available: pushAvailable,
+  busy: pushBusy,
+  error: pushError,
+  loadConfig: loadPushConfig,
+  sync: syncPush,
+} = usePush();
 
 const { eventsByDay, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
@@ -73,7 +120,8 @@ function setLang(lang) {
  * Au premier affichage, si la journée en cours est vide (week-end, vacances),
  * on saute au prochain jour qui a cours plutôt que d'ouvrir sur une page vide.
  */
-let jumped = false;
+// Un jour demandé par une notification est un choix explicite : on n'en bouge pas.
+let jumped = Boolean(requestedDay);
 watch(eventsByDay, (map) => {
   if (jumped || map.size === 0 || focusedDay.value !== today()) return;
   jumped = true;
@@ -126,11 +174,24 @@ onMounted(() => {
     if (document.visibilityState === 'visible') load(true);
   }, 10 * 60_000);
   document.addEventListener('visibilitychange', onVisible);
+
+  /*
+   * Un abonnement push peut mourir sans que la page le sache : autorisation
+   * retirée, service de push qui renouvelle l'URL, serveur réinstallé. Le
+   * renvoyer à chaque ouverture est la façon la plus simple de le garder vivant.
+   */
+  loadPushConfig().then(() => resyncPush());
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', onServiceWorkerMessage);
+  }
 });
 onUnmounted(() => {
   clearInterval(ticker);
   clearInterval(refresher);
   document.removeEventListener('visibilitychange', onVisible);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.removeEventListener('message', onServiceWorkerMessage);
+  }
 });
 
 /** Suit l'utilisateur sur le nouveau jour à minuit, sauf s'il consulte une autre date. */
@@ -156,6 +217,71 @@ function choose({ department: dept, kind: pickedKind, resourceId: id, resourceNa
   pickerOpen.value = false;
   menuOpen.value = false;
   focusedDay.value = today();
+}
+
+/**
+ * Choix — ou changement — de son identité. Elle devient aussi la ressource
+ * affichée : on vient de désigner l'emploi du temps qui est le sien, il n'y a
+ * pas de raison de continuer à en regarder un autre.
+ */
+function chooseIdentity({ department: dept, kind: pickedKind, resourceId: id, resourceName }) {
+  const mine = { department: dept, kind: pickedKind, resourceId: id, resourceName };
+  settings.value = { ...settings.value, identity: mine, ...mine };
+  writeSettings(settings.value);
+  identityOpen.value = false;
+  menuOpen.value = false;
+  focusedDay.value = today();
+}
+
+/** Ramène l'affichage sur son propre emploi du temps, sans changer de jour. */
+function backToMine() {
+  if (!identity.value) return;
+  settings.value = { ...settings.value, ...identity.value };
+  writeSettings(settings.value);
+  menuOpen.value = false;
+}
+
+/*
+ * Notifications. L'interrupteur est optimiste : il bascule tout de suite, puis
+ * on tente de s'abonner. Si le navigateur refuse — autorisation bloquée,
+ * serveur sans clés — il revient à sa position d'origine, et le message
+ * d'erreur dit pourquoi. Laisser un interrupteur allumé sur une notification
+ * qui n'arrivera jamais serait pire que de le remettre à zéro.
+ */
+async function setPushOption(key, value) {
+  const previous = settings.value.push;
+  const next = { ...previous, [key]: value };
+  settings.value = { ...settings.value, push: next };
+  writeSettings(settings.value);
+
+  const ok = await syncPush(identity.value, next, settings.value.lang);
+  if (!ok && value) {
+    settings.value = { ...settings.value, push: previous };
+    writeSettings(settings.value);
+  }
+}
+
+const pushOn = computed(() => settings.value.push.nextCourse || settings.value.push.changes);
+
+/** Renvoie l'abonnement au serveur quand ce qu'il décrit a changé. */
+function resyncPush() {
+  if (!pushOn.value) return;
+  syncPush(identity.value, settings.value.push, settings.value.lang);
+}
+
+// L'identité et la langue voyagent avec l'abonnement : le serveur doit les suivre.
+watch([identity, () => settings.value.lang], resyncPush);
+
+/** Message du service worker : notification touchée, ou abonnement renouvelé. */
+function onServiceWorkerMessage(event) {
+  const data = event.data;
+  if (!data || typeof data !== 'object') return;
+  if (data.type === 'show-day') {
+    // Une notification ne parle jamais que de son propre emploi du temps.
+    backToMine();
+    if (typeof data.day === 'string' && DAY_RE.test(data.day)) focusedDay.value = data.day;
+  }
+  if (data.type === 'push-subscription-changed') resyncPush();
 }
 
 function setView(view) {
@@ -186,20 +312,23 @@ function onKeydown(event) {
   if (event.key === 'Escape') {
     pickerOpen.value = false;
     menuOpen.value = false;
+    // Tant qu'aucune identité n'est choisie, il n'y a rien derrière à découvrir.
+    if (hasIdentity.value) identityOpen.value = false;
     return;
   }
-  if (pickerOpen.value || menuOpen.value) return;
+  if (pickerOpen.value || menuOpen.value || identityOpen.value) return;
   if (event.key === 'ArrowRight') shiftDay(1);
   if (event.key === 'ArrowLeft') shiftDay(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
 }
-watch(pickerOpen, (open) => { if (open) menuOpen.value = false; });
+watch(pickerOpen, (open) => { if (open) { menuOpen.value = false; identityOpen.value = false; } });
 watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
+watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.value = false; } });
 </script>
 
 <template>
   <div class="app" tabindex="-1" @keydown="onKeydown">
-    <header class="top">
+    <header v-if="hasIdentity" class="top">
       <div class="identity">
         <p class="eyebrow">{{ t(`app.eyebrow.${settings.kind}`) }}</p>
         <button class="group-btn" type="button" :aria-expanded="pickerOpen" @click="pickerOpen = !pickerOpen">
@@ -208,6 +337,18 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
         </button>
       </div>
       <div class="actions">
+        <!-- Le chemin du retour reste visible tant qu'on regarde ailleurs que chez soi. -->
+        <button
+          v-if="viewingOther"
+          class="pill mine"
+          type="button"
+          :aria-label="t('app.backToMine', { name: identity.resourceName })"
+          :title="t('app.backToMine', { name: identity.resourceName })"
+          @click="backToMine"
+        >
+          <span aria-hidden="true">↩</span>
+          <span class="mine-name">{{ identity.resourceName }}</span>
+        </button>
         <button
           v-if="!isToday"
           class="pill"
@@ -235,8 +376,48 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
         {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
       </button>
       <button type="button" role="menuitem" @click="pickerOpen = true">{{ t('app.changeResource') }}</button>
+      <button type="button" role="menuitem" @click="identityOpen = true">{{ t('app.changeIdentity') }}</button>
       <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">{{ t('app.subscribe') }}</a>
       <button type="button" role="menuitem" @click="load(true); menuOpen = false">{{ t('app.refresh') }}</button>
+
+      <!--
+        Notifications. Elles suivent l'identité, jamais la ressource affichée :
+        aller regarder l'emploi du temps d'une autre classe ne change pas les
+        cours dont on veut être prévenu.
+      -->
+      <div class="setting stack" role="group" :aria-label="t('push.section')">
+        <span class="setting-label">{{ t('push.section') }}</span>
+
+        <label class="toggle">
+          <input
+            type="checkbox"
+            :checked="settings.push.nextCourse"
+            :disabled="pushBusy || !pushSupported"
+            @change="setPushOption('nextCourse', $event.target.checked)"
+          />
+          <span class="toggle-text">
+            <span class="toggle-title">{{ t('push.nextCourse') }}</span>
+            <span class="toggle-hint">{{ t('push.nextCourseHint') }}</span>
+          </span>
+        </label>
+
+        <label class="toggle">
+          <input
+            type="checkbox"
+            :checked="settings.push.changes"
+            :disabled="pushBusy || !pushSupported"
+            @change="setPushOption('changes', $event.target.checked)"
+          />
+          <span class="toggle-text">
+            <span class="toggle-title">{{ t('push.changes') }}</span>
+            <span class="toggle-hint">{{ t('push.changesHint') }}</span>
+          </span>
+        </label>
+
+        <p v-if="!pushSupported" class="toggle-note">{{ t('push.unsupported') }}</p>
+        <p v-else-if="pushError" class="toggle-note error" role="status">{{ t(pushError) }}</p>
+        <p v-else-if="!pushAvailable" class="toggle-note">{{ t('push.unavailable') }}</p>
+      </div>
 
       <div class="setting" role="group" :aria-label="t('app.theme')">
         <span class="setting-label">{{ t('app.theme') }}</span>
@@ -268,7 +449,7 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
       </div>
     </div>
 
-    <main v-if="settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+    <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <div class="strip-stage">
         <Transition :name="slideName">
           <WeekStrip
@@ -300,11 +481,47 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
       <p v-if="loading && !dayEvents.length" class="banner" role="status">{{ t('app.loading') }}</p>
     </main>
 
-    <!-- Première ouverture : le panneau est déjà déroulé, on dit juste quoi y faire. -->
-    <p v-else class="welcome">
+    <p v-else-if="hasIdentity" class="welcome">
       <span class="emoji" aria-hidden="true">🎓</span>
       {{ t('app.welcome') }}
     </p>
+
+    <!--
+      Première ouverture : tant qu'on n'a pas dit qui l'on est, il n'y a rien à
+      afficher. L'écran est volontairement sans échappatoire — ni croix, ni
+      clic à côté — car sans classe ni nom, l'application n'a pas d'emploi du
+      temps à montrer ni de cours dont prévenir. Une fois l'identité choisie,
+      le même écran redevient un panneau ordinaire, que l'on referme.
+    -->
+    <div v-if="identityOpen" class="gate" :class="{ blocking: !hasIdentity }">
+      <div v-if="hasIdentity" class="gate-backdrop" @click="identityOpen = false"></div>
+      <div class="gate-card" role="dialog" aria-modal="true" :aria-label="t('gate.title')">
+        <div class="gate-head">
+          <div>
+            <h1 class="gate-title">{{ t('gate.title') }}</h1>
+            <p class="gate-intro">{{ t('gate.intro') }}</p>
+          </div>
+          <button
+            v-if="hasIdentity"
+            class="icon"
+            type="button"
+            :aria-label="t('app.options')"
+            @click="identityOpen = false"
+          >✕</button>
+        </div>
+
+        <ResourcePicker
+          identity-mode
+          :department="identity?.department ?? settings.department"
+          :kind="identity?.kind ?? settings.kind"
+          :resource-id="identity?.resourceId ?? null"
+          @choose="chooseIdentity"
+          @close="hasIdentity && (identityOpen = false)"
+        />
+
+        <p class="gate-why">{{ t('gate.why') }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -361,6 +578,22 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
   border-radius: 999px;
 }
 .icon:hover { background: var(--bg-elevated); color: var(--text); }
+
+/*
+ * Le retour vers son propre emploi du temps. Le nom peut être long : il se
+ * tronque plutôt que de repousser le bouton « aujourd'hui » hors de l'écran.
+ */
+.pill.mine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 9rem;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+}
+.pill.mine:hover { border-color: var(--accent); color: var(--accent); }
+.mine-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .menu-backdrop { position: fixed; inset: 0; z-index: 3; }
 
@@ -428,6 +661,75 @@ watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
 }
 .segmented button:hover { color: var(--text); }
 .segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
+
+/* Les réglages de notification s'expliquent : ils s'empilent au lieu de s'aligner. */
+.setting.stack { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+
+.toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.15rem 0;
+  cursor: pointer;
+}
+.toggle input {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--accent);
+}
+.toggle input:disabled { cursor: not-allowed; }
+.toggle:has(input:disabled) { cursor: not-allowed; opacity: 0.55; }
+.toggle-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.toggle-title { font-size: 0.88rem; color: var(--text); }
+/* La règle horaire est la seule chose qu'on ne devine pas : elle est écrite. */
+.toggle-hint { font-size: 0.72rem; line-height: 1.35; color: var(--text-muted); }
+.toggle-note { margin: 0; font-size: 0.72rem; line-height: 1.35; color: var(--text-muted); }
+.toggle-note.error { color: var(--danger); }
+
+/*
+ * L'écran d'identité. Il couvre tout : au premier lancement parce qu'il n'y a
+ * rien derrière, ensuite parce qu'un choix aussi structurant mérite l'écran
+ * entier plutôt qu'un menu déroulant.
+ */
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  padding-top: calc(1rem + var(--safe-top));
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+.gate-backdrop { position: absolute; inset: 0; }
+
+.gate-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(26rem, 100%);
+  /* Sans cela, la largeur minimale du sélecteur pousse la carte hors de l'écran. */
+  min-width: 0;
+  max-height: min(88vh, 42rem);
+  padding: 1rem 0.9rem 0.8rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+}
+
+.gate-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.gate-title { margin: 0 0 0.2rem; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+.gate-intro { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-muted); }
+.gate-why { margin: 0; font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
+
+/* Le sélecteur occupe la place qui reste : c'est sa liste qui défile, pas la carte. */
+.gate-card :deep(.picker) { flex: 1; min-width: 0; min-height: 0; padding: 0; }
 
 .main { flex: 1; padding-top: 0.6rem; overflow-x: clip; }
 
