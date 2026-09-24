@@ -26,8 +26,6 @@ export interface PushConfig {
   tickMs: number;
   /** Âge maximal d'un emploi du temps avant de le redemander à ADE. */
   pollMs: number;
-  /** Horizon des notifications de changement. */
-  changeWindowMs: number;
 }
 
 export interface AppConfig {
@@ -104,7 +102,6 @@ function readPushConfig(): PushConfig {
       process.env.PUSH_STORE_PATH ?? fileURLToPath(new URL('../data/subscriptions.json', import.meta.url)),
     tickMs: positiveInt(process.env.PUSH_TICK_MS, 60 * 1000),
     pollMs: positiveInt(process.env.PUSH_POLL_MS, 5 * 60 * 1000),
-    changeWindowMs: positiveInt(process.env.PUSH_CHANGE_WINDOW_MS, 2 * 24 * 60 * 60 * 1000),
   };
 }
 

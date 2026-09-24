@@ -48,6 +48,36 @@ export function dayOf(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** Décalage du fuseau de Paris à un instant donné (ms). */
+function offsetOf(ms: number): number {
+  const label = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' })
+    .formatToParts(ms)
+    .find((part) => part.type === 'timeZoneName')?.value;
+  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(label ?? '');
+  if (!match) return 0;
+  const minutes = Number(match[2]) * 60 + Number(match[3]);
+  return (match[1] === '-' ? -minutes : minutes) * 60_000;
+}
+
+/**
+ * Minuit, heure de Paris, du jour calendaire donné (`AAAA-MM-JJ`).
+ *
+ * Deux passes : la première applique le décalage lu à une heure approchée, la
+ * seconde le corrige si cette approximation tombait de l'autre côté d'un
+ * changement d'heure.
+ */
+export function startOfDay(day: string): number {
+  const utc = Date.parse(`${day}T00:00:00.000Z`);
+  let ms = utc - offsetOf(utc);
+  ms = utc - offsetOf(ms);
+  return ms;
+}
+
+/** Jour calendaire situé `count` jours après `day` (`AAAA-MM-JJ`). */
+export function addDays(day: string, count: number): string {
+  return new Date(Date.parse(`${day}T00:00:00.000Z`) + count * 24 * 60 * 60_000).toISOString().slice(0, 10);
+}
+
 /** Intitulé lisible d'un cours : le module, suivi du type de séance s'il est connu. */
 export function courseLabel(event: CourseEvent): string {
   return event.kind ? `${event.subject} (${event.kind})` : event.subject || event.title;

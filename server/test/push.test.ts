@@ -145,29 +145,42 @@ test('un emploi du temps inchangé ne produit aucun changement', () => {
   assert.deepEqual(diffSchedules(snapshotOf(DAY), snapshotOf([...DAY])), []);
 });
 
-test('changesWithin ne garde que les deux prochains jours, cours passés exclus', () => {
+test('changesWithin s’arrête à la fin de la journée de demain, cours passés exclus', () => {
+  // Lundi 21 septembre, 7 h à Paris : la fenêtre court jusqu'au mardi 22 à minuit.
   const now = Date.parse('2026-09-21T05:00:00.000Z');
-  const window = 2 * 24 * 60 * 60_000;
 
   const past = course({ start: '2026-09-21T04:00:00.000Z', end: '2026-09-21T05:30:00.000Z', uid: 'past' });
-  const soon = course({ start: '2026-09-22T06:00:00.000Z', end: '2026-09-22T07:30:00.000Z', uid: 'soon' });
-  const far = course({ start: '2026-09-28T06:00:00.000Z', end: '2026-09-28T07:30:00.000Z', uid: 'far' });
+  const today = course({ start: '2026-09-21T14:00:00.000Z', end: '2026-09-21T15:30:00.000Z', uid: 'today' });
+  const tomorrowEvening = course({ start: '2026-09-22T16:00:00.000Z', end: '2026-09-22T17:30:00.000Z', uid: 'tomorrow' });
+  const afterTomorrow = course({ start: '2026-09-23T06:00:00.000Z', end: '2026-09-23T07:30:00.000Z', uid: 'after' });
 
   const kept = changesWithin(
     [
       { kind: 'room', event: past },
-      { kind: 'room', event: soon },
-      { kind: 'added', event: far },
+      { kind: 'room', event: today },
+      { kind: 'room', event: tomorrowEvening },
+      { kind: 'added', event: afterTomorrow },
     ],
     now,
-    window,
   );
-  assert.deepEqual(kept.map((c) => c.event.uid), ['soon']);
+  assert.deepEqual(kept.map((c) => c.event.uid), ['today', 'tomorrow']);
+});
+
+/*
+ * Un changement annoncé tard le soir ne doit pas voir sa fenêtre se réduire à
+ * quelques heures : elle va toujours jusqu'à la fin de la journée suivante.
+ */
+test('la fenêtre ne dépend pas de l’heure à laquelle on regarde', () => {
+  const lateEvening = Date.parse('2026-09-21T20:00:00.000Z');
+  const tomorrowEvening = course({ start: '2026-09-22T16:00:00.000Z', end: '2026-09-22T17:30:00.000Z', uid: 'tomorrow' });
+
+  const kept = changesWithin([{ kind: 'room', event: tomorrowEvening }], lateEvening);
+  assert.deepEqual(kept.map((c) => c.event.uid), ['tomorrow']);
 });
 
 /*
  * ADE sert une fenêtre glissante : sans précaution, un cours que le temps fait
- * simplement entrer dans l'horizon des deux jours passerait pour un ajout.
+ * simplement entrer dans l'horizon passerait pour un ajout.
  * La comparaison porte donc sur toute la fenêtre, le filtrage vient après.
  */
 test('le passage du temps n’invente pas de changement', () => {
@@ -175,7 +188,7 @@ test('le passage du temps n’invente pas de changement', () => {
   const snapshot = snapshotOf(twelveWeeks);
 
   const changes = diffSchedules(snapshot, snapshotOf(twelveWeeks));
-  assert.deepEqual(changesWithin(changes, Date.parse('2026-10-03T08:00:00.000Z'), 2 * 24 * 60 * 60_000), []);
+  assert.deepEqual(changesWithin(changes, Date.parse('2026-10-03T08:00:00.000Z')), []);
 });
 
 test('les notifications se lisent en français comme en anglais', () => {
@@ -360,7 +373,7 @@ test('le premier relevé ne signale aucun changement', async () => {
   }
 });
 
-test('un changement de salle dans les deux jours réveille les abonnés de la classe', async () => {
+test('un changement de salle dans la fenêtre réveille les abonnés de la classe', async () => {
   const moved = [{ ...MORNING, room: 'S134' }, LATE_MORNING, AFTERNOON];
   const { store, cleanup } = storeWith([
     subscriber({ nextCourse: false }),
@@ -389,7 +402,7 @@ test('un changement de salle dans les deux jours réveille les abonnés de la cl
   }
 });
 
-test('un changement au-delà de deux jours ne réveille personne', async () => {
+test('un changement au-delà de la journée de demain ne réveille personne', async () => {
   const far = course({ start: '2026-09-28T06:00:00.000Z', end: '2026-09-28T07:30:00.000Z', uid: 'far' });
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
   const sender = fakeSender();

@@ -34,8 +34,6 @@ export interface NotifierOptions {
   tickMs: number;
   /** Âge maximal d'un emploi du temps avant de le redemander à ADE. */
   pollMs: number;
-  /** Horizon des notifications de changement : deux jours. */
-  changeWindowMs: number;
   /** Retard maximal toléré pour un rappel (redémarrage, battement en retard). */
   graceMs: number;
   /** Au-delà, les changements d'une même classe sont résumés en une seule notification. */
@@ -45,7 +43,6 @@ export interface NotifierOptions {
 export const DEFAULT_NOTIFIER_OPTIONS: NotifierOptions = {
   tickMs: 60_000,
   pollMs: 5 * 60_000,
-  changeWindowMs: 2 * 24 * 60 * 60_000,
   graceMs: 4 * 60_000,
   maxChangeNotifications: 5,
 };
@@ -163,9 +160,7 @@ export class Notifier {
      * départ et n'annonce rien. Sans ce garde-fou, le premier abonné d'une
      * classe recevrait la semaine entière comme autant de « cours ajoutés ».
      */
-    const changes = known
-      ? changesWithin(diffSchedules(known.snapshot, snapshot), now, this.#options.changeWindowMs)
-      : [];
+    const changes = known ? changesWithin(diffSchedules(known.snapshot, snapshot), now) : [];
 
     const state: Watched = { events: schedule.events, snapshot, fetchedAt: now };
     this.#watched.set(key, state);

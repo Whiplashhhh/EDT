@@ -116,7 +116,6 @@ if (config.push.enabled) {
   const notifier = new Notifier(service, subscriptions, sender, app.log, {
     tickMs: config.push.tickMs,
     pollMs: config.push.pollMs,
-    changeWindowMs: config.push.changeWindowMs,
   });
   notifier.start();
   app.log.info({ subscriptions: subscriptions.size }, 'notifications push actives');
