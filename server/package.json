@@ -7,7 +7,7 @@
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "start": "node --experimental-strip-types src/index.ts",
     "test": "node --experimental-strip-types --test test/*.test.ts",
-    "vapid": "node --experimental-strip-types scripts/vapid.ts"
+    "vapid": "node scripts/vapid.js"
   },
   "dependencies": {
     "@fastify/compress": "^8.0.1",
