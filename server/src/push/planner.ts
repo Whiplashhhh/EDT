@@ -26,6 +26,19 @@ export const MENU_LEAD_MS = 5 * 60_000;
 export const LUNCH_END_WINDOW = { from: 11 * 60, to: 14 * 60 };
 
 /**
+ * Fenêtre où commence le premier cours d'une journée qui démarre après le
+ * déjeuner, en minutes depuis minuit, heure de Paris.
+ *
+ * Elle reconnaît celui qui arrive pour l'après-midi et peut passer au
+ * restaurant en chemin. Un cours qui ne commence qu'à 16 h n'en fait pas
+ * partie : on ne déjeune pas trois heures avant d'arriver.
+ */
+export const LUNCH_ARRIVAL_WINDOW = { from: 11 * 60, to: 14 * 60 + 30 };
+
+/** Heure d'envoi du menu à qui n'a cours que l'après-midi (minutes depuis minuit). */
+export const MENU_ARRIVAL_TIME = 11 * 60;
+
+/**
  * Un créneau de la journée. Deux cours qui commencent à la même heure (un TP
  * dédoublé en deux salles, par exemple) forment un seul créneau : on ne
  * réveille pas deux fois le téléphone pour le même moment.
@@ -133,25 +146,42 @@ export interface MenuReminder {
 }
 
 /**
- * Rappels « menu du midi » : un par journée de cours, cinq minutes avant la fin
- * du dernier cours d'avant le déjeuner.
+ * Rappels « menu du midi » : un par journée où l'on est au département autour
+ * du repas, c'est-à-dire où un cours précède le déjeuner ou le suit.
  *
- * Ce cours-là se reconnaît à son heure de fin plutôt qu'à sa place dans la
- * journée : c'est le dernier à s'arrêter dans la fenêtre du midi. Une matinée
- * qui s'achève à 11 h 35 comme une journée qui court jusqu'à 13 h donnent donc
- * le bon moment, et une journée qui ne commence qu'à 14 h 30 n'annonce rien —
- * on n'y déjeune pas entre deux cours.
+ * Le cours d'avant le déjeuner se reconnaît à son heure de fin plutôt qu'à sa
+ * place dans la journée : c'est le dernier à s'arrêter dans la fenêtre du midi.
+ * Le menu part alors cinq minutes avant sa fin. Une matinée qui s'achève à
+ * 11 h 35 comme une journée qui court jusqu'à 13 h donnent donc le bon moment.
+ *
+ * Une journée qui ne commence qu'après le repas n'a pas de cours à qui
+ * s'accrocher : le menu part à 11 h, à temps pour décider où déjeuner avant de
+ * venir. Et une journée où l'on n'est là ni avant ni après — rien du tout, ou
+ * une matinée finie à 9 h 55 — n'annonce rien : on ne déjeune pas au
+ * restaurant un jour où l'on n'y passe pas.
  */
 export function menuRemindersFor(events: CourseEvent[]): MenuReminder[] {
   const reminders: MenuReminder[] = [];
   for (const [day, dayEvents] of byDay(events)) {
-    let last: Session | null = null;
-    for (const session of sessionsOf(dayEvents)) {
+    const sessions = sessionsOf(dayEvents);
+
+    let before: Session | null = null;
+    for (const session of sessions) {
       const end = minutesOfDay(session.end);
       if (end < LUNCH_END_WINDOW.from || end > LUNCH_END_WINDOW.to) continue;
-      if (!last || session.end > last.end) last = session;
+      if (!before || session.end > before.end) before = session;
     }
-    if (last) reminders.push({ at: Date.parse(last.end) - MENU_LEAD_MS, day });
+    if (before) {
+      reminders.push({ at: Date.parse(before.end) - MENU_LEAD_MS, day });
+      continue;
+    }
+
+    // Pas de cours avant le repas : reste à savoir si l'on arrive pour l'après-midi.
+    const after = sessions.some((session) => {
+      const start = minutesOfDay(session.start);
+      return start >= LUNCH_ARRIVAL_WINDOW.from && start <= LUNCH_ARRIVAL_WINDOW.to;
+    });
+    if (after) reminders.push({ at: startOfDay(day) + MENU_ARRIVAL_TIME * 60_000, day });
   }
   return reminders.sort((a, b) => a.at - b.at);
 }
