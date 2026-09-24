@@ -254,9 +254,29 @@ docker build -t edt-ulco .
 docker run -p 3000:3000 -e TRUST_PROXY=true -v edt-data:/app/server/data edt-ulco
 ```
 
-Derrière un reverse proxy en HTTPS (nginx, Traefik), mettre `TRUST_PROXY=true`.
-HTTPS n'est pas optionnel si l'on veut les notifications : les navigateurs
-refusent le service worker hors contexte sûr (`localhost` excepté).
+Derrière un reverse proxy en HTTPS (nginx, Traefik, tunnel Cloudflare), mettre
+`TRUST_PROXY=true`. HTTPS n'est pas optionnel si l'on veut les notifications :
+les navigateurs refusent le service worker hors contexte sûr (`localhost` excepté).
+
+### Tunnel Cloudflare
+
+En production, `compose.yaml` lance un second conteneur : un tunnel Cloudflare
+**nommé**, créé en ligne de commande, qui joint `edt:3000` par le réseau Docker.
+La connexion est sortante (QUIC, UDP 7844) : le VPS n'a besoin d'**aucun port
+entrant**, et le certificat TLS est celui de Cloudflare — ni nginx ni certbot.
+
+À faire une fois sur la machine, à côté de `compose.yaml` :
+
+```bash
+cloudflared tunnel login                          # crée cert.pem
+cloudflared tunnel create edt                     # crée <id>.json : identifiant + secret
+cloudflared tunnel route dns edt edt-iut.online   # CNAME vers <id>.cfargotunnel.com
+mkdir -p cloudflared && cp ~/.cloudflared/cert.pem ~/.cloudflared/<id>.json cloudflared/
+```
+
+Le dossier `cloudflared/` est hors du dépôt : `<id>.json` suffit à se faire passer
+pour le site. Pour déplacer le tunnel sur une autre machine, copier ce dossier —
+et arrêter l'ancienne, pour ne jamais avoir deux tunnels `edt` en même temps.
 
 Hors notifications, le service ne stocke rien et peut être redémarré librement.
 Avec elles, il tient un fichier d'abonnements : le volume `edt-data` doit suivre
