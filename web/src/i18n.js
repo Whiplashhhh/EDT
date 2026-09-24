@@ -38,7 +38,7 @@ const messages = {
     'app.themeLight': 'Clair',
     'app.themeDark': 'Sombre',
     'app.language': 'Langue',
-    'app.changeIdentity': 'Ma classe / mon nom',
+    'app.changeIdentity': 'Mon calendrier',
     'app.backToMine': ({ name }) => `Revenir à ${name}`,
     'app.viewingOther': 'Vous consultez un autre emploi du temps',
 
@@ -125,7 +125,7 @@ const messages = {
     'app.themeLight': 'Light',
     'app.themeDark': 'Dark',
     'app.language': 'Language',
-    'app.changeIdentity': 'My class / my name',
+    'app.changeIdentity': 'My calendar',
     'app.backToMine': ({ name }) => `Back to ${name}`,
     'app.viewingOther': 'You are viewing another timetable',
 
