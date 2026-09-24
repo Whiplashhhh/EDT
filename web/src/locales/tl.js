@@ -89,5 +89,4 @@ export default {
   'lang.europe': 'Europa',
   'lang.africa': 'Aprika',
   'lang.asia': 'Asya at Gitnang Silangan',
-  'lang.americas': 'Amerika',
 };

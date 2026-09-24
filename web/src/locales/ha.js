@@ -89,5 +89,4 @@ export default {
   'lang.europe': 'Turai',
   'lang.africa': 'Afirka',
   'lang.asia': 'Asiya da Gabas ta Tsakiya',
-  'lang.americas': 'Amurka',
 };

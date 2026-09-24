@@ -4,8 +4,8 @@
  * retraduire tout ce qui est affiché.
  *
  * Le français et l'anglais sont dans le bundle — ce sont les langues de
- * l'établissement. Les autres sont chargées à la demande : une cinquantaine de
- * catalogues dans la page d'accueil pèserait plus que l'application elle-même.
+ * l'établissement. Les autres sont chargées à la demande : quarante-cinq
+ * catalogues dans la page d'accueil pèseraient plus que l'application elle-même.
  *
  * Ce qui vient d'ADE ou du Crous (intitulés de cours, plats) n'est pas traduit :
  * ce sont des données, pas de l'interface.
@@ -50,17 +50,11 @@ export const LOCALES = [
 
   // Afrique
   { id: 'ar', label: 'العربية', region: 'africa', tag: 'ar', dir: 'rtl' },
-  { id: 'tzm', label: 'Tamaziɣt', region: 'africa', tag: 'fr-FR' },
   { id: 'sw', label: 'Kiswahili', region: 'africa', tag: 'sw' },
   { id: 'am', label: 'አማርኛ', region: 'africa', tag: 'am-ET' },
   { id: 'ha', label: 'Hausa', region: 'africa', tag: 'ha' },
-  { id: 'yo', label: 'Yorùbá', region: 'africa', tag: 'yo' },
-  { id: 'ig', label: 'Igbo', region: 'africa', tag: 'ig' },
-  { id: 'zu', label: 'isiZulu', region: 'africa', tag: 'zu' },
   { id: 'af', label: 'Afrikaans', region: 'africa', tag: 'af-ZA' },
   { id: 'so', label: 'Soomaali', region: 'africa', tag: 'so' },
-  { id: 'wo', label: 'Wolof', region: 'africa', tag: 'fr-FR' },
-  { id: 'mg', label: 'Malagasy', region: 'africa', tag: 'mg' },
 
   // Asie et Moyen-Orient
   { id: 'zh-Hans', label: '简体中文', region: 'asia', tag: 'zh-Hans' },
@@ -78,14 +72,10 @@ export const LOCALES = [
   { id: 'id', label: 'Bahasa Indonesia', region: 'asia', tag: 'id-ID' },
   { id: 'ms', label: 'Bahasa Melayu', region: 'asia', tag: 'ms-MY' },
   { id: 'tl', label: 'Tagalog', region: 'asia', tag: 'fil-PH' },
-
-  // Amériques
-  { id: 'ht', label: 'Kreyòl ayisyen', region: 'americas', tag: 'fr-FR' },
-  { id: 'qu', label: 'Runa simi', region: 'americas', tag: 'es-ES' },
 ];
 
 /** Ordre d'affichage des groupes du sélecteur. */
-export const LOCALE_REGIONS = ['europe', 'africa', 'asia', 'americas'];
+export const LOCALE_REGIONS = ['europe', 'africa', 'asia'];
 
 export const LOCALE_IDS = LOCALES.map((l) => l.id);
 
