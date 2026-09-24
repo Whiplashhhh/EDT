@@ -3,6 +3,9 @@
  * dépendance : `t()` lit une ref réactive, donc changer de langue suffit à
  * retraduire tout ce qui est affiché.
  *
+ * À la première visite, la langue est celle du navigateur si on sait la
+ * traduire, sinon l'anglais. Ensuite, c'est celle qu'on a choisie.
+ *
  * Le français et l'anglais sont dans le bundle — ce sont les langues de
  * l'établissement. Les autres sont chargées à la demande : quarante-cinq
  * catalogues dans la page d'accueil pèseraient plus que l'application elle-même.
@@ -79,9 +82,52 @@ export const LOCALE_REGIONS = ['europe', 'africa', 'asia'];
 
 export const LOCALE_IDS = LOCALES.map((l) => l.id);
 
-const DEFAULT = 'fr';
+/*
+ * Le français reste la langue de référence : c'est le catalogue complet dont
+ * les autres sont traduits, et celui où `t()` va chercher une clé absente.
+ * Ce n'est pas pour autant la langue affichée par défaut — voir `preferredLocale`.
+ */
+const SOURCE = 'fr';
 
 const byId = new Map(LOCALES.map((l) => [l.id, l]));
+
+/* Première langue de la liste pour chaque code primaire : `pt` → `pt`, `zh` → `zh-Hans`. */
+const byPrimary = new Map();
+for (const { id } of LOCALES) {
+  const primary = id.split('-')[0];
+  if (!byPrimary.has(primary)) byPrimary.set(primary, id);
+}
+
+/*
+ * Codes que les navigateurs emploient encore et qui ne sont pas les nôtres :
+ * anciens codes ISO (`iw`, `in`), macrolangues et variantes régionales.
+ */
+const ALIASES = { no: 'nb', nn: 'nb', iw: 'he', in: 'id', fil: 'tl', mo: 'ro', sh: 'sr', cmn: 'zh' };
+
+/*
+ * La langue du navigateur — donc, la plupart du temps, celle du système. Les
+ * étiquettes arrivent par ordre de préférence ; la première que l'on sait
+ * traduire gagne. Si aucune ne convient, l'anglais : il est plus partagé que
+ * le français chez ceux qui ne lisent ni l'un ni l'autre.
+ */
+export function preferredLocale(tags) {
+  const wanted = tags ?? (typeof navigator === 'undefined' ? [] : navigator.languages ?? [navigator.language]);
+  for (const raw of wanted) {
+    if (typeof raw !== 'string') continue;
+    const parts = raw.replace(/_/g, '-').toLowerCase().split('-');
+    const exact = LOCALE_IDS.find((id) => id.toLowerCase() === parts.join('-'));
+    if (exact) return exact;
+
+    const primary = ALIASES[parts[0]] ?? parts[0];
+    // Le chinois se distingue par l'écriture, que l'étiquette porte rarement en clair.
+    if (primary === 'zh') {
+      return parts.some((p) => ['hant', 'tw', 'hk', 'mo'].includes(p)) ? 'zh-Hant' : 'zh-Hans';
+    }
+    const match = byPrimary.get(primary);
+    if (match) return match;
+  }
+  return 'en';
+}
 
 /*
  * Vite transforme ce glob en une table d'imports dynamiques : chaque catalogue
@@ -93,7 +139,7 @@ const loaders = import.meta.glob('./locales/*.js');
 /** Catalogues déjà en mémoire. Une ref : `t()` se recalcule à l'arrivée d'un nouveau. */
 const loaded = ref({ fr, en });
 
-export const locale = ref(DEFAULT);
+export const locale = ref(SOURCE);
 
 /**
  * Change la langue de l'interface. Asynchrone : le catalogue peut rester à
@@ -101,7 +147,7 @@ export const locale = ref(DEFAULT);
  * courante plutôt que d'afficher une interface à moitié traduite.
  */
 export async function setLocale(value) {
-  const id = byId.has(value) ? value : DEFAULT;
+  const id = byId.has(value) ? value : preferredLocale();
   if (!loaded.value[id]) {
     const load = loaders[`./locales/${id}.js`];
     if (!load) return;

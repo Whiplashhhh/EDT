@@ -2,7 +2,7 @@
  * Préférences locales. Rien ne quitte l'appareil : ni compte, ni cookie, ni suivi.
  * Chaque accès est protégé — en navigation privée, `localStorage` peut lever.
  */
-import { LOCALE_IDS } from '../i18n.js';
+import { LOCALE_IDS, preferredLocale } from '../i18n.js';
 
 const KEY = 'edt-ulco:v1';
 
@@ -22,8 +22,15 @@ const EMPTY = {
   push: { nextCourse: false, changes: false },
   view: 'day',
   theme: 'system',
-  lang: 'fr',
 };
+
+/*
+ * Réglages d'un appareil qui n'en a encore aucun. La langue n'est pas écrite en
+ * dur : tant que personne n'a choisi, on affiche celle du navigateur.
+ */
+function empty() {
+  return { ...EMPTY, lang: preferredLocale() };
+}
 
 const KINDS = ['groups', 'rooms', 'teachers'];
 /** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
@@ -55,7 +62,7 @@ function readPush(raw) {
 export function readSettings() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { ...EMPTY };
+    if (!raw) return empty();
     const parsed = JSON.parse(raw);
     // Avant l'arrivée des salles et des enseignants, seule une classe était
     // mémorisée, sous `groupId` / `groupName`.
@@ -87,10 +94,10 @@ export function readSettings() {
       push: readPush(parsed.push),
       view: parsed.view === 'week' ? 'week' : 'day',
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
-      lang: LANGS.includes(parsed.lang) ? parsed.lang : 'fr',
+      lang: LANGS.includes(parsed.lang) ? parsed.lang : preferredLocale(),
     };
   } catch {
-    return { ...EMPTY };
+    return empty();
   }
 }
 
