@@ -2,6 +2,8 @@
  * Préférences locales. Rien ne quitte l'appareil : ni compte, ni cookie, ni suivi.
  * Chaque accès est protégé — en navigation privée, `localStorage` peut lever.
  */
+import { LOCALE_IDS } from '../i18n.js';
+
 const KEY = 'edt-ulco:v1';
 
 const EMPTY = {
@@ -27,7 +29,8 @@ const KINDS = ['groups', 'rooms', 'teachers'];
 /** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
 export const IDENTITY_KINDS = ['groups', 'teachers'];
 const THEMES = ['system', 'light', 'dark'];
-const LANGS = ['fr', 'en'];
+/* La liste des langues vit dans le module de traduction : une seule source. */
+const LANGS = LOCALE_IDS;
 
 /** Relit une identité enregistrée, ou `null` si elle est incomplète. */
 function readIdentity(raw) {

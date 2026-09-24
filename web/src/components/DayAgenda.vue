@@ -126,14 +126,14 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
   display: flex;
   align-items: center;
   /* Le trait pointillé montre le trou à l'échelle, comme sur la grille semaine. */
-  border-left: 2px dashed var(--line);
-  margin-left: 4.9rem;
+  border-inline-start: 2px dashed var(--line);
+  margin-inline-start: 4.9rem;
 }
 .list > li.gap.lunch,
 .list > li.crous {
   /* Le menu remplace le trait pointillé : il s'aligne sur les cartes de cours. */
   display: flex;
-  border-left: none;
+  border-inline-start: none;
   margin: 0.15rem 0;
 }
 .gap-label {

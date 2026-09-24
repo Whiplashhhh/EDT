@@ -335,7 +335,7 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.tree > li { display: flex; align-items: center; gap: 0.3rem; padding-left: calc(var(--depth, 0) * 0.9rem); }
+.tree > li { display: flex; align-items: center; gap: 0.3rem; padding-inline-start: calc(var(--depth, 0) * 0.9rem); }
 
 /*
  * Le chevron est le seul moyen de déplier : cliquer sur le nom ouvre l'emploi
@@ -378,15 +378,15 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   gap: 0.5rem;
   padding: 0.4rem 0.55rem;
   border-radius: var(--radius-sm);
-  text-align: left;
+  text-align: start;
   font-size: 0.92rem;
   color: var(--text);
 }
-.row.lone { margin-left: 2.05rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
+.row.lone { margin-inline-start: 2.05rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
 .row:hover { background: var(--bg-sunken); }
 .row.current { background: var(--accent-soft); color: var(--accent); font-weight: 650; }
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.check { margin-left: auto; font-size: 0.8rem; }
+.check { margin-inline-start: auto; font-size: 0.8rem; }
 .trail { font-size: 0.74rem; color: var(--text-muted); }
 
 .state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }

@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { AdeService } from '../ade/service.ts';
 import { mondayOf } from './api.ts';
 import type { PushSubscription, SubscriptionStore } from '../push/store.ts';
-import { isLang } from '../push/messages.ts';
+import { readLang } from '../push/messages.ts';
 
 /**
  * Abonnement et désabonnement aux notifications push.
@@ -142,7 +142,7 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
       resourceName,
       nextCourse: parseFlag(body.nextCourse),
       changes: parseFlag(body.changes),
-      lang: isLang(body.lang) ? body.lang : 'fr',
+      lang: readLang(body.lang),
       updatedAt: new Date().toISOString(),
     };
 

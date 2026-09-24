@@ -143,7 +143,7 @@ function layout(day) {
         // GUTTER creuse un écart visible entre deux cours qui s'enchaînent.
         top: `${y(item.from) + GUTTER}px`,
         height: `${height - 2 * GUTTER}px`,
-        left: `${(item.lane / item.lanes) * 100}%`,
+        insetInlineStart: `${(item.lane / item.lanes) * 100}%`,
         width: `${100 / item.lanes}%`,
       },
     };
@@ -262,7 +262,7 @@ const peopleOf = (event) =>
 .axis { position: relative; }
 .axis-hour {
   position: absolute;
-  right: 0.3rem;
+  inset-inline-end: 0.3rem;
   transform: translateY(-0.5em);
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
@@ -274,8 +274,7 @@ const peopleOf = (event) =>
 
 .hour-line {
   position: absolute;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   height: 1px;
   background: var(--line);
   opacity: 0.6;
@@ -292,14 +291,14 @@ const peopleOf = (event) =>
   /* Contour dans la couleur de la ressource : deux cours voisins restent distincts
      même quand leurs teintes sont proches. */
   border: 1px solid color-mix(in srgb, var(--kind) 55%, transparent);
-  border-left: 3px solid var(--kind);
+  border-inline-start: 3px solid var(--kind);
   border-radius: 6px;
   font-size: 0.72rem;
   line-height: 1.2;
 }
 .hours { font-variant-numeric: tabular-nums; font-size: 0.65rem; color: var(--text-muted); }
 .tag {
-  margin-left: 0.3rem;
+  margin-inline-start: 0.3rem;
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -332,8 +331,7 @@ const peopleOf = (event) =>
 
 .now {
   position: absolute;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   height: 2px;
   background: var(--danger);
   border-radius: 2px;
@@ -341,7 +339,7 @@ const peopleOf = (event) =>
 .now::before {
   content: '';
   position: absolute;
-  left: -3px;
+  inset-inline-start: -3px;
   top: -2px;
   width: 6px;
   height: 6px;
