@@ -8,8 +8,6 @@ services:
     container_name: edt
     restart: unless-stopped
     ports:
-      # Uniquement pour regarder le service depuis le VPS ; le public passe par
-      # le tunnel, qui joint le conteneur par le réseau Docker.
       - "127.0.0.1:3100:3000"
     environment:
       TRUST_PROXY: "true"
@@ -20,24 +18,6 @@ services:
     env_file:
       - path: .env
         required: false
-
-  # Tunnel Cloudflare nommé « edt », créé en ligne de commande (voir README).
-  # Il ouvre une connexion sortante vers Cloudflare : aucun port entrant n'est
-  # nécessaire sur le VPS, et le certificat TLS est celui de Cloudflare.
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: edt-tunnel
-    restart: unless-stopped
-    # L'identifiant et le secret du tunnel appartiennent à l'utilisateur du VPS
-    # en rw------- ; l'utilisateur « nonroot » de l'image ne pourrait pas les lire.
-    user: root
-    command: tunnel --no-autoupdate run --url http://edt:3000 edt
-    volumes:
-      # Contient <id-du-tunnel>.json (identifiant + secret) et cert.pem.
-      # Hors du dépôt : ces fichiers suffisent à se faire passer pour le site.
-      - ./cloudflared:/root/.cloudflared:ro
-    depends_on:
-      - edt
 
 volumes:
   edt-data:

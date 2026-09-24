@@ -5,4 +5,3 @@ web/dist/
 .DS_Store
 .idea/
 server/data/
-cloudflared/

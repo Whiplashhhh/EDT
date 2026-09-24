@@ -260,23 +260,35 @@ les navigateurs refusent le service worker hors contexte sûr (`localhost` excep
 
 ### Tunnel Cloudflare
 
-En production, `compose.yaml` lance un second conteneur : un tunnel Cloudflare
-**nommé**, créé en ligne de commande, qui joint `edt:3000` par le réseau Docker.
-La connexion est sortante (QUIC, UDP 7844) : le VPS n'a besoin d'**aucun port
-entrant**, et le certificat TLS est celui de Cloudflare — ni nginx ni certbot.
+En production, le service n'est pas exposé directement : un tunnel Cloudflare
+ouvre une connexion **sortante** vers Cloudflare et joint `edt:3000` par le
+réseau Docker du projet (`edt_default`). Le VPS n'a donc besoin d'aucun port
+entrant, et le certificat TLS est celui de Cloudflare — ni nginx ni certbot.
 
-À faire une fois sur la machine, à côté de `compose.yaml` :
+Le tunnel est **géré depuis le tableau de bord** Cloudflare (Zero Trust →
+Networks → Tunnels) : il s'y déclare un *public hostname* `edt-iut.online` vers
+`http://edt:3000`, et le tableau de bord fournit un jeton. Le tunnel tourne dans
+sa propre pile, hors du dépôt, pour que le jeton ne croise jamais git :
 
-```bash
-cloudflared tunnel login                          # crée cert.pem
-cloudflared tunnel create edt                     # crée <id>.json : identifiant + secret
-cloudflared tunnel route dns edt edt-iut.online   # CNAME vers <id>.cfargotunnel.com
-mkdir -p cloudflared && cp ~/.cloudflared/cert.pem ~/.cloudflared/<id>.json cloudflared/
+```yaml
+# ~/edt-tunnel/compose.yaml
+services:
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    networks: [edt_default]
+
+networks:
+  edt_default:
+    external: true
 ```
 
-Le dossier `cloudflared/` est hors du dépôt : `<id>.json` suffit à se faire passer
-pour le site. Pour déplacer le tunnel sur une autre machine, copier ce dossier —
-et arrêter l'ancienne, pour ne jamais avoir deux tunnels `edt` en même temps.
+Le jeton va dans `~/edt-tunnel/.env` (`TUNNEL_TOKEN=…`, en `chmod 600`) : il
+suffit à lui seul à se faire passer pour le site. Le réseau `edt_default` est
+celui créé par ce dépôt ; il doit donc être lancé en premier.
 
 Hors notifications, le service ne stocke rien et peut être redémarré librement.
 Avec elles, il tient un fichier d'abonnements : le volume `edt-data` doit suivre
