@@ -4,3 +4,4 @@ web/dist/
 .env
 .DS_Store
 .idea/
+server/data/

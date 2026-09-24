@@ -1,5 +1,6 @@
 # Équivalent de : docker build -t edt-ulco . && docker run -d --name edt \
-#   --restart unless-stopped -p 127.0.0.1:3100:3000 -e TRUST_PROXY=true edt-ulco
+#   --restart unless-stopped -p 127.0.0.1:3100:3000 -e TRUST_PROXY=true \
+#   -v edt-data:/app/server/data edt-ulco
 services:
   edt:
     build: .
@@ -10,7 +11,13 @@ services:
       - "127.0.0.1:3100:3000"
     environment:
       TRUST_PROXY: "true"
+    volumes:
+      # Abonnements aux notifications push : ils doivent survivre à une mise à jour.
+      - edt-data:/app/server/data
     # Jetons ADE et réglages optionnels (voir .env.example) ; ignoré si le fichier n'existe pas.
     env_file:
       - path: .env
         required: false
+
+volumes:
+  edt-data:

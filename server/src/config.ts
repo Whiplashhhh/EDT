@@ -9,6 +9,27 @@ export interface Department {
   token: string;
 }
 
+/**
+ * Notifications push. Sans paire de clés VAPID, la fonctionnalité reste
+ * éteinte : le serveur n'expose pas les routes d'abonnement et le front ne
+ * propose pas les réglages. `npm run vapid --workspace=server` en fabrique une.
+ */
+export interface PushConfig {
+  enabled: boolean;
+  publicKey: string;
+  privateKey: string;
+  /** Contact de l'exploitant, exigé par VAPID (`mailto:` ou `https:`). */
+  subject: string;
+  /** Fichier des abonnements — la seule donnée que le service écrive sur disque. */
+  storePath: string;
+  /** Intervalle du battement qui déclenche les rappels dus. */
+  tickMs: number;
+  /** Âge maximal d'un emploi du temps avant de le redemander à ADE. */
+  pollMs: number;
+  /** Horizon des notifications de changement. */
+  changeWindowMs: number;
+}
+
 export interface AppConfig {
   host: string;
   port: number;
@@ -25,6 +46,7 @@ export interface AppConfig {
   crousRestaurantId: number;
   /** Durée de vie du menu en cache (ms). Le Crous publie une fois par jour. */
   crousTtlMs: number;
+  push: PushConfig;
 }
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -54,6 +76,38 @@ function readDepartments(): Department[] {
   });
 }
 
+/**
+ * Lecture des réglages de notification.
+ *
+ * Les deux clés doivent être présentes ensemble : une seule ne permet rien, et
+ * démarrer « à moitié activé » ne ferait qu'échouer plus tard, à l'envoi.
+ */
+function readPushConfig(): PushConfig {
+  const publicKey = process.env.VAPID_PUBLIC_KEY ?? '';
+  const privateKey = process.env.VAPID_PRIVATE_KEY ?? '';
+  const subject = process.env.VAPID_SUBJECT ?? '';
+  const enabled = Boolean(publicKey && privateKey);
+
+  if (enabled && !/^(mailto:|https:\/\/)/.test(subject)) {
+    throw new Error('VAPID_SUBJECT doit être une adresse `mailto:` ou une URL `https:`');
+  }
+  if (Boolean(publicKey) !== Boolean(privateKey)) {
+    throw new Error('VAPID_PUBLIC_KEY et VAPID_PRIVATE_KEY vont par paire');
+  }
+
+  return {
+    enabled,
+    publicKey,
+    privateKey,
+    subject,
+    storePath:
+      process.env.PUSH_STORE_PATH ?? fileURLToPath(new URL('../data/subscriptions.json', import.meta.url)),
+    tickMs: positiveInt(process.env.PUSH_TICK_MS, 60 * 1000),
+    pollMs: positiveInt(process.env.PUSH_POLL_MS, 5 * 60 * 1000),
+    changeWindowMs: positiveInt(process.env.PUSH_CHANGE_WINDOW_MS, 2 * 24 * 60 * 60 * 1000),
+  };
+}
+
 function positiveInt(value: string | undefined, fallback: number): number {
   const n = Number(value);
   return Number.isInteger(n) && n > 0 ? n : fallback;
@@ -74,5 +128,6 @@ export function loadConfig(): AppConfig {
     // 1164 = R.U. de la Mi-Voix, le restaurant du campus de Calais.
     crousRestaurantId: positiveInt(process.env.CROUS_RESTAURANT_ID, 1164),
     crousTtlMs: positiveInt(process.env.CROUS_TTL_MS, 60 * 60 * 1000),
+    push: readPushConfig(),
   };
 }
