@@ -32,6 +32,8 @@ export interface PushSubscription extends PushIdentity {
   nextCourse: boolean;
   /** Changement d'emploi du temps dans les deux jours à venir. */
   changes: boolean;
+  /** Menu du restaurant universitaire, avant la pause du midi. */
+  menu: boolean;
   lang: string;
   updatedAt: string;
 }
@@ -94,7 +96,7 @@ export class SubscriptionStore {
   byResource(): Map<string, PushSubscription[]> {
     const map = new Map<string, PushSubscription[]>();
     for (const sub of this.#byEndpoint.values()) {
-      if (!sub.nextCourse && !sub.changes) continue;
+      if (!sub.nextCourse && !sub.changes && !sub.menu) continue;
       const key = resourceKey(sub);
       const list = map.get(key);
       if (list) list.push(sub);

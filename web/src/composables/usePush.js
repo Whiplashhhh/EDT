@@ -107,22 +107,23 @@ export function usePush() {
    * Aligne l'état du navigateur et du serveur sur les réglages voulus.
    *
    * @param identity classe ou enseignant que l'on suit
-   * @param options `{ nextCourse, changes }`
+   * @param options `{ nextCourse, changes, menu }`
    * @param lang langue des notifications
    * @returns `true` si l'état voulu est atteint
    */
   async function sync(identity, options, lang) {
     error.value = null;
+    const asked = options.nextCourse || options.changes || options.menu;
     if (!supported.value) {
-      if (options.nextCourse || options.changes) error.value = 'push.unsupported';
+      if (asked) error.value = 'push.unsupported';
       return false;
     }
     if (!(await loadConfig())) {
-      if (options.nextCourse || options.changes) error.value = 'push.unavailable';
+      if (asked) error.value = 'push.unavailable';
       return false;
     }
 
-    const wanted = Boolean(identity) && (options.nextCourse || options.changes);
+    const wanted = Boolean(identity) && asked;
     busy.value = true;
     try {
       const reg = await registration();
@@ -165,6 +166,7 @@ export function usePush() {
         resourceId: identity.resourceId,
         nextCourse: options.nextCourse,
         changes: options.changes,
+        menu: options.menu,
         lang,
       });
       return true;

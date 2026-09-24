@@ -267,7 +267,9 @@ async function setPushOption(key, value) {
   }
 }
 
-const pushOn = computed(() => settings.value.push.nextCourse || settings.value.push.changes);
+const pushOn = computed(
+  () => settings.value.push.nextCourse || settings.value.push.changes || settings.value.push.menu,
+);
 
 /** Renvoie l'abonnement au serveur quand ce qu'il décrit a changé. */
 function resyncPush() {
@@ -417,6 +419,19 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           <span class="toggle-text">
             <span class="toggle-title">{{ t('push.changes') }}</span>
             <span class="toggle-hint">{{ t('push.changesHint') }}</span>
+          </span>
+        </label>
+
+        <label class="toggle">
+          <input
+            type="checkbox"
+            :checked="settings.push.menu"
+            :disabled="pushBusy || !pushSupported"
+            @change="setPushOption('menu', $event.target.checked)"
+          />
+          <span class="toggle-text">
+            <span class="toggle-title">{{ t('push.menu') }}</span>
+            <span class="toggle-hint">{{ t('push.menuHint') }}</span>
           </span>
         </label>
 

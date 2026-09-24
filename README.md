@@ -11,7 +11,7 @@ sa classe une fois, elle est mémorisée, et l'emploi du temps du jour s'affiche
 - La classe choisie est enregistrée en `localStorage`, uniquement sur l'appareil.
 - Installable sur l'écran d'accueil (PWA) et consultable hors ligne (dernières données vues).
 - Abonnement possible depuis l'app Calendrier du téléphone (flux `.ics`).
-- Notifications facultatives : prochain cours, et changements d’aujourd’hui et de demain.
+- Notifications facultatives : prochain cours, changements d’aujourd’hui et de demain, menu du midi.
 
 ## Architecture
 
@@ -140,15 +140,27 @@ L'identité est distincte de la ressource affichée, et c'est elle — et elle
 seule — qui décide des notifications reçues : aller regarder l'emploi du temps
 du voisin ne doit pas changer les cours dont on est prévenu.
 
-### Les deux notifications
+### Les trois notifications
 
 Elles sont **éteintes par défaut** et s'activent séparément dans le menu ⋯.
 
-**Prochain cours.** Le premier cours de la journée est annoncé 30 minutes avant
-son début ; les suivants, 10 minutes avant la fin du cours précédent — on est
-alors encore en cours, et c'est le moment utile pour savoir où aller en sortant.
-Un trou dans la journée fait donc arriver le rappel longtemps à l'avance : il
-annonce la reprise dès la fin du cours d'avant.
+**Prochain cours.** Un cours enchaîné derrière un autre est annoncé 5 minutes
+avant la fin de celui-ci — on est alors encore en cours, et c'est le moment utile
+pour savoir où aller en sortant. Un cours qu'une vraie pause précède — le premier
+de la journée, la reprise de l'après-midi, le retour après un trou — est annoncé
+30 minutes avant son début : l'annoncer dès la fin du cours d'avant le ferait
+passer pour imminent alors qu'il reste une heure à attendre.
+
+Les horaires employés sont ceux de la grille du département, et non les blocs
+publiés par ADE : au BUT INFO, le cours de 11 h 35 est annoncé à 11 h 30, quand
+le précédent s'achève réellement, et non à 11 h 25.
+
+**Menu du midi.** Le menu du restaurant universitaire, 5 minutes avant la fin du
+dernier cours d'avant la pause — celui qui s'achève dans la fenêtre de midi. Les
+jours de fermeture, la notification le dit ; si le Crous ne publie rien ou ne
+répond pas, elle le dit aussi, plutôt que de laisser attendre un menu qui ne
+viendra pas. Une journée qui ne commence qu'à 14 h n'annonce rien : on n'y
+déjeune pas entre deux cours.
 
 **Changements.** Salle, horaire, intervenant, cours ajouté ou annulé : les
 abonnés de la classe concernée sont prévenus, mais **uniquement pour les cours

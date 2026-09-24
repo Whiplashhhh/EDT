@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Benachrichtigungen',
   'push.nextCourse': 'Nächste Veranstaltung',
-  'push.nextCourseHint': '30 Min. vor der ersten Veranstaltung des Tages, 10 Min. vor Ende der vorherigen.',
+  'push.nextCourseHint': '30 Min. vor einer Veranstaltung nach einer Pause, 5 Min. vor Ende der vorherigen.',
   'push.changes': 'Änderungen',
   'push.changesHint': 'Raum, Uhrzeit, neue oder ausgefallene Veranstaltungen, für heute und morgen.',
+  'push.menu': 'Mittagsmenü',
+  'push.menuHint': '5 Min. vor Ende der letzten Veranstaltung am Vormittag.',
   'push.unsupported': 'Dieser Browser kann keine Benachrichtigungen empfangen.',
   'push.unavailable': 'Benachrichtigungen sind auf diesem Server nicht aktiviert.',
   'push.denied': 'Benachrichtigungen sind blockiert. Erlaube sie in den Browsereinstellungen.',

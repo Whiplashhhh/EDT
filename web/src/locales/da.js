@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notifikationer',
   'push.nextCourse': 'Næste time',
-  'push.nextCourseHint': '30 min før dagens første time, 10 min før den forrige slutter.',
+  'push.nextCourseHint': '30 min før en time efter en pause, 5 min før den forrige slutter.',
   'push.changes': 'Ændringer',
   'push.changesHint': 'Lokale, tidspunkt, tilføjede eller aflyste timer, for i dag og i morgen.',
+  'push.menu': 'Frokostmenu',
+  'push.menuHint': '5 min før formiddagens sidste time slutter.',
   'push.unsupported': 'Denne browser kan ikke modtage notifikationer.',
   'push.unavailable': 'Notifikationer er ikke slået til på denne server.',
   'push.denied': 'Notifikationer er blokeret. Tillad dem i browserens indstillinger.',

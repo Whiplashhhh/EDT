@@ -32,9 +32,11 @@ export default {
 
   'push.section': '알림',
   'push.nextCourse': '다음 수업',
-  'push.nextCourseHint': '그날 첫 수업 30분 전, 이전 수업이 끝나기 10분 전.',
+  'push.nextCourseHint': '쉬는 시간 뒤 수업은 30분 전, 이어지는 수업은 앞 수업이 끝나기 5분 전.',
   'push.changes': '변경 사항',
   'push.changesHint': '강의실, 시간, 추가되거나 취소된 수업 — 오늘과 내일 기준.',
+  'push.menu': '점심 메뉴',
+  'push.menuHint': '오전 마지막 수업이 끝나기 5분 전.',
   'push.unsupported': '이 브라우저는 알림을 받을 수 없습니다.',
   'push.unavailable': '이 서버에서는 알림이 켜져 있지 않습니다.',
   'push.denied': '알림이 차단되어 있습니다. 브라우저 설정에서 허용하세요.',

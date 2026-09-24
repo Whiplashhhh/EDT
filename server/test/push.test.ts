@@ -7,14 +7,24 @@ import type { CourseEvent } from '../src/ade/ics.ts';
 import {
   BETWEEN_COURSES_LEAD_MS,
   FIRST_COURSE_LEAD_MS,
+  MENU_LEAD_MS,
   changesWithin,
   diffSchedules,
+  dueMenuReminders,
   dueReminders,
+  menuRemindersFor,
   remindersFor,
   sessionsOf,
   snapshotOf,
 } from '../src/push/planner.ts';
-import { changeNotification, nextCourseNotification, notificationLang, readLang } from '../src/push/messages.ts';
+import { alignToSlots } from '../src/ade/slots.ts';
+import {
+  changeNotification,
+  menuNotification,
+  nextCourseNotification,
+  notificationLang,
+  readLang,
+} from '../src/push/messages.ts';
 import { createECDH, randomBytes } from 'node:crypto';
 import webpush from 'web-push';
 import { SubscriptionStore, type PushSubscription } from '../src/push/store.ts';
@@ -56,17 +66,25 @@ test('le premier cours de la journée est annoncé 30 minutes avant son début',
   assert.equal(first.at, Date.parse(MORNING.start) - FIRST_COURSE_LEAD_MS);
 });
 
-test('les cours suivants sont annoncés 10 minutes avant la fin du cours précédent', () => {
+test('un cours enchaîné est annoncé 5 minutes avant la fin du précédent', () => {
   const reminders = remindersFor(DAY);
 
+  // Quinze minutes d'inter-cours : on enchaîne, le rappel part pendant le cours.
   const second = reminders.find((r) => r.event.uid === 'b');
   assert.ok(second);
   assert.equal(second.at, Date.parse(MORNING.end) - BETWEEN_COURSES_LEAD_MS);
+});
 
-  // Après une longue pause, le rappel part tout de même à la fin du cours d'avant.
-  const third = reminders.find((r) => r.event.uid === 'c');
+/*
+ * Annoncer le cours de l'après-midi dès 11 h 15, à la fin de la matinée, donnait
+ * l'impression qu'il était imminent alors qu'il restait presque trois heures.
+ */
+test('un cours qui reprend après une pause est annoncé 30 minutes avant son début', () => {
+  const third = remindersFor(DAY).find((r) => r.event.uid === 'c');
   assert.ok(third);
-  assert.equal(third.at, Date.parse(LATE_MORNING.end) - BETWEEN_COURSES_LEAD_MS);
+  assert.equal(third.at, Date.parse(AFTERNOON.start) - FIRST_COURSE_LEAD_MS);
+  // Et non à la fin du dernier cours de la matinée.
+  assert.notEqual(third.at, Date.parse(LATE_MORNING.end) - BETWEEN_COURSES_LEAD_MS);
 });
 
 test('chaque journée repart sur la règle du premier cours', () => {
@@ -74,7 +92,7 @@ test('chaque journée repart sur la règle du premier cours', () => {
   const reminders = remindersFor([...DAY, nextDay]);
   const monday = reminders.find((r) => r.event.uid === 'd');
   assert.ok(monday);
-  // Et non 10 minutes avant la fin du dernier cours de la veille.
+  // Et non à quelques minutes de la fin du dernier cours de la veille.
   assert.equal(monday.at, Date.parse(nextDay.start) - FIRST_COURSE_LEAD_MS);
 });
 
@@ -238,6 +256,7 @@ test('le registre des abonnements survit à un redémarrage', () => {
       resourceName: 'BUT1-TD1',
       nextCourse: true,
       changes: true,
+      menu: false,
       lang: 'fr',
       updatedAt: '2026-09-21T08:00:00.000Z',
     };
@@ -286,6 +305,7 @@ test('un abonnement sans option activée n’est pas suivi', () => {
       resourceName: 'BUT1-TD1',
       nextCourse: false,
       changes: false,
+      menu: false,
       lang: 'fr',
       updatedAt: '2026-09-21T08:00:00.000Z',
     });
@@ -308,6 +328,11 @@ function fakeSender() {
       return true;
     },
   };
+}
+
+/** Un Crous simulé. Sans jours, il se tait comme un menu non publié. */
+function fakeCrous(days = []) {
+  return { async menu() { return { days }; } };
 }
 
 /** Un `AdeService` réduit à ce que le planificateur lui demande. */
@@ -338,6 +363,7 @@ function subscriber(overrides = {}) {
     resourceName: 'BUT1-TPA',
     nextCourse: true,
     changes: true,
+    menu: false,
     lang: 'fr',
     updatedAt: '2026-09-21T00:00:00.000Z',
     ...overrides,
@@ -354,7 +380,7 @@ function storeWith(subs) {
 test('le planificateur annonce le prochain cours une seule fois', async () => {
   const { store, cleanup } = storeWith([subscriber({ changes: false })]);
   const sender = fakeSender();
-  const notifier = new Notifier(fakeService([DAY]), store, sender, SILENT, { pollMs: 60_000 });
+  const notifier = new Notifier(fakeService([DAY]), fakeCrous(), store, sender, SILENT, { pollMs: 60_000 });
   try {
     const at = Date.parse(MORNING.start) - FIRST_COURSE_LEAD_MS;
 
@@ -377,7 +403,7 @@ test('le premier relevé ne signale aucun changement', async () => {
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
   const sender = fakeSender();
   // Un seul état : le planificateur n'a rien à quoi comparer au premier passage.
-  const notifier = new Notifier(fakeService([DAY]), store, sender, SILENT, { pollMs: 0 });
+  const notifier = new Notifier(fakeService([DAY]), fakeCrous(), store, sender, SILENT, { pollMs: 0 });
   try {
     await notifier.tick(Date.parse('2026-09-20T09:00:00.000Z'));
     await notifier.tick(Date.parse('2026-09-20T09:05:00.000Z'));
@@ -395,7 +421,7 @@ test('un changement de salle dans la fenêtre réveille les abonnés de la class
   ]);
   const sender = fakeSender();
   // `pollMs: 0` force un relevé à chaque battement : le deuxième voit le changement.
-  const notifier = new Notifier(fakeService([DAY, moved]), store, sender, SILENT, { pollMs: 0 });
+  const notifier = new Notifier(fakeService([DAY, moved]), fakeCrous(), store, sender, SILENT, { pollMs: 0 });
   try {
     const at = Date.parse('2026-09-20T09:00:00.000Z');
     await notifier.tick(at);
@@ -422,6 +448,7 @@ test('un changement au-delà de la journée de demain ne réveille personne', as
   const sender = fakeSender();
   const notifier = new Notifier(
     fakeService([[far], [{ ...far, room: 'S999' }]]),
+    fakeCrous(),
     store,
     sender,
     SILENT,
@@ -440,7 +467,7 @@ test('un changement au-delà de la journée de demain ne réveille personne', as
 test('un abonné qui n’a demandé que les changements ne reçoit pas les rappels', async () => {
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false, changes: true })]);
   const sender = fakeSender();
-  const notifier = new Notifier(fakeService([DAY]), store, sender, SILENT, { pollMs: 60_000 });
+  const notifier = new Notifier(fakeService([DAY]), fakeCrous(), store, sender, SILENT, { pollMs: 60_000 });
   try {
     await notifier.tick(Date.parse(MORNING.start) - FIRST_COURSE_LEAD_MS);
     assert.deepEqual(sender.sent, []);
@@ -461,7 +488,7 @@ test('une avalanche de changements se résume en une notification', async () => 
 
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
   const sender = fakeSender();
-  const notifier = new Notifier(fakeService([before, after]), store, sender, SILENT, {
+  const notifier = new Notifier(fakeService([before, after]), fakeCrous(), store, sender, SILENT, {
     pollMs: 0,
     maxChangeNotifications: 5,
   });
@@ -521,4 +548,144 @@ test('web-push accepte les clés et sait signer avec', async () => {
 
   // L'en-tête n'existe que si le JWT a réellement été signé avec la clé privée.
   assert.match(details.headers.Authorization, /^vapid t=[\w-]+\.[\w-]+\.[\w-]+, k=/);
+});
+
+/* --- Grille horaire réelle, menu du midi. --- */
+
+/*
+ * ADE publie des blocs collés bout à bout ; le BUT INFO enchaîne en réalité un
+ * cours de 10 h 10 à 11 h 35 puis un autre à partir de 11 h 35. Sans ce recalage,
+ * le rappel du second partirait à 11 h 25 au lieu de 11 h 30.
+ */
+test('les horaires d’ADE sont recalés sur la grille du département', () => {
+  const [morning, midday] = alignToSlots('iut-info', [
+    course({ start: '2026-09-21T08:00:00.000Z', end: '2026-09-21T09:30:00.000Z', uid: 'bloc-10h' }),
+    course({ start: '2026-09-21T09:30:00.000Z', end: '2026-09-21T11:00:00.000Z', uid: 'bloc-11h30' }),
+  ]);
+
+  // Bloc ADE 10:00–11:30 → cours réel 10:10–11:35.
+  assert.equal(morning.start, '2026-09-21T08:10:00.000Z');
+  assert.equal(morning.end, '2026-09-21T09:35:00.000Z');
+  // Bloc ADE 11:30–13:00 → cours réel 11:35–13:00.
+  assert.equal(midday.start, '2026-09-21T09:35:00.000Z');
+  assert.equal(midday.end, '2026-09-21T11:00:00.000Z');
+
+  const reminder = remindersFor([morning, midday]).find((r) => r.event.uid === 'bloc-11h30');
+  assert.ok(reminder);
+  // 11 h 30, cinq minutes avant la fin réelle du cours d'avant — et non 11 h 25.
+  assert.equal(reminder.at, Date.parse('2026-09-21T09:30:00.000Z'));
+});
+
+test('un département sans grille connue garde les horaires d’ADE', () => {
+  const raw = [course({ start: '2026-09-21T08:00:00.000Z', end: '2026-09-21T09:30:00.000Z' })];
+  assert.deepEqual(alignToSlots('all', raw), raw);
+});
+
+test('le menu part 5 minutes avant la fin du dernier cours de la matinée', () => {
+  // 11 h 15 à Paris : c'est la matinée qui s'achève, pas le cours de 9 h 30.
+  const reminders = menuRemindersFor(DAY);
+  assert.equal(reminders.length, 1);
+  assert.equal(reminders[0].at, Date.parse(LATE_MORNING.end) - MENU_LEAD_MS);
+  assert.equal(reminders[0].day, '2026-09-21');
+});
+
+test('une journée sans cours autour de midi n’annonce pas de menu', () => {
+  // Uniquement l'après-midi : on ne passe pas au restaurant entre deux cours.
+  assert.deepEqual(menuRemindersFor([AFTERNOON]), []);
+  // Uniquement le début de matinée : trop tôt pour parler du déjeuner.
+  assert.deepEqual(menuRemindersFor([MORNING]), []);
+});
+
+test('une journée qui court jusqu’à 13 h annonce le menu à 12 h 55', () => {
+  // Matinée enchaînée jusqu'à 13 h : le dernier cours d'avant le repas, c'est celui-là.
+  const midday = course({ start: '2026-09-21T09:15:00.000Z', end: '2026-09-21T11:00:00.000Z', uid: 'midi' });
+  const reminders = menuRemindersFor([...DAY, midday]);
+  assert.equal(reminders.length, 1);
+  assert.equal(reminders[0].at, Date.parse('2026-09-21T10:55:00.000Z'));
+});
+
+test('dueMenuReminders ne retient que les rappels échus depuis peu', () => {
+  const at = Date.parse(LATE_MORNING.end) - MENU_LEAD_MS;
+  const grace = 4 * 60_000;
+  assert.equal(dueMenuReminders(DAY, at - 60_000, grace).length, 0, 'pas encore l’heure');
+  assert.equal(dueMenuReminders(DAY, at, grace).length, 1, 'à l’heure pile');
+  assert.equal(dueMenuReminders(DAY, at + 10 * 60_000, grace).length, 0, 'trop tard');
+});
+
+test('la notification du menu dit les plats, la fermeture, ou son ignorance', () => {
+  const served = menuNotification(
+    { closed: false, categories: [{ label: 'Plat du jour', dishes: ['Poulet basquaise', 'Riz'] }] },
+    '2026-09-21',
+    'fr',
+  );
+  assert.match(served.title, /Menu du midi/);
+  assert.match(served.body, /Plat du jour : Poulet basquaise, Riz/);
+  assert.equal(served.day, '2026-09-21');
+
+  const closed = menuNotification({ closed: true, categories: [] }, '2026-09-21', 'fr');
+  assert.match(closed.title, /Restaurant universitaire fermé/);
+
+  // Crous injoignable ou menu pas encore publié : on le dit plutôt que de se taire.
+  assert.match(menuNotification(null, '2026-09-21', 'fr').body, /Menu non communiqué/);
+  assert.match(menuNotification(null, '2026-09-21', 'en').title, /Lunch menu/);
+
+  // Un menu bavard est coupé au dernier mot entier : un écran verrouillé est étroit.
+  const long = menuNotification(
+    { closed: false, categories: [{ label: 'Entrées', dishes: Array.from({ length: 20 }, () => 'Salade verte') }] },
+    '2026-09-21',
+    'fr',
+  );
+  assert.ok(long.body.length <= 181, long.body);
+  assert.match(long.body, /…$/);
+});
+
+test('le planificateur envoie le menu du jour à qui l’a demandé', async () => {
+  const { store, cleanup } = storeWith([subscriber({ nextCourse: false, changes: false, menu: true })]);
+  const sender = fakeSender();
+  const crous = fakeCrous([
+    { day: '2026-09-21', closed: false, categories: [{ label: 'Plat', dishes: ['Chili sin carne'] }] },
+  ]);
+  const notifier = new Notifier(fakeService([DAY]), crous, store, sender, SILENT, { pollMs: 60_000 });
+  try {
+    const at = Date.parse(LATE_MORNING.end) - MENU_LEAD_MS;
+
+    await notifier.tick(at - 60_000);
+    assert.equal(sender.sent.length, 0, 'trop tôt');
+
+    await notifier.tick(at);
+    assert.equal(sender.sent.length, 1);
+    assert.match(sender.sent[0].title, /Menu du midi/);
+    assert.match(sender.sent[0].body, /Chili sin carne/);
+
+    // Le battement suivant retombe dans le délai de grâce : il ne doit pas répéter.
+    await notifier.tick(at + 60_000);
+    assert.equal(sender.sent.length, 1, 'une seule annonce par jour');
+  } finally {
+    cleanup();
+  }
+});
+
+test('un Crous injoignable n’empêche pas la notification du menu', async () => {
+  const { store, cleanup } = storeWith([subscriber({ nextCourse: false, changes: false, menu: true })]);
+  const sender = fakeSender();
+  const broken = { async menu() { throw new Error('CROUStillant a répondu 502'); } };
+  const notifier = new Notifier(fakeService([DAY]), broken, store, sender, SILENT, { pollMs: 60_000 });
+  try {
+    await notifier.tick(Date.parse(LATE_MORNING.end) - MENU_LEAD_MS);
+    assert.equal(sender.sent.length, 1);
+    assert.match(sender.sent[0].body, /Menu non communiqué/);
+  } finally {
+    cleanup();
+  }
+});
+
+test('le menu seul suffit à faire suivre une classe', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'edt-push-'));
+  try {
+    const store = new SubscriptionStore(join(dir, 'subscriptions.json'));
+    store.save(subscriber({ nextCourse: false, changes: false, menu: true }) as PushSubscription);
+    assert.deepEqual([...store.byResource().keys()], ['iut-info:groups:4445']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'ማሳወቂያዎች',
   'push.nextCourse': 'ቀጣይ ትምህርት',
-  'push.nextCourseHint': 'ከቀኑ የመጀመሪያ ትምህርት 30 ደቂቃ በፊት፣ ቀዳሚው ከማለቁ 10 ደቂቃ በፊት።',
+  'push.nextCourseHint': 'ከዕረፍት በኋላ ከሚጀምር ትምህርት 30 ደቂቃ በፊት፣ ከቀደመው መጨረሻ 5 ደቂቃ በፊት።',
   'push.changes': 'ለውጦች',
   'push.changesHint': 'አዳራሽ፣ ሰዓት፣ የተጨመሩ ወይም የተሰረዙ ትምህርቶች፤ ለዛሬና ለነገ።',
+  'push.menu': 'የምሳ ዝርዝር',
+  'push.menuHint': 'የጠዋቱ የመጨረሻ ትምህርት ከማለቁ 5 ደቂቃ በፊት።',
   'push.unsupported': 'ይህ አሳሽ ማሳወቂያ መቀበል አይችልም።',
   'push.unavailable': 'በዚህ አገልጋይ ላይ ማሳወቂያዎች አልነቁም።',
   'push.denied': 'ማሳወቂያዎች ታግደዋል። በአሳሹ ቅንብሮች ፍቀድላቸው።',

@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Njoftimet',
   'push.nextCourse': 'Ora e ardhshme',
-  'push.nextCourseHint': '30 min para orës së parë të ditës, 10 min para se të mbarojë e mëparshmja.',
+  'push.nextCourseHint': '30 min para një ore mësimi pas një pushimi, 5 min para mbarimit të asaj të mëparshme.',
   'push.changes': 'Ndryshimet',
   'push.changesHint': 'Salla, ora, orë të shtuara ose të anuluara, për sot dhe nesër.',
+  'push.menu': 'Menuja e drekës',
+  'push.menuHint': '5 min para mbarimit të orës së fundit të mëngjesit.',
   'push.unsupported': 'Ky shfletues nuk mund të marrë njoftime.',
   'push.unavailable': 'Njoftimet nuk janë aktive në këtë server.',
   'push.denied': 'Njoftimet janë bllokuar. Lejoji te cilësimet e shfletuesit.',

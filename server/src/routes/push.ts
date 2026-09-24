@@ -31,6 +31,7 @@ interface SubscribeBody {
   resourceName?: unknown;
   nextCourse?: unknown;
   changes?: unknown;
+  menu?: unknown;
   lang?: unknown;
 }
 
@@ -68,6 +69,15 @@ function parseKind(raw: unknown): 'groups' | 'teachers' {
 function parseFlag(raw: unknown): boolean {
   if (typeof raw !== 'boolean') throw bad('Option de notification invalide.');
   return raw;
+}
+
+/**
+ * Option qu'une version plus ancienne de l'application n'envoie pas encore. Un
+ * onglet resté ouvert depuis avant la mise à jour se réabonne sans elle : mieux
+ * vaut l'éteindre que rejeter l'abonnement entier.
+ */
+function parseOptionalFlag(raw: unknown): boolean {
+  return raw === undefined ? false : parseFlag(raw);
 }
 
 export interface PushRoutesOptions {
@@ -142,6 +152,7 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
       resourceName,
       nextCourse: parseFlag(body.nextCourse),
       changes: parseFlag(body.changes),
+      menu: parseOptionalFlag(body.menu),
       lang: readLang(body.lang),
       updatedAt: new Date().toISOString(),
     };

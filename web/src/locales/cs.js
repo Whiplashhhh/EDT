@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Oznámení',
   'push.nextCourse': 'Další výuka',
-  'push.nextCourseHint': '30 min před první výukou dne, 10 min před koncem té předchozí.',
+  'push.nextCourseHint': '30 min před výukou po přestávce, 5 min před koncem té předchozí.',
   'push.changes': 'Změny',
   'push.changesHint': 'Učebna, čas, přidaná nebo zrušená výuka, pro dnešek a zítřek.',
+  'push.menu': 'Polední menu',
+  'push.menuHint': '5 min před koncem poslední dopolední výuky.',
   'push.unsupported': 'Tento prohlížeč neumí přijímat oznámení.',
   'push.unavailable': 'Oznámení nejsou na tomto serveru zapnutá.',
   'push.denied': 'Oznámení jsou zablokovaná. Povol je v nastavení prohlížeče.',

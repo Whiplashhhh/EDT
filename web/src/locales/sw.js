@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Arifa',
   'push.nextCourse': 'Somo linalofuata',
-  'push.nextCourseHint': 'Dakika 30 kabla ya somo la kwanza la siku, dakika 10 kabla la awali kumalizika.',
+  'push.nextCourseHint': 'Dakika 30 kabla ya somo linalofuata mapumziko, dakika 5 kabla ya mwisho wa lililotangulia.',
   'push.changes': 'Mabadiliko',
   'push.changesHint': 'Chumba, saa, masomo yaliyoongezwa au kufutwa, kwa leo na kesho.',
+  'push.menu': 'Menyu ya chakula cha mchana',
+  'push.menuHint': 'Dakika 5 kabla ya mwisho wa somo la mwisho la asubuhi.',
   'push.unsupported': 'Kivinjari hiki hakiwezi kupokea arifa.',
   'push.unavailable': 'Arifa hazijawashwa kwenye seva hii.',
   'push.denied': 'Arifa zimezuiwa. Ziruhusu katika mipangilio ya kivinjari.',

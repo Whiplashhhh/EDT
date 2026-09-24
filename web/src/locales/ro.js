@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notificări',
   'push.nextCourse': 'Următorul curs',
-  'push.nextCourseHint': 'Cu 30 min înainte de primul curs al zilei, cu 10 min înainte de finalul celui precedent.',
+  'push.nextCourseHint': 'Cu 30 min înainte de un curs după o pauză, cu 5 min înainte de sfârșitul celui precedent.',
   'push.changes': 'Modificări',
   'push.changesHint': 'Sală, oră, cursuri adăugate sau anulate, pentru azi și mâine.',
+  'push.menu': 'Meniul de prânz',
+  'push.menuHint': 'Cu 5 min înainte de sfârșitul ultimului curs de dimineață.',
   'push.unsupported': 'Acest browser nu poate primi notificări.',
   'push.unavailable': 'Notificările nu sunt activate pe acest server.',
   'push.denied': 'Notificările sunt blocate. Permite-le din setările browserului.',

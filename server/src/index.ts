@@ -113,7 +113,7 @@ if (config.push.enabled) {
     { publicKey: config.push.publicKey, privateKey: config.push.privateKey, subject: config.push.subject },
     subscriptions,
   );
-  const notifier = new Notifier(service, subscriptions, sender, app.log, {
+  const notifier = new Notifier(service, crous, subscriptions, sender, app.log, {
     tickMs: config.push.tickMs,
     pollMs: config.push.pollMs,
   });

@@ -1,4 +1,5 @@
 import type { CourseEvent } from '../ade/ics.ts';
+import { minutesOfDay } from '../ade/slots.ts';
 import { addDays, dayOf, startOfDay, type ScheduleChange } from './messages.ts';
 
 /**
@@ -7,10 +8,22 @@ import { addDays, dayOf, startOfDay, type ScheduleChange } from './messages.ts';
  * Toute la logique horaire des notifications tient ici, et se teste seule.
  */
 
-/** Premier cours de la journée : le rappel part une demi-heure avant. */
+/** Reprise après une pause : le rappel part une demi-heure avant le cours. */
 export const FIRST_COURSE_LEAD_MS = 30 * 60_000;
-/** Cours suivants : le rappel part dix minutes avant la fin du cours précédent. */
-export const BETWEEN_COURSES_LEAD_MS = 10 * 60_000;
+/** Cours enchaîné : le rappel part cinq minutes avant la fin du cours précédent. */
+export const BETWEEN_COURSES_LEAD_MS = 5 * 60_000;
+/** Menu du midi : annoncé cinq minutes avant la fin du dernier cours de la matinée. */
+export const MENU_LEAD_MS = 5 * 60_000;
+
+/**
+ * Fenêtre où se termine le dernier cours d'avant le déjeuner, en minutes depuis
+ * minuit, heure de Paris.
+ *
+ * Elle sert à reconnaître la pause du midi sans supposer la grille d'un
+ * département : un cours qui s'arrête entre 11 h et 14 h est le dernier avant
+ * le repas, un cours qui s'arrête à 9 h 55 ne l'est pas.
+ */
+export const LUNCH_END_WINDOW = { from: 11 * 60, to: 14 * 60 };
 
 /**
  * Un créneau de la journée. Deux cours qui commencent à la même heure (un TP
@@ -53,41 +66,49 @@ export interface Reminder {
 /**
  * Rappels « prochain cours » pour une liste de cours.
  *
- * La règle diffère selon la place du cours dans la journée :
+ * La règle diffère selon ce qui précède le cours :
  *
- * - le premier cours de la journée est annoncé 30 minutes avant son début,
- *   le temps de se lever et de venir ;
- * - les suivants sont annoncés 10 minutes avant la fin du cours précédent,
- *   c'est-à-dire pendant qu'on est encore en cours, pour savoir où aller
- *   en sortant.
+ * - un cours enchaîné derrière un autre est annoncé 5 minutes avant la fin de
+ *   celui-ci, c'est-à-dire pendant qu'on y est encore, pour savoir où aller en
+ *   sortant ;
+ * - un cours qu'une vraie pause précède — le premier de la journée, celui qui
+ *   reprend après le déjeuner ou après un trou — est annoncé 30 minutes avant
+ *   son début.
  *
- * Un trou dans la journée fait donc arriver le rappel longtemps à l'avance :
- * c'est voulu, il annonce la reprise dès la fin du cours d'avant.
+ * Le second cas se reconnaît à l'attente : au-delà d'une demi-heure de battement,
+ * annoncer le cours dès la fin du précédent donnerait l'impression qu'il est
+ * imminent alors qu'il reste une heure à attendre. Le rappel part donc au moment
+ * où il faut se remettre en route, pas au moment où l'on quitte la salle.
  */
 export function remindersFor(events: CourseEvent[]): Reminder[] {
-  const byDay = new Map<string, CourseEvent[]>();
-  for (const event of events) {
-    const day = dayOf(event.start);
-    const list = byDay.get(day);
-    if (list) list.push(event);
-    else byDay.set(day, [event]);
-  }
-
   const reminders: Reminder[] = [];
-  for (const dayEvents of byDay.values()) {
+  for (const dayEvents of byDay(events).values()) {
     const sessions = sessionsOf(dayEvents);
     sessions.forEach((session, index) => {
       const start = Date.parse(session.start);
+      const previousEnd = index === 0 ? null : Date.parse(sessions[index - 1].end);
       const at =
-        index === 0
+        previousEnd === null || start - previousEnd > FIRST_COURSE_LEAD_MS
           ? start - FIRST_COURSE_LEAD_MS
           : // Jamais après le début du cours annoncé : deux cours qui se chevauchent
             // ramèneraient sinon le rappel à un moment où l'on y est déjà.
-            Math.min(Date.parse(sessions[index - 1].end) - BETWEEN_COURSES_LEAD_MS, start);
+            Math.min(previousEnd - BETWEEN_COURSES_LEAD_MS, start);
       reminders.push({ at, event: session.events[0], key: session.start });
     });
   }
   return reminders.sort((a, b) => a.at - b.at);
+}
+
+/** Cours d'une même journée calendaire, regroupés. */
+function byDay(events: CourseEvent[]): Map<string, CourseEvent[]> {
+  const map = new Map<string, CourseEvent[]>();
+  for (const event of events) {
+    const day = dayOf(event.start);
+    const list = map.get(day);
+    if (list) list.push(event);
+    else map.set(day, [event]);
+  }
+  return map;
 }
 
 /**
@@ -101,6 +122,43 @@ export function dueReminders(events: CourseEvent[], now: number, graceMs: number
     // Un cours déjà commencé n'est plus « le prochain ».
     (r) => r.at <= now && now - r.at <= graceMs && Date.parse(r.event.start) > now,
   );
+}
+
+/** Annonce du menu du restaurant universitaire, un jour donné. */
+export interface MenuReminder {
+  /** Instant d'envoi (ms depuis l'époque). */
+  at: number;
+  /** Jour concerné (`AAAA-MM-JJ`), qui sert aussi de clé de dédoublonnage. */
+  day: string;
+}
+
+/**
+ * Rappels « menu du midi » : un par journée de cours, cinq minutes avant la fin
+ * du dernier cours d'avant le déjeuner.
+ *
+ * Ce cours-là se reconnaît à son heure de fin plutôt qu'à sa place dans la
+ * journée : c'est le dernier à s'arrêter dans la fenêtre du midi. Une matinée
+ * qui s'achève à 11 h 35 comme une journée qui court jusqu'à 13 h donnent donc
+ * le bon moment, et une journée qui ne commence qu'à 14 h 30 n'annonce rien —
+ * on n'y déjeune pas entre deux cours.
+ */
+export function menuRemindersFor(events: CourseEvent[]): MenuReminder[] {
+  const reminders: MenuReminder[] = [];
+  for (const [day, dayEvents] of byDay(events)) {
+    let last: Session | null = null;
+    for (const session of sessionsOf(dayEvents)) {
+      const end = minutesOfDay(session.end);
+      if (end < LUNCH_END_WINDOW.from || end > LUNCH_END_WINDOW.to) continue;
+      if (!last || session.end > last.end) last = session;
+    }
+    if (last) reminders.push({ at: Date.parse(last.end) - MENU_LEAD_MS, day });
+  }
+  return reminders.sort((a, b) => a.at - b.at);
+}
+
+/** Rappels « menu du midi » à envoyer maintenant. */
+export function dueMenuReminders(events: CourseEvent[], now: number, graceMs: number): MenuReminder[] {
+  return menuRemindersFor(events).filter((r) => r.at <= now && now - r.at <= graceMs);
 }
 
 /** Empreinte d'un cours : tout ce dont un changement mérite d'être signalé. */

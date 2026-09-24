@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Varsler',
   'push.nextCourse': 'Neste time',
-  'push.nextCourseHint': '30 min før dagens første time, 10 min før den forrige er slutt.',
+  'push.nextCourseHint': '30 min før en time etter en pause, 5 min før den forrige slutter.',
   'push.changes': 'Endringer',
   'push.changesHint': 'Rom, tidspunkt, nye eller avlyste timer, for i dag og i morgen.',
+  'push.menu': 'Lunsjmeny',
+  'push.menuHint': '5 min før siste time før lunsj slutter.',
   'push.unsupported': 'Denne nettleseren kan ikke motta varsler.',
   'push.unavailable': 'Varsler er ikke slått på på denne serveren.',
   'push.denied': 'Varsler er blokkert. Tillat dem i nettleserinnstillingene.',

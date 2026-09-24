@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Aviseringar',
   'push.nextCourse': 'Nästa lektion',
-  'push.nextCourseHint': '30 min före dagens första lektion, 10 min innan den föregående slutar.',
+  'push.nextCourseHint': '30 min före en lektion efter en paus, 5 min innan den föregående slutar.',
   'push.changes': 'Ändringar',
   'push.changesHint': 'Sal, tid, tillagda eller inställda lektioner, för i dag och i morgon.',
+  'push.menu': 'Lunchmeny',
+  'push.menuHint': '5 min innan förmiddagens sista lektion slutar.',
   'push.unsupported': 'Den här webbläsaren kan inte ta emot aviseringar.',
   'push.unavailable': 'Aviseringar är inte aktiverade på den här servern.',
   'push.denied': 'Aviseringar är blockerade. Tillåt dem i webbläsarens inställningar.',

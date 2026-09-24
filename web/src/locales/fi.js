@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Ilmoitukset',
   'push.nextCourse': 'Seuraava tunti',
-  'push.nextCourseHint': '30 min ennen päivän ensimmäistä tuntia, 10 min ennen edellisen päättymistä.',
+  'push.nextCourseHint': '30 min ennen tauon jälkeistä oppituntia, 5 min ennen edellisen päättymistä.',
   'push.changes': 'Muutokset',
   'push.changesHint': 'Tila, kellonaika, lisätyt tai peruutetut tunnit, tänään ja huomenna.',
+  'push.menu': 'Lounaslista',
+  'push.menuHint': '5 min ennen aamupäivän viimeisen oppitunnin päättymistä.',
   'push.unsupported': 'Tämä selain ei voi vastaanottaa ilmoituksia.',
   'push.unavailable': 'Ilmoitukset eivät ole käytössä tällä palvelimella.',
   'push.denied': 'Ilmoitukset on estetty. Salli ne selaimen asetuksista.',

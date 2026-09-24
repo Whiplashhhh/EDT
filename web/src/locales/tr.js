@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Bildirimler',
   'push.nextCourse': 'Sonraki ders',
-  'push.nextCourseHint': 'Günün ilk dersinden 30 dk önce, önceki ders bitmeden 10 dk önce.',
+  'push.nextCourseHint': 'Aradan sonraki dersten 30 dk önce, önceki ders bitmeden 5 dk önce.',
   'push.changes': 'Değişiklikler',
   'push.changesHint': 'Derslik, saat, eklenen veya iptal edilen dersler; bugün ve yarın için.',
+  'push.menu': 'Öğle menüsü',
+  'push.menuHint': 'Sabahın son dersi bitmeden 5 dk önce.',
   'push.unsupported': 'Bu tarayıcı bildirim alamıyor.',
   'push.unavailable': 'Bu sunucuda bildirimler açık değil.',
   'push.denied': 'Bildirimler engellendi. Tarayıcı ayarlarından izin ver.',

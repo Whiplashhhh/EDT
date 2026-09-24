@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Sanarwa',
   'push.nextCourse': 'Darasi na gaba',
-  'push.nextCourseHint': 'Minti 30 kafin darasi na farko na rana, minti 10 kafin na baya ya ƙare.',
+  'push.nextCourseHint': 'Minti 30 kafin darasin da ke biyo hutu, minti 5 kafin ƙarshen wanda ya gabata.',
   'push.changes': 'Canje-canje',
   'push.changesHint': 'Daki, lokaci, darussan da aka ƙara ko aka soke, na yau da gobe.',
+  'push.menu': 'Menu na abincin rana',
+  'push.menuHint': 'Minti 5 kafin ƙarshen darasi na ƙarshe na safe.',
   'push.unsupported': 'Wannan burauza ba ta iya karɓar sanarwa.',
   'push.unavailable': 'Ba a kunna sanarwa a wannan sabar ba.',
   'push.denied': 'An toshe sanarwa. Ka ba da izini a saitunan burauza.',

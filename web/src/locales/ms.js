@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Pemberitahuan',
   'push.nextCourse': 'Kelas seterusnya',
-  'push.nextCourseHint': '30 minit sebelum kelas pertama hari itu, 10 minit sebelum kelas sebelumnya tamat.',
+  'push.nextCourseHint': '30 minit sebelum kelas selepas rehat, 5 minit sebelum kelas sebelumnya tamat.',
   'push.changes': 'Perubahan',
   'push.changesHint': 'Bilik, waktu, kelas ditambah atau dibatalkan, untuk hari ini dan esok.',
+  'push.menu': 'Menu makan tengah hari',
+  'push.menuHint': '5 minit sebelum kelas terakhir pagi tamat.',
   'push.unsupported': 'Pelayar ini tidak boleh menerima pemberitahuan.',
   'push.unavailable': 'Pemberitahuan tidak dihidupkan pada pelayan ini.',
   'push.denied': 'Pemberitahuan disekat. Benarkan dalam tetapan pelayar.',
