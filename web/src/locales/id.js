@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notifikasi',
   'push.nextCourse': 'Kelas berikutnya',
-  'push.nextCourseHint': '30 menit sebelum kelas pertama hari itu, 10 menit sebelum kelas sebelumnya selesai.',
+  'push.nextCourseHint': '30 menit sebelum kelas setelah jeda, 5 menit sebelum kelas sebelumnya berakhir.',
   'push.changes': 'Perubahan',
   'push.changesHint': 'Ruang, jam, kelas tambahan atau yang dibatalkan, untuk hari ini dan besok.',
+  'push.menu': 'Menu makan siang',
+  'push.menuHint': '5 menit sebelum kelas terakhir pagi berakhir.',
   'push.unsupported': 'Peramban ini tidak bisa menerima notifikasi.',
   'push.unavailable': 'Notifikasi belum diaktifkan di server ini.',
   'push.denied': 'Notifikasi diblokir. Izinkan di pengaturan peramban.',

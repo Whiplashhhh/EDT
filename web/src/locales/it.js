@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notifiche',
   'push.nextCourse': 'Prossima lezione',
-  'push.nextCourseHint': '30 min prima della prima lezione del giorno, 10 min prima della fine di quella precedente.',
+  'push.nextCourseHint': '30 min prima di una lezione dopo una pausa, 5 min prima della fine di quella precedente.',
   'push.changes': 'Modifiche',
   'push.changesHint': 'Aula, orario, lezioni aggiunte o annullate, per oggi e domani.',
+  'push.menu': 'Menù del pranzo',
+  'push.menuHint': '5 min prima della fine dell’ultima lezione della mattina.',
   'push.unsupported': 'Questo browser non può ricevere notifiche.',
   'push.unavailable': 'Le notifiche non sono attive su questo server.',
   'push.denied': 'Le notifiche sono bloccate. Autorizzale nelle impostazioni del browser.',

@@ -125,6 +125,10 @@ const T = {
     arrow: '→',
     more: (n: number) => `et ${n} autre${n > 1 ? 's' : ''} changement${n > 1 ? 's' : ''}`,
     moreTitle: 'Emploi du temps modifié',
+    menu: 'Menu du midi',
+    menuClosed: 'Restaurant universitaire fermé',
+    menuNoService: 'Pas de service ce midi.',
+    menuUnknown: 'Menu non communiqué.',
   },
   en: {
     nextCourse: 'Next class',
@@ -140,6 +144,10 @@ const T = {
     arrow: '→',
     more: (n: number) => `and ${n} more change${n > 1 ? 's' : ''}`,
     moreTitle: 'Timetable updated',
+    menu: 'Lunch menu',
+    menuClosed: 'University restaurant closed',
+    menuNoService: 'No lunch service today.',
+    menuUnknown: 'No menu published.',
   },
 } as const;
 
@@ -225,6 +233,43 @@ function when(iso: string, lang: Lang): string {
  */
 function movedFrom(from: string, to: string, lang: Lang): string {
   return dayOf(from) === dayOf(to) ? formatTime(from, lang) : when(from, lang);
+}
+
+/**
+ * Menu du jour au restaurant universitaire, tel qu'il tient sur un écran
+ * verrouillé : les catégories dans l'ordre publié, séparées par des points
+ * médians, et rien de plus.
+ */
+export interface MenuOfDay {
+  /** Le Crous publie « Structure fermée » les jours de fermeture. */
+  closed: boolean;
+  categories: { label: string; dishes: string[] }[];
+}
+
+/** Longueur au-delà de laquelle un téléphone tronque de toute façon le corps. */
+const MENU_MAX_LENGTH = 180;
+
+/**
+ * « Menu du midi ». Le menu peut manquer de trois façons — restaurant fermé,
+ * menu non encore publié, Crous injoignable — et les deux dernières se disent
+ * pareil : ce qu'on sait, c'est qu'il n'y a rien à annoncer.
+ */
+export function menuNotification(menu: MenuOfDay | null, day: string, lang: Lang): Notification {
+  const tr = T[lang];
+  if (menu?.closed) return { title: tr.menuClosed, body: tr.menuNoService, tag: 'edt-menu', day };
+
+  const body = (menu?.categories ?? [])
+    .map((category) => `${category.label} : ${category.dishes.join(', ')}`)
+    .join(' · ');
+  return { title: tr.menu, body: body ? ellipsis(body) : tr.menuUnknown, tag: 'edt-menu', day };
+}
+
+/** Coupe au dernier mot entier, plutôt qu'au milieu d'un plat. */
+function ellipsis(text: string): string {
+  if (text.length <= MENU_MAX_LENGTH) return text;
+  const cut = text.slice(0, MENU_MAX_LENGTH);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > MENU_MAX_LENGTH / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
 }
 
 /** Quand les changements sont trop nombreux, une seule notification les résume. */

@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Kennisgewings',
   'push.nextCourse': 'Volgende klas',
-  'push.nextCourseHint': '30 min voor die dag se eerste klas, 10 min voor die vorige een klaar is.',
+  'push.nextCourseHint': '30 min voor ’n klas ná ’n pouse, 5 min voor die vorige een eindig.',
   'push.changes': 'Veranderinge',
   'push.changesHint': 'Lokaal, tyd, bygevoegde of gekanselleerde klasse, vir vandag en môre.',
+  'push.menu': 'Middagete-spyskaart',
+  'push.menuHint': '5 min voor die oggend se laaste klas eindig.',
   'push.unsupported': 'Hierdie blaaier kan nie kennisgewings ontvang nie.',
   'push.unavailable': 'Kennisgewings is nie op hierdie bediener aangeskakel nie.',
   'push.denied': 'Kennisgewings word geblokkeer. Laat dit toe in jou blaaier se instellings.',

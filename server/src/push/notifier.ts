@@ -1,19 +1,27 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { AdeService } from '../ade/service.ts';
 import type { CourseEvent } from '../ade/ics.ts';
+import { alignToSlots } from '../ade/slots.ts';
 import { mondayOf } from '../routes/api.ts';
 import { type PushSubscription, type SubscriptionStore } from './store.ts';
 import type { PushSender } from './sender.ts';
 import {
   changeNotification,
+  menuNotification,
   moreChangesNotification,
   nextCourseNotification,
   notificationLang,
   type Lang,
+  type MenuOfDay,
   type Notification,
   type ScheduleChange,
 } from './messages.ts';
-import { changesWithin, dueReminders, diffSchedules, snapshotOf } from './planner.ts';
+import { changesWithin, dueMenuReminders, dueReminders, diffSchedules, snapshotOf } from './planner.ts';
+
+/** Ce que le planificateur attend du Crous : le menu, et rien d'autre. */
+export interface MenuSource {
+  menu(): Promise<{ days: ({ day: string } & MenuOfDay)[] }>;
+}
 
 /**
  * Le planificateur : il regarde l'heure, relit les emplois du temps suivis, et
@@ -61,6 +69,7 @@ const SENT_MEMORY_MS = 12 * 60 * 60_000;
 
 export class Notifier {
   readonly #service: AdeService;
+  readonly #crous: MenuSource | null;
   readonly #store: SubscriptionStore;
   readonly #sender: PushSender;
   readonly #options: NotifierOptions;
@@ -73,12 +82,14 @@ export class Notifier {
 
   constructor(
     service: AdeService,
+    crous: MenuSource | null,
     store: SubscriptionStore,
     sender: PushSender,
     log: FastifyBaseLogger,
     options: Partial<NotifierOptions> = {},
   ) {
     this.#service = service;
+    this.#crous = crous;
     this.#store = store;
     this.#sender = sender;
     this.#log = log;
@@ -137,6 +148,7 @@ export class Notifier {
     for (const sub of subscriptions) {
       if (sub.nextCourse) await this.#sendReminders(sub, state.events, now);
       if (sub.changes && changes.length > 0) await this.#sendChanges(sub, changes, now);
+      if (sub.menu) await this.#sendMenu(sub, state.events, now);
     }
   }
 
@@ -155,7 +167,14 @@ export class Notifier {
         ? await this.#service.schedule(sample.department, sample.resourceId, from)
         : await this.#service.facetSchedule(sample.department, sample.kind, sample.resourceId, from);
 
-    const snapshot = snapshotOf(schedule.events);
+    /*
+     * Les horaires d'ADE sont recalés sur la grille du département avant tout
+     * le reste : les rappels se calant à quelques minutes des bornes, les
+     * annoncer sur les blocs d'ADE les décalerait tous — et les notifications
+     * de changement afficheraient une heure que l'application n'affiche pas.
+     */
+    const events = alignToSlots(sample.department, schedule.events);
+    const snapshot = snapshotOf(events);
     /*
      * Le tout premier relevé n'a rien à quoi se comparer : il sert de point de
      * départ et n'annonce rien. Sans ce garde-fou, le premier abonné d'une
@@ -163,7 +182,7 @@ export class Notifier {
      */
     const changes = known ? changesWithin(diffSchedules(known.snapshot, snapshot), now) : [];
 
-    const state: Watched = { events: schedule.events, snapshot, fetchedAt: now };
+    const state: Watched = { events, snapshot, fetchedAt: now };
     this.#watched.set(key, state);
     return { state, changes };
   }
@@ -171,6 +190,30 @@ export class Notifier {
   async #sendReminders(sub: PushSubscription, events: CourseEvent[], now: number): Promise<void> {
     for (const reminder of dueReminders(events, now, this.#options.graceMs)) {
       await this.#deliver(sub, `next:${reminder.key}`, nextCourseNotification(reminder.event, langOf(sub)), now);
+    }
+  }
+
+  /**
+   * Menu du restaurant universitaire, avant la pause du midi.
+   *
+   * Le Crous injoignable ne fait pas taire la notification : elle part en
+   * disant que le menu n'est pas connu, ce qui est exactement ce que l'on sait.
+   */
+  async #sendMenu(sub: PushSubscription, events: CourseEvent[], now: number): Promise<void> {
+    for (const reminder of dueMenuReminders(events, now, this.#options.graceMs)) {
+      const menu = await this.#menuOf(reminder.day);
+      await this.#deliver(sub, `menu:${reminder.day}`, menuNotification(menu, reminder.day, langOf(sub)), now);
+    }
+  }
+
+  /** Le menu d'un jour, ou `null` si le Crous ne le publie pas ou ne répond pas. */
+  async #menuOf(day: string): Promise<MenuOfDay | null> {
+    if (!this.#crous) return null;
+    try {
+      return (await this.#crous.menu()).days.find((entry) => entry.day === day) ?? null;
+    } catch (err) {
+      this.#log.warn({ err, day }, 'menu Crous indisponible pour la notification');
+      return null;
     }
   }
 

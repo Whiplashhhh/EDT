@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Thông báo',
   'push.nextCourse': 'Buổi học kế tiếp',
-  'push.nextCourseHint': '30 phút trước buổi đầu tiên trong ngày, 10 phút trước khi buổi trước kết thúc.',
+  'push.nextCourseHint': '30 phút trước buổi học sau giờ nghỉ, 5 phút trước khi buổi học trước kết thúc.',
   'push.changes': 'Thay đổi',
   'push.changesHint': 'Phòng học, giờ, buổi được thêm hoặc bị huỷ, cho hôm nay và ngày mai.',
+  'push.menu': 'Thực đơn bữa trưa',
+  'push.menuHint': '5 phút trước khi buổi học cuối buổi sáng kết thúc.',
   'push.unsupported': 'Trình duyệt này không nhận được thông báo.',
   'push.unavailable': 'Thông báo chưa được bật trên máy chủ này.',
   'push.denied': 'Thông báo đang bị chặn. Hãy cho phép trong cài đặt trình duyệt.',

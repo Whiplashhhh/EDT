@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Mga abiso',
   'push.nextCourse': 'Susunod na klase',
-  'push.nextCourseHint': '30 minuto bago ang unang klase ng araw, 10 minuto bago matapos ang nauna.',
+  'push.nextCourseHint': '30 minuto bago ang klaseng kasunod ng pahinga, 5 minuto bago matapos ang naunang klase.',
   'push.changes': 'Mga pagbabago',
   'push.changesHint': 'Silid, oras, mga klaseng idinagdag o kinansela, para ngayon at bukas.',
+  'push.menu': 'Menu sa tanghalian',
+  'push.menuHint': '5 minuto bago matapos ang huling klase sa umaga.',
   'push.unsupported': 'Hindi makatanggap ng abiso ang browser na ito.',
   'push.unavailable': 'Hindi naka-on ang mga abiso sa server na ito.',
   'push.denied': 'Naka-block ang mga abiso. Payagan ang mga ito sa setting ng browser.',

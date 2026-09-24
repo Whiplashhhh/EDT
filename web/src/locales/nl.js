@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Meldingen',
   'push.nextCourse': 'Volgende les',
-  'push.nextCourseHint': '30 min voor de eerste les van de dag, 10 min voor het einde van de vorige les.',
+  'push.nextCourseHint': '30 min voor een college na een pauze, 5 min voor het einde van het vorige.',
   'push.changes': 'Wijzigingen',
   'push.changesHint': 'Lokaal, tijdstip, toegevoegde of geannuleerde lessen, voor vandaag en morgen.',
+  'push.menu': 'Lunchmenu',
+  'push.menuHint': '5 min voor het einde van het laatste college van de ochtend.',
   'push.unsupported': 'Deze browser kan geen meldingen ontvangen.',
   'push.unavailable': 'Meldingen staan niet aan op deze server.',
   'push.denied': 'Meldingen zijn geblokkeerd. Sta ze toe in de instellingen van je browser.',

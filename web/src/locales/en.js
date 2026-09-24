@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notifications',
   'push.nextCourse': 'Next class',
-  'push.nextCourseHint': '30 min before the first class of the day, 10 min before the previous one ends.',
+  'push.nextCourseHint': '30 min before a class that follows a break, 5 min before the previous one ends.',
   'push.changes': 'Changes',
   'push.changesHint': 'Room, time, added or cancelled classes, for today and tomorrow.',
+  'push.menu': 'Lunch menu',
+  'push.menuHint': '5 min before the last morning class ends.',
   'push.unsupported': 'This browser cannot receive notifications.',
   'push.unavailable': 'Notifications are not enabled on this server.',
   'push.denied': 'Notifications are blocked. Allow them in your browser settings.',

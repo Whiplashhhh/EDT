@@ -32,9 +32,11 @@ export default {
 
   'push.section': '通知',
   'push.nextCourse': '次の授業',
-  'push.nextCourseHint': 'その日の最初の授業の30分前、前の授業が終わる10分前。',
+  'push.nextCourseHint': '休憩明けの授業は30分前、続けての授業は前の授業が終わる5分前に。',
   'push.changes': '変更',
   'push.changesHint': '教室・時間・追加や休講。今日と明日の分。',
+  'push.menu': '昼食メニュー',
+  'push.menuHint': '午前最後の授業が終わる5分前に。',
   'push.unsupported': 'このブラウザーは通知を受け取れません。',
   'push.unavailable': 'このサーバーでは通知が有効になっていません。',
   'push.denied': '通知がブロックされています。ブラウザーの設定で許可してください。',

@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Obavijesti',
   'push.nextCourse': 'Sljedeći sat',
-  'push.nextCourseHint': '30 min prije prvog sata u danu, 10 min prije kraja prethodnog.',
+  'push.nextCourseHint': '30 min prije nastave nakon pauze, 5 min prije kraja prethodne.',
   'push.changes': 'Promjene',
   'push.changesHint': 'Dvorana, vrijeme, dodani ili otkazani sati, za danas i sutra.',
+  'push.menu': 'Jelovnik za ručak',
+  'push.menuHint': '5 min prije kraja posljednjeg prijepodnevnog sata.',
   'push.unsupported': 'Ovaj preglednik ne može primati obavijesti.',
   'push.unavailable': 'Obavijesti nisu uključene na ovom poslužitelju.',
   'push.denied': 'Obavijesti su blokirane. Dopusti ih u postavkama preglednika.',

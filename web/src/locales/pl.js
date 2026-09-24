@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Powiadomienia',
   'push.nextCourse': 'Najbliższe zajęcia',
-  'push.nextCourseHint': '30 min przed pierwszymi zajęciami dnia, 10 min przed końcem poprzednich.',
+  'push.nextCourseHint': '30 min przed zajęciami po przerwie, 5 min przed końcem poprzednich.',
   'push.changes': 'Zmiany',
   'push.changesHint': 'Sala, godzina, dodane lub odwołane zajęcia, na dziś i jutro.',
+  'push.menu': 'Menu obiadowe',
+  'push.menuHint': '5 min przed końcem ostatnich zajęć przed południem.',
   'push.unsupported': 'Ta przeglądarka nie odbiera powiadomień.',
   'push.unavailable': 'Powiadomienia nie są włączone na tym serwerze.',
   'push.denied': 'Powiadomienia są zablokowane. Zezwól na nie w ustawieniach przeglądarki.',

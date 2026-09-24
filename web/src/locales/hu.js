@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Értesítések',
   'push.nextCourse': 'Következő óra',
-  'push.nextCourseHint': 'A nap első órája előtt 30 perccel, az előző óra vége előtt 10 perccel.',
+  'push.nextCourseHint': '30 perccel a szünet utáni óra előtt, 5 perccel az előző óra vége előtt.',
   'push.changes': 'Változások',
   'push.changesHint': 'Terem, időpont, új vagy elmaradó órák, mára és holnapra.',
+  'push.menu': 'Ebédmenü',
+  'push.menuHint': '5 perccel a délelőtt utolsó órájának vége előtt.',
   'push.unsupported': 'Ez a böngésző nem tud értesítéseket fogadni.',
   'push.unavailable': 'Az értesítések nincsenek bekapcsolva ezen a kiszolgálón.',
   'push.denied': 'Az értesítések le vannak tiltva. Engedélyezd őket a böngésző beállításaiban.',

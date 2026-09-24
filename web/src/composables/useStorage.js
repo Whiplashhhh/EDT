@@ -19,7 +19,7 @@ const EMPTY = {
    */
   identity: null,
   /** Notifications push, éteintes tant qu'on ne les a pas demandées. */
-  push: { nextCourse: false, changes: false },
+  push: { nextCourse: false, changes: false, menu: false },
   view: 'day',
   theme: 'system',
 };
@@ -56,6 +56,7 @@ function readPush(raw) {
   return {
     nextCourse: raw?.nextCourse === true,
     changes: raw?.changes === true,
+    menu: raw?.menu === true,
   };
 }
 

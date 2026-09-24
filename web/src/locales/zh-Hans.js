@@ -32,9 +32,11 @@ export default {
 
   'push.section': '通知',
   'push.nextCourse': '下一节课',
-  'push.nextCourseHint': '当天第一节课前 30 分钟，上一节课结束前 10 分钟。',
+  'push.nextCourseHint': '课间休息后的课程提前 30 分钟，连堂课在上一节课结束前 5 分钟。',
   'push.changes': '变动',
   'push.changesHint': '教室、时间、新增或取消的课程，涵盖今天和明天。',
+  'push.menu': '午餐菜单',
+  'push.menuHint': '上午最后一节课结束前 5 分钟。',
   'push.unsupported': '此浏览器无法接收通知。',
   'push.unavailable': '此服务器未启用通知。',
   'push.denied': '通知已被拦截。请在浏览器设置中允许。',

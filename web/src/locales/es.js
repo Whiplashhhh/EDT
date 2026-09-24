@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Notificaciones',
   'push.nextCourse': 'Próxima clase',
-  'push.nextCourseHint': '30 min antes de la primera clase del día, 10 min antes de que acabe la anterior.',
+  'push.nextCourseHint': '30 min antes de una clase que sigue a una pausa, 5 min antes de que acabe la anterior.',
   'push.changes': 'Cambios',
   'push.changesHint': 'Aula, horario, clases añadidas o anuladas, para hoy y mañana.',
+  'push.menu': 'Menú del mediodía',
+  'push.menuHint': '5 min antes de que acabe la última clase de la mañana.',
   'push.unsupported': 'Este navegador no puede recibir notificaciones.',
   'push.unavailable': 'Las notificaciones no están activadas en este servidor.',
   'push.denied': 'Las notificaciones están bloqueadas. Permítelas en los ajustes del navegador.',

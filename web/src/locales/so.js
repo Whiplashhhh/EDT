@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Ogeysiisyo',
   'push.nextCourse': 'Casharka xiga',
-  'push.nextCourseHint': '30 daqiiqo ka hor casharka koowaad ee maalinta, 10 daqiiqo ka hor inta uu kii hore dhammaanayo.',
+  'push.nextCourseHint': '30 daqiiqo ka hor cashar ku xiga nasasho, 5 daqiiqo ka hor dhammaadka kii hore.',
   'push.changes': 'Isbeddello',
   'push.changesHint': 'Qol, waqti, casharro la daray ama la joojiyey, maanta iyo berri.',
+  'push.menu': 'Liiska qadada',
+  'push.menuHint': '5 daqiiqo ka hor dhammaadka casharkii ugu dambeeyay ee subaxa.',
   'push.unsupported': 'Baraawsarkan ma heli karo ogeysiisyo.',
   'push.unavailable': 'Ogeysiisyada laguma shidin serferkan.',
   'push.denied': 'Ogeysiisyada waa la xannibay. Ka ogolow goobaha baraawsarka.',

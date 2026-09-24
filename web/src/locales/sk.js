@@ -32,9 +32,11 @@ export default {
 
   'push.section': 'Oznámenia',
   'push.nextCourse': 'Najbližšia hodina',
-  'push.nextCourseHint': '30 min pred prvou hodinou dňa, 10 min pred koncom predchádzajúcej.',
+  'push.nextCourseHint': '30 min pred hodinou po prestávke, 5 min pred koncom tej predchádzajúcej.',
   'push.changes': 'Zmeny',
   'push.changesHint': 'Učebňa, čas, pridané alebo zrušené hodiny, na dnes a zajtra.',
+  'push.menu': 'Obedové menu',
+  'push.menuHint': '5 min pred koncom poslednej doobedňajšej hodiny.',
   'push.unsupported': 'Tento prehliadač nevie prijímať oznámenia.',
   'push.unavailable': 'Oznámenia nie sú na tomto serveri zapnuté.',
   'push.denied': 'Oznámenia sú zablokované. Povoľ ich v nastaveniach prehliadača.',

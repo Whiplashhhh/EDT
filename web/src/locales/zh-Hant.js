@@ -32,9 +32,11 @@ export default {
 
   'push.section': '通知',
   'push.nextCourse': '下一堂課',
-  'push.nextCourseHint': '當天第一堂課前 30 分鐘，前一堂課結束前 10 分鐘。',
+  'push.nextCourseHint': '課間休息後的課程提前 30 分鐘，連堂課在上一節課結束前 5 分鐘。',
   'push.changes': '異動',
   'push.changesHint': '教室、時間、新增或取消的課程，涵蓋今天與明天。',
+  'push.menu': '午餐菜單',
+  'push.menuHint': '上午最後一節課結束前 5 分鐘。',
   'push.unsupported': '這個瀏覽器無法接收通知。',
   'push.unavailable': '此伺服器未啟用通知。',
   'push.denied': '通知已被封鎖。請在瀏覽器設定中允許。',
