@@ -1,5 +1,5 @@
 import type { CourseEvent } from '../ade/ics.ts';
-import { dayOf, type ScheduleChange } from './messages.ts';
+import { addDays, dayOf, startOfDay, type ScheduleChange } from './messages.ts';
 
 /**
  * Quand prévenir, et de quoi. Ce module ne parle ni à ADE ni au réseau : il ne
@@ -119,10 +119,11 @@ export function snapshotOf(events: CourseEvent[]): Map<string, CourseEvent> {
  * change de salle ou d'horaire : un cours déplacé se lit comme une modification,
  * pas comme une suppression suivie d'un ajout.
  *
- * La comparaison porte sur *toute* la fenêtre connue, et le filtrage aux deux
- * prochains jours n'intervient qu'ensuite (`changesWithin`). Comparer
- * directement deux fenêtres glissantes ferait apparaître comme « ajouté » tout
- * cours que le simple passage du temps fait entrer dans la fenêtre.
+ * La comparaison porte sur *toute* la fenêtre connue, et le filtrage à la
+ * journée en cours et à la suivante n'intervient qu'ensuite (`changesWithin`).
+ * Comparer directement deux fenêtres glissantes ferait apparaître comme
+ * « ajouté » tout cours que le simple passage du temps fait entrer dans la
+ * fenêtre.
  */
 export function diffSchedules(
   previous: Map<string, CourseEvent>,
@@ -156,13 +157,24 @@ function changeKind(before: CourseEvent, after: CourseEvent): ScheduleChange['ki
 }
 
 /**
- * Ne garde que les changements qui concernent les cours à venir dans les
- * `windowMs` prochaines heures — deux jours par défaut. Au-delà, un
- * réaménagement d'emploi du temps n'a pas à faire sonner un téléphone : il
- * sera vu en ouvrant l'application.
+ * Fin de la fenêtre des notifications de changement : la fin de la journée de
+ * demain, heure de Paris.
+ *
+ * Une durée fixe ferait varier la portée selon l'heure d'envoi ; une fin de
+ * journée se raisonne comme on lit un emploi du temps : ce qui bouge
+ * aujourd'hui ou demain.
  */
-export function changesWithin(changes: ScheduleChange[], now: number, windowMs: number): ScheduleChange[] {
-  const horizon = now + windowMs;
+export function changeHorizon(now: number): number {
+  return startOfDay(addDays(dayOf(new Date(now).toISOString()), 2));
+}
+
+/**
+ * Ne garde que les changements qui concernent les cours à venir d'ici la fin
+ * de la journée de demain. Au-delà, un réaménagement d'emploi du temps n'a pas
+ * à faire sonner un téléphone : il sera vu en ouvrant l'application.
+ */
+export function changesWithin(changes: ScheduleChange[], now: number): ScheduleChange[] {
+  const horizon = changeHorizon(now);
   return changes
     .filter((change) => {
       // Pour une suppression, c'est l'horaire qu'avait le cours qui compte.
