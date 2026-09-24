@@ -319,6 +319,13 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   border-radius: var(--radius-sm);
 }
 .fields select { flex: 0 1 auto; }
+/*
+  iOS Safari zoome automatiquement sur un champ dont la police fait moins de
+  16px, et ne dézoome jamais ensuite. Sur écran tactile on garde donc 16px.
+*/
+@media (pointer: coarse) {
+  .fields select, .fields input { font-size: 16px; }
+}
 .fields input:focus, .fields select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .tree {
