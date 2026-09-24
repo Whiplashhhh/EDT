@@ -77,7 +77,9 @@ const remaining = computed(() => {
 }
 /* Côte à côte, la colonne d'horaires mangerait la moitié de la carte :
    les heures repassent sur une ligne, au-dessus du titre. */
-.card.compact { grid-template-columns: 1fr; gap: 0.3rem 0; padding: 0.7rem 0.75rem; }
+/* Le contenu reste en haut : une carte tient la hauteur de sa durée, l'espace
+   libre d'un long cours se laisse en bas plutôt que de délier ses lignes. */
+.card.compact { grid-template-columns: 1fr; gap: 0.3rem 0; padding: 0.7rem 0.75rem; align-content: start; }
 .card.compact .hours { flex-direction: row; align-items: center; gap: 0.35rem; font-size: 0.88rem; }
 .card.compact .dash { width: 0.5rem; height: 1px; margin: 0; }
 .card.compact .subject { font-size: 0.95rem; }
