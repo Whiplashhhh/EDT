@@ -155,8 +155,18 @@ réglages. Pour les activer, générer une paire **une seule fois** :
 npm run vapid --workspace=server
 ```
 
+Ce script est le seul en JavaScript simple : il tourne sur n'importe quelle
+version de Node, y compris sur une machine d'hébergement trop ancienne pour le
+`--experimental-strip-types` du reste du serveur. Il lui faut seulement les
+dépendances installées. Sans elles — typiquement sur un serveur qui ne fait que
+lancer le conteneur — on passe par l'image :
+
+```bash
+docker run --rm edt-ulco node server/scripts/vapid.js
+```
+
 puis reporter `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` et `VAPID_SUBJECT` dans
-l'environnement. **Ne plus en changer ensuite** : les abonnements en cours
+l'environnement (fichier `.env` à côté de `compose.yaml`). **Ne plus en changer ensuite** : les abonnements en cours
 seraient invalidés et les téléphones cesseraient d'être prévenus sans rien
 signaler.
 

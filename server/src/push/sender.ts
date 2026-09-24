@@ -67,13 +67,3 @@ export class PushSender {
     }
   }
 }
-
-/**
- * Fabrique une paire de clés VAPID. Utilisé par `npm run vapid` pour
- * initialiser une installation : les clés sont ensuite fournies par
- * l'environnement et ne changent plus — les changer invaliderait tous les
- * abonnements existants.
- */
-export function generateVapidKeys(): { publicKey: string; privateKey: string } {
-  return webpush.generateVAPIDKeys();
-}
