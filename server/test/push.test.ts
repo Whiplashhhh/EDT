@@ -15,7 +15,17 @@ import {
   snapshotOf,
 } from '../src/push/planner.ts';
 import { changeNotification, nextCourseNotification } from '../src/push/messages.ts';
+import { createECDH, randomBytes } from 'node:crypto';
+import webpush from 'web-push';
 import { SubscriptionStore, type PushSubscription } from '../src/push/store.ts';
+import { generateVapidKeys } from '../scripts/vapid.mjs';
+
+/** Clé publique d'un abonné fictif, au format que réclame le protocole. */
+function subscriberPublicKey(): string {
+  const curve = createECDH('prime256v1');
+  curve.generateKeys();
+  return curve.getPublicKey('base64url');
+}
 import { Notifier } from '../src/push/notifier.ts';
 
 /** Un cours minimal : seuls les champs que le planificateur regarde sont renseignés. */
@@ -439,4 +449,49 @@ test('une avalanche de changements se résume en une notification', async () => 
   } finally {
     cleanup();
   }
+});
+
+/* --- Les clés VAPID d'amorçage, fabriquées sans dépendance. --- */
+
+test('generateVapidKeys produit une paire P-256 au format attendu', () => {
+  for (let i = 0; i < 50; i += 1) {
+    const { publicKey, privateKey } = generateVapidKeys();
+    const pub = Buffer.from(publicKey, 'base64url');
+    const priv = Buffer.from(privateKey, 'base64url');
+
+    // Point non compressé : 0x04 suivi de X et Y sur 32 octets chacun.
+    assert.equal(pub.length, 65, 'clé publique de 65 octets');
+    assert.equal(pub[0], 0x04, 'point non compressé');
+    // Le scalaire doit garder ses zéros de tête, sinon le format est refusé.
+    assert.equal(priv.length, 32, 'clé privée de 32 octets');
+  }
+});
+
+test('la clé publique VAPID correspond bien à la clé privée', () => {
+  const { publicKey, privateKey } = generateVapidKeys();
+  // On repart de la clé privée seule : la courbe doit retrouver la même clé publique.
+  const curve = createECDH('prime256v1');
+  curve.setPrivateKey(Buffer.from(privateKey, 'base64url'));
+  assert.equal(curve.getPublicKey('base64url'), publicKey);
+});
+
+test('web-push accepte les clés et sait signer avec', async () => {
+  const { publicKey, privateKey } = generateVapidKeys();
+  // `setVapidDetails` valide les longueurs et rejette une paire mal formée.
+  webpush.setVapidDetails('mailto:contact@example.org', publicKey, privateKey);
+
+  const details = webpush.generateRequestDetails(
+    {
+      endpoint: 'https://push.example.org/abc',
+      keys: {
+        // Clés d'un abonné fictif, elles aussi sur P-256.
+        p256dh: subscriberPublicKey(),
+        auth: randomBytes(16).toString('base64url'),
+      },
+    },
+    'coucou',
+  );
+
+  // L'en-tête n'existe que si le JWT a réellement été signé avec la clé privée.
+  assert.match(details.headers.Authorization, /^vapid t=[\w-]+\.[\w-]+\.[\w-]+, k=/);
 });
