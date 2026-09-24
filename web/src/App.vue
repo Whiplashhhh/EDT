@@ -9,7 +9,7 @@ import { usePush } from './composables/usePush.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
-import { LOCALES, setLocale, t } from './i18n.js';
+import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
 
 const THEMES = ['system', 'light', 'dark'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -110,6 +110,12 @@ function setTheme(theme) {
   settings.value = { ...settings.value, theme };
   writeSettings(settings.value);
 }
+
+/* Le sélecteur groupe les langues par région : une liste de cinquante entrées
+ * à plat ne se parcourt pas. */
+const localeGroups = computed(() =>
+  LOCALE_REGIONS.map((region) => ({ region, locales: LOCALES.filter((l) => l.region === region) })),
+);
 
 function setLang(lang) {
   settings.value = { ...settings.value, lang };
@@ -433,19 +439,18 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         </div>
       </div>
 
-      <div class="setting" role="group" :aria-label="t('app.language')">
-        <span class="setting-label">{{ t('app.language') }}</span>
-        <div class="segmented">
-          <button
-            v-for="option in LOCALES"
-            :key="option.id"
-            type="button"
-            :class="{ on: settings.lang === option.id }"
-            :aria-pressed="settings.lang === option.id"
-            :aria-label="option.label"
-            @click="setLang(option.id)"
-          >{{ option.short }}</button>
-        </div>
+      <div class="setting">
+        <label class="setting-label" for="lang-select">{{ t('app.language') }}</label>
+        <select
+          id="lang-select"
+          class="select"
+          :value="settings.lang"
+          @change="setLang($event.target.value)"
+        >
+          <optgroup v-for="group in localeGroups" :key="group.region" :label="t(`lang.${group.region}`)">
+            <option v-for="option in group.locales" :key="option.id" :value="option.id">{{ option.label }}</option>
+          </optgroup>
+        </select>
       </div>
     </div>
 
@@ -608,7 +613,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 
 .menu {
-  right: 0.85rem;
+  inset-inline-end: 0.85rem;
   display: flex;
   flex-direction: column;
   min-width: 15rem;
@@ -616,7 +621,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 
 .picker-panel {
-  left: 0.85rem;
+  inset-inline-start: 0.85rem;
   display: flex;
   flex-direction: column;
   width: min(24rem, calc(100vw - 1.7rem));
@@ -627,7 +632,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .menu > :where(button, a) {
   padding: 0.6rem 0.7rem;
   border-radius: var(--radius-sm);
-  text-align: left;
+  text-align: start;
   font-size: 0.92rem;
   color: var(--text);
   text-decoration: none;
@@ -661,6 +666,23 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 .segmented button:hover { color: var(--text); }
 .segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
+
+/* Liste déroulante native : elle sait déjà chercher au clavier et s'ouvre en
+   plein écran sur mobile, ce qu'aucun menu maison ne fait aussi bien. */
+.select {
+  max-width: 11rem;
+  padding: 0.3rem 0.55rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.select:hover { color: var(--accent); }
+.select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Les réglages de notification s'expliquent : ils s'empilent au lieu de s'aligner. */
 .setting.stack { flex-direction: column; align-items: stretch; gap: 0.5rem; }
@@ -742,8 +764,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .strip-stage .slide-prev-leave-active {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
 }
 
 /* Le contenu, lui, change de hauteur : il glisse en relais plutôt qu'en croisé. */

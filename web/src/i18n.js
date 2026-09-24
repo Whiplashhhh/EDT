@@ -1,211 +1,137 @@
 /**
- * Traductions de l'interface. Deux langues, pas de dépendance : les textes
- * tiennent dans un objet et `t()` lit une ref réactive, donc changer de langue
- * suffit à retraduire tout ce qui est affiché.
+ * Traductions de l'interface. Un fichier par langue dans `locales/`, pas de
+ * dépendance : `t()` lit une ref réactive, donc changer de langue suffit à
+ * retraduire tout ce qui est affiché.
+ *
+ * Le français et l'anglais sont dans le bundle — ce sont les langues de
+ * l'établissement. Les autres sont chargées à la demande : une cinquantaine de
+ * catalogues dans la page d'accueil pèserait plus que l'application elle-même.
  *
  * Ce qui vient d'ADE ou du Crous (intitulés de cours, plats) n'est pas traduit :
  * ce sont des données, pas de l'interface.
  */
 import { ref } from 'vue';
 import { setDateLocale } from './dates.js';
+import fr from './locales/fr.js';
+import en from './locales/en.js';
 
+/*
+ * `tag` sert au formatage des dates (Intl). Il est explicite plutôt que déduit
+ * de l'identifiant : certaines langues n'ont pas de données Intl dans les
+ * navigateurs, et il vaut mieux des dates en français qu'un repli surprise sur
+ * la langue du système.
+ */
 export const LOCALES = [
-  { id: 'fr', label: 'Français', short: 'FR' },
-  { id: 'en', label: 'English', short: 'EN' },
+  // Europe
+  { id: 'fr', label: 'Français', region: 'europe', tag: 'fr-FR' },
+  { id: 'en', label: 'English', region: 'europe', tag: 'en-GB' },
+  { id: 'es', label: 'Español', region: 'europe', tag: 'es-ES' },
+  { id: 'pt', label: 'Português', region: 'europe', tag: 'pt-PT' },
+  { id: 'de', label: 'Deutsch', region: 'europe', tag: 'de-DE' },
+  { id: 'it', label: 'Italiano', region: 'europe', tag: 'it-IT' },
+  { id: 'nl', label: 'Nederlands', region: 'europe', tag: 'nl-NL' },
+  { id: 'pl', label: 'Polski', region: 'europe', tag: 'pl-PL' },
+  { id: 'ro', label: 'Română', region: 'europe', tag: 'ro-RO' },
+  { id: 'el', label: 'Ελληνικά', region: 'europe', tag: 'el-GR' },
+  { id: 'sv', label: 'Svenska', region: 'europe', tag: 'sv-SE' },
+  { id: 'da', label: 'Dansk', region: 'europe', tag: 'da-DK' },
+  { id: 'fi', label: 'Suomi', region: 'europe', tag: 'fi-FI' },
+  { id: 'nb', label: 'Norsk', region: 'europe', tag: 'nb-NO' },
+  { id: 'cs', label: 'Čeština', region: 'europe', tag: 'cs-CZ' },
+  { id: 'sk', label: 'Slovenčina', region: 'europe', tag: 'sk-SK' },
+  { id: 'hu', label: 'Magyar', region: 'europe', tag: 'hu-HU' },
+  { id: 'bg', label: 'Български', region: 'europe', tag: 'bg-BG' },
+  { id: 'hr', label: 'Hrvatski', region: 'europe', tag: 'hr-HR' },
+  { id: 'sr', label: 'Српски', region: 'europe', tag: 'sr-RS' },
+  { id: 'sq', label: 'Shqip', region: 'europe', tag: 'sq-AL' },
+  { id: 'uk', label: 'Українська', region: 'europe', tag: 'uk-UA' },
+  { id: 'ru', label: 'Русский', region: 'europe', tag: 'ru-RU' },
+  { id: 'tr', label: 'Türkçe', region: 'europe', tag: 'tr-TR' },
+
+  // Afrique
+  { id: 'ar', label: 'العربية', region: 'africa', tag: 'ar', dir: 'rtl' },
+  { id: 'tzm', label: 'Tamaziɣt', region: 'africa', tag: 'fr-FR' },
+  { id: 'sw', label: 'Kiswahili', region: 'africa', tag: 'sw' },
+  { id: 'am', label: 'አማርኛ', region: 'africa', tag: 'am-ET' },
+  { id: 'ha', label: 'Hausa', region: 'africa', tag: 'ha' },
+  { id: 'yo', label: 'Yorùbá', region: 'africa', tag: 'yo' },
+  { id: 'ig', label: 'Igbo', region: 'africa', tag: 'ig' },
+  { id: 'zu', label: 'isiZulu', region: 'africa', tag: 'zu' },
+  { id: 'af', label: 'Afrikaans', region: 'africa', tag: 'af-ZA' },
+  { id: 'so', label: 'Soomaali', region: 'africa', tag: 'so' },
+  { id: 'wo', label: 'Wolof', region: 'africa', tag: 'fr-FR' },
+  { id: 'mg', label: 'Malagasy', region: 'africa', tag: 'mg' },
+
+  // Asie et Moyen-Orient
+  { id: 'zh-Hans', label: '简体中文', region: 'asia', tag: 'zh-Hans' },
+  { id: 'zh-Hant', label: '繁體中文', region: 'asia', tag: 'zh-Hant' },
+  { id: 'ja', label: '日本語', region: 'asia', tag: 'ja-JP' },
+  { id: 'ko', label: '한국어', region: 'asia', tag: 'ko-KR' },
+  { id: 'hi', label: 'हिन्दी', region: 'asia', tag: 'hi-IN' },
+  { id: 'bn', label: 'বাংলা', region: 'asia', tag: 'bn-BD' },
+  { id: 'ta', label: 'தமிழ்', region: 'asia', tag: 'ta-IN' },
+  { id: 'ur', label: 'اردو', region: 'asia', tag: 'ur-PK', dir: 'rtl' },
+  { id: 'fa', label: 'فارسی', region: 'asia', tag: 'fa-IR', dir: 'rtl' },
+  { id: 'he', label: 'עברית', region: 'asia', tag: 'he-IL', dir: 'rtl' },
+  { id: 'th', label: 'ไทย', region: 'asia', tag: 'th-TH' },
+  { id: 'vi', label: 'Tiếng Việt', region: 'asia', tag: 'vi-VN' },
+  { id: 'id', label: 'Bahasa Indonesia', region: 'asia', tag: 'id-ID' },
+  { id: 'ms', label: 'Bahasa Melayu', region: 'asia', tag: 'ms-MY' },
+  { id: 'tl', label: 'Tagalog', region: 'asia', tag: 'fil-PH' },
+
+  // Amériques
+  { id: 'ht', label: 'Kreyòl ayisyen', region: 'americas', tag: 'fr-FR' },
+  { id: 'qu', label: 'Runa simi', region: 'americas', tag: 'es-ES' },
 ];
+
+/** Ordre d'affichage des groupes du sélecteur. */
+export const LOCALE_REGIONS = ['europe', 'africa', 'asia', 'americas'];
+
+export const LOCALE_IDS = LOCALES.map((l) => l.id);
 
 const DEFAULT = 'fr';
 
-const messages = {
-  fr: {
-    'app.eyebrow.groups': 'Emploi du temps',
-    'app.eyebrow.rooms': 'Salle',
-    'app.eyebrow.teachers': 'Enseignant',
-    'app.pickResource': 'Choisir sa classe',
-    'app.today': 'Aujourd’hui',
-    'app.todayBadge': 'aujourd’hui',
-    'app.options': 'Options',
-    'app.viewWeek': 'Vue semaine',
-    'app.viewDay': 'Vue jour',
-    'app.changeResource': 'Classe, salle ou enseignant',
-    'app.subscribe': 'Exporter vers mon agenda',
-    'app.refresh': 'Actualiser',
-    'app.loading': 'Chargement…',
-    'app.stale': 'Données enregistrées sur l’appareil — actualisation en cours…',
-    'app.welcome': 'Choisis une classe, une salle ou un enseignant pour afficher son emploi du temps.',
-    'app.theme': 'Thème',
-    'app.themeSystem': 'Système',
-    'app.themeLight': 'Clair',
-    'app.themeDark': 'Sombre',
-    'app.language': 'Langue',
-    'app.changeIdentity': 'Mon calendrier',
-    'app.backToMine': ({ name }) => `Revenir à ${name}`,
-    'app.viewingOther': 'Vous consultez un autre emploi du temps',
+const byId = new Map(LOCALES.map((l) => [l.id, l]));
 
-    'gate.title': 'Qui es-tu ?',
-    'gate.intro':
-      'Choisis ta classe pour commencer. Si tu enseignes, choisis ton nom : c’est ton emploi du temps qui s’affichera.',
-    'gate.why': 'Ce choix reste sur cet appareil. Il sert d’emploi du temps par défaut et décide des notifications.',
-    'gate.action': 'Choisir ma classe ou mon nom',
+/*
+ * Vite transforme ce glob en une table d'imports dynamiques : chaque catalogue
+ * devient un fragment séparé, téléchargé au premier usage puis mis en cache par
+ * le service worker.
+ */
+const loaders = import.meta.glob('./locales/*.js');
 
-    'push.section': 'Notifications',
-    'push.nextCourse': 'Prochain cours',
-    'push.nextCourseHint': '30 min avant le premier cours du jour, 10 min avant la fin du cours précédent.',
-    'push.changes': 'Changements',
-    'push.changesHint': 'Salle, horaire, ajout ou annulation, pour aujourd’hui et demain.',
-    'push.unsupported': 'Ce navigateur ne sait pas recevoir de notifications.',
-    'push.unavailable': 'Les notifications ne sont pas activées sur ce serveur.',
-    'push.denied': 'Les notifications sont bloquées. Autorise-les dans les réglages du navigateur.',
-    'push.failed': 'Impossible d’activer les notifications pour le moment.',
-    'push.brave': 'Brave bloque les notifications par défaut. Ouvre brave://settings/privacy, active « Use Google services for push messaging », puis recharge cette page.',
-
-    'picker.mode': 'Que consulter',
-    'picker.kind.groups': 'Classes',
-    'picker.kind.rooms': 'Salles',
-    'picker.kind.teachers': 'Enseignants',
-    'picker.search.groups': 'Rechercher un groupe…',
-    'picker.search.rooms': 'Rechercher une salle…',
-    'picker.search.teachers': 'Rechercher un enseignant…',
-    'picker.courses': ({ n }) => `${n} cours`,
-    'picker.department': 'Formation',
-    'picker.loading': 'Chargement…',
-    'picker.empty': 'Aucun résultat.',
-    'picker.hint': 'Le choix est mémorisé sur cet appareil.',
-    'picker.identityHint': 'Modifiable à tout moment depuis le menu ⋯.',
-    'picker.expand': ({ name }) => `Déplier ${name}`,
-    'picker.collapse': ({ name }) => `Replier ${name}`,
-
-    'week.label': ({ n }) => `Semaine ${n}`,
-    'week.nav': 'Semaine',
-    'week.previous': 'Semaine précédente',
-    'week.next': 'Semaine suivante',
-
-    'day.aria': ({ day }) => `Cours du ${day}`,
-    'day.empty': 'Aucun cours ce jour-là.',
-    'day.courses': ({ n }) => `${n} cours`,
-    'day.break': ({ duration }) => `${duration} de pause`,
-    'card.remaining': ({ duration }) => `encore ${duration}`,
-
-    'crous.tag': 'Crous',
-    'crous.aria': 'Menu du Crous',
-    'crous.fallbackName': 'Restaurant universitaire',
-    'crous.fallbackHours': 'Service de 11h15 à 13h45',
-    'crous.closed': 'Restaurant fermé ce jour-là.',
-    'crous.loading': 'Chargement du menu…',
-    'crous.unknown': 'Menu non communiqué pour ce jour.',
-
-    'error.generic': 'Une erreur est survenue.',
-    'error.network': 'Impossible de contacter le serveur.',
-    'error.offline': 'Données hors ligne : impossible de contacter le serveur.',
-    'error.schedule': 'Impossible de charger l’emploi du temps.',
-    'error.groups': 'Impossible de charger la liste des groupes.',
-    'error.rooms': 'Impossible de charger la liste des salles.',
-    'error.teachers': 'Impossible de charger la liste des enseignants.',
-    'error.ade': 'Le serveur d’emploi du temps de l’ULCO est injoignable.',
-    'error.crous': 'Le menu du Crous est momentanément indisponible.',
-  },
-
-  en: {
-    'app.eyebrow.groups': 'Timetable',
-    'app.eyebrow.rooms': 'Room',
-    'app.eyebrow.teachers': 'Teacher',
-    'app.pickResource': 'Pick your class',
-    'app.today': 'Today',
-    'app.todayBadge': 'today',
-    'app.options': 'Options',
-    'app.viewWeek': 'Week view',
-    'app.viewDay': 'Day view',
-    'app.changeResource': 'Class, room or teacher',
-    'app.subscribe': 'Export to my calendar',
-    'app.refresh': 'Refresh',
-    'app.loading': 'Loading…',
-    'app.stale': 'Showing data saved on this device — refreshing…',
-    'app.welcome': 'Pick a class, a room or a teacher to see its timetable.',
-    'app.theme': 'Theme',
-    'app.themeSystem': 'System',
-    'app.themeLight': 'Light',
-    'app.themeDark': 'Dark',
-    'app.language': 'Language',
-    'app.changeIdentity': 'My calendar',
-    'app.backToMine': ({ name }) => `Back to ${name}`,
-    'app.viewingOther': 'You are viewing another timetable',
-
-    'gate.title': 'Who are you?',
-    'gate.intro':
-      'Pick your class to get started. If you teach, pick your name instead — your own timetable will be shown.',
-    'gate.why': 'This stays on your device. It is your default timetable, and it decides what you get notified about.',
-    'gate.action': 'Pick my class or my name',
-
-    'push.section': 'Notifications',
-    'push.nextCourse': 'Next class',
-    'push.nextCourseHint': '30 min before the first class of the day, 10 min before the previous one ends.',
-    'push.changes': 'Changes',
-    'push.changesHint': 'Room, time, added or cancelled classes, for today and tomorrow.',
-    'push.unsupported': 'This browser cannot receive notifications.',
-    'push.unavailable': 'Notifications are not enabled on this server.',
-    'push.denied': 'Notifications are blocked. Allow them in your browser settings.',
-    'push.failed': 'Could not turn notifications on right now.',
-    'push.brave': 'Brave blocks notifications by default. Open brave://settings/privacy, turn on “Use Google services for push messaging”, then reload this page.',
-
-    'picker.mode': 'What to show',
-    'picker.kind.groups': 'Classes',
-    'picker.kind.rooms': 'Rooms',
-    'picker.kind.teachers': 'Teachers',
-    'picker.search.groups': 'Search for a group…',
-    'picker.search.rooms': 'Search for a room…',
-    'picker.search.teachers': 'Search for a teacher…',
-    'picker.courses': ({ n }) => `${n} ${n === 1 ? 'class' : 'classes'}`,
-    'picker.department': 'Programme',
-    'picker.loading': 'Loading…',
-    'picker.empty': 'No match.',
-    'picker.hint': 'Your choice is saved on this device.',
-    'picker.identityHint': 'You can change this any time from the ⋯ menu.',
-    'picker.expand': ({ name }) => `Expand ${name}`,
-    'picker.collapse': ({ name }) => `Collapse ${name}`,
-
-    'week.label': ({ n }) => `Week ${n}`,
-    'week.nav': 'Week',
-    'week.previous': 'Previous week',
-    'week.next': 'Next week',
-
-    'day.aria': ({ day }) => `Classes on ${day}`,
-    'day.empty': 'No class that day.',
-    'day.courses': ({ n }) => `${n} ${n === 1 ? 'class' : 'classes'}`,
-    'day.break': ({ duration }) => `${duration} break`,
-    'card.remaining': ({ duration }) => `${duration} left`,
-
-    'crous.tag': 'Crous',
-    'crous.aria': 'Crous menu',
-    'crous.fallbackName': 'University restaurant',
-    'crous.fallbackHours': 'Served 11:15 am to 1:45 pm',
-    'crous.closed': 'Restaurant closed that day.',
-    'crous.loading': 'Loading the menu…',
-    'crous.unknown': 'No menu published for that day.',
-
-    'error.generic': 'Something went wrong.',
-    'error.network': 'Could not reach the server.',
-    'error.offline': 'Offline data: could not reach the server.',
-    'error.schedule': 'Could not load the timetable.',
-    'error.groups': 'Could not load the list of groups.',
-    'error.rooms': 'Could not load the list of rooms.',
-    'error.teachers': 'Could not load the list of teachers.',
-    'error.ade': 'The ULCO timetable server is unreachable.',
-    'error.crous': 'The Crous menu is temporarily unavailable.',
-  },
-};
+/** Catalogues déjà en mémoire. Une ref : `t()` se recalcule à l'arrivée d'un nouveau. */
+const loaded = ref({ fr, en });
 
 export const locale = ref(DEFAULT);
 
-export function setLocale(value) {
-  const id = LOCALES.some((l) => l.id === value) ? value : DEFAULT;
+/**
+ * Change la langue de l'interface. Asynchrone : le catalogue peut rester à
+ * télécharger. En cas d'échec (hors ligne, fichier absent), on garde la langue
+ * courante plutôt que d'afficher une interface à moitié traduite.
+ */
+export async function setLocale(value) {
+  const id = byId.has(value) ? value : DEFAULT;
+  if (!loaded.value[id]) {
+    const load = loaders[`./locales/${id}.js`];
+    if (!load) return;
+    try {
+      const mod = await load();
+      loaded.value = { ...loaded.value, [id]: mod.default };
+    } catch {
+      return;
+    }
+  }
+  const meta = byId.get(id);
   locale.value = id;
-  setDateLocale(id);
+  setDateLocale(meta.tag, id);
   document.documentElement.lang = id;
+  document.documentElement.dir = meta.dir ?? 'ltr';
 }
 
 /** Traduit une clé. `params` alimente les messages qui sont des fonctions. */
 export function t(key, params) {
-  const entry = messages[locale.value]?.[key] ?? messages[DEFAULT][key];
+  const entry = loaded.value[locale.value]?.[key] ?? fr[key];
   if (entry === undefined) return key;
   return typeof entry === 'function' ? entry(params ?? {}) : entry;
 }
@@ -213,7 +139,7 @@ export function t(key, params) {
 /** Message lisible pour une erreur d'API, quelle que soit la langue du serveur. */
 export function errorMessage(err, fallbackKey) {
   const key = err?.code ? `error.${err.code}` : null;
-  if (key && messages[DEFAULT][key] !== undefined) return t(key);
+  if (key && fr[key] !== undefined) return t(key);
   return t(fallbackKey);
 }
 

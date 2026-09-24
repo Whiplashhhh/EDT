@@ -68,7 +68,7 @@ const remaining = computed(() => {
   border: 1px solid color-mix(in srgb, var(--kind) 28%, var(--line));
   /* La barre de couleur court sur toute la hauteur : une bordure, pas un bloc
      enfermé dans le padding vertical de la carte. */
-  border-left: 4px solid var(--kind);
+  border-inline-start: 4px solid var(--kind);
   border-radius: var(--radius);
   overflow: hidden;
 }

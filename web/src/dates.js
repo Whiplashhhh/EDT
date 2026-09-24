@@ -42,12 +42,14 @@ export function weekNumber(iso) {
  * Les formats suivent la langue de l'interface. Les heures restent en 24 h même
  * en anglais : c'est ainsi qu'ADE et les salles de cours les affichent.
  */
-const TAGS = { fr: 'fr-FR', en: 'en-GB' };
+const DEFAULT_TAG = 'fr-FR';
 /*
  * La langue est une ref : les `computed` qui mettent en forme une date en
  * dépendent donc, et se recalculent d'eux-mêmes au changement de langue.
  */
-const tag = ref(TAGS.fr);
+const tag = ref(DEFAULT_TAG);
+/* L'identifiant de langue, lui, sert aux règles d'écriture (« 1 h 30 »). */
+const lang = ref('fr');
 
 const fmt = computed(() => ({
   time: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }),
@@ -58,8 +60,9 @@ const fmt = computed(() => ({
 }));
 
 /** Appelé par le module de traduction quand la langue change. */
-export function setDateLocale(locale) {
-  tag.value = TAGS[locale] ?? TAGS.fr;
+export function setDateLocale(localeTag, localeId) {
+  tag.value = localeTag ?? DEFAULT_TAG;
+  lang.value = localeId ?? 'fr';
 }
 
 export const formatTime = (iso) => fmt.value.time.format(new Date(iso));
@@ -96,7 +99,7 @@ export function formatDuration(start, end) {
 export function formatMinutesSpan(total) {
   const h = Math.floor(total / 60);
   const m = Math.round(total % 60);
-  const hour = tag.value === TAGS.fr ? `${h} h` : `${h}h`;
+  const hour = lang.value === 'fr' ? `${h} h` : `${h}h`;
   if (h && m) return `${hour} ${String(m).padStart(2, '0')}`;
   if (h) return hour;
   return `${m} min`;

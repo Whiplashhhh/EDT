@@ -57,7 +57,7 @@ const state = computed(() => {
   overflow: hidden;
   background: var(--crous-soft);
   border: 1px solid color-mix(in srgb, var(--crous) 45%, transparent);
-  border-left: 4px solid var(--crous-strong);
+  border-inline-start: 4px solid var(--crous-strong);
   border-radius: var(--radius);
 }
 
@@ -82,7 +82,7 @@ const state = computed(() => {
   color: #fff;
 }
 .hours {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 0.72rem;
   color: color-mix(in srgb, #fff 78%, transparent);
   font-variant-numeric: tabular-nums;

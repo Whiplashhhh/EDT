@@ -7,6 +7,11 @@ import type { CourseEvent } from '../ade/ics.ts';
  * qui se traduit dans le navigateur : au moment de l'envoi, la page n'est pas
  * ouverte. Chaque abonnement mémorise donc sa langue.
  *
+ * L'interface, elle, se décline en une cinquantaine de langues. Les
+ * notifications n'en connaissent que deux : qui ne lit pas le français reçoit
+ * l'anglais, faute de mieux. La langue demandée est tout de même conservée
+ * telle quelle, pour le jour où ces textes seront traduits eux aussi.
+ *
  * Les intitulés de cours, eux, ne sont pas traduits : ce sont des données ADE.
  */
 
@@ -16,6 +21,19 @@ export const LANGS: Lang[] = ['fr', 'en'];
 
 export function isLang(value: unknown): value is Lang {
   return typeof value === 'string' && (LANGS as string[]).includes(value);
+}
+
+/** Étiquette de langue plausible (`fr`, `pt`, `zh-Hans`…), pour ne rien stocker d'arbitraire. */
+const LANG_TAG = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/;
+
+/** La langue demandée par le navigateur, ou le français si elle est illisible. */
+export function readLang(value: unknown): string {
+  return typeof value === 'string' && LANG_TAG.test(value) ? value : 'fr';
+}
+
+/** La langue dans laquelle une notification sera écrite. */
+export function notificationLang(value: string): Lang {
+  return value === 'fr' ? 'fr' : 'en';
 }
 
 /** Fuseau de l'établissement : ADE publie en heure de Paris, les notifications aussi. */

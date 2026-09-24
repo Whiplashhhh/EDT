@@ -14,7 +14,7 @@ import {
   sessionsOf,
   snapshotOf,
 } from '../src/push/planner.ts';
-import { changeNotification, nextCourseNotification } from '../src/push/messages.ts';
+import { changeNotification, nextCourseNotification, notificationLang, readLang } from '../src/push/messages.ts';
 import { createECDH, randomBytes } from 'node:crypto';
 import webpush from 'web-push';
 import { SubscriptionStore, type PushSubscription } from '../src/push/store.ts';
@@ -189,6 +189,20 @@ test('le passage du temps n’invente pas de changement', () => {
 
   const changes = diffSchedules(snapshot, snapshotOf(twelveWeeks));
   assert.deepEqual(changesWithin(changes, Date.parse('2026-10-03T08:00:00.000Z')), []);
+});
+
+test('une langue d’interface inconnue des notifications bascule en anglais', () => {
+  // L'interface parle une cinquantaine de langues, les notifications deux.
+  assert.equal(notificationLang('fr'), 'fr');
+  assert.equal(notificationLang('en'), 'en');
+  assert.equal(notificationLang('vi'), 'en');
+  assert.equal(notificationLang('zh-Hans'), 'en');
+
+  // La langue demandée est conservée telle quelle, si elle a l'allure d'une étiquette.
+  assert.equal(readLang('zh-Hant'), 'zh-Hant');
+  assert.equal(readLang('tzm'), 'tzm');
+  assert.equal(readLang('n’importe quoi'), 'fr');
+  assert.equal(readLang(undefined), 'fr');
 });
 
 test('les notifications se lisent en français comme en anglais', () => {

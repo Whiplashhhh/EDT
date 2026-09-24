@@ -8,6 +8,7 @@ import {
   changeNotification,
   moreChangesNotification,
   nextCourseNotification,
+  notificationLang,
   type Lang,
   type Notification,
   type ScheduleChange,
@@ -219,5 +220,5 @@ export class Notifier {
 }
 
 function langOf(sub: PushSubscription): Lang {
-  return sub.lang === 'en' ? 'en' : 'fr';
+  return notificationLang(sub.lang);
 }

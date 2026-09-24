@@ -91,10 +91,17 @@ pas d'en changer. Il apparaît dans la vue jour, calé sur le service de 11 h 15
 dans le trou entre deux cours qui recouvre le service, sinon avant un premier cours qui
 commence après 11 h 15, sinon après un dernier cours qui finit avant 13 h 45.
 
-Côté navigateur, le thème (système / clair / sombre) et la langue (français /
-anglais) se règlent dans le menu ⋯ et sont mémorisés sur l'appareil. Les textes
-de l'interface vivent dans `web/src/i18n.js` ; ce qui vient d'ADE ou du Crous
-(intitulés de cours, plats) n'est pas traduit, ce sont des données.
+Côté navigateur, le thème (système / clair / sombre) et la langue se règlent dans
+le menu ⋯ et sont mémorisés sur l'appareil. L'interface se décline en une
+cinquantaine de langues, groupées par région dans la liste déroulante : la liste
+et les réglages associés (étiquette Intl pour les dates, sens d'écriture) vivent
+dans `web/src/i18n.js`, un catalogue de textes par langue dans
+`web/src/locales/`. Le français et l'anglais sont dans le bundle, les autres se
+téléchargent au premier usage puis restent en cache. Ce qui vient d'ADE ou du
+Crous (intitulés de cours, plats) n'est pas traduit, ce sont des données — et
+les notifications push, composées par le serveur, restent en français ou en
+anglais (`server/src/push/messages.ts`) : qui ne lit pas le français les reçoit
+en anglais.
 
 Les autres réglages sont dans `.env.example`.
 
