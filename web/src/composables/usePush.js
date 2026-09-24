@@ -16,6 +16,25 @@ import { api } from '../api.js';
  * langue ou d'options, sans mécanisme de synchronisation à part.
  */
 
+/**
+ * Brave, sur ordinateur, coupe par défaut le service de push : le réglage
+ * « Use Google services for push messaging » est éteint tant qu'on ne l'allume
+ * pas. L'autorisation d'afficher des notifications est bien accordée — c'est
+ * l'abonnement lui-même que le navigateur refuse, sans raison lisible. Sur
+ * téléphone, Brave passe par les services Google déjà présents et cela marche
+ * sans rien régler : l'échec n'arrive donc que sur ordinateur.
+ *
+ * Brave se déclare lui-même par cette API, la seule façon fiable de le
+ * reconnaître : sa signature de navigateur est volontairement celle de Chrome.
+ */
+async function isBrave() {
+  try {
+    return (await navigator.brave?.isBrave?.()) === true;
+  } catch {
+    return false;
+  }
+}
+
 /** La clé publique VAPID voyage en base64url ; `subscribe` veut des octets. */
 function decodeKey(base64) {
   const padding = '='.repeat((4 - (base64.length % 4)) % 4);
@@ -126,7 +145,19 @@ export function usePush() {
         }
       }
 
-      const subscription = (await browserSubscription(reg)).toJSON();
+      /*
+       * L'abonnement est isolé du reste : c'est là que se manifeste un
+       * navigateur qui refuse le service de push, et le dire précisément
+       * évite à l'utilisateur de chercher la panne de notre côté.
+       */
+      let subscription;
+      try {
+        subscription = (await browserSubscription(reg)).toJSON();
+      } catch (err) {
+        error.value = (await isBrave()) ? 'push.brave' : 'push.failed';
+        return false;
+      }
+
       await api.pushSubscribe({
         subscription,
         department: identity.department,

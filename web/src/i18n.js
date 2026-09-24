@@ -57,6 +57,7 @@ const messages = {
     'push.unavailable': 'Les notifications ne sont pas activées sur ce serveur.',
     'push.denied': 'Les notifications sont bloquées. Autorise-les dans les réglages du navigateur.',
     'push.failed': 'Impossible d’activer les notifications pour le moment.',
+    'push.brave': 'Brave bloque les notifications par défaut. Ouvre brave://settings/privacy, active « Use Google services for push messaging », puis recharge cette page.',
 
     'picker.mode': 'Que consulter',
     'picker.kind.groups': 'Classes',
@@ -144,6 +145,7 @@ const messages = {
     'push.unavailable': 'Notifications are not enabled on this server.',
     'push.denied': 'Notifications are blocked. Allow them in your browser settings.',
     'push.failed': 'Could not turn notifications on right now.',
+    'push.brave': 'Brave blocks notifications by default. Open brave://settings/privacy, turn on “Use Google services for push messaging”, then reload this page.',
 
     'picker.mode': 'What to show',
     'picker.kind.groups': 'Classes',
