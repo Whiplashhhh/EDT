@@ -87,16 +87,19 @@ const shift = (iso: string, minutes: number): string =>
   minutes ? new Date(Date.parse(iso) + minutes * 60_000).toISOString() : iso;
 
 /**
- * Recale une liste de cours sur la grille du département. Un département dont
- * la grille est inconnue — ou l'annuaire transversal des enseignants, qui n'en
- * a pas — garde les horaires d'ADE tels quels.
+ * Recale une liste de cours sur la grille de leur formation. Chaque cours suit
+ * la sienne — celle que le service lui a attachée —, car les départements ne
+ * partagent pas la même : une vue transversale (une salle, un enseignant) en
+ * réunit plusieurs et ne peut pas les recaler toutes de la même façon. Un
+ * département dont la grille est inconnue garde les horaires d'ADE tels quels.
  */
 export function alignToSlots(department: string, events: CourseEvent[]): CourseEvent[] {
-  if (!SLOTS[department]) return events;
   return events.map((event) => {
+    const grid = event.department ?? department;
+    if (!SLOTS[grid]) return event;
     const from = minutesOfDay(event.start);
     const to = minutesOfDay(event.end) || 24 * 60;
-    const real = realHours(department, from, to);
+    const real = realHours(grid, from, to);
     if (!real) return event;
     return { ...event, start: shift(event.start, real.from - from), end: shift(event.end, real.to - to) };
   });

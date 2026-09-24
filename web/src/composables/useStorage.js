@@ -79,15 +79,16 @@ export function readSettings() {
     const identity =
       readIdentity(parsed.identity) ??
       (IDENTITY_KINDS.includes(kind) && department && Number.isInteger(id)
-        ? { department: kind === 'teachers' ? 'all' : department, kind, resourceId: id, resourceName: name ?? '' }
+        ? { department: kind === 'groups' ? department : 'all', kind, resourceId: id, resourceName: name ?? '' }
         : null);
     return {
       /*
-       * Les enseignants se consultent toutes formations confondues : un prof
-       * mémorisé sous un département précis bascule sur la vue transversale.
-       * Son identifiant vient de son nom, il ne change donc pas.
+       * Les salles et les enseignants se consultent toutes formations
+       * confondues : une ressource mémorisée sous un département précis bascule
+       * sur la vue transversale. Son identifiant vient de son nom, il ne change
+       * donc pas.
        */
-      department: kind === 'teachers' && department ? 'all' : department,
+      department: kind !== 'groups' && department ? 'all' : department,
       kind,
       resourceId: Number.isInteger(id) ? id : null,
       resourceName: typeof name === 'string' ? name : null,

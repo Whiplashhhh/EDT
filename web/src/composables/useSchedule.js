@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { mondayOf } from '../dates.js';
-import { alignToSlots } from '../slots.js';
+import { alignToSlots, gridDepartment } from '../slots.js';
 import { errorMessage, t } from '../i18n.js';
 import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 
@@ -23,6 +23,10 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
   /* ADE publie des blocs d'une heure et demie : on leur rend l'horaire réel du
      département avant de les montrer. */
   const events = computed(() => alignToSlots(department.value, published.value));
+
+  /* Sur quelle grille graduer la vue semaine : celle de la formation consultée,
+     ou celle des cours affichés quand on regarde une salle ou un enseignant. */
+  const grid = computed(() => gridDepartment(department.value, published.value));
 
   const eventsByDay = computed(() => {
     const map = new Map();
@@ -78,5 +82,5 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
   });
   watch(focusedDay, () => load());
 
-  return { events, eventsByDay, loading, error, stale, fetchedAt, load };
+  return { events, eventsByDay, grid, loading, error, stale, fetchedAt, load };
 }

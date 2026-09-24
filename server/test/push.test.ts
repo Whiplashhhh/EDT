@@ -581,6 +581,24 @@ test('un département sans grille connue garde les horaires d’ADE', () => {
   assert.deepEqual(alignToSlots('all', raw), raw);
 });
 
+/*
+ * Une salle est occupée par tout l'établissement, et les formations n'ont pas la
+ * même grille : chaque cours se recale sur la sienne, pas sur celle de la vue.
+ */
+test('une vue transversale recale chaque cours sur la grille de sa formation', () => {
+  const [info, autre] = alignToSlots('all', [
+    course({ start: '2026-09-21T08:00:00.000Z', end: '2026-09-21T09:30:00.000Z', uid: 'info', department: 'iut-info' }),
+    course({ start: '2026-09-21T08:00:00.000Z', end: '2026-09-21T09:30:00.000Z', uid: 'gea', department: 'iut-gea' }),
+  ]);
+
+  // Le cours du BUT INFO suit sa grille : bloc ADE 10:00–11:30 → 10:10–11:35.
+  assert.equal(info.start, '2026-09-21T08:10:00.000Z');
+  assert.equal(info.end, '2026-09-21T09:35:00.000Z');
+  // Celui d'une formation sans grille connue garde les horaires d'ADE.
+  assert.equal(autre.start, '2026-09-21T08:00:00.000Z');
+  assert.equal(autre.end, '2026-09-21T09:30:00.000Z');
+});
+
 test('le menu part 5 minutes avant la fin du dernier cours de la matinée', () => {
   // 11 h 15 à Paris : c'est la matinée qui s'achève, pas le cours de 9 h 30.
   const reminders = menuRemindersFor(DAY);

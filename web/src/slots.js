@@ -98,16 +98,19 @@ const shift = (iso, minutes) =>
   minutes ? new Date(new Date(iso).getTime() + minutes * 60_000).toISOString() : iso;
 
 /**
- * Recale les horaires d'une liste de cours sur la grille du département. Le décalage
- * ne portant que sur les minutes, il s'applique à l'instant lui-même : la date et le
- * fuseau des cours restent intacts.
+ * Recale les horaires d'une liste de cours sur la grille de leur formation. Chaque
+ * cours suit la sienne, celle que le serveur lui a attachée : une salle réunit les
+ * cours de tout l'établissement, et les départements n'ont pas la même grille. Le
+ * décalage ne portant que sur les minutes, il s'applique à l'instant lui-même : la
+ * date et le fuseau des cours restent intacts.
  */
 export function alignToSlots(department, events) {
-  if (!SLOTS[department]) return events;
   return events.map((event) => {
+    const grid = event.department ?? department;
+    if (!SLOTS[grid]) return event;
     const from = minutesOfDay(event.start);
     const to = minutesOfDay(event.end) || 24 * 60;
-    const real = realHours(department, from, to);
+    const real = realHours(grid, from, to);
     if (!real) return event;
     return {
       ...event,
@@ -115,4 +118,16 @@ export function alignToSlots(department, events) {
       end: shift(event.end, real.to - to),
     };
   });
+}
+
+/**
+ * Département dont la grille gradue la vue semaine. Une vue transversale — une
+ * salle, un enseignant — n'a pas de grille à elle : elle emprunte celle de ses
+ * cours tant qu'ils viennent tous de la même formation, et se rabat sur une
+ * graduation horaire dès qu'ils en mêlent plusieurs, faute de grille commune.
+ */
+export function gridDepartment(department, events) {
+  if (SLOTS[department]) return department;
+  const found = new Set(events.map((event) => event.department).filter(Boolean));
+  return found.size === 1 ? [...found][0] : department;
 }
