@@ -118,9 +118,18 @@ Les autres réglages sont dans `.env.example`.
 | `GET /api/:dept/groups` | arbre des groupes |
 | `GET /api/:dept/groups/:id/schedule?from=AAAA-MM-JJ` | cours normalisés en JSON |
 | `GET /api/:dept/groups/:id/calendar.ics` | flux iCalendar à ajouter à son calendrier |
+| `GET /api/:dept/rooms` · `GET /api/:dept/teachers` | annuaire des salles, des enseignants |
+| `GET /api/:dept/:kind/:id/schedule` · `/calendar.ics` | même chose pour une salle, un enseignant |
 | `GET /api/push/config` | notifications proposées ? clé publique VAPID |
 | `POST /api/push/subscribe` | enregistre ou met à jour l'abonnement d'un appareil |
 | `POST /api/push/unsubscribe` | supprime l'abonnement d'un appareil |
+
+`:dept` vaut `all` pour les salles et les enseignants : une salle est partagée
+par tout l'établissement, un enseignant intervient souvent dans plusieurs
+formations. Les chercher formation par formation ferait passer une salle pour
+libre alors qu'un autre département l'occupe. Chaque cours retient d'où il vient,
+car les formations n'ont pas la même grille horaire (voir `ade/slots.ts`) : dans
+une telle vue, chacun est recalé sur la sienne.
 
 ## Identité et notifications
 

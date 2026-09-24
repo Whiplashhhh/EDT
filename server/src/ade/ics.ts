@@ -15,6 +15,12 @@ export interface CourseEvent {
   room: string | null;
   teachers: string[];
   groups: string[];
+  /**
+   * Formation d'où vient le cours. Renseigné par le service, pas par le flux :
+   * c'est lui qui dit sur quelle grille horaire recaler la séance lorsqu'une vue
+   * transversale — une salle, un enseignant — en réunit plusieurs.
+   */
+  department?: string;
 }
 
 /** Déplie les lignes iCalendar (RFC 5545 §3.1 : continuation par espace ou tabulation). */

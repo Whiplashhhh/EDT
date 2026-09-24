@@ -10,9 +10,11 @@ const KINDS = ['groups', 'rooms', 'teachers'];
  */
 const IDENTITY_KINDS = ['groups', 'teachers'];
 /**
- * Département fictif du serveur : toutes les formations réunies. Un enseignant
- * peut intervenir dans plusieurs départements — on le cherche donc partout,
- * et son emploi du temps les réunit tous.
+ * Département fictif du serveur : toutes les formations réunies. Une salle est
+ * partagée par tout l'établissement, et un enseignant peut intervenir dans
+ * plusieurs départements — on les cherche donc partout, et leur emploi du temps
+ * les réunit tous. Une salle affichée formation par formation paraîtrait libre
+ * alors qu'une autre l'occupe.
  */
 const ALL_DEPARTMENTS = 'all';
 
@@ -28,7 +30,8 @@ const emit = defineEmits(['choose', 'close']);
 const kinds = computed(() => (props.identityMode ? IDENTITY_KINDS : KINDS));
 
 const departments = ref([]);
-// Un enseignant n'appartient pas à une formation : `all` n'est pas un choix à mémoriser ici.
+// Ni une salle ni un enseignant n'appartiennent à une formation : `all` n'est
+// pas un choix à mémoriser ici.
 const selectedDept = ref(props.department === ALL_DEPARTMENTS ? null : props.department);
 // En mode identité, une salle mémorisée ne peut pas servir de point de départ.
 const selectedKind = ref(props.identityMode && !IDENTITY_KINDS.includes(props.kind) ? 'groups' : props.kind);
@@ -47,8 +50,8 @@ let hoverTimer = null;
 const searchInput = ref(null);
 
 const isTree = computed(() => selectedKind.value === 'groups');
-/** Les enseignants se cherchent toutes formations confondues. */
-const isCrossDepartment = computed(() => selectedKind.value === 'teachers');
+/** Les salles et les enseignants se cherchent toutes formations confondues. */
+const isCrossDepartment = computed(() => selectedKind.value !== 'groups');
 const effectiveDept = computed(() => (isCrossDepartment.value ? ALL_DEPARTMENTS : selectedDept.value));
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */

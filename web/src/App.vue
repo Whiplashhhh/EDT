@@ -69,7 +69,7 @@ const {
   sync: syncPush,
 } = usePush();
 
-const { eventsByDay, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
+const { eventsByDay, grid, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
 /*
  * Thème et langue sont appliqués au document lui-même : le thème par un attribut
@@ -494,7 +494,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
             </h2>
             <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
           </template>
-          <WeekGrid v-else :focused="focusedDay" :department="settings.department" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
+          <WeekGrid v-else :focused="focusedDay" :department="grid" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
         </div>
       </Transition>
 

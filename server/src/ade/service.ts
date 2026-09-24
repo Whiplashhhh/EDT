@@ -18,10 +18,12 @@ export function isResourceKind(value: string): value is ResourceKind {
 }
 
 /**
- * Département fictif qui réunit toutes les formations configurées. Un
- * enseignant intervient souvent dans plusieurs départements : le chercher
- * n'aurait pas de sens formation par formation. Réservé aux vues transversales
- * (`rooms`, `teachers`) — l'arbre des groupes, lui, reste propre à une formation.
+ * Département fictif qui réunit toutes les formations configurées. Une salle est
+ * partagée par tout l'établissement et un enseignant intervient souvent dans
+ * plusieurs départements : les chercher formation par formation n'aurait pas de
+ * sens, et une salle paraîtrait libre alors qu'une autre formation l'occupe.
+ * Réservé aux vues transversales (`rooms`, `teachers`) — l'arbre des groupes,
+ * lui, reste propre à une formation.
  */
 export const ALL_DEPARTMENTS = 'all';
 
@@ -219,7 +221,9 @@ export class AdeService {
         resourceName: group.name,
         from,
         fetchedAt: new Date().toISOString(),
-        events: parseAdeIcs(ics),
+        // Chaque cours retient d'où il vient : c'est sa formation qui dit sur
+        // quelle grille horaire le recaler, y compris dans une vue transversale.
+        events: parseAdeIcs(ics).map((event) => ({ ...event, department: dept.id })),
       };
     });
   }
