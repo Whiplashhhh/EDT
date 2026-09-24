@@ -11,6 +11,9 @@ const props = defineProps({
      Sur l'emploi du temps d'un enseignant, son nom est déjà dans l'en-tête et
      n'a pas besoin d'être répété sur chaque carte. */
   context: { type: String, default: 'groups' },
+  /* Carte réduite : deux cours simultanés se partagent la largeur, la colonne
+     d'horaires n'y tient plus et passe au-dessus du titre. */
+  compact: { type: Boolean, default: false },
 });
 
 const showTeachers = computed(() => props.context !== 'teachers' && props.event.teachers?.length > 0);
@@ -34,7 +37,7 @@ const remaining = computed(() => {
 </script>
 
 <template>
-  <article class="card tinted" :class="state" :style="tint">
+  <article class="card tinted" :class="[state, { compact }]" :style="tint">
     <div class="hours">
       <time :datetime="event.start">{{ formatTime(event.start) }}</time>
       <span class="dash" aria-hidden="true"></span>
@@ -72,6 +75,12 @@ const remaining = computed(() => {
   border-radius: var(--radius);
   overflow: hidden;
 }
+/* Côte à côte, la colonne d'horaires mangerait la moitié de la carte :
+   les heures repassent sur une ligne, au-dessus du titre. */
+.card.compact { grid-template-columns: 1fr; gap: 0.3rem 0; padding: 0.7rem 0.75rem; }
+.card.compact .hours { flex-direction: row; align-items: center; gap: 0.35rem; font-size: 0.88rem; }
+.card.compact .dash { width: 0.5rem; height: 1px; margin: 0; }
+.card.compact .subject { font-size: 0.95rem; }
 .card.past { opacity: 0.52; }
 .card.now { border-color: var(--kind); box-shadow: 0 0 0 1px var(--kind); }
 

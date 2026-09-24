@@ -25,20 +25,53 @@ function lunchOverlap(from, to) {
   return Math.min(minutesOfDay(to), LUNCH_TO) - Math.max(minutesOfDay(from), LUNCH_FROM);
 }
 
-/** Insère un séparateur quand deux cours sont séparés par au moins 45 minutes. */
+/**
+ * Regroupe les cours qui se chevauchent. Deux TD simultanés dans deux salles
+ * différentes forment un même bloc de la journée : les empiler l'un sous l'autre
+ * ferait croire qu'ils se suivent, alors qu'il faut choisir entre les deux.
+ */
+const clusters = computed(() => {
+  const sorted = [...props.events].sort(
+    (a, b) => new Date(a.start) - new Date(b.start) || new Date(a.end) - new Date(b.end),
+  );
+  const out = [];
+  for (const event of sorted) {
+    const current = out[out.length - 1];
+    // Un cours qui démarre avant la fin du bloc en cours le rejoint, côte à côte.
+    if (current && new Date(event.start) < new Date(current.end)) {
+      current.events.push(event);
+      if (new Date(event.end) > new Date(current.end)) current.end = event.end;
+    } else {
+      out.push({ start: event.start, end: event.end, events: [event] });
+    }
+  }
+  return out;
+});
+
+/** Insère un séparateur quand deux blocs sont séparés par au moins 15 minutes. */
 const rows = computed(() => {
   const out = [];
-  props.events.forEach((event, index) => {
-    const previous = props.events[index - 1];
+  clusters.value.forEach((cluster, index) => {
+    const previous = clusters.value[index - 1];
     if (previous) {
-      const gap = (new Date(event.start) - new Date(previous.end)) / 60_000;
-      if (gap >= 15) out.push({ type: 'gap', key: `gap-${event.uid}`, from: previous.end, to: event.start, minutes: gap });
+      const gap = (new Date(cluster.start) - new Date(previous.end)) / 60_000;
+      if (gap >= 15) {
+        out.push({
+          type: 'gap',
+          key: `gap-${cluster.events[0].uid}`,
+          from: previous.end,
+          to: cluster.start,
+          minutes: gap,
+        });
+      }
     }
     out.push({
       type: 'event',
-      key: event.uid,
-      event,
-      minutes: (new Date(event.end) - new Date(event.start)) / 60_000,
+      key: cluster.events.map((event) => event.uid).join('+'),
+      events: cluster.events,
+      /* La hauteur suit la durée du bloc entier : des cours simultanés de durées
+         différentes occupent la place du plus long, sans se décaler entre eux. */
+      minutes: (new Date(cluster.end) - new Date(cluster.start)) / 60_000,
     });
   });
 
@@ -61,8 +94,8 @@ const rows = computed(() => {
    * reste accessible : avant un premier cours qui commence après l'ouverture,
    * sinon après un dernier cours qui finit avant la fermeture.
    */
-  const first = props.events[0];
-  const last = props.events[props.events.length - 1];
+  const first = clusters.value[0];
+  const last = clusters.value[clusters.value.length - 1];
   if (first && minutesOfDay(first.start) > LUNCH_FROM) {
     out.unshift({ type: 'crous', key: 'crous-before' });
   } else if (last && minutesOfDay(last.end) < LUNCH_TO) {
@@ -88,7 +121,7 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
 <template>
   <section class="agenda" :aria-label="t('day.aria', { day })">
     <p v-if="events.length" class="summary">
-      {{ t('day.courses', { n: events.length }) }} · {{ totalHours }} · {{ formatTime(events[0].start) }} → {{ formatTime(events[events.length - 1].end) }}
+      {{ t('day.courses', { n: events.length }) }} · {{ totalHours }} · {{ formatTime(clusters[0].start) }} → {{ formatTime(clusters[clusters.length - 1].end) }}
     </p>
 
     <ol v-if="events.length" class="list">
@@ -98,7 +131,16 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
         :class="[row.type, { lunch: row.lunch }]"
         :style="row.lunch || row.type === 'crous' ? null : { minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) }"
       >
-        <EventCard v-if="row.type === 'event'" :event="row.event" :now="now" :context="context" />
+        <template v-if="row.type === 'event'">
+          <EventCard
+            v-for="event in row.events"
+            :key="event.uid"
+            :event="event"
+            :now="now"
+            :context="context"
+            :compact="row.events.length > 1"
+          />
+        </template>
         <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" />
         <p v-else class="gap-label">{{ gapLabel(row.minutes) }}</p>
       </li>
@@ -120,8 +162,10 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
   font-variant-numeric: tabular-nums;
 }
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-.list > li.event { display: flex; }
-.list > li.event > * { flex: 1; }
+/* Les cours simultanés se partagent la largeur au lieu de s'empiler : côte à côte,
+   on voit d'un coup qu'il faut choisir entre eux. */
+.list > li.event { display: flex; gap: 0.35rem; }
+.list > li.event > * { flex: 1 1 0; min-width: 0; }
 .list > li.gap {
   display: flex;
   align-items: center;
