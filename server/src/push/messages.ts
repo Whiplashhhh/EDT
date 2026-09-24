@@ -7,7 +7,7 @@ import type { CourseEvent } from '../ade/ics.ts';
  * qui se traduit dans le navigateur : au moment de l'envoi, la page n'est pas
  * ouverte. Chaque abonnement mémorise donc sa langue.
  *
- * L'interface, elle, se décline en une cinquantaine de langues. Les
+ * L'interface, elle, se décline en quarante-cinq langues. Les
  * notifications n'en connaissent que deux : qui ne lit pas le français reçoit
  * l'anglais, faute de mieux. La langue demandée est tout de même conservée
  * telle quelle, pour le jour où ces textes seront traduits eux aussi.

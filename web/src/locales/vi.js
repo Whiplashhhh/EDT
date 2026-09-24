@@ -89,5 +89,4 @@ export default {
   'lang.europe': 'Châu Âu',
   'lang.africa': 'Châu Phi',
   'lang.asia': 'Châu Á và Trung Đông',
-  'lang.americas': 'Châu Mỹ',
 };

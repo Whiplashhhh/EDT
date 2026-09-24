@@ -89,5 +89,4 @@ export default {
   'lang.europe': 'Yurub',
   'lang.africa': 'Afrika',
   'lang.asia': 'Aasiya iyo Bariga Dhexe',
-  'lang.americas': 'Ameerika',
 };

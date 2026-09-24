@@ -89,5 +89,4 @@ export default {
   'lang.europe': 'यूरोप',
   'lang.africa': 'अफ़्रीका',
   'lang.asia': 'एशिया और मध्य पूर्व',
-  'lang.americas': 'अमेरिका',
 };

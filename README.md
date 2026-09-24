@@ -92,8 +92,8 @@ dans le trou entre deux cours qui recouvre le service, sinon avant un premier co
 commence après 11 h 15, sinon après un dernier cours qui finit avant 13 h 45.
 
 Côté navigateur, le thème (système / clair / sombre) et la langue se règlent dans
-le menu ⋯ et sont mémorisés sur l'appareil. L'interface se décline en une
-cinquantaine de langues, groupées par région dans la liste déroulante : la liste
+le menu ⋯ et sont mémorisés sur l'appareil. L'interface se décline en
+quarante-cinq langues, groupées par région dans la liste déroulante : la liste
 et les réglages associés (étiquette Intl pour les dates, sens d'écriture) vivent
 dans `web/src/i18n.js`, un catalogue de textes par langue dans
 `web/src/locales/`. Le français et l'anglais sont dans le bundle, les autres se

@@ -192,7 +192,7 @@ test('le passage du temps n’invente pas de changement', () => {
 });
 
 test('une langue d’interface inconnue des notifications bascule en anglais', () => {
-  // L'interface parle une cinquantaine de langues, les notifications deux.
+  // L'interface parle quarante-cinq langues, les notifications deux.
   assert.equal(notificationLang('fr'), 'fr');
   assert.equal(notificationLang('en'), 'en');
   assert.equal(notificationLang('vi'), 'en');
@@ -200,7 +200,7 @@ test('une langue d’interface inconnue des notifications bascule en anglais', (
 
   // La langue demandée est conservée telle quelle, si elle a l'allure d'une étiquette.
   assert.equal(readLang('zh-Hant'), 'zh-Hant');
-  assert.equal(readLang('tzm'), 'tzm');
+  assert.equal(readLang('ms'), 'ms');
   assert.equal(readLang('n’importe quoi'), 'fr');
   assert.equal(readLang(undefined), 'fr');
 });
