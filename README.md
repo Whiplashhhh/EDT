@@ -155,20 +155,21 @@ réglages. Pour les activer, générer une paire **une seule fois** :
 npm run vapid --workspace=server
 ```
 
-Ce script est le seul en JavaScript simple : il tourne sur n'importe quelle
-version de Node, y compris sur une machine d'hébergement trop ancienne pour le
-`--experimental-strip-types` du reste du serveur. Il lui faut seulement les
-dépendances installées. Sans elles — typiquement sur un serveur qui ne fait que
-lancer le conteneur — on passe par l'image :
+C'est l'utilitaire d'amorçage, et le seul fichier du projet à n'avoir ni
+dépendance ni TypeScript : une clé VAPID est une simple paire de clés P-256
+que `node:crypto` produit tout seul. Il tourne donc sur la machine
+d'hébergement telle quelle — sans `npm install`, et sans le Node 22.6 qu'exige
+le `--experimental-strip-types` du reste du serveur. Au besoin, directement :
 
 ```bash
-docker run --rm edt-ulco node server/scripts/vapid.js
+node server/scripts/vapid.mjs
 ```
 
-puis reporter `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` et `VAPID_SUBJECT` dans
-l'environnement (fichier `.env` à côté de `compose.yaml`). **Ne plus en changer ensuite** : les abonnements en cours
-seraient invalidés et les téléphones cesseraient d'être prévenus sans rien
-signaler.
+Puis reporter `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` et `VAPID_SUBJECT` dans
+l'environnement — un fichier `.env` à côté de `compose.yaml`, que le service
+lit déjà et que `.gitignore` tient hors du dépôt. **Ne plus en changer
+ensuite** : les abonnements en cours seraient invalidés et les téléphones
+cesseraient d'être prévenus sans rien signaler.
 
 ### Ce qui est conservé
 
