@@ -48,6 +48,76 @@ const clusters = computed(() => {
   return out;
 });
 
+/* Hauteur proportionnelle : un cours de 2 h occupe deux fois la place d'un cours d'1 h. */
+const PX_PER_MIN = 0.95;
+
+/* La classe tient la colonne : ses cours se suivent de haut en bas, comme dans la
+   journée telle qu'elle est vécue. Sans classe — deux enseignants dans la même
+   salle —, c'est le nom du cours qui sert de repère. */
+const columnKey = (event) => (event.groups?.length ? event.groups.join(', ') : event.subject || '');
+
+/**
+ * Dispose les cours d'un bloc en grille : une colonne par classe, et une ligne par
+ * tranche horaire. Une tranche vaut sa durée, mais s'agrandit si une carte a besoin
+ * de plus de place : les proportions tiennent sans jamais rogner un libellé.
+ */
+function placeCluster(cluster) {
+  const origin = new Date(cluster.start).getTime();
+  const items = cluster.events.map((event) => ({
+    event,
+    from: (new Date(event.start).getTime() - origin) / 60_000,
+    to: (new Date(event.end).getTime() - origin) / 60_000,
+  }));
+
+  // Une colonne par classe, et une colonne de plus si une classe se dédouble.
+  const byClass = new Map();
+  for (const item of items) {
+    const key = columnKey(item.event);
+    if (!byClass.has(key)) byClass.set(key, []);
+    byClass.get(key).push(item);
+  }
+  const columns = [];
+  for (const group of byClass.values()) {
+    const lanes = [];
+    for (const item of group) {
+      let lane = lanes.find((candidate) => candidate.end <= item.from);
+      if (!lane) { lane = { end: -Infinity, items: [] }; lanes.push(lane); }
+      lane.items.push(item);
+      lane.end = Math.max(lane.end, item.to);
+    }
+    columns.push(...lanes.map((lane) => lane.items));
+  }
+
+  /* Les lignes de la grille : les instants où un cours commence ou s'arrête
+     découpent le bloc, et chaque tranche garde la hauteur de sa durée. */
+  const marks = [...new Set(items.flatMap((item) => [item.from, item.to]))].sort((a, b) => a - b);
+  const line = new Map(marks.map((at, index) => [at, index + 1]));
+
+  const cards = [];
+  columns.forEach((column, index) => {
+    for (const item of column) {
+      cards.push({
+        event: item.event,
+        style: {
+          gridColumn: `${index + 1}`,
+          gridRow: `${line.get(item.from)} / ${line.get(item.to)}`,
+        },
+      });
+    }
+  });
+
+  return {
+    cards,
+    compact: columns.length > 1,
+    grid: {
+      gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
+      gridTemplateRows: marks.slice(1)
+        .map((at, index) => `minmax(${Math.round((at - marks[index]) * PX_PER_MIN)}px, auto)`)
+        .join(' '),
+    },
+  };
+}
+
 /** Insère un séparateur quand deux blocs sont séparés par au moins 15 minutes. */
 const rows = computed(() => {
   const out = [];
@@ -68,10 +138,11 @@ const rows = computed(() => {
     out.push({
       type: 'event',
       key: cluster.events.map((event) => event.uid).join('+'),
-      events: cluster.events,
-      /* La hauteur suit la durée du bloc entier : des cours simultanés de durées
-         différentes occupent la place du plus long, sans se décaler entre eux. */
       minutes: (new Date(cluster.end) - new Date(cluster.start)) / 60_000,
+      /* Un cours seul reste dans le flux : il n'a personne avec qui s'aligner. */
+      ...(cluster.events.length > 1
+        ? placeCluster(cluster)
+        : { cards: [{ event: cluster.events[0], style: null }], compact: false, grid: null }),
     });
   });
 
@@ -109,13 +180,19 @@ const totalHours = computed(() =>
   formatMinutesSpan(props.events.reduce((sum, e) => sum + (new Date(e.end) - new Date(e.start)) / 60_000, 0)),
 );
 
-/* Hauteur proportionnelle : un cours de 2 h occupe deux fois la place d'un cours d'1 h. */
-const PX_PER_MIN = 0.95;
 const blockHeight = (minutes) => `${Math.round(minutes * PX_PER_MIN)}px`;
 /* Les longues pauses sont plafonnées pour ne pas repousser la suite hors de l'écran. */
 const gapHeight = (minutes) => `${Math.min(140, Math.max(26, Math.round(minutes * PX_PER_MIN)))}px`;
 
 const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minutes) });
+
+/* Un bloc de cours simultanés impose sa hauteur — c'est elle qui porte l'échelle
+   des cartes ; partout ailleurs, la ligne s'étire si son contenu déborde. */
+function rowStyle(row) {
+  if (row.lunch || row.type === 'crous') return null;
+  if (row.grid) return row.grid;
+  return { minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) };
+}
 </script>
 
 <template>
@@ -128,17 +205,18 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
       <li
         v-for="row in rows"
         :key="row.key"
-        :class="[row.type, { lunch: row.lunch }]"
-        :style="row.lunch || row.type === 'crous' ? null : { minHeight: row.type === 'event' ? blockHeight(row.minutes) : gapHeight(row.minutes) }"
+        :class="[row.type, { lunch: row.lunch, placed: row.grid }]"
+        :style="rowStyle(row)"
       >
         <template v-if="row.type === 'event'">
           <EventCard
-            v-for="event in row.events"
-            :key="event.uid"
-            :event="event"
+            v-for="item in row.cards"
+            :key="item.event.uid"
+            :event="item.event"
             :now="now"
             :context="context"
-            :compact="row.events.length > 1"
+            :compact="row.compact"
+            :style="item.style"
           />
         </template>
         <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" />
@@ -162,10 +240,13 @@ const gapLabel = (minutes) => t('day.break', { duration: formatMinutesSpan(minut
   font-variant-numeric: tabular-nums;
 }
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-/* Les cours simultanés se partagent la largeur au lieu de s'empiler : côte à côte,
-   on voit d'un coup qu'il faut choisir entre eux. */
-.list > li.event { display: flex; gap: 0.35rem; }
-.list > li.event > * { flex: 1 1 0; min-width: 0; }
+/* Les cours simultanés se partagent la largeur au lieu de s'empiler : une colonne
+   par classe, et on voit d'un coup qu'il faut choisir entre elles. */
+.list > li.event { display: flex; }
+.list > li.event > * { flex: 1; }
+/* Un bloc de cours simultanés devient une grille : les colonnes sont les classes,
+   les lignes les tranches horaires, et chaque carte occupe la sienne. */
+.list > li.event.placed { display: grid; gap: 2px 0.35rem; }
 .list > li.gap {
   display: flex;
   align-items: center;
