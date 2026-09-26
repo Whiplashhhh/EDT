@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Takaisin: ${name}`,
   'app.viewingOther': 'Katselet toisen lukujärjestystä',
 
+  'install.short': 'Asenna',
+  'install.title': 'Lisää Koti-valikkoon',
+  'install.close': 'Sulje',
+  'install.iosShare': 'Napauta Jaa-painiketta (joskus ⋯-valikossa)',
+  'install.iosAdd': 'Valitse ”Lisää Koti-valikkoon”',
+  'install.firefoxMenu': 'Napauta valikkoa',
+  'install.firefoxAdd': 'Valitse ”Lisää aloitusnäytölle” tai ”Asenna”',
+  'install.name': 'Nimeä kuvake, jos sitä kysytään, ja vahvista.',
+  'install.done': 'Valmis',
+
   'gate.title': 'Kuka olet?',
   'gate.intro':
     'Aloita valitsemalla ryhmäsi. Jos opetat, valitse nimesi: näet oman lukujärjestyksesi.',

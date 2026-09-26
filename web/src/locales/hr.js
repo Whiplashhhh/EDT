@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Natrag na ${name}`,
   'app.viewingOther': 'Gledaš tuđi raspored',
 
+  'install.short': 'Instaliraj',
+  'install.title': 'Dodaj na početni zaslon',
+  'install.close': 'Zatvori',
+  'install.iosShare': 'Dodirni gumb Podijeli (ponekad u izborniku ⋯)',
+  'install.iosAdd': 'Odaberi „Dodaj na početni zaslon”',
+  'install.firefoxMenu': 'Dodirni izbornik',
+  'install.firefoxAdd': 'Odaberi „Dodaj na početni zaslon” ili „Instaliraj”',
+  'install.name': 'Nazovi ikonu ako se to traži, pa potvrdi.',
+  'install.done': 'Gotovo',
+
   'gate.title': 'Tko si ti?',
   'gate.intro':
     'Za početak odaberi svoju grupu. Ako predaješ, odaberi svoje ime: prikazat će se tvoj raspored.',

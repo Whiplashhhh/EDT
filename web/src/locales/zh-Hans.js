@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的课程表',
 
+  'install.short': '安装',
+  'install.title': '添加到主屏幕',
+  'install.close': '关闭',
+  'install.iosShare': '轻点“分享”按钮（有时在 ⋯ 菜单中）',
+  'install.iosAdd': '选择“添加到主屏幕”',
+  'install.firefoxMenu': '轻点菜单',
+  'install.firefoxAdd': '选择“添加到主屏幕”或“安装”',
+  'install.name': '如有提示，为图标命名，然后确认。',
+  'install.done': '完成',
+
   'gate.title': '你是谁？',
   'gate.intro':
     '先选择你的班级。如果你是任课教师，请选择自己的姓名，将显示你本人的课程表。',

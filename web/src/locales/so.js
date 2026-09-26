@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Ku noqo ${name}`,
   'app.viewingOther': 'Waxaad eegaysaa jadwal kale',
 
+  'install.short': 'Ku rakib',
+  'install.title': 'Ku dar shaashadda hore',
+  'install.close': 'Xir',
+  'install.iosShare': 'Taabo badhanka La wadaag (mararka qaarkood liiska ⋯)',
+  'install.iosAdd': 'Dooro “Add to Home Screen”',
+  'install.firefoxMenu': 'Taabo liiska',
+  'install.firefoxAdd': 'Dooro “Add to Home screen” ama “Install”',
+  'install.name': 'Sii astaanta magac haddii lagu weydiiyo, kadibna xaqiiji.',
+  'install.done': 'Waa la dhammeeyay',
+
   'gate.title': 'Yaad tahay?',
   'gate.intro':
     'Dooro fasalkaaga si aad u bilowdo. Haddii aad wax dhigto, dooro magacaaga: jadwalkaaga ayaa soo bixi doona.',

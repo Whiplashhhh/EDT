@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Tilbake til ${name}`,
   'app.viewingOther': 'Du ser på en annen timeplan',
 
+  'install.short': 'Installer',
+  'install.title': 'Legg til på Hjem-skjerm',
+  'install.close': 'Lukk',
+  'install.iosShare': 'Trykk på Del-knappen (noen ganger i ⋯-menyen)',
+  'install.iosAdd': 'Velg «Legg til på Hjem-skjerm»',
+  'install.firefoxMenu': 'Trykk på menyen',
+  'install.firefoxAdd': 'Velg «Legg til på startskjermen» eller «Installer»',
+  'install.name': 'Gi ikonet et navn hvis du blir spurt, og bekreft.',
+  'install.done': 'Ferdig',
+
   'gate.title': 'Hvem er du?',
   'gate.intro':
     'Velg klassen din for å komme i gang. Underviser du, velg navnet ditt: din egen timeplan vises.',

@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `${name}(으)로 돌아가기`,
   'app.viewingOther': '다른 사람의 시간표를 보고 있습니다',
 
+  'install.short': '설치',
+  'install.title': '홈 화면에 추가',
+  'install.close': '닫기',
+  'install.iosShare': '공유 버튼을 탭하세요 (⋯ 메뉴 안에 있을 수도 있어요)',
+  'install.iosAdd': '\'홈 화면에 추가\'를 선택하세요',
+  'install.firefoxMenu': '메뉴를 탭하세요',
+  'install.firefoxAdd': '\'홈 화면에 추가\' 또는 \'설치\'를 선택하세요',
+  'install.name': '이름을 물으면 아이콘 이름을 정한 뒤 확인하세요.',
+  'install.done': '완료',
+
   'gate.title': '누구신가요?',
   'gate.intro':
     '먼저 반을 선택하세요. 강의를 하신다면 본인 이름을 선택하면 본인 시간표가 표시됩니다.',

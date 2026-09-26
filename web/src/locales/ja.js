@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `${name} に戻る`,
   'app.viewingOther': '他の人の時間割を表示しています',
 
+  'install.short': 'インストール',
+  'install.title': 'ホーム画面に追加',
+  'install.close': '閉じる',
+  'install.iosShare': '共有ボタンをタップ（⋯ メニュー内の場合もあります）',
+  'install.iosAdd': '「ホーム画面に追加」を選択',
+  'install.firefoxMenu': 'メニューをタップ',
+  'install.firefoxAdd': '「ホーム画面に追加」または「インストール」を選択',
+  'install.name': '名前を聞かれたらアイコン名を入力し、確定します。',
+  'install.done': '完了',
+
   'gate.title': 'あなたは誰ですか？',
   'gate.intro':
     'まずクラスを選んでください。教えている場合は自分の名前を選ぶと、自分の時間割が表示されます。',

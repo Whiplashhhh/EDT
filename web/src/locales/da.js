@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Tilbage til ${name}`,
   'app.viewingOther': 'Du ser et andet skema',
 
+  'install.short': 'Installer',
+  'install.title': 'Føj til hjemmeskærm',
+  'install.close': 'Luk',
+  'install.iosShare': 'Tryk på Del-knappen (nogle gange i ⋯-menuen)',
+  'install.iosAdd': 'Vælg “Føj til hjemmeskærm”',
+  'install.firefoxMenu': 'Tryk på menuen',
+  'install.firefoxAdd': 'Vælg “Føj til startskærm” eller “Installer”',
+  'install.name': 'Giv ikonet et navn, hvis du bliver spurgt, og bekræft.',
+  'install.done': 'Færdig',
+
   'gate.title': 'Hvem er du?',
   'gate.intro':
     'Vælg dit hold for at komme i gang. Underviser du, så vælg dit navn: dit eget skema bliver vist.',

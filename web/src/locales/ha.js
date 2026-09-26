@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Koma zuwa ${name}`,
   'app.viewingOther': 'Kana kallon wani jadawalin ne',
 
+  'install.short': 'Saka',
+  'install.title': 'Ƙara zuwa allon gida',
+  'install.close': 'Rufe',
+  'install.iosShare': 'Taɓa maɓallin Raba (wani lokaci a cikin menu ⋯)',
+  'install.iosAdd': 'Zaɓi “Add to Home Screen”',
+  'install.firefoxMenu': 'Taɓa menu',
+  'install.firefoxAdd': 'Zaɓi “Add to Home screen” ko “Install”',
+  'install.name': 'Ba gunkin suna idan an tambaye ka, sannan ka tabbatar.',
+  'install.done': 'An gama',
+
   'gate.title': 'Wane ne kai?',
   'gate.intro':
     'Zaɓi ajinka don farawa. Idan kana koyarwa, zaɓi sunanka: jadawalinka za a nuna.',

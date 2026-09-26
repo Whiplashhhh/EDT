@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Anda sedang melihat jadual orang lain',
 
+  'install.short': 'Pasang',
+  'install.title': 'Tambah ke Skrin Utama',
+  'install.close': 'Tutup',
+  'install.iosShare': 'Ketik butang Kongsi (kadangkala dalam menu ⋯)',
+  'install.iosAdd': 'Pilih “Tambah ke Skrin Utama”',
+  'install.firefoxMenu': 'Ketik menu',
+  'install.firefoxAdd': 'Pilih “Tambah ke skrin utama” atau “Pasang”',
+  'install.name': 'Namakan ikon jika diminta, kemudian sahkan.',
+  'install.done': 'Selesai',
+
   'gate.title': 'Siapa anda?',
   'gate.intro':
     'Pilih kelas anda untuk bermula. Jika anda mengajar, pilih nama anda: jadual anda sendiri akan dipaparkan.',

@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Terug naar ${name}`,
   'app.viewingOther': 'Je bekijkt een ander rooster',
 
+  'install.short': 'Installeren',
+  'install.title': 'Zet op beginscherm',
+  'install.close': 'Sluiten',
+  'install.iosShare': 'Tik op de deelknop (soms in het ⋯-menu)',
+  'install.iosAdd': 'Kies ‘Zet op beginscherm’',
+  'install.firefoxMenu': 'Tik op het menu',
+  'install.firefoxAdd': 'Kies ‘Toevoegen aan startscherm’ of ‘Installeren’',
+  'install.name': 'Geef het pictogram een naam als daarom gevraagd wordt en bevestig.',
+  'install.done': 'Klaar',
+
   'gate.title': 'Wie ben je?',
   'gate.intro':
     'Kies je klas om te beginnen. Geef je les, kies dan je naam: je eigen rooster wordt getoond.',

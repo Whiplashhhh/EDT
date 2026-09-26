@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Quay lại ${name}`,
   'app.viewingOther': 'Bạn đang xem thời khoá biểu của người khác',
 
+  'install.short': 'Cài đặt',
+  'install.title': 'Thêm vào Màn hình chính',
+  'install.close': 'Đóng',
+  'install.iosShare': 'Chạm vào nút Chia sẻ (đôi khi nằm trong menu ⋯)',
+  'install.iosAdd': 'Chọn “Thêm vào MH chính”',
+  'install.firefoxMenu': 'Chạm vào menu',
+  'install.firefoxAdd': 'Chọn “Thêm vào màn hình chính” hoặc “Cài đặt”',
+  'install.name': 'Đặt tên cho biểu tượng nếu được hỏi, rồi xác nhận.',
+  'install.done': 'Xong',
+
   'gate.title': 'Bạn là ai?',
   'gate.intro':
     'Chọn lớp của bạn để bắt đầu. Nếu bạn giảng dạy, hãy chọn tên mình: thời khoá biểu của bạn sẽ hiện ra.',

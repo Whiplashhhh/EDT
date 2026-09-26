@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Tillbaka till ${name}`,
   'app.viewingOther': 'Du tittar på ett annat schema',
 
+  'install.short': 'Installera',
+  'install.title': 'Lägg till på hemskärmen',
+  'install.close': 'Stäng',
+  'install.iosShare': 'Tryck på Dela-knappen (ibland i ⋯-menyn)',
+  'install.iosAdd': 'Välj ”Lägg till på hemskärmen”',
+  'install.firefoxMenu': 'Tryck på menyn',
+  'install.firefoxAdd': 'Välj ”Lägg till på startskärmen” eller ”Installera”',
+  'install.name': 'Namnge ikonen om du tillfrågas och bekräfta.',
+  'install.done': 'Klart',
+
   'gate.title': 'Vem är du?',
   'gate.intro':
     'Välj din klass för att börja. Om du undervisar, välj ditt namn: då visas ditt eget schema.',

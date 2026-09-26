@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的課表',
 
+  'install.short': '安裝',
+  'install.title': '加入主畫面',
+  'install.close': '關閉',
+  'install.iosShare': '點一下「分享」按鈕（有時在 ⋯ 選單中）',
+  'install.iosAdd': '選擇「加入主畫面」',
+  'install.firefoxMenu': '點一下選單',
+  'install.firefoxAdd': '選擇「加到主畫面」或「安裝」',
+  'install.name': '如有提示，為圖示命名，然後確認。',
+  'install.done': '完成',
+
   'gate.title': '你是誰？',
   'gate.intro':
     '先選擇你的班級。如果你是授課教師，請選擇自己的姓名，將顯示你本人的課表。',

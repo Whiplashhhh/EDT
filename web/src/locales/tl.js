@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Bumalik sa ${name}`,
   'app.viewingOther': 'Tinitingnan mo ang iskedyul ng iba',
 
+  'install.short': 'I-install',
+  'install.title': 'Idagdag sa Home Screen',
+  'install.close': 'Isara',
+  'install.iosShare': 'I-tap ang button na Share (minsan nasa menu na ⋯)',
+  'install.iosAdd': 'Piliin ang “Add to Home Screen”',
+  'install.firefoxMenu': 'I-tap ang menu',
+  'install.firefoxAdd': 'Piliin ang “Add to Home screen” o “Install”',
+  'install.name': 'Pangalanan ang icon kung itatanong, saka kumpirmahin.',
+  'install.done': 'Tapos na',
+
   'gate.title': 'Sino ka?',
   'gate.intro':
     'Piliin ang iyong klase para magsimula. Kung nagtuturo ka, piliin ang iyong pangalan: ang sarili mong iskedyul ang lalabas.',
