@@ -237,8 +237,7 @@ function movedFrom(from: string, to: string, lang: Lang): string {
 
 /**
  * Menu du jour au restaurant universitaire, tel qu'il tient sur un écran
- * verrouillé : les catégories dans l'ordre publié, séparées par des points
- * médians, et rien de plus.
+ * verrouillé : une ligne par catégorie, les plats d'abord, et rien de plus.
  */
 export interface MenuOfDay {
   /** Le Crous publie « Structure fermée » les jours de fermeture. */
@@ -246,8 +245,15 @@ export interface MenuOfDay {
   categories: { label: string; dishes: string[] }[];
 }
 
-/** Longueur au-delà de laquelle un téléphone tronque de toute façon le corps. */
-const MENU_MAX_LENGTH = 180;
+/**
+ * Garde-fou contre un menu démesuré. Le téléphone replie lui-même un corps
+ * long, et le déroule quand on appuie dessus : couper plus tôt, c'est perdre
+ * les plats que l'on voulait justement lire en dépliant.
+ */
+const MENU_MAX_LENGTH = 1000;
+
+/** Les plats sont ce qu'on cherche du regard ; garnitures, entrées et desserts suivent. */
+const MAIN_COURSE = /^plat/i;
 
 /**
  * « Menu du midi ». Le menu peut manquer de trois façons — restaurant fermé,
@@ -258,9 +264,13 @@ export function menuNotification(menu: MenuOfDay | null, day: string, lang: Lang
   const tr = T[lang];
   if (menu?.closed) return { title: tr.menuClosed, body: tr.menuNoService, tag: 'edt-menu', day };
 
-  const body = (menu?.categories ?? [])
+  const categories = menu?.categories ?? [];
+  const body = [
+    ...categories.filter((category) => MAIN_COURSE.test(category.label)),
+    ...categories.filter((category) => !MAIN_COURSE.test(category.label)),
+  ]
     .map((category) => `${category.label} : ${category.dishes.join(', ')}`)
-    .join(' · ');
+    .join('\n');
   return { title: tr.menu, body: body ? ellipsis(body) : tr.menuUnknown, tag: 'edt-menu', day };
 }
 
