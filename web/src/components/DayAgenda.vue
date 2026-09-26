@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import EventCard from './EventCard.vue';
 import CrousMenu from './CrousMenu.vue';
-import { formatTime, formatMinutesSpan, minutesOfDay } from '../dates.js';
+import { useCrousMenu } from '../composables/useCrousMenu.js';
+import { formatTime, formatMinutesSpan, isoDay, minutesOfDay, today } from '../dates.js';
 import { t } from '../i18n.js';
 
 const props = defineProps({
@@ -14,6 +15,14 @@ const props = defineProps({
   showMenu: { type: Boolean, default: true },
   context: { type: String, default: 'groups' },
 });
+
+const { load: loadMenu, menuFor } = useCrousMenu();
+onMounted(() => loadMenu());
+
+/* Un jour passé dont on n'a pas le menu ne mérite pas un bloc « rien de publié » :
+   l'information ne servira plus à personne, la pause redevient une pause. */
+const menuShown = computed(() => props.showMenu
+  && (props.day >= (props.now ? isoDay(props.now) : today()) || menuFor(props.day) !== null));
 
 /* Service du restaurant universitaire (11h15 → 13h45) : la pause qui recouvre
    cette plage reçoit le menu du Crous à la place du simple libellé de trou. */
@@ -161,7 +170,7 @@ const rows = computed(() => {
     });
   });
 
-  if (!props.showMenu) return out;
+  if (!menuShown.value) return out;
 
   // Une seule pause porte le menu : celle qui déborde le plus sur le service.
   let lunch = null;
