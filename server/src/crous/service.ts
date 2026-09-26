@@ -48,7 +48,8 @@ export class CrousService {
     return this.#cache.get(String(id), async () => {
       const [restaurant, menu] = await Promise.all([
         this.#get(`/restaurants/${id}`),
-        this.#get(`/restaurants/${id}/menu`),
+        // Rien de publié n'est pas une panne : les jours restent simplement vides.
+        this.#get(`/restaurants/${id}/menu`, { missingOk: true }),
       ]);
       return {
         restaurant: {
@@ -63,11 +64,13 @@ export class CrousService {
     });
   }
 
-  async #get(path: string): Promise<any> {
+  async #get(path: string, opts: { missingOk?: boolean } = {}): Promise<any> {
     const res = await fetch(`${this.#config.crousApiBase}${path}`, {
       headers: { Accept: 'application/json' },
       signal: AbortSignal.timeout(12_000),
     });
+    // CROUStillant répond 404 tant que le Crous n'a publié aucun menu.
+    if (res.status === 404 && opts.missingOk) return [];
     if (!res.ok) throw new CrousError(`CROUStillant a répondu ${res.status}`);
     const declared = Number(res.headers.get('content-length') ?? 0);
     if (declared > MAX_BYTES) throw new CrousError('Réponse CROUStillant trop volumineuse');
