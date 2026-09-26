@@ -267,28 +267,15 @@ entrant, et le certificat TLS est celui de Cloudflare — ni nginx ni certbot.
 
 Le tunnel est **géré depuis le tableau de bord** Cloudflare (Zero Trust →
 Networks → Tunnels) : il s'y déclare un *public hostname* `edt-iut.online` vers
-`http://edt:3000`, et le tableau de bord fournit un jeton. Le tunnel tourne dans
-sa propre pile, hors du dépôt, pour que le jeton ne croise jamais git :
+`http://edt:3000`, et le tableau de bord fournit un jeton. Le tunnel est le
+service `tunnel` de `compose.yaml` ; son jeton va dans `tunnel.env`
+(`TUNNEL_TOKEN=…`, en `chmod 600`), ignoré par git : il suffit à lui seul à se
+faire passer pour le site. Il est tenu à part de `.env` pour ne pas être injecté
+dans le conteneur `edt`.
 
-```yaml
-# ~/edt-tunnel/compose.yaml
-services:
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
-    networks: [edt_default]
-
-networks:
-  edt_default:
-    external: true
+```bash
+docker compose up -d --build
 ```
-
-Le jeton va dans `~/edt-tunnel/.env` (`TUNNEL_TOKEN=…`, en `chmod 600`) : il
-suffit à lui seul à se faire passer pour le site. Le réseau `edt_default` est
-celui créé par ce dépôt ; il doit donc être lancé en premier.
 
 Hors notifications, le service ne stocke rien et peut être redémarré librement.
 Avec elles, il tient un fichier d'abonnements : le volume `edt-data` doit suivre

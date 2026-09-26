@@ -19,5 +19,17 @@ services:
       - path: .env
         required: false
 
+  # Tunnel Cloudflare géré depuis le tableau de bord : il joint http://edt:3000
+  # par le réseau du projet, sans aucun port entrant sur le VPS.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: edt-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    depends_on: [edt]
+    # TUNNEL_TOKEN, à part de .env pour que le jeton n'atteigne pas le conteneur edt.
+    env_file:
+      - tunnel.env
+
 volumes:
   edt-data:

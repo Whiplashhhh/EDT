@@ -2,6 +2,7 @@ node_modules/
 web/dist/
 *.log
 .env
+tunnel.env
 .DS_Store
 .idea/
 server/data/
