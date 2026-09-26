@@ -6,6 +6,7 @@ import {
 } from '../dates.js';
 import { breaksOf, defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
 import { courseStyle } from '../colors.js';
+import { departmentTag } from '../departments.js';
 
 const props = defineProps({
   focused: { type: String, required: true },
@@ -161,6 +162,9 @@ const nowLine = computed(() => {
   return { day: iso, top: `${y(minutes)}px` };
 });
 
+/* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
+const deptOf = (event) => (props.context === 'groups' ? '' : departmentTag(event.department));
+
 const peopleOf = (event) =>
   (props.context === 'teachers' ? event.groups : event.teachers || []).join(', ');
 </script>
@@ -220,7 +224,10 @@ const peopleOf = (event) =>
             {{ block.event.subject }}
             <b v-if="block.event.kind" class="tag inline">{{ block.event.kind }}</b>
           </span>
-          <b v-if="block.event.room" class="room">{{ block.event.room }}</b>
+          <span v-if="block.event.room || deptOf(block.event)" class="where">
+            <b v-if="block.event.room" class="room">{{ block.event.room }}</b>
+            <span v-if="deptOf(block.event)" class="dept">{{ deptOf(block.event) }}</span>
+          </span>
           <span v-if="peopleOf(block.event)" class="teacher">{{ peopleOf(block.event) }}</span>
         </article>
 
@@ -309,10 +316,15 @@ const peopleOf = (event) =>
 .block.tiny .tag.inline { display: inline; }
 .title { font-weight: 650; overflow-wrap: anywhere; }
 /* La salle est l'information qu'on cherche en urgence : elle se détache. */
-.room {
-  align-self: flex-start;
-  max-width: 100%;
+.where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
   margin-top: 0.1rem;
+}
+.room {
+  max-width: 100%;
   padding: 0.02rem 0.28rem;
   font-size: 0.76rem;
   font-weight: 750;
@@ -320,6 +332,15 @@ const peopleOf = (event) =>
   background: color-mix(in srgb, var(--kind) 30%, transparent);
   border-radius: 4px;
   overflow-wrap: anywhere;
+}
+.dept {
+  padding: 0 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
 }
 .teacher { color: var(--text-muted); overflow-wrap: anywhere; }
 

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { formatTime, formatDuration, formatMinutesSpan } from '../dates.js';
 import { t } from '../i18n.js';
 import { courseStyle } from '../colors.js';
+import { departmentTag } from '../departments.js';
 
 const props = defineProps({
   event: { type: Object, required: true },
@@ -18,6 +19,8 @@ const props = defineProps({
 
 const showTeachers = computed(() => props.context !== 'teachers' && props.event.teachers?.length > 0);
 const showGroups = computed(() => props.event.groups?.length > 0);
+/* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
+const dept = computed(() => (props.context === 'groups' ? '' : departmentTag(props.event.department)));
 
 const tint = computed(() => courseStyle(props.event));
 
@@ -48,6 +51,7 @@ const remaining = computed(() => {
       <p class="meta">
         <b v-if="event.room" class="room">{{ event.room }}</b>
         <span v-if="event.kind" class="tag">{{ event.kind }}</span>
+        <span v-if="dept" class="dept">{{ dept }}</span>
         <span class="duration">{{ formatDuration(event.start, event.end) }}</span>
       </p>
       <p v-if="showTeachers || showGroups" class="people">
@@ -127,6 +131,16 @@ const remaining = computed(() => {
   background: color-mix(in srgb, var(--kind) 30%, transparent);
   border-radius: 6px;
   overflow-wrap: anywhere;
+}
+
+.dept {
+  padding: 0 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
 }
 
 .people { margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--text-muted); overflow-wrap: anywhere; }
