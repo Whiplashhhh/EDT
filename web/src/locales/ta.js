@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name} க்குத் திரும்பு`,
   'app.viewingOther': 'நீங்கள் வேறொருவரின் அட்டவணையைப் பார்க்கிறீர்கள்',
 
+  'compare.start': '2 அட்டவணைகளை அருகருகே காண்க',
+  'compare.stop': 'ஒப்பீட்டை நிறுத்து',
+  'compare.pick': 'ஒப்பிட அட்டவணையைத் தேர்வுசெய்க',
+  'compare.change': ({ name }) => `${name} மாற்று`,
+  'compare.close': ({ name }) => `${name} மறை`,
+
   'install.short': 'நிறுவு',
   'install.title': 'முகப்புத் திரையில் சேர்',
   'install.close': 'மூடு',

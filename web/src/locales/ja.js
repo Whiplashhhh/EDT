@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name} に戻る`,
   'app.viewingOther': '他の人の時間割を表示しています',
 
+  'compare.start': '2つの時間割を並べて表示',
+  'compare.stop': '比較をやめる',
+  'compare.pick': '比較する時間割を選択',
+  'compare.change': ({ name }) => `${name} を変更`,
+  'compare.close': ({ name }) => `${name} を非表示`,
+
   'install.short': 'インストール',
   'install.title': 'ホーム画面に追加',
   'install.close': '閉じる',

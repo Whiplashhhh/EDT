@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的课程表',
 
+  'compare.start': '同时查看 2 个课程表',
+  'compare.stop': '停止对比',
+  'compare.pick': '选择要对比的课程表',
+  'compare.change': ({ name }) => `更换 ${name}`,
+  'compare.close': ({ name }) => `不再显示 ${name}`,
+
   'install.short': '安装',
   'install.title': '添加到主屏幕',
   'install.close': '关闭',

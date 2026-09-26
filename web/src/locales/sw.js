@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Rudi kwa ${name}`,
   'app.viewingOther': 'Unaangalia ratiba ya mtu mwingine',
 
+  'compare.start': 'Tazama ratiba 2 kwa pamoja',
+  'compare.stop': 'Acha kulinganisha',
+  'compare.pick': 'Chagua ratiba ya kulinganisha',
+  'compare.change': ({ name }) => `Badilisha ${name}`,
+  'compare.close': ({ name }) => `Ficha ${name}`,
+
   'install.short': 'Sakinisha',
   'install.title': 'Ongeza kwenye skrini ya mwanzo',
   'install.close': 'Funga',

@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Terug na ${name}`,
   'app.viewingOther': 'Jy bekyk ’n ander rooster',
 
+  'compare.start': 'Wys 2 roosters langs mekaar',
+  'compare.stop': 'Hou op vergelyk',
+  'compare.pick': 'Kies ’n rooster om te vergelyk',
+  'compare.change': ({ name }) => `Verander ${name}`,
+  'compare.close': ({ name }) => `Versteek ${name}`,
+
   'install.short': 'Installeer',
   'install.title': 'Voeg by tuisskerm',
   'install.close': 'Maak toe',

@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Tillbaka till ${name}`,
   'app.viewingOther': 'Du tittar på ett annat schema',
 
+  'compare.start': 'Visa 2 scheman bredvid varandra',
+  'compare.stop': 'Sluta jämföra',
+  'compare.pick': 'Välj ett schema att jämföra',
+  'compare.change': ({ name }) => `Byt ${name}`,
+  'compare.close': ({ name }) => `Sluta visa ${name}`,
+
   'install.short': 'Installera',
   'install.title': 'Lägg till på hemskärmen',
   'install.close': 'Stäng',

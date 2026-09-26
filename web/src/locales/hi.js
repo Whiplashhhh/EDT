@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name} पर लौटें`,
   'app.viewingOther': 'आप किसी और की समय-सारणी देख रहे हैं',
 
+  'compare.start': '2 समय-सारणियाँ साथ-साथ देखें',
+  'compare.stop': 'तुलना बंद करें',
+  'compare.pick': 'तुलना के लिए समय-सारणी चुनें',
+  'compare.change': ({ name }) => `${name} बदलें`,
+  'compare.close': ({ name }) => `${name} छिपाएँ`,
+
   'install.short': 'इंस्टॉल करें',
   'install.title': 'होम स्क्रीन पर जोड़ें',
   'install.close': 'बंद करें',

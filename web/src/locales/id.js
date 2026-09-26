@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Kamu sedang melihat jadwal orang lain',
 
+  'compare.start': 'Lihat 2 jadwal berdampingan',
+  'compare.stop': 'Berhenti membandingkan',
+  'compare.pick': 'Pilih jadwal untuk dibandingkan',
+  'compare.change': ({ name }) => `Ganti ${name}`,
+  'compare.close': ({ name }) => `Sembunyikan ${name}`,
+
   'install.short': 'Pasang',
   'install.title': 'Tambahkan ke Layar Utama',
   'install.close': 'Tutup',

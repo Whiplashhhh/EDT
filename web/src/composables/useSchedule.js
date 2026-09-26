@@ -10,8 +10,11 @@ import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
  * ou un enseignant. ADE publie une fenêtre d'environ douze semaines à partir
  * d'un lundi donné : on recharge seulement quand on sort de la fenêtre déjà
  * en mémoire.
+ *
+ * `cacheSlot` sépare le cache hors ligne de deux emplois du temps chargés en
+ * même temps.
  */
-export function useSchedule(department, kind, resourceId, focusedDay) {
+export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlot } = {}) {
   const published = ref([]);
   const loading = ref(false);
   const error = ref(null);
@@ -49,7 +52,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
     controller?.abort();
     controller = new AbortController();
 
-    const cached = readCachedSchedule(department.value, kind.value, resourceId.value, from);
+    const cached = readCachedSchedule(department.value, kind.value, resourceId.value, from, cacheSlot);
     if (cached) {
       published.value = cached.events;
       fetchedAt.value = cached.fetchedAt;
@@ -65,7 +68,7 @@ export function useSchedule(department, kind, resourceId, focusedDay) {
       fetchedAt.value = data.fetchedAt;
       windowStart.value = from;
       stale.value = false;
-      writeCachedSchedule({ ...data, from });
+      writeCachedSchedule({ ...data, from }, cacheSlot);
     } catch (err) {
       if (err.name === 'AbortError') return;
       error.value = cached ? t('error.offline') : errorMessage(err, 'error.schedule');

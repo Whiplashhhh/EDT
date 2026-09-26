@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `กลับไปที่ ${name}`,
   'app.viewingOther': 'คุณกำลังดูตารางเรียนของคนอื่น',
 
+  'compare.start': 'ดูตารางเรียน 2 ตารางพร้อมกัน',
+  'compare.stop': 'หยุดเปรียบเทียบ',
+  'compare.pick': 'เลือกตารางที่จะเปรียบเทียบ',
+  'compare.change': ({ name }) => `เปลี่ยน ${name}`,
+  'compare.close': ({ name }) => `ซ่อน ${name}`,
+
   'install.short': 'ติดตั้ง',
   'install.title': 'เพิ่มไปยังหน้าจอโฮม',
   'install.close': 'ปิด',

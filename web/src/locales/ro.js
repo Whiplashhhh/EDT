@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Înapoi la ${name}`,
   'app.viewingOther': 'Vizualizezi un alt orar',
 
+  'compare.start': 'Vezi 2 orare în paralel',
+  'compare.stop': 'Oprește comparația',
+  'compare.pick': 'Alege orarul de comparat',
+  'compare.change': ({ name }) => `Schimbă ${name}`,
+  'compare.close': ({ name }) => `Nu mai afișa ${name}`,
+
   'install.short': 'Instalează',
   'install.title': 'Adaugă pe ecranul principal',
   'install.close': 'Închide',

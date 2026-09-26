@@ -17,6 +17,13 @@ const props = defineProps({
   /* Ce qu'on consulte. Sur l'emploi du temps d'un enseignant, répéter son nom
      sur chaque bloc n'apprend rien : c'est la classe qui manque. */
   context: { type: String, default: 'groups' },
+  /**
+   * Comparaison : une colonne par emploi du temps, toutes pour le jour `focused`,
+   * sur le même axe horaire — un trou à gauche se lit en face de ce qui se
+   * passe à droite. Chaque source porte `key`, `eventsByDay` et `context` ;
+   * l'en-tête de colonne est laissé à l'emplacement `head`.
+   */
+  sources: { type: Array, default: null },
 });
 const emit = defineEmits(['select']);
 
@@ -46,7 +53,19 @@ const days = computed(() => {
     .filter((day, index) => index < 5 || (props.eventsByDay.get(day) || []).length > 0);
 });
 
-const weekEvents = computed(() => days.value.flatMap((day) => props.eventsByDay.get(day) || []));
+const columnsOf = computed(() => (props.sources
+  ? props.sources.map((source) => ({
+    key: source.key,
+    day: props.focused,
+    events: source.eventsByDay.get(props.focused) || [],
+    context: source.context,
+    source,
+  }))
+  : days.value.map((day) => ({ key: day, day, events: props.eventsByDay.get(day) || [], context: props.context }))));
+
+const shownDays = computed(() => [...new Set(columnsOf.value.map((column) => column.day))]);
+
+const weekEvents = computed(() => columnsOf.value.flatMap((column) => column.events));
 
 /** Bornes de la grille, élargies jusqu'aux graduations qui encadrent les cours. */
 const range = computed(() => {
@@ -100,8 +119,8 @@ const bodyHeight = computed(() => y(range.value.to));
  * Place les cours d'une journée : position et hauteur proportionnelles à l'horaire,
  * et répartition en colonnes quand deux cours se chevauchent.
  */
-function layout(day) {
-  const events = [...(props.eventsByDay.get(day) || [])]
+function layout(dayEvents) {
+  const events = [...dayEvents]
     .map((event) => ({
       event,
       from: minutesOfDay(event.start),
@@ -151,39 +170,46 @@ function layout(day) {
   });
 }
 
-const columns = computed(() => days.value.map((day) => ({ day, blocks: layout(day) })));
+const columns = computed(() => columnsOf.value.map((column) => ({ ...column, blocks: layout(column.events) })));
 
 /** Position du trait « maintenant », uniquement si le jour est dans la semaine affichée. */
 const nowLine = computed(() => {
   const iso = today();
-  if (!props.now || !days.value.includes(iso)) return null;
+  if (!props.now || !shownDays.value.includes(iso)) return null;
   const minutes = minutesOfDay(new Date(props.now).toISOString());
   if (minutes < range.value.from || minutes > range.value.to) return null;
   return { day: iso, top: `${y(minutes)}px` };
 });
 
 /* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
-const deptOf = (event) => (props.context === 'groups' ? '' : departmentTag(event.department));
+const deptOf = (event, context) => (context === 'groups' ? '' : departmentTag(event.department));
 
-const peopleOf = (event) =>
-  (props.context === 'teachers' ? event.groups : event.teachers || []).join(', ');
+const peopleOf = (event, context) =>
+  (context === 'teachers' ? event.groups : event.teachers || []).join(', ');
 </script>
 
 <template>
   <div class="scroller">
-    <div class="grid" :style="{ '--cols': days.length, '--body-h': `${bodyHeight}px` }">
+    <div class="grid" :class="{ compare: sources }" :style="{ '--cols': columns.length, '--body-h': `${bodyHeight}px` }">
       <div class="head-corner"></div>
-      <button
-        v-for="day in days"
-        :key="`h-${day}`"
-        type="button"
-        class="col-head"
-        :class="{ today: day === today() }"
-        @click="emit('select', day)"
-      >
-        <span class="name">{{ formatDayShort(day) }}</span>
-        <span class="num">{{ dayNumber(day) }}</span>
-      </button>
+      <template v-if="sources">
+        <div v-for="column in columns" :key="`h-${column.key}`" class="col-head source">
+          <slot name="head" :source="column.source" />
+        </div>
+      </template>
+      <template v-else>
+        <button
+          v-for="day in days"
+          :key="`h-${day}`"
+          type="button"
+          class="col-head"
+          :class="{ today: day === today() }"
+          @click="emit('select', day)"
+        >
+          <span class="name">{{ formatDayShort(day) }}</span>
+          <span class="num">{{ dayNumber(day) }}</span>
+        </button>
+      </template>
 
       <div class="axis">
         <span
@@ -196,9 +222,9 @@ const peopleOf = (event) =>
 
       <div
         v-for="column in columns"
-        :key="column.day"
+        :key="column.key"
         class="col"
-        :class="{ today: column.day === today() }"
+        :class="{ today: !sources && column.day === today() }"
       >
         <div
           v-for="tick in ticks"
@@ -224,11 +250,11 @@ const peopleOf = (event) =>
             {{ block.event.subject }}
             <b v-if="block.event.kind" class="tag inline">{{ block.event.kind }}</b>
           </span>
-          <span v-if="block.event.room || deptOf(block.event)" class="where">
+          <span v-if="block.event.room || deptOf(block.event, column.context)" class="where">
             <b v-if="block.event.room" class="room">{{ block.event.room }}</b>
-            <span v-if="deptOf(block.event)" class="dept">{{ deptOf(block.event) }}</span>
+            <span v-if="deptOf(block.event, column.context)" class="dept">{{ deptOf(block.event, column.context) }}</span>
           </span>
-          <span v-if="peopleOf(block.event)" class="teacher">{{ peopleOf(block.event) }}</span>
+          <span v-if="peopleOf(block.event, column.context)" class="teacher">{{ peopleOf(block.event, column.context) }}</span>
         </article>
 
         <div
@@ -265,6 +291,13 @@ const peopleOf = (event) =>
 .name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
 .num { font-weight: 650; font-variant-numeric: tabular-nums; }
 .col-head.today .num { color: var(--accent); }
+/* L'en-tête d'une colonne comparée porte un nom de classe : il doit pouvoir
+   rétrécir plutôt qu'élargir la colonne. */
+.col-head.source { min-width: 0; justify-content: stretch; padding: 0.25rem 0; }
+
+/* Deux colonnes seulement : chacune a la place d'un texte un peu plus grand. */
+.grid.compare .block { font-size: 0.8rem; padding: 0.3rem 0.4rem; }
+.grid.compare .hours { font-size: 0.7rem; }
 
 .axis { position: relative; }
 .axis-hour {

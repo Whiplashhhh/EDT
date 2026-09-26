@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Natrag na ${name}`,
   'app.viewingOther': 'Gledaš tuđi raspored',
 
+  'compare.start': 'Prikaži 2 rasporeda usporedno',
+  'compare.stop': 'Prekini usporedbu',
+  'compare.pick': 'Odaberi raspored za usporedbu',
+  'compare.change': ({ name }) => `Promijeni ${name}`,
+  'compare.close': ({ name }) => `Sakrij ${name}`,
+
   'install.short': 'Instaliraj',
   'install.title': 'Dodaj na početni zaslon',
   'install.close': 'Zatvori',

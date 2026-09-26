@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Назад на ${name}`,
   'app.viewingOther': 'Гледаш туђи распоред',
 
+  'compare.start': 'Прикажи 2 распореда упоредо',
+  'compare.stop': 'Прекини поређење',
+  'compare.pick': 'Изабери распоред за поређење',
+  'compare.change': ({ name }) => `Промени ${name}`,
+  'compare.close': ({ name }) => `Сакриј ${name}`,
+
   'install.short': 'Инсталирај',
   'install.title': 'Додај на почетни екран',
   'install.close': 'Затвори',

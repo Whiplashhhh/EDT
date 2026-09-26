@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Повернутися до ${name}`,
   'app.viewingOther': 'Ти переглядаєш чужий розклад',
 
+  'compare.start': 'Показати 2 розклади поруч',
+  'compare.stop': 'Припинити порівняння',
+  'compare.pick': 'Обери розклад для порівняння',
+  'compare.change': ({ name }) => `Змінити ${name}`,
+  'compare.close': ({ name }) => `Приховати ${name}`,
+
   'install.short': 'Встановити',
   'install.title': 'Додати на початковий екран',
   'install.close': 'Закрити',

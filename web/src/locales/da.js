@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Tilbage til ${name}`,
   'app.viewingOther': 'Du ser et andet skema',
 
+  'compare.start': 'Se 2 skemaer side om side',
+  'compare.stop': 'Stop sammenligning',
+  'compare.pick': 'Vælg et skema at sammenligne',
+  'compare.change': ({ name }) => `Skift ${name}`,
+  'compare.close': ({ name }) => `Skjul ${name}`,
+
   'install.short': 'Installer',
   'install.title': 'Føj til hjemmeskærm',
   'install.close': 'Luk',

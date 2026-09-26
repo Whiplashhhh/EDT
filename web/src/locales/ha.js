@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Koma zuwa ${name}`,
   'app.viewingOther': 'Kana kallon wani jadawalin ne',
 
+  'compare.start': 'Duba jadawali 2 a lokaci guda',
+  'compare.stop': 'Daina kwatantawa',
+  'compare.pick': 'Zaɓi jadawalin da za a kwatanta',
+  'compare.change': ({ name }) => `Canza ${name}`,
+  'compare.close': ({ name }) => `Ɓoye ${name}`,
+
   'install.short': 'Saka',
   'install.title': 'Ƙara zuwa allon gida',
   'install.close': 'Rufe',

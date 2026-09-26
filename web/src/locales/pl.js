@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Wróć do ${name}`,
   'app.viewingOther': 'Przeglądasz cudzy plan zajęć',
 
+  'compare.start': 'Pokaż 2 plany obok siebie',
+  'compare.stop': 'Zakończ porównanie',
+  'compare.pick': 'Wybierz plan do porównania',
+  'compare.change': ({ name }) => `Zmień ${name}`,
+  'compare.close': ({ name }) => `Ukryj ${name}`,
+
   'install.short': 'Zainstaluj',
   'install.title': 'Dodaj do ekranu początkowego',
   'install.close': 'Zamknij',

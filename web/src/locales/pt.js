@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Voltar a ${name}`,
   'app.viewingOther': 'Estás a ver outro horário',
 
+  'compare.start': 'Ver 2 horários em simultâneo',
+  'compare.stop': 'Parar de comparar',
+  'compare.pick': 'Escolhe o horário a comparar',
+  'compare.change': ({ name }) => `Mudar ${name}`,
+  'compare.close': ({ name }) => `Deixar de mostrar ${name}`,
+
   'install.short': 'Instalar',
   'install.title': 'Adicionar ao ecrã principal',
   'install.close': 'Fechar',

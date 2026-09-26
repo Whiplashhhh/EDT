@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Terug naar ${name}`,
   'app.viewingOther': 'Je bekijkt een ander rooster',
 
+  'compare.start': '2 roosters naast elkaar bekijken',
+  'compare.stop': 'Stoppen met vergelijken',
+  'compare.pick': 'Kies een rooster om te vergelijken',
+  'compare.change': ({ name }) => `${name} wijzigen`,
+  'compare.close': ({ name }) => `${name} niet meer tonen`,
+
   'install.short': 'Installeren',
   'install.title': 'Zet op beginscherm',
   'install.close': 'Sluiten',

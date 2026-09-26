@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Anda sedang melihat jadual orang lain',
 
+  'compare.start': 'Lihat 2 jadual bersebelahan',
+  'compare.stop': 'Berhenti membanding',
+  'compare.pick': 'Pilih jadual untuk dibandingkan',
+  'compare.change': ({ name }) => `Tukar ${name}`,
+  'compare.close': ({ name }) => `Sembunyikan ${name}`,
+
   'install.short': 'Pasang',
   'install.title': 'Tambah ke Skrin Utama',
   'install.close': 'Tutup',

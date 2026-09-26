@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `חזרה אל ${name}`,
   'app.viewingOther': 'אתה צופה במערכת שעות אחרת',
 
+  'compare.start': 'הצגת 2 מערכות שעות זו לצד זו',
+  'compare.stop': 'הפסקת ההשוואה',
+  'compare.pick': 'בחירת מערכת שעות להשוואה',
+  'compare.change': ({ name }) => `החלפת ${name}`,
+  'compare.close': ({ name }) => `הסתרת ${name}`,
+
   'install.short': 'התקנה',
   'install.title': 'הוספה למסך הבית',
   'install.close': 'סגירה',

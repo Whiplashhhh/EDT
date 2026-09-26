@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Вернуться к ${name}`,
   'app.viewingOther': 'Ты смотришь чужое расписание',
 
+  'compare.start': 'Показать 2 расписания рядом',
+  'compare.stop': 'Закончить сравнение',
+  'compare.pick': 'Выбери расписание для сравнения',
+  'compare.change': ({ name }) => `Изменить ${name}`,
+  'compare.close': ({ name }) => `Скрыть ${name}`,
+
   'install.short': 'Установить',
   'install.title': 'Добавить на экран «Домой»',
   'install.close': 'Закрыть',

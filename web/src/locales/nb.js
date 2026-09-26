@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Tilbake til ${name}`,
   'app.viewingOther': 'Du ser på en annen timeplan',
 
+  'compare.start': 'Vis 2 timeplaner side om side',
+  'compare.stop': 'Avslutt sammenligning',
+  'compare.pick': 'Velg en timeplan å sammenligne',
+  'compare.change': ({ name }) => `Bytt ${name}`,
+  'compare.close': ({ name }) => `Skjul ${name}`,
+
   'install.short': 'Installer',
   'install.title': 'Legg til på Hjem-skjerm',
   'install.close': 'Lukk',
