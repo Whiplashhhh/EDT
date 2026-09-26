@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Înapoi la ${name}`,
   'app.viewingOther': 'Vizualizezi un alt orar',
 
+  'install.short': 'Instalează',
+  'install.title': 'Adaugă pe ecranul principal',
+  'install.close': 'Închide',
+  'install.iosShare': 'Atinge butonul Partajează (uneori în meniul ⋯)',
+  'install.iosAdd': 'Alege „Adaugă pe ecranul principal”',
+  'install.firefoxMenu': 'Atinge meniul',
+  'install.firefoxAdd': 'Alege „Adaugă pe ecranul de pornire” sau „Instalează”',
+  'install.name': 'Dă un nume pictogramei dacă ți se cere, apoi confirmă.',
+  'install.done': 'Gata',
+
   'gate.title': 'Cine ești?',
   'gate.intro':
     'Alege-ți grupa pentru a începe. Dacă predai, alege-ți numele: se va afișa propriul tău orar.',

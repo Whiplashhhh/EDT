@@ -6,6 +6,7 @@ import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
+import { useInstall } from './composables/useInstall.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
@@ -68,6 +69,8 @@ const {
   loadConfig: loadPushConfig,
   sync: syncPush,
 } = usePush();
+
+const { mode: installMode, guideOpen: installGuideOpen, install, markDone: markInstalled } = useInstall();
 
 const { eventsByDay, grid, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
@@ -320,6 +323,7 @@ function onKeydown(event) {
   if (event.key === 'Escape') {
     pickerOpen.value = false;
     menuOpen.value = false;
+    installGuideOpen.value = false;
     // Tant qu'aucune identité n'est choisie, il n'y a rien derrière à découvrir.
     if (hasIdentity.value) identityOpen.value = false;
     return;
@@ -345,6 +349,23 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         </button>
       </div>
       <div class="actions">
+        <!--
+          Disparaît une fois l'application sur l'écran d'accueil. Il cède aussi
+          la place quand le retour et « aujourd'hui » occupent déjà l'en-tête.
+        -->
+        <button
+          v-if="installMode && !(viewingOther && !isToday)"
+          class="pill install"
+          :class="{ compact: viewingOther || !isToday }"
+          type="button"
+          :aria-label="t('install.title')"
+          :title="t('install.title')"
+          @click="install"
+        >
+          <span aria-hidden="true">＋</span>
+          <!-- Aux côtés d'autres pastilles, le libellé ferait déborder l'en-tête. -->
+          <span v-if="!viewingOther && isToday">{{ t('install.short') }}</span>
+        </button>
         <!-- Le chemin du retour reste visible tant qu'on regarde ailleurs que chez soi. -->
         <button
           v-if="viewingOther"
@@ -507,6 +528,32 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </p>
 
     <!--
+      Mode d'emploi, là où le navigateur ne laisse pas la page installer
+      elle-même : on montre les gestes, l'utilisateur dit quand c'est fait.
+    -->
+    <div v-if="installGuideOpen" class="gate">
+      <div class="gate-backdrop" @click="installGuideOpen = false"></div>
+      <div class="gate-card install-card" role="dialog" aria-modal="true" :aria-label="t('install.title')">
+        <div class="gate-head">
+          <h1 class="gate-title">{{ t('install.title') }}</h1>
+          <button class="icon" type="button" :aria-label="t('install.close')" @click="installGuideOpen = false">✕</button>
+        </div>
+        <ol class="install-steps">
+          <template v-if="installMode === 'ios'">
+            <li>{{ t('install.iosShare') }} <span class="install-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8" /></svg></span></li>
+            <li>{{ t('install.iosAdd') }}</li>
+          </template>
+          <template v-else>
+            <li>{{ t('install.firefoxMenu') }} <span class="install-glyph" aria-hidden="true">⋮</span></li>
+            <li>{{ t('install.firefoxAdd') }}</li>
+          </template>
+          <li>{{ t('install.name') }}</li>
+        </ol>
+        <button class="install-done" type="button" @click="markInstalled">{{ t('install.done') }}</button>
+      </div>
+    </div>
+
+    <!--
       Première ouverture : tant qu'on n'a pas dit qui l'on est, il n'y a rien à
       afficher. L'écran est volontairement sans échappatoire — ni croix, ni
       clic à côté — car sans classe ni nom, l'application n'a pas d'emploi du
@@ -613,6 +660,45 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   border: 1px solid var(--line);
 }
 .pill.mine:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Plein, pour se distinguer des autres pastilles : c'est une invitation. */
+.pill.install {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  color: var(--bg);
+  background: var(--accent);
+}
+.pill.install.compact { padding-inline: 0.55rem; }
+
+.install-steps {
+  margin: 0;
+  padding-inline-start: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.install-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  padding: 0 0.3rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0.4rem;
+}
+.install-done {
+  margin-top: 0.4rem;
+  padding: 0.6rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+}
 .mine-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .menu-backdrop { position: fixed; inset: 0; z-index: 3; }

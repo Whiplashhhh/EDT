@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Vissza: ${name}`,
   'app.viewingOther': 'Egy másik órarendet nézel',
 
+  'install.short': 'Telepítés',
+  'install.title': 'Hozzáadás a főképernyőhöz',
+  'install.close': 'Bezárás',
+  'install.iosShare': 'Koppints a Megosztás gombra (néha a ⋯ menüben)',
+  'install.iosAdd': 'Válaszd a „Főképernyőhöz adás” lehetőséget',
+  'install.firefoxMenu': 'Koppints a menüre',
+  'install.firefoxAdd': 'Válaszd a „Hozzáadás a kezdőképernyőhöz” vagy a „Telepítés” lehetőséget',
+  'install.name': 'Adj nevet az ikonnak, ha kéri, majd erősítsd meg.',
+  'install.done': 'Kész',
+
   'gate.title': 'Ki vagy?',
   'gate.intro':
     'Kezdésként válaszd ki a csoportodat. Ha oktatsz, a nevedet válaszd: a saját órarended jelenik meg.',

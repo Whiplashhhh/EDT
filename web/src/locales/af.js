@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Terug na ${name}`,
   'app.viewingOther': 'Jy bekyk ’n ander rooster',
 
+  'install.short': 'Installeer',
+  'install.title': 'Voeg by tuisskerm',
+  'install.close': 'Maak toe',
+  'install.iosShare': 'Tik op die Deel-knoppie (soms in die ⋯-kieslys)',
+  'install.iosAdd': 'Kies “Voeg by tuisskerm”',
+  'install.firefoxMenu': 'Tik op die kieslys',
+  'install.firefoxAdd': 'Kies “Voeg by tuisskerm” of “Installeer”',
+  'install.name': 'Gee die ikoon ’n naam as daarvoor gevra word, en bevestig.',
+  'install.done': 'Klaar',
+
   'gate.title': 'Wie is jy?',
   'gate.intro':
     'Kies jou klas om te begin. As jy klasgee, kies jou naam: jou eie rooster sal wys.',

@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Revenir à ${name}`,
   'app.viewingOther': 'Vous consultez un autre emploi du temps',
 
+  'install.short': 'Installer',
+  'install.title': 'Ajouter à l’écran d’accueil',
+  'install.close': 'Fermer',
+  'install.iosShare': 'Touche le bouton Partager (parfois dans le menu ⋯)',
+  'install.iosAdd': 'Choisis « Sur l’écran d’accueil »',
+  'install.firefoxMenu': 'Touche le menu',
+  'install.firefoxAdd': 'Choisis « Ajouter à l’écran d’accueil » ou « Installer »',
+  'install.name': 'Donne un nom à l’icône si on te le propose, puis valide.',
+  'install.done': 'C’est fait',
+
   'gate.title': 'Qui es-tu ?',
   'gate.intro':
     'Choisis ta classe pour commencer. Si tu enseignes, choisis ton nom : c’est ton emploi du temps qui s’affichera.',

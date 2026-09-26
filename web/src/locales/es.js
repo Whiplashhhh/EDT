@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Volver a ${name}`,
   'app.viewingOther': 'Estás viendo otro horario',
 
+  'install.short': 'Instalar',
+  'install.title': 'Añadir a la pantalla de inicio',
+  'install.close': 'Cerrar',
+  'install.iosShare': 'Toca el botón Compartir (a veces en el menú ⋯)',
+  'install.iosAdd': 'Elige «Añadir a pantalla de inicio»',
+  'install.firefoxMenu': 'Toca el menú',
+  'install.firefoxAdd': 'Elige «Añadir a pantalla de inicio» o «Instalar»',
+  'install.name': 'Ponle un nombre al icono si te lo pide y confirma.',
+  'install.done': 'Hecho',
+
   'gate.title': '¿Quién eres?',
   'gate.intro':
     'Elige tu clase para empezar. Si das clase, elige tu nombre: se mostrará tu propio horario.',

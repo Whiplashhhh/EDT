@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Kthehu te ${name}`,
   'app.viewingOther': 'Po shikon një orar tjetër',
 
+  'install.short': 'Instalo',
+  'install.title': 'Shto në ekranin bazë',
+  'install.close': 'Mbyll',
+  'install.iosShare': 'Prek butonin Ndaj (ndonjëherë te menyja ⋯)',
+  'install.iosAdd': 'Zgjidh “Shto në ekranin bazë”',
+  'install.firefoxMenu': 'Prek menynë',
+  'install.firefoxAdd': 'Zgjidh “Shto në ekranin kryesor” ose “Instalo”',
+  'install.name': 'Jepi një emër ikonës nëse të kërkohet, pastaj konfirmo.',
+  'install.done': 'U bë',
+
   'gate.title': 'Kush je ti?',
   'gate.intro':
     'Zgjidh grupin tënd për të filluar. Nëse jep mësim, zgjidh emrin tënd: do të shfaqet orari yt.',

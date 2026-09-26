@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `ወደ ${name} ተመለስ`,
   'app.viewingOther': 'ሌላ መርሐግብር እያየህ ነው',
 
+  'install.short': 'ጫን',
+  'install.title': 'ወደ መነሻ ማያ ገጽ አክል',
+  'install.close': 'ዝጋ',
+  'install.iosShare': 'የማጋሪያ አዝራሩን ንካ (አንዳንዴ በ⋯ ምናሌ ውስጥ)',
+  'install.iosAdd': '«ወደ መነሻ ማያ ገጽ አክል»ን ምረጥ',
+  'install.firefoxMenu': 'ምናሌውን ንካ',
+  'install.firefoxAdd': '«ወደ መነሻ ማያ ገጽ አክል» ወይም «ጫን»ን ምረጥ',
+  'install.name': 'ከተጠየቅክ ለአዶው ስም ስጥ፣ ከዚያ አረጋግጥ።',
+  'install.done': 'ተጠናቋል',
+
   'gate.title': 'ማን ነህ?',
   'gate.intro':
     'ለመጀመር ክፍልህን ምረጥ። የምታስተምር ከሆነ ስምህን ምረጥ፤ የራስህ መርሐግብር ይታያል።',

@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Kamu sedang melihat jadwal orang lain',
 
+  'install.short': 'Pasang',
+  'install.title': 'Tambahkan ke Layar Utama',
+  'install.close': 'Tutup',
+  'install.iosShare': 'Ketuk tombol Bagikan (kadang di menu ⋯)',
+  'install.iosAdd': 'Pilih “Tambah ke Layar Utama”',
+  'install.firefoxMenu': 'Ketuk menu',
+  'install.firefoxAdd': 'Pilih “Tambahkan ke layar utama” atau “Instal”',
+  'install.name': 'Beri nama ikon jika diminta, lalu konfirmasi.',
+  'install.done': 'Selesai',
+
   'gate.title': 'Siapa kamu?',
   'gate.intro':
     'Pilih kelasmu untuk memulai. Jika kamu mengajar, pilih namamu: jadwalmu sendiri yang akan tampil.',

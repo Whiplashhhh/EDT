@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Zurück zu ${name}`,
   'app.viewingOther': 'Du siehst einen fremden Stundenplan',
 
+  'install.short': 'Installieren',
+  'install.title': 'Zum Home-Bildschirm hinzufügen',
+  'install.close': 'Schließen',
+  'install.iosShare': 'Tippe auf „Teilen“ (manchmal im ⋯-Menü)',
+  'install.iosAdd': 'Wähle „Zum Home-Bildschirm“',
+  'install.firefoxMenu': 'Tippe auf das Menü',
+  'install.firefoxAdd': 'Wähle „Zum Startbildschirm hinzufügen“ oder „Installieren“',
+  'install.name': 'Gib dem Symbol einen Namen, falls gefragt, und bestätige.',
+  'install.done': 'Erledigt',
+
   'gate.title': 'Wer bist du?',
   'gate.intro':
     'Wähle deinen Kurs, um zu beginnen. Wenn du unterrichtest, wähle deinen Namen: dann erscheint dein eigener Stundenplan.',

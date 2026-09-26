@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Rudi kwa ${name}`,
   'app.viewingOther': 'Unaangalia ratiba ya mtu mwingine',
 
+  'install.short': 'Sakinisha',
+  'install.title': 'Ongeza kwenye skrini ya mwanzo',
+  'install.close': 'Funga',
+  'install.iosShare': 'Gusa kitufe cha Shiriki (wakati mwingine kwenye menyu ⋯)',
+  'install.iosAdd': 'Chagua “Ongeza kwenye Skrini ya Mwanzo”',
+  'install.firefoxMenu': 'Gusa menyu',
+  'install.firefoxAdd': 'Chagua “Ongeza kwenye skrini ya kwanza” au “Sakinisha”',
+  'install.name': 'Ipe ikoni jina ukiombwa, kisha thibitisha.',
+  'install.done': 'Nimemaliza',
+
   'gate.title': 'Wewe ni nani?',
   'gate.intro':
     'Chagua kikundi chako ili kuanza. Kama unafundisha, chagua jina lako: ratiba yako mwenyewe itaonyeshwa.',

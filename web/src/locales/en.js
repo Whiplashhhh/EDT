@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Back to ${name}`,
   'app.viewingOther': 'You are viewing another timetable',
 
+  'install.short': 'Install',
+  'install.title': 'Add to Home Screen',
+  'install.close': 'Close',
+  'install.iosShare': 'Tap the Share button (sometimes in the ⋯ menu)',
+  'install.iosAdd': 'Choose “Add to Home Screen”',
+  'install.firefoxMenu': 'Tap the menu',
+  'install.firefoxAdd': 'Choose “Add to Home screen” or “Install”',
+  'install.name': 'Name the icon if asked, then confirm.',
+  'install.done': 'Done',
+
   'gate.title': 'Who are you?',
   'gate.intro':
     'Pick your class to get started. If you teach, pick your name instead — your own timetable will be shown.',

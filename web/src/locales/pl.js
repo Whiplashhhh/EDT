@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Wróć do ${name}`,
   'app.viewingOther': 'Przeglądasz cudzy plan zajęć',
 
+  'install.short': 'Zainstaluj',
+  'install.title': 'Dodaj do ekranu początkowego',
+  'install.close': 'Zamknij',
+  'install.iosShare': 'Stuknij przycisk Udostępnij (czasem w menu ⋯)',
+  'install.iosAdd': 'Wybierz „Do ekranu początk.”',
+  'install.firefoxMenu': 'Stuknij menu',
+  'install.firefoxAdd': 'Wybierz „Dodaj do ekranu głównego” lub „Zainstaluj”',
+  'install.name': 'Nadaj ikonie nazwę, jeśli pojawi się pytanie, i potwierdź.',
+  'install.done': 'Gotowe',
+
   'gate.title': 'Kim jesteś?',
   'gate.intro':
     'Wybierz swoją grupę, aby zacząć. Jeśli prowadzisz zajęcia, wybierz swoje nazwisko: zobaczysz własny plan.',

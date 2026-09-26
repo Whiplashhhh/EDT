@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Назад на ${name}`,
   'app.viewingOther': 'Гледаш туђи распоред',
 
+  'install.short': 'Инсталирај',
+  'install.title': 'Додај на почетни екран',
+  'install.close': 'Затвори',
+  'install.iosShare': 'Додирни дугме Дели (понекад у менију ⋯)',
+  'install.iosAdd': 'Изабери „Додај на почетни екран”',
+  'install.firefoxMenu': 'Додирни мени',
+  'install.firefoxAdd': 'Изабери „Додај на почетни екран” или „Инсталирај”',
+  'install.name': 'Именуј иконицу ако се то тражи, па потврди.',
+  'install.done': 'Готово',
+
   'gate.title': 'Ко си ти?',
   'gate.intro':
     'Изабери своју групу да почнеш. Ако предајеш, изабери своје име: приказаће се твој распоред.',

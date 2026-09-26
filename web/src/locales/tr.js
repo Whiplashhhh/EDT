@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `${name} sayfasına dön`,
   'app.viewingOther': 'Başka bir ders programına bakıyorsun',
 
+  'install.short': 'Yükle',
+  'install.title': 'Ana Ekrana Ekle',
+  'install.close': 'Kapat',
+  'install.iosShare': 'Paylaş düğmesine dokun (bazen ⋯ menüsünde)',
+  'install.iosAdd': '“Ana Ekrana Ekle”yi seç',
+  'install.firefoxMenu': 'Menüye dokun',
+  'install.firefoxAdd': '“Ana ekrana ekle” veya “Yükle”yi seç',
+  'install.name': 'İstenirse simgeye bir ad ver ve onayla.',
+  'install.done': 'Tamam',
+
   'gate.title': 'Sen kimsin?',
   'gate.intro':
     'Başlamak için sınıfını seç. Ders veriyorsan adını seç: kendi ders programın gösterilir.',

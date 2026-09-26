@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `חזרה אל ${name}`,
   'app.viewingOther': 'אתה צופה במערכת שעות אחרת',
 
+  'install.short': 'התקנה',
+  'install.title': 'הוספה למסך הבית',
+  'install.close': 'סגירה',
+  'install.iosShare': 'הקש על כפתור השיתוף (לפעמים בתפריט ⋯)',
+  'install.iosAdd': 'בחר „הוסף למסך הבית”',
+  'install.firefoxMenu': 'הקש על התפריט',
+  'install.firefoxAdd': 'בחר „הוספה למסך הבית” או „התקנה”',
+  'install.name': 'תן שם לסמל אם תתבקש, ואשר.',
+  'install.done': 'סיימתי',
+
   'gate.title': 'מי אתה?',
   'gate.intro':
     'בחר את הכיתה שלך כדי להתחיל. אם אתה מלמד, בחר את שמך: תוצג מערכת השעות שלך.',

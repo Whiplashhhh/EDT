@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `العودة إلى ${name}`,
   'app.viewingOther': 'أنت تطالع جدولًا آخر',
 
+  'install.short': 'تثبيت',
+  'install.title': 'إضافة إلى الشاشة الرئيسية',
+  'install.close': 'إغلاق',
+  'install.iosShare': 'اضغط على زر المشاركة (أحيانًا في القائمة ⋯)',
+  'install.iosAdd': 'اختر «إضافة إلى الشاشة الرئيسية»',
+  'install.firefoxMenu': 'اضغط على القائمة',
+  'install.firefoxAdd': 'اختر «إضافة إلى الشاشة الرئيسية» أو «تثبيت»',
+  'install.name': 'سمِّ الأيقونة إن طُلب منك ذلك، ثم أكّد.',
+  'install.done': 'تم',
+
   'gate.title': 'من أنت؟',
   'gate.intro':
     'اختر فوجك للبدء. إن كنت تُدرّس، اختر اسمك: سيُعرض جدولك أنت.',

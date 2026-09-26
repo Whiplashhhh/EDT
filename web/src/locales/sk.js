@@ -24,6 +24,16 @@ export default {
   'app.backToMine': ({ name }) => `Späť na ${name}`,
   'app.viewingOther': 'Prezeráš si cudzí rozvrh',
 
+  'install.short': 'Nainštalovať',
+  'install.title': 'Pridať na plochu',
+  'install.close': 'Zavrieť',
+  'install.iosShare': 'Ťukni na tlačidlo Zdieľať (niekedy v ponuke ⋯)',
+  'install.iosAdd': 'Vyber „Pridať na plochu“',
+  'install.firefoxMenu': 'Ťukni na ponuku',
+  'install.firefoxAdd': 'Vyber „Pridať na plochu“ alebo „Inštalovať“',
+  'install.name': 'Pomenuj ikonu, ak sa spýta, a potvrď.',
+  'install.done': 'Hotovo',
+
   'gate.title': 'Kto si?',
   'gate.intro':
     'Začni výberom svojej skupiny. Ak učíš, vyber svoje meno: zobrazí sa tvoj vlastný rozvrh.',
