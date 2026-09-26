@@ -6,6 +6,14 @@ import { LOCALE_IDS, preferredLocale } from '../i18n.js';
 
 const KEY = 'edt-ulco:v1';
 
+/*
+ * Génération des abonnements. La monter remet tous les interrupteurs de
+ * notification à zéro sur chaque appareil : sans elle, l'application se
+ * réabonnerait d'elle-même à la prochaine ouverture, même après avoir vidé les
+ * abonnements côté serveur. On la monte en même temps qu'on vide ce registre.
+ */
+const PUSH_EPOCH = 2;
+
 const EMPTY = {
   department: null,
   /** Ce qu'on consulte : une classe, une salle ou un enseignant. */
@@ -19,7 +27,7 @@ const EMPTY = {
    */
   identity: null,
   /** Notifications push, éteintes tant qu'on ne les a pas demandées. */
-  push: { nextCourse: false, changes: false, menu: false },
+  push: { nextCourse: false, changes: false, menu: false, epoch: PUSH_EPOCH },
   /**
    * Second emploi du temps affiché à côté du premier, en vue jour : n'importe
    * quelle classe, salle ou enseignant, de n'importe quelle formation.
@@ -71,10 +79,12 @@ function readCompare(raw) {
 }
 
 function readPush(raw) {
+  if (raw?.epoch !== PUSH_EPOCH) return { ...EMPTY.push };
   return {
     nextCourse: raw?.nextCourse === true,
     changes: raw?.changes === true,
     menu: raw?.menu === true,
+    epoch: PUSH_EPOCH,
   };
 }
 
