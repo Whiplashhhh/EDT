@@ -652,6 +652,21 @@ test('la notification du menu dit les plats, la fermeture, ou son ignorance', ()
   assert.match(served.body, /Plat du jour : Poulet basquaise, Riz/);
   assert.equal(served.day, '2026-09-21');
 
+  // Une ligne par catégorie, les plats en tête : c'est ce qu'on lit d'abord.
+  const ordered = menuNotification(
+    {
+      closed: false,
+      categories: [
+        { label: 'Garniture', dishes: ['Blé pilaf'] },
+        { label: 'Plat', dishes: ['Pilons de poulet yassa'] },
+        { label: 'Plat vegetal', dishes: ['Lasagnes aux légumes'] },
+      ],
+    },
+    '2026-09-21',
+    'fr',
+  );
+  assert.equal(ordered.body, 'Plat : Pilons de poulet yassa\nPlat vegetal : Lasagnes aux légumes\nGarniture : Blé pilaf');
+
   const closed = menuNotification({ closed: true, categories: [] }, '2026-09-21', 'fr');
   assert.match(closed.title, /Restaurant universitaire fermé/);
 
@@ -659,14 +674,22 @@ test('la notification du menu dit les plats, la fermeture, ou son ignorance', ()
   assert.match(menuNotification(null, '2026-09-21', 'fr').body, /Menu non communiqué/);
   assert.match(menuNotification(null, '2026-09-21', 'en').title, /Lunch menu/);
 
-  // Un menu bavard est coupé au dernier mot entier : un écran verrouillé est étroit.
-  const long = menuNotification(
+  // Un menu ordinaire passe en entier : le téléphone le déroule quand on appuie dessus.
+  const full = menuNotification(
     { closed: false, categories: [{ label: 'Entrées', dishes: Array.from({ length: 20 }, () => 'Salade verte') }] },
     '2026-09-21',
     'fr',
   );
-  assert.ok(long.body.length <= 181, long.body);
-  assert.match(long.body, /…$/);
+  assert.doesNotMatch(full.body, /…$/);
+
+  // Seul un menu démesuré est coupé, au dernier mot entier.
+  const huge = menuNotification(
+    { closed: false, categories: [{ label: 'Entrées', dishes: Array.from({ length: 200 }, () => 'Salade verte') }] },
+    '2026-09-21',
+    'fr',
+  );
+  assert.ok(huge.body.length <= 1001, String(huge.body.length));
+  assert.match(huge.body, /…$/);
 });
 
 test('le planificateur envoie le menu du jour à qui l’a demandé', async () => {
