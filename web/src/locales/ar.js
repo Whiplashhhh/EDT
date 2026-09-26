@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `العودة إلى ${name}`,
   'app.viewingOther': 'أنت تطالع جدولًا آخر',
 
+  'compare.start': 'عرض جدولين جنبًا إلى جنب',
+  'compare.stop': 'إيقاف المقارنة',
+  'compare.pick': 'اختر الجدول المراد مقارنته',
+  'compare.change': ({ name }) => `تغيير ${name}`,
+  'compare.close': ({ name }) => `إخفاء ${name}`,
+
   'install.short': 'تثبيت',
   'install.title': 'إضافة إلى الشاشة الرئيسية',
   'install.close': 'إغلاق',

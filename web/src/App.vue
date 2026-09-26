@@ -75,6 +75,40 @@ const { mode: installMode, guideOpen: installGuideOpen, install, markDone: markI
 const { eventsByDay, grid, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
 /*
+ * Comparaison : un second emploi du temps, affiché à droite du premier en vue
+ * jour. Chaque colonne se change ou se ferme indépendamment ; fermer celle de
+ * gauche laisse celle de droite seule à l'écran, qui devient l'affichage
+ * ordinaire. On peut donc comparer deux classes dont aucune n'est la sienne.
+ */
+const compare = computed(() => settings.value.compare);
+const comparing = computed(() => Boolean(compare.value) && settings.value.view === 'day');
+const {
+  eventsByDay: compareEventsByDay,
+  grid: compareGrid,
+  error: compareError,
+  load: loadCompare,
+} = useSchedule(
+  computed(() => compare.value?.department ?? null),
+  computed(() => compare.value?.kind ?? 'groups'),
+  computed(() => compare.value?.resourceId ?? null),
+  focusedDay,
+  { cacheSlot: 'compare' },
+);
+
+const compareSources = computed(() => [
+  { key: 'main', side: 'main', name: settings.value.resourceName, context: settings.value.kind, eventsByDay: eventsByDay.value },
+  { key: 'compare', side: 'compare', name: compare.value?.resourceName, context: compare.value?.kind, eventsByDay: compareEventsByDay.value },
+]);
+/* Deux formations n'ont pas forcément les mêmes créneaux : l'axe ne suit ceux
+   de l'une que si l'autre les partage, sinon il se gradue en heures. */
+const compareGridDept = computed(() => (grid.value === compareGrid.value ? grid.value : ''));
+
+function reloadAll(force) {
+  load(force);
+  loadCompare(force);
+}
+
+/*
  * Thème et langue sont appliqués au document lui-même : le thème par un attribut
  * que la feuille de style écoute, la langue par le module de traduction.
  * « system » retire l'attribut et laisse `prefers-color-scheme` décider.
@@ -167,7 +201,7 @@ let refresher;
 let currentDay = today();
 
 onMounted(() => {
-  load();
+  reloadAll();
   // L'état « cours en cours » se rafraîchit sans recharger les données.
   ticker = setInterval(() => {
     now.value = Date.now();
@@ -180,7 +214,7 @@ onMounted(() => {
    * ne rapporterait rien de plus frais.
    */
   refresher = setInterval(() => {
-    if (document.visibilityState === 'visible') load(true);
+    if (document.visibilityState === 'visible') reloadAll(true);
   }, 10 * 60_000);
   document.addEventListener('visibilitychange', onVisible);
 
@@ -217,15 +251,40 @@ function onVisible() {
   // Au retour dans l'application, on revient sur aujourd'hui si le jour a changé.
   rollOverDay();
   if (focusedDay.value < today()) focusedDay.value = today();
-  load(true);
+  reloadAll(true);
+}
+
+/** Colonne que le sélecteur remplace : l'affichage principal, ou celle de droite. */
+const pickerTarget = ref('main');
+const pickerCurrent = computed(() => (pickerTarget.value === 'compare' && compare.value ? compare.value : settings.value));
+
+function openPicker(target) {
+  pickerTarget.value = target;
+  pickerOpen.value = true;
 }
 
 function choose({ department: dept, kind: pickedKind, resourceId: id, resourceName }) {
-  settings.value = { ...settings.value, department: dept, kind: pickedKind, resourceId: id, resourceName };
+  const picked = { department: dept, kind: pickedKind, resourceId: id, resourceName };
+  if (pickerTarget.value === 'compare') {
+    // On compare un jour précis : celui qu'on regardait reste à l'écran.
+    settings.value = { ...settings.value, compare: picked, view: 'day' };
+  } else {
+    settings.value = { ...settings.value, ...picked };
+    focusedDay.value = today();
+  }
   writeSettings(settings.value);
   pickerOpen.value = false;
   menuOpen.value = false;
-  focusedDay.value = today();
+}
+
+/**
+ * Ferme une des deux colonnes. Celle de droite disparaît simplement ; fermer
+ * celle de gauche fait de celle de droite l'affichage ordinaire.
+ */
+function closeColumn(side) {
+  const promoted = side === 'main' ? compare.value : {};
+  settings.value = { ...settings.value, ...promoted, compare: null };
+  writeSettings(settings.value);
 }
 
 /**
@@ -296,7 +355,8 @@ function onServiceWorkerMessage(event) {
 }
 
 function setView(view) {
-  settings.value = { ...settings.value, view };
+  // La comparaison n'existe qu'en vue jour : passer en semaine y met fin.
+  settings.value = { ...settings.value, view, ...(view === 'week' ? { compare: null } : {}) };
   writeSettings(settings.value);
 }
 
@@ -343,7 +403,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     <header v-if="hasIdentity" class="top">
       <div class="identity">
         <p class="eyebrow">{{ t(`app.eyebrow.${settings.kind}`) }}</p>
-        <button class="group-btn" type="button" :aria-expanded="pickerOpen" @click="pickerOpen = !pickerOpen">
+        <button class="group-btn" type="button" :aria-expanded="pickerOpen && pickerTarget === 'main'" @click="pickerOpen ? (pickerOpen = false) : openPicker('main')">
           {{ settings.resourceName || t('app.pickResource') }}
           <span class="chev" aria-hidden="true">▾</span>
         </button>
@@ -389,11 +449,18 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </header>
 
     <div v-if="pickerOpen" class="menu-backdrop" @click="pickerOpen = false"></div>
-    <div v-if="pickerOpen" class="dropdown picker-panel" role="dialog" :aria-label="t('app.pickResource')">
+    <div
+      v-if="pickerOpen"
+      class="dropdown picker-panel"
+      :class="{ right: pickerTarget === 'compare' }"
+      role="dialog"
+      :aria-label="pickerTarget === 'compare' ? t('compare.pick') : t('app.pickResource')"
+    >
       <ResourcePicker
-        :department="settings.department"
-        :kind="settings.kind"
-        :resource-id="settings.resourceId"
+        :key="pickerTarget"
+        :department="pickerCurrent.department"
+        :kind="pickerCurrent.kind"
+        :resource-id="pickerCurrent.resourceId"
         @choose="choose"
         @close="pickerOpen = false"
       />
@@ -404,10 +471,12 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <button type="button" role="menuitem" @click="setView(settings.view === 'day' ? 'week' : 'day'); menuOpen = false">
         {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
       </button>
-      <button type="button" role="menuitem" @click="pickerOpen = true">{{ t('app.changeResource') }}</button>
+      <button type="button" role="menuitem" @click="openPicker('main')">{{ t('app.changeResource') }}</button>
+      <button v-if="comparing" type="button" role="menuitem" @click="closeColumn('compare'); menuOpen = false">{{ t('compare.stop') }}</button>
+      <button v-else type="button" role="menuitem" @click="openPicker('compare')">{{ t('compare.start') }}</button>
       <button type="button" role="menuitem" @click="identityOpen = true">{{ t('app.changeIdentity') }}</button>
       <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">{{ t('app.subscribe') }}</a>
-      <button type="button" role="menuitem" @click="load(true); menuOpen = false">{{ t('app.refresh') }}</button>
+      <button type="button" role="menuitem" @click="reloadAll(true); menuOpen = false">{{ t('app.refresh') }}</button>
 
       <!--
         Notifications. Elles suivent l'identité, jamais la ressource affichée :
@@ -505,6 +574,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
       <p v-if="error" class="banner error" role="status">{{ error }}</p>
       <p v-else-if="stale" class="banner" role="status">{{ t('app.stale') }}</p>
+      <p v-if="comparing && compareError" class="banner error" role="status">{{ compare.resourceName }} · {{ compareError }}</p>
 
       <Transition :name="slideName" mode="out-in">
         <div :key="viewKey" class="view">
@@ -513,7 +583,41 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
               {{ formatDayLong(focusedDay) }}
               <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
             </h2>
-            <DayAgenda :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
+            <!--
+              Côte à côte, sur un même axe horaire : c'est la grille de la vue
+              semaine, une colonne par emploi du temps au lieu d'une par jour.
+            -->
+            <WeekGrid
+              v-if="comparing"
+              :focused="focusedDay"
+              :department="compareGridDept"
+              :events-by-day="eventsByDay"
+              :sources="compareSources"
+              :now="now"
+            >
+              <template #head="{ source }">
+                <div class="compare-head">
+                  <button
+                    class="compare-name"
+                    type="button"
+                    :aria-label="t('compare.change', { name: source.name })"
+                    :title="t('compare.change', { name: source.name })"
+                    @click="openPicker(source.side)"
+                  >
+                    <span class="compare-label">{{ source.name }}</span>
+                    <span class="chev" aria-hidden="true">▾</span>
+                  </button>
+                  <button
+                    class="compare-close"
+                    type="button"
+                    :aria-label="t('compare.close', { name: source.name })"
+                    :title="t('compare.close', { name: source.name })"
+                    @click="closeColumn(source.side)"
+                  >✕</button>
+                </div>
+              </template>
+            </WeekGrid>
+            <DayAgenda v-else :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
           </template>
           <WeekGrid v-else :focused="focusedDay" :department="grid" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
         </div>
@@ -730,6 +834,9 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   max-height: min(70vh, 30rem);
   overflow: hidden;
 }
+/* Le sélecteur de la colonne de droite s'ouvre de son côté. */
+.picker-panel.right { inset-inline-start: auto; inset-inline-end: 0.85rem; }
+
 .menu > :where(button, a) {
   padding: 0.6rem 0.7rem;
   border-radius: var(--radius-sm);
@@ -900,6 +1007,37 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   color: var(--text-muted);
 }
 .welcome .emoji { font-size: 1.8rem; }
+
+/*
+ * En-tête d'une colonne comparée : le nom se touche pour changer d'emploi du
+ * temps, la croix pour cesser de l'afficher. Le nom se tronque, jamais la croix.
+ */
+.compare-head { display: flex; align-items: center; gap: 0.15rem; width: 100%; min-width: 0; }
+.compare-name {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+}
+.compare-name:hover { background: var(--bg-elevated); color: var(--accent); }
+.compare-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compare-close {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-radius: 999px;
+}
+.compare-close:hover { background: var(--bg-elevated); color: var(--danger); }
 
 .day-title::first-letter { text-transform: uppercase; }
 

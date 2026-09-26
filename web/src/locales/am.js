@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `ወደ ${name} ተመለስ`,
   'app.viewingOther': 'ሌላ መርሐግብር እያየህ ነው',
 
+  'compare.start': '2 መርሐግብሮችን ጎን ለጎን አሳይ',
+  'compare.stop': 'ማነጻጸሩን አቁም',
+  'compare.pick': 'የሚነጻጸር መርሐግብር ምረጥ',
+  'compare.change': ({ name }) => `${name} ቀይር`,
+  'compare.close': ({ name }) => `${name} ደብቅ`,
+
   'install.short': 'ጫን',
   'install.title': 'ወደ መነሻ ማያ ገጽ አክል',
   'install.close': 'ዝጋ',

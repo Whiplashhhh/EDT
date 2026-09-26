@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Vissza: ${name}`,
   'app.viewingOther': 'Egy másik órarendet nézel',
 
+  'compare.start': '2 órarend egymás mellett',
+  'compare.stop': 'Összehasonlítás vége',
+  'compare.pick': 'Válaszd ki az összehasonlítandó órarendet',
+  'compare.change': ({ name }) => `${name} módosítása`,
+  'compare.close': ({ name }) => `${name} elrejtése`,
+
   'install.short': 'Telepítés',
   'install.title': 'Hozzáadás a főképernyőhöz',
   'install.close': 'Bezárás',

@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Back to ${name}`,
   'app.viewingOther': 'You are viewing another timetable',
 
+  'compare.start': 'View 2 timetables side by side',
+  'compare.stop': 'Stop comparing',
+  'compare.pick': 'Choose a timetable to compare',
+  'compare.change': ({ name }) => `Change ${name}`,
+  'compare.close': ({ name }) => `Stop showing ${name}`,
+
   'install.short': 'Install',
   'install.title': 'Add to Home Screen',
   'install.close': 'Close',

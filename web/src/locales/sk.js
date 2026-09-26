@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Späť na ${name}`,
   'app.viewingOther': 'Prezeráš si cudzí rozvrh',
 
+  'compare.start': 'Zobraziť 2 rozvrhy vedľa seba',
+  'compare.stop': 'Ukončiť porovnanie',
+  'compare.pick': 'Vyber rozvrh na porovnanie',
+  'compare.change': ({ name }) => `Zmeniť ${name}`,
+  'compare.close': ({ name }) => `Skryť ${name}`,
+
   'install.short': 'Nainštalovať',
   'install.title': 'Pridať na plochu',
   'install.close': 'Zavrieť',

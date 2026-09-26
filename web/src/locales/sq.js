@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Kthehu te ${name}`,
   'app.viewingOther': 'Po shikon një orar tjetër',
 
+  'compare.start': 'Shiko 2 orare njëkohësisht',
+  'compare.stop': 'Ndalo krahasimin',
+  'compare.pick': 'Zgjidh orarin për krahasim',
+  'compare.change': ({ name }) => `Ndrysho ${name}`,
+  'compare.close': ({ name }) => `Mos e shfaq më ${name}`,
+
   'install.short': 'Instalo',
   'install.title': 'Shto në ekranin bazë',
   'install.close': 'Mbyll',

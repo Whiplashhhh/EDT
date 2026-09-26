@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Ku noqo ${name}`,
   'app.viewingOther': 'Waxaad eegaysaa jadwal kale',
 
+  'compare.start': 'Eeg 2 jadwal hal mar',
+  'compare.stop': 'Jooji isbarbardhigga',
+  'compare.pick': 'Dooro jadwalka la isbarbardhigayo',
+  'compare.change': ({ name }) => `Beddel ${name}`,
+  'compare.close': ({ name }) => `Qari ${name}`,
+
   'install.short': 'Ku rakib',
   'install.title': 'Ku dar shaashadda hore',
   'install.close': 'Xir',

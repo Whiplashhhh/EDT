@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Revenir à ${name}`,
   'app.viewingOther': 'Vous consultez un autre emploi du temps',
 
+  'compare.start': 'Voir 2 emplois du temps simultanément',
+  'compare.stop': 'Arrêter la comparaison',
+  'compare.pick': 'Choisir l’emploi du temps à comparer',
+  'compare.change': ({ name }) => `Changer ${name}`,
+  'compare.close': ({ name }) => `Ne plus afficher ${name}`,
+
   'install.short': 'Installer',
   'install.title': 'Ajouter à l’écran d’accueil',
   'install.close': 'Fermer',

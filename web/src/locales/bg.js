@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Обратно към ${name}`,
   'app.viewingOther': 'Разглеждаш чуждо разписание',
 
+  'compare.start': 'Покажи 2 разписания едно до друго',
+  'compare.stop': 'Спри сравнението',
+  'compare.pick': 'Избери разписание за сравнение',
+  'compare.change': ({ name }) => `Смени ${name}`,
+  'compare.close': ({ name }) => `Скрий ${name}`,
+
   'install.short': 'Инсталирай',
   'install.title': 'Добавяне към началния екран',
   'install.close': 'Затвори',

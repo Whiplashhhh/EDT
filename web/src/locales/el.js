@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Επιστροφή σε ${name}`,
   'app.viewingOther': 'Βλέπεις άλλο πρόγραμμα',
 
+  'compare.start': 'Προβολή 2 προγραμμάτων δίπλα-δίπλα',
+  'compare.stop': 'Τέλος σύγκρισης',
+  'compare.pick': 'Διάλεξε πρόγραμμα για σύγκριση',
+  'compare.change': ({ name }) => `Αλλαγή ${name}`,
+  'compare.close': ({ name }) => `Απόκρυψη ${name}`,
+
   'install.short': 'Εγκατάσταση',
   'install.title': 'Προσθήκη στην οθόνη αφετηρίας',
   'install.close': 'Κλείσιμο',

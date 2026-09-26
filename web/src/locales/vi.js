@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Quay lại ${name}`,
   'app.viewingOther': 'Bạn đang xem thời khoá biểu của người khác',
 
+  'compare.start': 'Xem 2 thời khoá biểu cạnh nhau',
+  'compare.stop': 'Dừng so sánh',
+  'compare.pick': 'Chọn thời khoá biểu để so sánh',
+  'compare.change': ({ name }) => `Đổi ${name}`,
+  'compare.close': ({ name }) => `Ẩn ${name}`,
+
   'install.short': 'Cài đặt',
   'install.title': 'Thêm vào Màn hình chính',
   'install.close': 'Đóng',

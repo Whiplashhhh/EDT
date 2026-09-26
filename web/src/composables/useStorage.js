@@ -20,6 +20,11 @@ const EMPTY = {
   identity: null,
   /** Notifications push, éteintes tant qu'on ne les a pas demandées. */
   push: { nextCourse: false, changes: false, menu: false },
+  /**
+   * Second emploi du temps affiché à côté du premier, en vue jour : n'importe
+   * quelle classe, salle ou enseignant, de n'importe quelle formation.
+   */
+  compare: null,
   view: 'day',
   theme: 'system',
 };
@@ -43,6 +48,19 @@ const LANGS = LOCALE_IDS;
 function readIdentity(raw) {
   if (!raw || typeof raw !== 'object') return null;
   if (!IDENTITY_KINDS.includes(raw.kind)) return null;
+  if (!Number.isInteger(raw.resourceId) || typeof raw.department !== 'string') return null;
+  return {
+    department: raw.department,
+    kind: raw.kind,
+    resourceId: raw.resourceId,
+    resourceName: typeof raw.resourceName === 'string' ? raw.resourceName : '',
+  };
+}
+
+/** Relit la ressource comparée, ou `null` si elle est incomplète. */
+function readCompare(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (!KINDS.includes(raw.kind)) return null;
   if (!Number.isInteger(raw.resourceId) || typeof raw.department !== 'string') return null;
   return {
     department: raw.department,
@@ -94,6 +112,7 @@ export function readSettings() {
       resourceName: typeof name === 'string' ? name : null,
       identity,
       push: readPush(parsed.push),
+      compare: readCompare(parsed.compare),
       view: parsed.view === 'week' ? 'week' : 'day',
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : preferredLocale(),
@@ -111,12 +130,16 @@ export function writeSettings(settings) {
   }
 }
 
-/** Dernier emploi du temps reçu, pour un affichage immédiat et hors ligne. */
+/**
+ * Dernier emploi du temps reçu, pour un affichage immédiat et hors ligne. Chaque
+ * emplacement garde le sien : celui qu'on compare au sien ne doit pas l'écraser.
+ */
 const CACHE_KEY = 'edt-ulco:schedule:v1';
+const cacheKey = (slot) => (slot ? `${CACHE_KEY}:${slot}` : CACHE_KEY);
 
-export function readCachedSchedule(department, kind, resourceId, from) {
+export function readCachedSchedule(department, kind, resourceId, from, slot) {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(cacheKey(slot));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed.department !== department || parsed.kind !== kind) return null;
@@ -127,9 +150,9 @@ export function readCachedSchedule(department, kind, resourceId, from) {
   }
 }
 
-export function writeCachedSchedule(schedule) {
+export function writeCachedSchedule(schedule, slot) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(schedule));
+    localStorage.setItem(cacheKey(slot), JSON.stringify(schedule));
   } catch {
     // Quota atteint ou stockage refusé : sans conséquence, le cache est optionnel.
   }

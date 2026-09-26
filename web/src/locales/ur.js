@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name} پر واپس جائیں`,
   'app.viewingOther': 'آپ کسی اور کا ٹائم ٹیبل دیکھ رہے ہیں',
 
+  'compare.start': '2 ٹائم ٹیبل ساتھ ساتھ دیکھیں',
+  'compare.stop': 'موازنہ بند کریں',
+  'compare.pick': 'موازنے کے لیے ٹائم ٹیبل چنیں',
+  'compare.change': ({ name }) => `${name} بدلیں`,
+  'compare.close': ({ name }) => `${name} چھپائیں`,
+
   'install.short': 'انسٹال کریں',
   'install.title': 'ہوم اسکرین پر شامل کریں',
   'install.close': 'بند کریں',

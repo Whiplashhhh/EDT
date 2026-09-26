@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `بازگشت به ${name}`,
   'app.viewingOther': 'در حال دیدن برنامهٔ شخص دیگری هستی',
 
+  'compare.start': 'نمایش ۲ برنامه کنار هم',
+  'compare.stop': 'پایان مقایسه',
+  'compare.pick': 'برنامه‌ای برای مقایسه انتخاب کن',
+  'compare.change': ({ name }) => `تغییر ${name}`,
+  'compare.close': ({ name }) => `پنهان کردن ${name}`,
+
   'install.short': 'نصب',
   'install.title': 'افزودن به صفحهٔ اصلی',
   'install.close': 'بستن',

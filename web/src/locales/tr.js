@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name} sayfasına dön`,
   'app.viewingOther': 'Başka bir ders programına bakıyorsun',
 
+  'compare.start': '2 ders programını yan yana gör',
+  'compare.stop': 'Karşılaştırmayı bitir',
+  'compare.pick': 'Karşılaştırılacak programı seç',
+  'compare.change': ({ name }) => `${name} değiştir`,
+  'compare.close': ({ name }) => `${name} gizle`,
+
   'install.short': 'Yükle',
   'install.title': 'Ana Ekrana Ekle',
   'install.close': 'Kapat',

@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name}(으)로 돌아가기`,
   'app.viewingOther': '다른 사람의 시간표를 보고 있습니다',
 
+  'compare.start': '시간표 2개 나란히 보기',
+  'compare.stop': '비교 그만하기',
+  'compare.pick': '비교할 시간표 선택',
+  'compare.change': ({ name }) => `${name} 변경`,
+  'compare.close': ({ name }) => `${name} 숨기기`,
+
   'install.short': '설치',
   'install.title': '홈 화면에 추가',
   'install.close': '닫기',

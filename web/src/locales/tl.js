@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Bumalik sa ${name}`,
   'app.viewingOther': 'Tinitingnan mo ang iskedyul ng iba',
 
+  'compare.start': 'Tingnan ang 2 iskedyul nang magkatabi',
+  'compare.stop': 'Itigil ang paghahambing',
+  'compare.pick': 'Pumili ng iskedyul na ihahambing',
+  'compare.change': ({ name }) => `Palitan ang ${name}`,
+  'compare.close': ({ name }) => `Itago ang ${name}`,
+
   'install.short': 'I-install',
   'install.title': 'Idagdag sa Home Screen',
   'install.close': 'Isara',

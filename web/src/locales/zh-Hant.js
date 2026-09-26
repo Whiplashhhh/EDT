@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的課表',
 
+  'compare.start': '同時查看 2 個課表',
+  'compare.stop': '停止比較',
+  'compare.pick': '選擇要比較的課表',
+  'compare.change': ({ name }) => `更換 ${name}`,
+  'compare.close': ({ name }) => `不再顯示 ${name}`,
+
   'install.short': '安裝',
   'install.title': '加入主畫面',
   'install.close': '關閉',

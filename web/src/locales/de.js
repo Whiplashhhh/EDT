@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Zurück zu ${name}`,
   'app.viewingOther': 'Du siehst einen fremden Stundenplan',
 
+  'compare.start': '2 Stundenpläne nebeneinander anzeigen',
+  'compare.stop': 'Vergleich beenden',
+  'compare.pick': 'Stundenplan zum Vergleichen wählen',
+  'compare.change': ({ name }) => `${name} ändern`,
+  'compare.close': ({ name }) => `${name} ausblenden`,
+
   'install.short': 'Installieren',
   'install.title': 'Zum Home-Bildschirm hinzufügen',
   'install.close': 'Schließen',

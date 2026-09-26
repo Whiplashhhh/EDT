@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `${name}-এ ফিরে যাও`,
   'app.viewingOther': 'তুমি অন্য কারও রুটিন দেখছ',
 
+  'compare.start': '২টি রুটিন পাশাপাশি দেখো',
+  'compare.stop': 'তুলনা বন্ধ করো',
+  'compare.pick': 'তুলনার জন্য রুটিন বেছে নাও',
+  'compare.change': ({ name }) => `${name} বদলাও`,
+  'compare.close': ({ name }) => `${name} লুকাও`,
+
   'install.short': 'ইনস্টল করো',
   'install.title': 'হোম স্ক্রিনে যোগ করো',
   'install.close': 'বন্ধ করো',

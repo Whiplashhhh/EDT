@@ -24,6 +24,12 @@ export default {
   'app.backToMine': ({ name }) => `Takaisin: ${name}`,
   'app.viewingOther': 'Katselet toisen lukujärjestystä',
 
+  'compare.start': 'Näytä 2 lukujärjestystä rinnakkain',
+  'compare.stop': 'Lopeta vertailu',
+  'compare.pick': 'Valitse verrattava lukujärjestys',
+  'compare.change': ({ name }) => `Vaihda ${name}`,
+  'compare.close': ({ name }) => `Piilota ${name}`,
+
   'install.short': 'Asenna',
   'install.title': 'Lisää Koti-valikkoon',
   'install.close': 'Sulje',
