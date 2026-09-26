@@ -63,6 +63,29 @@ const columnsOf = computed(() => (props.sources
   }))
   : days.value.map((day) => ({ key: day, day, events: props.eventsByDay.get(day) || [], context: props.context }))));
 
+const overlaps = (a, b) => new Date(a.start) < new Date(b.end) && new Date(b.start) < new Date(a.end);
+
+/**
+ * Cours communs à toutes les colonnes comparées : la même séance ADE — même
+ * identifiant, mêmes horaires —, suivie ensemble par les deux classes. Ils
+ * s'affichent en un seul bloc qui traverse les colonnes. Un cours qui en
+ * chevauche un autre d'un côté reste dédoublé : un bloc pleine largeur le
+ * recouvrirait.
+ */
+const shared = computed(() => {
+  const out = new Map();
+  const [first, ...rest] = props.sources ? columnsOf.value : [];
+  if (!rest.length) return out;
+  for (const event of first.events) {
+    const twins = rest.map((column) => column.events.find((other) => other.uid === event.uid));
+    if (twins.some((twin) => !twin || twin.start !== event.start || twin.end !== event.end)) continue;
+    const crowded = columnsOf.value.some((column) =>
+      column.events.some((other) => other.uid !== event.uid && overlaps(other, event)));
+    if (!crowded) out.set(event.uid, event);
+  }
+  return out;
+});
+
 const shownDays = computed(() => [...new Set(columnsOf.value.map((column) => column.day))]);
 
 const weekEvents = computed(() => columnsOf.value.flatMap((column) => column.events));
@@ -170,7 +193,22 @@ function layout(dayEvents) {
   });
 }
 
-const columns = computed(() => columnsOf.value.map((column) => ({ ...column, blocks: layout(column.events) })));
+/*
+ * Un cours commun n'est placé que dans la première colonne, et s'y élargit par
+ * dessus les suivantes — écarts entre colonnes compris.
+ */
+const COLUMN_GAP_REM = 0.3;
+const columns = computed(() => columnsOf.value.map((column, index) => {
+  const own = column.events.filter((event) => !shared.value.has(event.uid));
+  const blocks = layout(index === 0 ? [...own, ...shared.value.values()] : own);
+  const count = columnsOf.value.length;
+  for (const block of blocks) {
+    if (!shared.value.has(block.event.uid)) continue;
+    block.shared = true;
+    block.style.width = `calc(${count * 100}% + ${(count - 1) * COLUMN_GAP_REM}rem)`;
+  }
+  return { ...column, blocks };
+}));
 
 /** Position du trait « maintenant », uniquement si le jour est dans la semaine affichée. */
 const nowLine = computed(() => {
@@ -237,7 +275,7 @@ const peopleOf = (event, context) =>
           v-for="block in column.blocks"
           :key="block.event.uid"
           class="block tinted"
-          :class="{ tiny: block.minutes < 55, small: block.minutes < 85, narrow: block.narrow }"
+          :class="{ tiny: block.minutes < 55, small: block.minutes < 85, narrow: block.narrow, shared: block.shared }"
           :style="[block.style, courseStyle(block.event)]"
         >
           <span class="hours">
@@ -275,6 +313,7 @@ const peopleOf = (event, context) =>
   display: grid;
   grid-template-columns: 2.9rem repeat(var(--cols), minmax(5.4rem, 1fr));
   grid-template-rows: auto var(--body-h);
+  /* Même valeur que COLUMN_GAP_REM : un cours commun enjambe cet écart. */
   column-gap: 0.3rem;
   min-width: 100%;
 }
@@ -336,6 +375,14 @@ const peopleOf = (event, context) =>
   font-size: 0.72rem;
   line-height: 1.2;
 }
+/* Posé sur la colonne voisine : il doit passer devant ses graduations. */
+.block.shared { z-index: 1; }
+/* Il a toute la largeur : un cours court range horaire, titre et salle sur une
+   même ligne plutôt que de rogner la salle en bas du bloc. */
+.block.shared.small { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 0.45rem; }
+.block.shared.tiny .hours { display: inline; }
+.block.shared.tiny .tag.inline { display: none; }
+.block.shared.small .where { margin-top: 0; }
 .hours { font-variant-numeric: tabular-nums; font-size: 0.65rem; color: var(--text-muted); }
 .tag {
   margin-inline-start: 0.3rem;
@@ -385,6 +432,7 @@ const peopleOf = (event, context) =>
 
 .now {
   position: absolute;
+  z-index: 2;
   inset-inline: 0;
   height: 2px;
   background: var(--danger);
