@@ -3,6 +3,8 @@ import { isResourceKind, type AdeService, type ResourceKind, type Schedule } fro
 import type { CrousService } from '../crous/service.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
+/** Ressources réunies dans un même emploi du temps, au plus. */
+const MAX_SUBJECTS = 20;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Lundi de la semaine contenant `date`, en heure de Paris. */
@@ -44,7 +46,7 @@ function parseDepartment(raw: string | undefined): string {
   return department;
 }
 
-/** Façon de consulter l'emploi du temps : `groups`, `rooms` ou `teachers`. */
+/** Façon de consulter l'emploi du temps : `groups`, `rooms`, `teachers` ou `subjects`. */
 function parseKind(raw: string | undefined): ResourceKind {
   if (!raw || !isResourceKind(raw)) {
     throw Object.assign(new Error('Type de ressource inconnu.'), { statusCode: 404 });
@@ -52,14 +54,23 @@ function parseKind(raw: string | undefined): ResourceKind {
   return raw;
 }
 
-function parseIds(params: Record<string, string>): { department: string; kind: ResourceKind; resourceId: number } {
+/**
+ * Identifiant de ce qu'on consulte. Les ressources pédagogiques se réunissent :
+ * `12,34,56` désigne l'emploi du temps commun à plusieurs d'entre elles.
+ */
+function parseIds(params: Record<string, string>): { department: string; kind: ResourceKind; resourceIds: number[] } {
   const department = parseDepartment(params.department);
   const kind = parseKind(params.kind);
-  const resourceId = Number(params.resourceId);
-  if (!Number.isInteger(resourceId) || resourceId <= 0 || resourceId > 10_000_000) {
+  const parts = (params.resourceId ?? '').split(',');
+  const max = kind === 'subjects' ? MAX_SUBJECTS : 1;
+  if (parts.length > max) {
+    throw Object.assign(new Error('Trop de ressources demandées à la fois.'), { statusCode: 400 });
+  }
+  const resourceIds = [...new Set(parts.map(Number))].sort((a, b) => a - b);
+  if (resourceIds.some((id) => !Number.isInteger(id) || id <= 0 || id > 10_000_000)) {
     throw Object.assign(new Error('Identifiant de ressource invalide.'), { statusCode: 400 });
   }
-  return { department, kind, resourceId };
+  return { department, kind, resourceIds };
 }
 
 export async function registerApi(
@@ -72,12 +83,12 @@ export async function registerApi(
   const scheduleOf = (
     department: string,
     kind: ResourceKind,
-    resourceId: number,
+    resourceIds: number[],
     from: string,
   ): Promise<Schedule> =>
     kind === 'groups'
-      ? service.schedule(department, resourceId, from)
-      : service.facetSchedule(department, kind, resourceId, from);
+      ? service.schedule(department, resourceIds[0], from)
+      : service.facetSchedule(department, kind, resourceIds, from);
 
   app.get('/health', async () => ({ status: 'ok' }));
 
@@ -102,7 +113,7 @@ export async function registerApi(
   });
 
   /*
-   * Annuaire des salles et des enseignants. À la différence des groupes, ce ne
+   * Annuaire des salles, des enseignants et des ressources pédagogiques. À la différence des groupes, ce ne
    * sont pas des branches de l'arbre ADE mais des vues transversales : elles se
    * déduisent des cours eux-mêmes, qui portent déjà salle et intervenants.
    */
@@ -121,9 +132,9 @@ export async function registerApi(
   app.get<{ Params: Record<string, string>; Querystring: { from?: string } }>(
     '/:department/:kind/:resourceId/schedule',
     async (req, reply) => {
-      const { department, kind, resourceId } = parseIds(req.params);
+      const { department, kind, resourceIds } = parseIds(req.params);
       const from = normalizeFrom(req.query.from);
-      const schedule = await scheduleOf(department, kind, resourceId, from);
+      const schedule = await scheduleOf(department, kind, resourceIds, from);
       reply.header('Cache-Control', 'public, max-age=300');
       return schedule;
     },
@@ -133,9 +144,9 @@ export async function registerApi(
   app.get<{ Params: Record<string, string> }>(
     '/:department/:kind/:resourceId/calendar.ics',
     async (req, reply) => {
-      const { department, kind, resourceId } = parseIds(req.params);
+      const { department, kind, resourceIds } = parseIds(req.params);
       const from = mondayOf(new Date());
-      const schedule = await scheduleOf(department, kind, resourceId, from);
+      const schedule = await scheduleOf(department, kind, resourceIds, from);
       reply
         .header('Content-Type', 'text/calendar; charset=utf-8')
         // Le nom vient d'ADE : on le réduit à un jeu de caractères sûr pour un en-tête.

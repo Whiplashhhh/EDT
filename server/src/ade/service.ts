@@ -1,15 +1,17 @@
 import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
+import { subjectOf } from './subjects.ts';
 import { TtlCache } from '../cache.ts';
 import type { AppConfig, Department } from '../config.ts';
 
 /**
- * Les trois façons de consulter un emploi du temps, telles qu'elles apparaissent
- * dans l'URL de l'API. `groups` suit l'arbre ADE ; `rooms` et `teachers` sont
- * des vues transversales, reconstruites à partir des cours de la formation
- * (voir `directory`).
+ * Les façons de consulter un emploi du temps, telles qu'elles apparaissent dans
+ * l'URL de l'API. `groups` suit l'arbre ADE ; `rooms`, `teachers` et
+ * `subjects` — les ressources pédagogiques, R1.01 et consorts — sont des vues
+ * transversales, reconstruites à partir des cours de la formation (voir
+ * `directory`).
  */
-export const RESOURCE_KINDS = ['groups', 'rooms', 'teachers'] as const;
+export const RESOURCE_KINDS = ['groups', 'rooms', 'teachers', 'subjects'] as const;
 
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
 
@@ -42,11 +44,18 @@ export interface Catalog {
   groups: GroupNode[];
 }
 
-/** Une salle ou un enseignant, avec le nombre de cours qui le concernent. */
+/** Une salle, un enseignant ou une ressource, avec le nombre de cours qui le concernent. */
 export interface DirectoryEntry {
   id: number;
   name: string;
   courses: number;
+  /**
+   * Ressources seulement. « R1.01 » n'est pas la même matière en informatique
+   * et en GEA : une ressource appartient à une formation, et l'intitulé
+   * complète le code, qui seul ne parle à personne.
+   */
+  department?: string;
+  label?: string;
 }
 
 export interface Directory {
@@ -59,7 +68,8 @@ export interface Directory {
 export interface Schedule {
   department: string;
   kind: ResourceKind;
-  resourceId: number;
+  /** Pour les ressources, la liste de celles qu'on a réunies. */
+  resourceId: number | number[];
   resourceName: string;
   /** Début de la fenêtre couverte (ISO `YYYY-MM-DD`). */
   from: string;
@@ -108,12 +118,69 @@ function nameId(name: string): number {
   return (h % 9_999_999) + 1;
 }
 
+/** Clé d'une ressource : son code, dans sa formation. */
+function subjectKey(event: CourseEvent): string | null {
+  const subject = subjectOf(event);
+  return subject ? `${event.department ?? ''}:${subject.code}` : null;
+}
+
+/**
+ * Intitulé retenu pour une ressource, parmi ceux de ses séances : leur début
+ * commun s'il y en a un (« Dev Web » pour « Dev Web Mme X » et
+ * « Dev Web Symfony »), sinon le plus fréquent. Rien du tout si la plupart des
+ * séances n'en portent pas : un nom d'enseignant glissé dans une seule ne
+ * nomme pas la matière.
+ */
+function pickLabel(labels: Map<string, number>): string {
+  const named = [...labels.entries()].filter(([label]) => label);
+  const namedCount = named.reduce((n, [, count]) => n + count, 0);
+  if (named.length === 0 || namedCount < (labels.get('') ?? 0)) return '';
+
+  const words = named.map(([label]) => label.split(' '));
+  const common: string[] = [];
+  for (let i = 0; words.every((w) => i < w.length && w[i].toLowerCase() === words[0][i].toLowerCase()); i += 1) {
+    common.push(words[0][i]);
+  }
+  if (common.length > 0) return common.join(' ');
+
+  named.sort((a, b) => b[1] - a[1] || a[0].length - b[0].length);
+  return named[0][0];
+}
+
 /** Une salle ADE peut en désigner plusieurs : « S201,S134 » est un cours en deux salles. */
 function roomsOf(event: CourseEvent): string[] {
   return (event.room ?? '')
     .split(',')
     .map((r) => r.trim())
     .filter(Boolean);
+}
+
+/** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
+function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
+  const byKey = new Map<string, { department: string; code: string; courses: number; labels: Map<string, number> }>();
+  for (const event of events) {
+    const subject = subjectOf(event);
+    if (!subject) continue;
+    const department = event.department ?? '';
+    const key = `${department}:${subject.code}`;
+    let entry = byKey.get(key);
+    if (!entry) {
+      entry = { department, code: subject.code, courses: 0, labels: new Map() };
+      byKey.set(key, entry);
+    }
+    entry.courses += 1;
+    entry.labels.set(subject.label, (entry.labels.get(subject.label) ?? 0) + 1);
+  }
+  return [...byKey.entries()]
+    .map(([key, entry]) => ({
+      id: nameId(key),
+      name: entry.code,
+      courses: entry.courses,
+      department: entry.department,
+      label: pickLabel(entry.labels),
+    }))
+    // Ordre naturel : R1.02 avant R1.10, les ressources avant les SAE.
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
 }
 
 export class AdeService {
@@ -283,9 +350,9 @@ export class AdeService {
   }
 
   /**
-   * Liste des salles ou des enseignants de la formation, avec leur charge.
-   * Construite sur la fenêtre en cours — soit environ douze semaines, assez
-   * pour que la liste soit stable d'un jour à l'autre.
+   * Liste des salles, des enseignants ou des ressources de la formation, avec
+   * leur charge. Construite sur la fenêtre en cours — soit environ douze
+   * semaines, assez pour que la liste soit stable d'un jour à l'autre.
    */
   async directory(departmentId: string, kind: ResourceKind, from: string): Promise<Directory> {
     if (kind === 'groups') throw new NotFoundError('Les groupes se consultent via le catalogue.');
@@ -294,6 +361,9 @@ export class AdeService {
 
     return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
       const events = await this.#allEvents(departmentId, from);
+      if (kind === 'subjects') {
+        return { department: departmentId, kind, fetchedAt: new Date().toISOString(), entries: subjectEntries(events) };
+      }
       const counts = new Map<string, number>();
       for (const event of events) {
         for (const name of kind === 'rooms' ? roomsOf(event) : event.teachers) {
@@ -308,29 +378,44 @@ export class AdeService {
   }
 
   /**
-   * Emploi du temps d'une salle ou d'un enseignant : tous les cours de la
-   * formation qui la — ou le — concernent, sans distinction de classe.
+   * Emploi du temps d'une salle, d'un enseignant ou d'une ressource : tous les
+   * cours de la formation qui la — ou le — concernent, sans distinction de
+   * classe. Les ressources se réunissent : un vacataire qui assure R1.01 en
+   * informatique et R3.04 en GEA les voit côte à côte, même quand ADE ne
+   * connaît pas son nom.
    */
   async facetSchedule(
     departmentId: string,
     kind: ResourceKind,
-    resourceId: number,
+    resourceIds: number[],
     from: string,
   ): Promise<Schedule> {
+    if (resourceIds.length !== 1 && kind !== 'subjects') {
+      throw new NotFoundError('Une seule salle ou un seul enseignant à la fois.');
+    }
     const directory = await this.directory(departmentId, kind, from);
-    const entry = directory.entries.find((e) => e.id === resourceId);
-    if (!entry) throw new NotFoundError(`Ressource inconnue : ${resourceId}`);
+    const entries = resourceIds.map((id) => {
+      const entry = directory.entries.find((e) => e.id === id);
+      if (!entry) throw new NotFoundError(`Ressource inconnue : ${id}`);
+      return entry;
+    });
+    const names = new Set(entries.map((e) => e.name));
+    const ids = new Set(resourceIds);
 
     const events = await this.#allEvents(departmentId, from);
-    const matches = events.filter((event) =>
-      kind === 'rooms' ? roomsOf(event).includes(entry.name) : event.teachers.includes(entry.name),
-    );
+    const matches = events.filter((event) => {
+      if (kind === 'rooms') return roomsOf(event).some((room) => names.has(room));
+      if (kind === 'teachers') return event.teachers.some((teacher) => names.has(teacher));
+      const key = subjectKey(event);
+      return key !== null && ids.has(nameId(key));
+    });
 
     return {
       department: departmentId,
       kind,
-      resourceId,
-      resourceName: entry.name,
+      // Une sélection de ressources reste une liste, même réduite à une seule.
+      resourceId: kind === 'subjects' ? resourceIds : resourceIds[0],
+      resourceName: entries.map((e) => e.name).join(', '),
       from,
       fetchedAt: new Date().toISOString(),
       events: matches,

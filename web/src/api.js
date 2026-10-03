@@ -26,19 +26,21 @@ async function getJson(path, signal) {
 }
 
 const seg = encodeURIComponent;
+/** Une ressource, ou plusieurs réunies : `12,34` dans l'URL. */
+const ids = (resourceId) => (Array.isArray(resourceId) ? resourceId.map(seg).join(',') : seg(resourceId));
 
 export const api = {
   departments: (signal) => getJson('/api/departments', signal),
   /** Arbre des groupes du département. */
   groups: (department, signal) => getJson(`/api/${seg(department)}/groups`, signal),
-  /** Liste plate des salles (`rooms`) ou des enseignants (`teachers`). */
+  /** Liste plate des salles (`rooms`), des enseignants (`teachers`) ou des ressources (`subjects`). */
   directory: (department, kind, signal) => getJson(`/api/${seg(department)}/${seg(kind)}`, signal),
   schedule: (department, kind, resourceId, from, signal) =>
-    getJson(`/api/${seg(department)}/${seg(kind)}/${seg(resourceId)}/schedule?from=${seg(from)}`, signal),
+    getJson(`/api/${seg(department)}/${seg(kind)}/${ids(resourceId)}/schedule?from=${seg(from)}`, signal),
   // Le restaurant universitaire est fixé côté serveur : aucun paramètre ici.
   crousMenu: (signal) => getJson('/api/crous/menu', signal),
   calendarUrl: (department, kind, resourceId) =>
-    `${location.origin}/api/${seg(department)}/${seg(kind)}/${seg(resourceId)}/calendar.ics`,
+    `${location.origin}/api/${seg(department)}/${seg(kind)}/${ids(resourceId)}/calendar.ics`,
 
   /** Notifications push : l'installation les propose-t-elle, et sous quelle clé publique ? */
   pushConfig: (signal) => getJson('/api/push/config', signal),

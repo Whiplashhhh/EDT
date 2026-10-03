@@ -2,11 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
+import { MAX_SUBJECTS } from '../composables/useStorage.js';
 
-const KINDS = ['groups', 'rooms', 'teachers'];
+const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 /**
  * Quand on choisit qui l'on est, les salles disparaissent : une salle n'a pas
  * d'emploi du temps « à soi », et personne ne reçoit de notification pour elle.
+ * Les ressources non plus : elles se consultent, elles ne sont personne.
  */
 const IDENTITY_KINDS = ['groups', 'teachers'];
 /**
@@ -17,11 +19,14 @@ const IDENTITY_KINDS = ['groups', 'teachers'];
  * alors qu'une autre l'occupe.
  */
 const ALL_DEPARTMENTS = 'all';
+/** Un vrai code de ressource — R1.01, P1.01, SAE5.B.00 — par opposition à un intitulé libre. */
+const SUBJECT_CODE_RE = /^(?:[RP]\d|SAE\d)/;
 
 const props = defineProps({
   department: { type: String, default: null },
   kind: { type: String, default: 'groups' },
-  resourceId: { type: Number, default: null },
+  /** Un entier, ou la liste des ressources réunies. */
+  resourceId: { type: [Number, Array], default: null },
   /** Choix de l'identité : classe ou enseignant seulement, et un autre texte d'aide. */
   identityMode: { type: Boolean, default: false },
 });
@@ -50,9 +55,23 @@ let hoverTimer = null;
 const searchInput = ref(null);
 
 const isTree = computed(() => selectedKind.value === 'groups');
-/** Les salles et les enseignants se cherchent toutes formations confondues. */
+/**
+ * Les ressources se cochent : on en réunit plusieurs, éventuellement de
+ * plusieurs formations — un vacataire peut assurer R1.01 en informatique et
+ * R3.04 en GEA.
+ */
+const isSubjects = computed(() => selectedKind.value === 'subjects');
+/**
+ * Seules les classes se chargent formation par formation. Les ressources se
+ * chargent toutes ensemble — une sélection peut en mêler plusieurs — mais se
+ * parcourent par formation : « R1.01 » n'est pas la même matière partout.
+ */
 const isCrossDepartment = computed(() => selectedKind.value !== 'groups');
+const showsDepartment = computed(() => !isCrossDepartment.value || isSubjects.value);
 const effectiveDept = computed(() => (isCrossDepartment.value ? ALL_DEPARTMENTS : selectedDept.value));
+
+/** Ressources cochées, toutes formations confondues. */
+const picked = ref(new Set(props.kind === 'subjects' && Array.isArray(props.resourceId) ? props.resourceId : []));
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */
 function flatten(nodes, trail = []) {
@@ -67,6 +86,12 @@ const allGroups = computed(() => (catalog.value ? flatten(catalog.value.groups) 
 const results = computed(() => {
   const q = query.value.trim().toLowerCase();
   if (isTree.value) return q ? allGroups.value.filter((g) => g.label.toLowerCase().includes(q)) : [];
+  if (isSubjects.value) {
+    return entries.value
+      .filter((e) => e.department === selectedDept.value && `${e.name} ${e.label}`.toLowerCase().includes(q))
+      // Les ressources codées d'abord : « FORUM » ou « Journée des anciens » ne sont que des séances isolées.
+      .sort((a, b) => Number(!SUBJECT_CODE_RE.test(a.name)) - Number(!SUBJECT_CODE_RE.test(b.name)));
+  }
   // Salles et enseignants : une liste plate, filtrée au fil de la frappe.
   return q ? entries.value.filter((e) => e.name.toLowerCase().includes(q)) : entries.value;
 });
@@ -99,7 +124,9 @@ const visible = computed(() => {
 });
 
 const isCurrent = (id) =>
-  id === props.resourceId && effectiveDept.value === props.department && selectedKind.value === props.kind;
+  isSubjects.value
+    ? picked.value.has(id)
+    : id === props.resourceId && effectiveDept.value === props.department && selectedKind.value === props.kind;
 
 const isOpen = (id) => expanded.value.has(id) || hovered.value.has(id);
 
@@ -159,6 +186,42 @@ function pick(id, name) {
   });
 }
 
+function togglePicked(id) {
+  const next = new Set(picked.value);
+  if (next.has(id)) next.delete(id);
+  else if (next.size < MAX_SUBJECTS) next.add(id);
+  picked.value = next;
+}
+
+/** Les ressources cochées encore connues : la liste suit la fenêtre de douze semaines. */
+const pickedEntries = computed(() => entries.value.filter((e) => picked.value.has(e.id)));
+
+/* Une sélection peut s'étendre sur plusieurs formations, qu'on ne voit qu'une à
+   la fois : chaque formation dit combien de ses ressources sont cochées. */
+const pickedPerDept = computed(() => {
+  const counts = new Map();
+  if (!isSubjects.value) return counts;
+  for (const e of pickedEntries.value) counts.set(e.department, (counts.get(e.department) ?? 0) + 1);
+  return counts;
+});
+
+/** Une ressource seule se nomme en entier ; plusieurs, par leurs seuls codes. */
+function selectionName(list) {
+  if (list.length === 1) return [list[0].name, list[0].label].filter(Boolean).join(' ');
+  return list.map((e) => e.name).join(', ');
+}
+
+function showPicked() {
+  const list = pickedEntries.value;
+  if (!list.length) return;
+  emit('choose', {
+    department: ALL_DEPARTMENTS,
+    kind: 'subjects',
+    resourceId: list.map((e) => e.id).sort((a, b) => a - b),
+    resourceName: selectionName(list),
+  });
+}
+
 function setKind(kind) {
   if (kind === selectedKind.value) return;
   selectedKind.value = kind;
@@ -183,6 +246,9 @@ async function loadResources() {
       resetHover();
     } else {
       entries.value = (await api.directory(dept, kind)).entries;
+      // On rouvre sur la formation de la sélection en cours, pas sur la première venue.
+      const first = entries.value.find((e) => picked.value.has(e.id));
+      if (kind === 'subjects' && first?.department) selectedDept.value = first.department;
     }
   } catch (err) {
     error.value = errorMessage(err, `error.${kind}`);
@@ -224,11 +290,13 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 
     <div class="fields">
       <select
-        v-if="departments.length > 1 && !isCrossDepartment"
+        v-if="departments.length > 1 && showsDepartment"
         v-model="selectedDept"
         :aria-label="t('picker.department')"
       >
-        <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.label }}</option>
+        <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+          {{ pickedPerDept.get(dept.id) ? `${dept.label} (${pickedPerDept.get(dept.id)})` : dept.label }}
+        </option>
       </select>
       <input
         ref="searchInput"
@@ -243,6 +311,28 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 
     <p v-if="loading" class="state">{{ t('picker.loading') }}</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
+
+    <!-- Ressources : une liste à cocher. -->
+    <ul v-else-if="isSubjects" class="tree" role="listbox" aria-multiselectable="true">
+      <li v-for="item in results" :key="item.id">
+        <button
+          type="button"
+          role="option"
+          class="row lone check-row"
+          :class="{ current: isCurrent(item.id) }"
+          :aria-selected="isCurrent(item.id)"
+          :disabled="!isCurrent(item.id) && picked.size >= MAX_SUBJECTS"
+          @click="togglePicked(item.id)"
+        >
+          <span class="box" aria-hidden="true">{{ isCurrent(item.id) ? '✓' : '' }}</span>
+          <span class="name">
+            <b>{{ item.name }}</b><span v-if="item.label" class="label">{{ item.label }}</span>
+          </span>
+          <span class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
+        </button>
+      </li>
+      <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
+    </ul>
 
     <!-- Salles et enseignants, ou recherche dans l'arbre : une liste plate. -->
     <ul v-else-if="!isTree || query.trim()" class="tree" role="listbox">
@@ -280,7 +370,15 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
       </li>
     </ul>
 
-    <p v-if="identityMode || !resourceId" class="hint">
+    <div v-if="isSubjects && !loading && !error" class="selection">
+      <button v-if="picked.size" type="button" class="clear" @click="picked = new Set()">{{ t('picker.clearSelection') }}</button>
+      <button type="button" class="show" :disabled="!pickedEntries.length" @click="showPicked">
+        {{ t('picker.showSelection', { n: pickedEntries.length }) }}
+      </button>
+    </div>
+
+    <p v-if="isSubjects" class="hint">{{ t('picker.subjectsHint') }}</p>
+    <p v-else-if="identityMode || !resourceId" class="hint">
       {{ t(identityMode ? 'picker.identityHint' : 'picker.hint') }}
     </p>
   </div>
@@ -298,8 +396,8 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   border-radius: 999px;
 }
 .tabs button {
-  flex: 1;
-  padding: 0.35rem 0.5rem;
+  flex: 1 1 auto;
+  padding: 0.35rem 0.4rem;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -391,6 +489,47 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .check { margin-inline-start: auto; font-size: 0.8rem; }
 .trail { font-size: 0.74rem; color: var(--text-muted); }
+
+/*
+ * Ressource à cocher : la case à gauche, le nom et le volume de cours à
+ * droite. Le code est en gras, c'est par lui qu'on la reconnaît.
+ */
+.row.check-row { flex-direction: row; align-items: center; gap: 0.55rem; margin-inline-start: 0; }
+.check-row .name { flex: 1; min-width: 0; }
+.check-row .label { margin-inline-start: 0.35em; }
+.check-row .trail { flex: none; }
+.check-row:disabled { opacity: 0.45; cursor: not-allowed; }
+.box {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 0.3rem;
+}
+.check-row.current .box { background: var(--accent); border-color: var(--accent); }
+
+.selection {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  padding: 0.5rem 0.15rem 0;
+  border-top: 1px solid var(--line);
+}
+.selection button {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+}
+.selection .clear { color: var(--text-muted); }
+.selection .clear:hover { color: var(--text); }
+.selection .show { color: var(--bg); background: var(--accent); }
+.selection .show:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }
 .error { color: var(--danger); }
