@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Zaɓi ajinka don farawa. Idan kana koyarwa, zaɓi sunanka: jadawalinka za a nuna.',
   'gate.why': 'Wannan zaɓin zai kasance a wannan na’urar. Shi ne jadawalinka na asali kuma yana tantance sanarwa.',
+  'gate.subjects': 'Kana koyarwa amma sunanka ba ya cikin ADE? Buɗe shafin “Darussa” ka zaɓi waɗanda kake koyarwa.',
   'gate.action': 'Zaɓi aji ko suna',
 
   'push.section': 'Sanarwa',

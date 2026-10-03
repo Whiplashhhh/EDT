@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Kies je klas om te beginnen. Geef je les, kies dan je naam: je eigen rooster wordt getoond.',
   'gate.why': 'Deze keuze blijft op dit apparaat. Het is je standaardrooster en bepaalt je meldingen.',
+  'gate.subjects': 'Je geeft les, maar je naam staat niet in ADE? Open het tabblad ‘Vakken’ en vink aan welke je geeft.',
   'gate.action': 'Mijn klas of naam kiezen',
 
   'push.section': 'Meldingen',

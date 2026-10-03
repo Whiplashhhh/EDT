@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Aloita valitsemalla ryhmäsi. Jos opetat, valitse nimesi: näet oman lukujärjestyksesi.',
   'gate.why': 'Valinta jää tälle laitteelle. Se on oletuslukujärjestyksesi ja määrää ilmoitukset.',
+  'gate.subjects': 'Opetatko, mutta nimesi puuttuu ADE:sta? Avaa ”Opintojaksot”-välilehti ja valitse opettamasi jaksot.',
   'gate.action': 'Valitse ryhmä tai nimi',
 
   'push.section': 'Ilmoitukset',

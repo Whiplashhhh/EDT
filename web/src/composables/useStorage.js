@@ -22,7 +22,8 @@ const EMPTY = {
   resourceId: null,
   resourceName: null,
   /**
-   * Qui l'on est : sa classe, ou son nom si l'on enseigne. À la différence de
+   * Qui l'on est : sa classe, son nom si l'on enseigne, ou les ressources
+   * qu'on assure quand ADE ne connaît pas son nom — le cas d'un vacataire. À la différence de
    * la ressource consultée, qui change au gré des recherches, celle-ci ne bouge
    * que si on la change explicitement. C'est elle qui décide des notifications.
    */
@@ -50,7 +51,7 @@ const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 /** Ressources réunies dans un même emploi du temps, au plus — la limite du serveur. */
 export const MAX_SUBJECTS = 20;
 /** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
-export const IDENTITY_KINDS = ['groups', 'teachers'];
+export const IDENTITY_KINDS = ['groups', 'teachers', 'subjects'];
 const THEMES = ['system', 'light', 'dark'];
 /* La liste des langues vit dans le module de traduction : une seule source. */
 const LANGS = LOCALE_IDS;
@@ -76,11 +77,12 @@ export function sameResourceId(a, b) {
 function readIdentity(raw) {
   if (!raw || typeof raw !== 'object') return null;
   if (!IDENTITY_KINDS.includes(raw.kind)) return null;
-  if (!Number.isInteger(raw.resourceId) || typeof raw.department !== 'string') return null;
+  const resourceId = readResourceId(raw.kind, raw.resourceId);
+  if (resourceId === null || typeof raw.department !== 'string') return null;
   return {
     department: raw.department,
     kind: raw.kind,
-    resourceId: raw.resourceId,
+    resourceId,
     resourceName: typeof raw.resourceName === 'string' ? raw.resourceName : '',
   };
 }

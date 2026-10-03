@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Kezdésként válaszd ki a csoportodat. Ha oktatsz, a nevedet válaszd: a saját órarended jelenik meg.',
   'gate.why': 'A választás ezen az eszközön marad. Ez az alapértelmezett órarended, és ez dönti el az értesítéseket.',
+  'gate.subjects': 'Tanít, de a neve nem szerepel az ADE-ben? Nyissa meg a „Tantárgyak” lapot, és jelölje be, amelyeket tanít.',
   'gate.action': 'Csoport vagy név választása',
 
   'push.section': 'Értesítések',

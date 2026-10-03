@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Začni výberom svojej skupiny. Ak učíš, vyber svoje meno: zobrazí sa tvoj vlastný rozvrh.',
   'gate.why': 'Voľba ostáva v tomto zariadení. Je to tvoj predvolený rozvrh a určuje oznámenia.',
+  'gate.subjects': 'Učíte, ale vaše meno v ADE chýba? Otvorte kartu „Predmety“ a označte tie, ktoré vyučujete.',
   'gate.action': 'Vybrať skupinu alebo meno',
 
   'push.section': 'Oznámenia',

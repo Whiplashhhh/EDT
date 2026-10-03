@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Elige tu clase para empezar. Si das clase, elige tu nombre: se mostrará tu propio horario.',
   'gate.why': 'Esta elección se queda en el dispositivo. Es tu horario por defecto y decide tus notificaciones.',
+  'gate.subjects': '¿Das clase pero tu nombre no aparece en ADE? Abre la pestaña «Asignaturas» y marca las que impartes.',
   'gate.action': 'Elegir mi clase o mi nombre',
 
   'push.section': 'Notificaciones',

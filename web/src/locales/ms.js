@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Pilih kelas anda untuk bermula. Jika anda mengajar, pilih nama anda: jadual anda sendiri akan dipaparkan.',
   'gate.why': 'Pilihan ini kekal pada peranti ini. Ia jadual lalai anda dan menentukan pemberitahuan.',
+  'gate.subjects': 'Anda mengajar tetapi nama anda tiada dalam ADE? Buka tab “Subjek” dan tandakan subjek yang anda ajar.',
   'gate.action': 'Pilih kelas atau nama saya',
 
   'push.section': 'Pemberitahuan',

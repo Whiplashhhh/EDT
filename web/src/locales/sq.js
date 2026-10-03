@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Zgjidh grupin tënd për të filluar. Nëse jep mësim, zgjidh emrin tënd: do të shfaqet orari yt.',
   'gate.why': 'Zgjedhja mbetet në këtë pajisje. Është orari yt i parazgjedhur dhe përcakton njoftimet.',
+  'gate.subjects': 'Jepni mësim, por emri juaj nuk është në ADE? Hapni skedën “Lëndë” dhe zgjidhni ato që jepni.',
   'gate.action': 'Zgjidh grupin ose emrin',
 
   'push.section': 'Njoftimet',

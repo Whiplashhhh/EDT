@@ -16,8 +16,14 @@ const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 /** Clés publiées par le navigateur : base64url, longueur bornée par le format. */
 const KEY_RE = /^[A-Za-z0-9_-]{16,256}$/;
 const MAX_ENDPOINT_LENGTH = 1024;
-/** Seules une classe et un enseignant ont des notifications : une salle n'a pas d'élèves. */
-const SUBSCRIBABLE_KINDS = ['groups', 'teachers'] as const;
+/**
+ * Une classe, un enseignant ou des ressources réunies ont des notifications.
+ * Une salle n'en a pas : elle n'a pas d'élèves.
+ */
+const SUBSCRIBABLE_KINDS = ['groups', 'teachers', 'subjects'] as const;
+type SubscribableKind = (typeof SUBSCRIBABLE_KINDS)[number];
+/** Ressources réunies au plus, comme pour l'emploi du temps. */
+const MAX_SUBJECTS = 20;
 
 function bad(message: string): Error {
   return Object.assign(new Error(message), { statusCode: 400 });
@@ -61,9 +67,24 @@ function parseKey(raw: unknown): string {
   return raw;
 }
 
-function parseKind(raw: unknown): 'groups' | 'teachers' {
-  if (raw === 'groups' || raw === 'teachers') return raw;
-  throw bad('Seule une classe ou un enseignant peut recevoir des notifications.');
+function parseKind(raw: unknown): SubscribableKind {
+  if ((SUBSCRIBABLE_KINDS as readonly unknown[]).includes(raw)) return raw as SubscribableKind;
+  throw bad('Seuls une classe, un enseignant ou des ressources peuvent recevoir des notifications.');
+}
+
+function parseId(raw: unknown): number {
+  const id = Number(raw);
+  if (!Number.isInteger(id) || id <= 0 || id > 10_000_000) throw bad('Identifiant de ressource invalide.');
+  return id;
+}
+
+/** Un identifiant, ou pour les ressources une liste non vide, triée et sans doublon. */
+function parseResourceId(kind: SubscribableKind, raw: unknown): number | number[] {
+  if (kind !== 'subjects') return parseId(raw);
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_SUBJECTS) {
+    throw bad('Identifiant de ressource invalide.');
+  }
+  return [...new Set(raw.map(parseId))].sort((a, b) => a - b);
 }
 
 function parseFlag(raw: unknown): boolean {
@@ -128,18 +149,16 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
     const kind = parseKind(body.kind);
     const department = String(body.department ?? '');
     if (!DEPARTMENT_RE.test(department)) throw bad('Département invalide.');
-    const resourceId = Number(body.resourceId);
-    if (!Number.isInteger(resourceId) || resourceId <= 0 || resourceId > 10_000_000) {
-      throw bad('Identifiant de ressource invalide.');
-    }
+    const resourceId = parseResourceId(kind, body.resourceId);
 
     /*
      * La ressource est vérifiée auprès d'ADE avant d'être enregistrée : on ne
      * garde pas un abonnement vers une classe qui n'existe pas, et le nom
      * affiché vient de la source plutôt que du client.
      */
-    const resourceName =
-      kind === 'groups'
+    const resourceName = Array.isArray(resourceId)
+      ? await subjectsName(service, department, resourceId)
+      : kind === 'groups'
         ? (await service.findGroup(department, resourceId)).name
         : await teacherName(service, department, resourceId);
 
@@ -171,6 +190,22 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
     // Désabonner deux fois n'est pas une erreur : le résultat voulu est atteint.
     reply.code(204);
   });
+}
+
+/**
+ * Nom d'une sélection de ressources, tel que l'application l'affiche : la
+ * ressource entière quand elle est seule, les codes sinon. Vérifie au passage
+ * que chacune existe.
+ */
+async function subjectsName(service: AdeService, department: string, ids: number[]): Promise<string> {
+  const directory = await service.directory(department, 'subjects', mondayOf(new Date()));
+  const entries = ids.map((id) => {
+    const entry = directory.entries.find((e) => e.id === id);
+    if (!entry) throw Object.assign(new Error('Ressource inconnue.'), { statusCode: 404 });
+    return entry;
+  });
+  if (entries.length === 1) return [entries[0].name, entries[0].label].filter(Boolean).join(' ');
+  return entries.map((e) => e.name).join(', ');
 }
 
 /** Nom d'un enseignant dans l'annuaire transversal — sert aussi à vérifier qu'il existe. */

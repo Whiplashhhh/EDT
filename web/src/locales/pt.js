@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Escolhe a tua turma para começar. Se dás aulas, escolhe o teu nome: será mostrado o teu horário.',
   'gate.why': 'Esta escolha fica neste aparelho. Serve de horário por omissão e define as notificações.',
+  'gate.subjects': 'Dá aulas mas o seu nome não aparece no ADE? Abra o separador «Unidades curriculares» e assinale as que leciona.',
   'gate.action': 'Escolher a minha turma ou o meu nome',
 
   'push.section': 'Notificações',

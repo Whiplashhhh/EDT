@@ -162,10 +162,11 @@ export class Notifier {
     if (known && now - known.fetchedAt < this.#options.pollMs) return { state: known, changes: [] };
 
     const from = mondayOf(new Date(now));
+    const ids = Array.isArray(sample.resourceId) ? sample.resourceId : [sample.resourceId];
     const schedule =
       sample.kind === 'groups'
-        ? await this.#service.schedule(sample.department, sample.resourceId, from)
-        : await this.#service.facetSchedule(sample.department, sample.kind, [sample.resourceId], from);
+        ? await this.#service.schedule(sample.department, ids[0], from)
+        : await this.#service.facetSchedule(sample.department, sample.kind, ids, from);
 
     /*
      * Les horaires d'ADE sont recalés sur la grille du département avant tout

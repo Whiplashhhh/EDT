@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Dooro fasalkaaga si aad u bilowdo. Haddii aad wax dhigto, dooro magacaaga: jadwalkaaga ayaa soo bixi doona.',
   'gate.why': 'Doorashadu waxay ku hartaa qalabkan. Waa jadwalkaaga caadiga ah, wuxuuna go’aamiyaa ogeysiisyada.',
+  'gate.subjects': 'Wax ma bartaa laakiin magacaagu kuma jiro ADE? Fur tabka “Maaddooyin” oo calaamadee kuwa aad dhigto.',
   'gate.action': 'Dooro fasalkayga ama magacayga',
 
   'push.section': 'Ogeysiisyo',

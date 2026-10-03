@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Başlamak için sınıfını seç. Ders veriyorsan adını seç: kendi ders programın gösterilir.',
   'gate.why': 'Bu seçim cihazda kalır. Varsayılan ders programındır ve bildirimleri belirler.',
+  'gate.subjects': 'Ders veriyorsunuz ama adınız ADE’de yok mu? “Dersler” sekmesini açın ve verdiğiniz dersleri işaretleyin.',
   'gate.action': 'Sınıfımı veya adımı seç',
 
   'push.section': 'Bildirimler',

@@ -15,12 +15,19 @@ import { dirname } from 'node:path';
  * Aucun nom, aucune adresse, aucune adresse IP.
  */
 
-/** Ce qu'un abonné suit : sa classe, ou son nom s'il enseigne. */
+/**
+ * Ce qu'un abonné suit : sa classe, son nom s'il enseigne, ou les ressources
+ * qu'il assure quand ADE ne connaît pas son nom — le cas d'un vacataire.
+ */
 export interface PushIdentity {
   department: string;
-  /** `groups` (une classe) ou `teachers` (un enseignant). Jamais `rooms` : une salle n'a pas d'élèves. */
-  kind: 'groups' | 'teachers';
-  resourceId: number;
+  /**
+   * `groups` (une classe), `teachers` (un enseignant) ou `subjects` (des
+   * ressources réunies). Jamais `rooms` : une salle n'a pas d'élèves.
+   */
+  kind: 'groups' | 'teachers' | 'subjects';
+  /** Pour les ressources, la liste triée de celles qu'on réunit. */
+  resourceId: number | number[];
   resourceName: string;
 }
 
@@ -40,7 +47,8 @@ export interface PushSubscription extends PushIdentity {
 
 /** Clé du groupe d'abonnés qui suivent la même ressource : un seul emploi du temps à charger pour tous. */
 export function resourceKey(identity: PushIdentity): string {
-  return `${identity.department}:${identity.kind}:${identity.resourceId}`;
+  const id = Array.isArray(identity.resourceId) ? identity.resourceId.join(',') : identity.resourceId;
+  return `${identity.department}:${identity.kind}:${id}`;
 }
 
 const MAX_SUBSCRIPTIONS = 20_000;
