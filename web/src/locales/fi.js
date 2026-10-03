@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Valitse yksi tai useampi opintojakso (R1.01, SAÉ…): niiden tunnit näytetään yhdessä, vaikka opettajaa ei olisi merkitty.',
   'picker.showSelection': ({ n }) => `Näytä (${n})`,
   'picker.clearSelection': 'Poista valinnat',
+  'picker.severalTeachers': 'Tätä opintojaksoa opettaa useampi opettaja: poista valinta niiltä, joiden tunteja et halua nähdä.',
+  'picker.noTeacher': 'Ei merkittyä opettajaa',
   'picker.expand': ({ name }) => `Avaa ${name}`,
   'picker.collapse': ({ name }) => `Sulje ${name}`,
 

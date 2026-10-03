@@ -1,6 +1,6 @@
 import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
-import { subjectOf } from './subjects.ts';
+import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
 import { TtlCache } from '../cache.ts';
 import type { AppConfig, Department } from '../config.ts';
 
@@ -56,6 +56,12 @@ export interface DirectoryEntry {
    */
   department?: string;
   label?: string;
+  /**
+   * Ressources seulement : qui en assure les séances. Une ressource partagée
+   * entre deux enseignants se filtre ainsi, chacun ne gardant que les siennes.
+   * `NO_TEACHER` regroupe les séances qu'ADE ne rattache à personne.
+   */
+  teachers?: Array<{ id: number; name: string; courses: number }>;
 }
 
 export interface Directory {
@@ -68,8 +74,8 @@ export interface Directory {
 export interface Schedule {
   department: string;
   kind: ResourceKind;
-  /** Pour les ressources, la liste de celles qu'on a réunies. */
-  resourceId: number | number[];
+  /** Pour les ressources, la sélection sous sa forme canonique (voir `formatSelection`). */
+  resourceId: number | string;
   resourceName: string;
   /** Début de la fenêtre couverte (ISO `YYYY-MM-DD`). */
   from: string;
@@ -109,7 +115,7 @@ async function mapWithLimit<T, R>(items: T[], limit: number, task: (item: T) => 
  * enseignants n'ont pas d'identifiant ADE exploitable : on leur en fabrique un,
  * pour que toute l'API — URL, cache, préférences — manipule des entiers.
  */
-function nameId(name: string): number {
+export function nameId(name: string): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < name.length; i += 1) {
     h = (h ^ name.charCodeAt(i)) >>> 0;
@@ -157,7 +163,10 @@ function roomsOf(event: CourseEvent): string[] {
 
 /** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
 function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
-  const byKey = new Map<string, { department: string; code: string; courses: number; labels: Map<string, number> }>();
+  const byKey = new Map<
+    string,
+    { department: string; code: string; courses: number; labels: Map<string, number>; teachers: Map<string, number> }
+  >();
   for (const event of events) {
     const subject = subjectOf(event);
     if (!subject) continue;
@@ -165,11 +174,15 @@ function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
     const key = `${department}:${subject.code}`;
     let entry = byKey.get(key);
     if (!entry) {
-      entry = { department, code: subject.code, courses: 0, labels: new Map() };
+      entry = { department, code: subject.code, courses: 0, labels: new Map(), teachers: new Map() };
       byKey.set(key, entry);
     }
     entry.courses += 1;
     entry.labels.set(subject.label, (entry.labels.get(subject.label) ?? 0) + 1);
+    // Une séance sans enseignant compte sous le nom vide.
+    for (const teacher of event.teachers.length ? event.teachers : ['']) {
+      entry.teachers.set(teacher, (entry.teachers.get(teacher) ?? 0) + 1);
+    }
   }
   return [...byKey.entries()]
     .map(([key, entry]) => ({
@@ -178,6 +191,9 @@ function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
       courses: entry.courses,
       department: entry.department,
       label: pickLabel(entry.labels),
+      teachers: [...entry.teachers.entries()]
+        .map(([name, courses]) => ({ id: name ? nameId(name) : NO_TEACHER, name, courses }))
+        .sort((a, b) => b.courses - a.courses || a.name.localeCompare(b.name, 'fr')),
     }))
     // Ordre naturel : R1.02 avant R1.10, les ressources avant les SAE.
     .sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
@@ -387,12 +403,16 @@ export class AdeService {
   async facetSchedule(
     departmentId: string,
     kind: ResourceKind,
-    resourceIds: number[],
+    /** Une salle ou un enseignant ; pour les ressources, la sélection. */
+    target: number | SubjectPick[],
     from: string,
   ): Promise<Schedule> {
-    if (resourceIds.length !== 1 && kind !== 'subjects') {
-      throw new NotFoundError('Une seule salle ou un seul enseignant à la fois.');
+    if (Array.isArray(target) !== (kind === 'subjects')) {
+      throw new NotFoundError('Une sélection ne vaut que pour les ressources.');
     }
+    const picks = Array.isArray(target) ? target : [{ id: target, without: [] }];
+    const resourceIds = picks.map((p) => p.id);
+    const without = new Map(picks.map((p) => [p.id, new Set(p.without)]));
     const directory = await this.directory(departmentId, kind, from);
     const entries = resourceIds.map((id) => {
       const entry = directory.entries.find((e) => e.id === id);
@@ -400,21 +420,23 @@ export class AdeService {
       return entry;
     });
     const names = new Set(entries.map((e) => e.name));
-    const ids = new Set(resourceIds);
 
     const events = await this.#allEvents(departmentId, from);
     const matches = events.filter((event) => {
       if (kind === 'rooms') return roomsOf(event).some((room) => names.has(room));
       if (kind === 'teachers') return event.teachers.some((teacher) => names.has(teacher));
       const key = subjectKey(event);
-      return key !== null && ids.has(nameId(key));
+      const excluded = key === null ? undefined : without.get(nameId(key));
+      if (!excluded) return false;
+      // Une séance reste tant qu'un de ses enseignants n'est pas écarté.
+      const teachers = event.teachers.length ? event.teachers.map(nameId) : [NO_TEACHER];
+      return teachers.some((t) => !excluded.has(t));
     });
 
     return {
       department: departmentId,
       kind,
-      // Une sélection de ressources reste une liste, même réduite à une seule.
-      resourceId: kind === 'subjects' ? resourceIds : resourceIds[0],
+      resourceId: Array.isArray(target) ? formatSelection(target) : target,
       resourceName: entries.map((e) => e.name).join(', '),
       from,
       fetchedAt: new Date().toISOString(),

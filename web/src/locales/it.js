@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Seleziona uno o più insegnamenti (R1.01, SAÉ…): le lezioni vengono mostrate insieme, anche quando il docente non è indicato.',
   'picker.showSelection': ({ n }) => `Mostra (${n})`,
   'picker.clearSelection': 'Deseleziona tutto',
+  'picker.severalTeachers': 'Più docenti tengono questo insegnamento: deseleziona quelli di cui non vuoi vedere le lezioni.',
+  'picker.noTeacher': 'Nessun docente indicato',
   'picker.expand': ({ name }) => `Espandi ${name}`,
   'picker.collapse': ({ name }) => `Comprimi ${name}`,
 

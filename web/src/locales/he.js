@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'סמנו קורס אחד או יותר (R1.01, SAÉ…): השיעורים שלהם יוצגו יחד, גם כשלא צוין מרצה.',
   'picker.showSelection': ({ n }) => `הצגה (${n})`,
   'picker.clearSelection': 'ניקוי הכול',
+  'picker.severalTeachers': 'כמה מרצים מלמדים את הקורס הזה: בטלו את הסימון של אלה שאינכם רוצים לראות את השיעורים שלהם.',
+  'picker.noTeacher': 'ללא מרצה מצוין',
   'picker.expand': ({ name }) => `פתיחת ${name}`,
   'picker.collapse': ({ name }) => `סגירת ${name}`,
 

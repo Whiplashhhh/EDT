@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Ein oder mehrere Module ankreuzen (R1.01, SAÉ…): Ihre Veranstaltungen erscheinen zusammen, auch wenn keine Lehrkraft eingetragen ist.',
   'picker.showSelection': ({ n }) => `Anzeigen (${n})`,
   'picker.clearSelection': 'Alle abwählen',
+  'picker.severalTeachers': 'Mehrere Lehrkräfte teilen sich dieses Modul: Entfernen Sie den Haken bei denen, deren Veranstaltungen Sie nicht sehen möchten.',
+  'picker.noTeacher': 'Keine Lehrkraft angegeben',
   'picker.expand': ({ name }) => `${name} aufklappen`,
   'picker.collapse': ({ name }) => `${name} zuklappen`,
 

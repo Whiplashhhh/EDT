@@ -3,6 +3,7 @@ import type { AdeService } from '../ade/service.ts';
 import { mondayOf } from './api.ts';
 import type { PushSubscription, SubscriptionStore } from '../push/store.ts';
 import { readLang } from '../push/messages.ts';
+import { formatSelection, parseSelection, type SubjectPick } from '../ade/subjects.ts';
 
 /**
  * Abonnement et désabonnement aux notifications push.
@@ -22,8 +23,6 @@ const MAX_ENDPOINT_LENGTH = 1024;
  */
 const SUBSCRIBABLE_KINDS = ['groups', 'teachers', 'subjects'] as const;
 type SubscribableKind = (typeof SUBSCRIBABLE_KINDS)[number];
-/** Ressources réunies au plus, comme pour l'emploi du temps. */
-const MAX_SUBJECTS = 20;
 
 function bad(message: string): Error {
   return Object.assign(new Error(message), { statusCode: 400 });
@@ -78,13 +77,12 @@ function parseId(raw: unknown): number {
   return id;
 }
 
-/** Un identifiant, ou pour les ressources une liste non vide, triée et sans doublon. */
-function parseResourceId(kind: SubscribableKind, raw: unknown): number | number[] {
+/** Un identifiant, ou pour les ressources une sélection (voir `parseSelection`). */
+function parseResourceId(kind: SubscribableKind, raw: unknown): number | SubjectPick[] {
   if (kind !== 'subjects') return parseId(raw);
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_SUBJECTS) {
-    throw bad('Identifiant de ressource invalide.');
-  }
-  return [...new Set(raw.map(parseId))].sort((a, b) => a - b);
+  const picks = typeof raw === 'string' ? parseSelection(raw) : null;
+  if (!picks) throw bad('Sélection de ressources invalide.');
+  return picks;
 }
 
 function parseFlag(raw: unknown): boolean {
@@ -149,18 +147,20 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
     const kind = parseKind(body.kind);
     const department = String(body.department ?? '');
     if (!DEPARTMENT_RE.test(department)) throw bad('Département invalide.');
-    const resourceId = parseResourceId(kind, body.resourceId);
+    const target = parseResourceId(kind, body.resourceId);
+    // Une sélection s'enregistre sous sa forme canonique : deux abonnés aux mêmes ressources se regroupent.
+    const resourceId = Array.isArray(target) ? formatSelection(target) : target;
 
     /*
      * La ressource est vérifiée auprès d'ADE avant d'être enregistrée : on ne
      * garde pas un abonnement vers une classe qui n'existe pas, et le nom
      * affiché vient de la source plutôt que du client.
      */
-    const resourceName = Array.isArray(resourceId)
-      ? await subjectsName(service, department, resourceId)
+    const resourceName = Array.isArray(target)
+      ? await subjectsName(service, department, target.map((p) => p.id))
       : kind === 'groups'
-        ? (await service.findGroup(department, resourceId)).name
-        : await teacherName(service, department, resourceId);
+        ? (await service.findGroup(department, target)).name
+        : await teacherName(service, department, target);
 
     const subscription: PushSubscription = {
       endpoint,

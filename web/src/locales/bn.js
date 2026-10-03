@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'এক বা একাধিক বিষয় বেছে নিন (R1.01, SAÉ…): শিক্ষকের নাম না থাকলেও তাদের ক্লাসগুলো একসাথে দেখানো হবে।',
   'picker.showSelection': ({ n }) => `দেখান (${n})`,
   'picker.clearSelection': 'সব মুছুন',
+  'picker.severalTeachers': 'এই বিষয়টি একাধিক শিক্ষক পড়ান: যাঁদের ক্লাস দেখতে চান না তাঁদের টিক তুলে দিন।',
+  'picker.noTeacher': 'কোনো শিক্ষক উল্লেখ নেই',
   'picker.expand': ({ name }) => `${name} খোলো`,
   'picker.collapse': ({ name }) => `${name} বন্ধ করো`,
 

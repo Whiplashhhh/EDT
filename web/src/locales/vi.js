@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Đánh dấu một hoặc nhiều học phần (R1.01, SAÉ…): các buổi học sẽ hiển thị cùng nhau, kể cả khi không ghi tên giảng viên.',
   'picker.showSelection': ({ n }) => `Hiển thị (${n})`,
   'picker.clearSelection': 'Bỏ chọn tất cả',
+  'picker.severalTeachers': 'Học phần này do nhiều giảng viên dạy: bỏ chọn những người mà bạn không muốn xem buổi học.',
+  'picker.noTeacher': 'Không ghi giảng viên',
   'picker.expand': ({ name }) => `Mở rộng ${name}`,
   'picker.collapse': ({ name }) => `Thu gọn ${name}`,
 

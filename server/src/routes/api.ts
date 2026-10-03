@@ -1,10 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { isResourceKind, type AdeService, type ResourceKind, type Schedule } from '../ade/service.ts';
+import { parseSelection, type SubjectPick } from '../ade/subjects.ts';
 import type { CrousService } from '../crous/service.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
-/** Ressources réunies dans un même emploi du temps, au plus. */
-const MAX_SUBJECTS = 20;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Lundi de la semaine contenant `date`, en heure de Paris. */
@@ -55,22 +54,28 @@ function parseKind(raw: string | undefined): ResourceKind {
 }
 
 /**
- * Identifiant de ce qu'on consulte. Les ressources pédagogiques se réunissent :
- * `12,34,56` désigne l'emploi du temps commun à plusieurs d'entre elles.
+ * Identifiant de ce qu'on consulte. Les ressources pédagogiques se réunissent
+ * et se filtrent par enseignant : `12,34-0-56` désigne l'emploi du temps commun
+ * à plusieurs d'entre elles (voir `parseSelection`).
  */
-function parseIds(params: Record<string, string>): { department: string; kind: ResourceKind; resourceIds: number[] } {
+function parseIds(params: Record<string, string>): {
+  department: string;
+  kind: ResourceKind;
+  target: number | SubjectPick[];
+} {
   const department = parseDepartment(params.department);
   const kind = parseKind(params.kind);
-  const parts = (params.resourceId ?? '').split(',');
-  const max = kind === 'subjects' ? MAX_SUBJECTS : 1;
-  if (parts.length > max) {
-    throw Object.assign(new Error('Trop de ressources demandées à la fois.'), { statusCode: 400 });
+  const raw = params.resourceId ?? '';
+  if (kind === 'subjects') {
+    const picks = parseSelection(raw);
+    if (!picks) throw Object.assign(new Error('Sélection de ressources invalide.'), { statusCode: 400 });
+    return { department, kind, target: picks };
   }
-  const resourceIds = [...new Set(parts.map(Number))].sort((a, b) => a - b);
-  if (resourceIds.some((id) => !Number.isInteger(id) || id <= 0 || id > 10_000_000)) {
+  const resourceId = Number(raw);
+  if (!/^\d+$/.test(raw) || resourceId <= 0 || resourceId > 10_000_000) {
     throw Object.assign(new Error('Identifiant de ressource invalide.'), { statusCode: 400 });
   }
-  return { department, kind, resourceIds };
+  return { department, kind, target: resourceId };
 }
 
 export async function registerApi(
@@ -83,12 +88,12 @@ export async function registerApi(
   const scheduleOf = (
     department: string,
     kind: ResourceKind,
-    resourceIds: number[],
+    target: number | SubjectPick[],
     from: string,
   ): Promise<Schedule> =>
-    kind === 'groups'
-      ? service.schedule(department, resourceIds[0], from)
-      : service.facetSchedule(department, kind, resourceIds, from);
+    kind === 'groups' && typeof target === 'number'
+      ? service.schedule(department, target, from)
+      : service.facetSchedule(department, kind, target, from);
 
   app.get('/health', async () => ({ status: 'ok' }));
 
@@ -132,9 +137,9 @@ export async function registerApi(
   app.get<{ Params: Record<string, string>; Querystring: { from?: string } }>(
     '/:department/:kind/:resourceId/schedule',
     async (req, reply) => {
-      const { department, kind, resourceIds } = parseIds(req.params);
+      const { department, kind, target } = parseIds(req.params);
       const from = normalizeFrom(req.query.from);
-      const schedule = await scheduleOf(department, kind, resourceIds, from);
+      const schedule = await scheduleOf(department, kind, target, from);
       reply.header('Cache-Control', 'public, max-age=300');
       return schedule;
     },
@@ -144,9 +149,9 @@ export async function registerApi(
   app.get<{ Params: Record<string, string> }>(
     '/:department/:kind/:resourceId/calendar.ics',
     async (req, reply) => {
-      const { department, kind, resourceIds } = parseIds(req.params);
+      const { department, kind, target } = parseIds(req.params);
       const from = mondayOf(new Date());
-      const schedule = await scheduleOf(department, kind, resourceIds, from);
+      const schedule = await scheduleOf(department, kind, target, from);
       reply
         .header('Content-Type', 'text/calendar; charset=utf-8')
         // Le nom vient d'ADE : on le réduit à un jeu de caractères sûr pour un en-tête.

@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Marca una o varias asignaturas (R1.01, SAÉ…): sus clases se muestran juntas, aunque no figure el profesor.',
   'picker.showSelection': ({ n }) => `Mostrar (${n})`,
   'picker.clearSelection': 'Desmarcar todo',
+  'picker.severalTeachers': 'Varios profesores imparten esta asignatura: desmarca aquellos cuyas clases no quieres ver.',
+  'picker.noTeacher': 'Sin profesor indicado',
   'picker.expand': ({ name }) => `Desplegar ${name}`,
   'picker.collapse': ({ name }) => `Plegar ${name}`,
 

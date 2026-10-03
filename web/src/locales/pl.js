@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Zaznacz jeden lub więcej przedmiotów (R1.01, SAÉ…): ich zajęcia pojawią się razem, nawet gdy prowadzący nie jest podany.',
   'picker.showSelection': ({ n }) => `Pokaż (${n})`,
   'picker.clearSelection': 'Odznacz wszystko',
+  'picker.severalTeachers': 'Ten przedmiot prowadzi kilku prowadzących: odznacz tych, których zajęć nie chcesz widzieć.',
+  'picker.noTeacher': 'Bez podanego prowadzącego',
   'picker.expand': ({ name }) => `Rozwiń ${name}`,
   'picker.collapse': ({ name }) => `Zwiń ${name}`,
 

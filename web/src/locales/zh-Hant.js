@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': '勾選一門或多門課程（R1.01、SAÉ…）：即使未登記授課教師，它們的課也會一起顯示。',
   'picker.showSelection': ({ n }) => `顯示 (${n})`,
   'picker.clearSelection': '全部取消',
+  'picker.severalTeachers': '這門課程由多位教師講授：取消勾選你不想看到其課的教師。',
+  'picker.noTeacher': '未登記教師',
   'picker.expand': ({ name }) => `展開 ${name}`,
   'picker.collapse': ({ name }) => `收合 ${name}`,
 

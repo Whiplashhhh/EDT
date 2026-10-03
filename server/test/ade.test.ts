@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs } from '../src/ade/ics.ts';
-import { subjectOf } from '../src/ade/subjects.ts';
+import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
 import { TtlCache } from '../src/cache.ts';
 
@@ -162,4 +162,18 @@ test('subjectOf réunit les séances d’une ressource sous un même code', () =
   assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', label: '' });
   // Un type de séance n'est pas un code.
   assert.equal(of('TP2')?.code, undefined);
+});
+
+test('une sélection de ressources se lit et s’écrit sous une forme unique', () => {
+  // Désordre, doublons : la forme canonique trie et fusionne.
+  const picks = parseSelection('34-56-0,12,34-56');
+  assert.deepEqual(picks, [
+    { id: 12, without: [] },
+    { id: 34, without: [0, 56] },
+  ]);
+  assert.equal(formatSelection(picks!), '12,34-0-56');
+  // Formes refusées : vide, identifiant nul, caractères parasites, trop de ressources.
+  for (const bad of ['', '0', '12,', '12-a', '12;34', Array.from({ length: 21 }, (_, i) => i + 1).join(',')]) {
+    assert.equal(parseSelection(bad), null, bad);
+  }
 });

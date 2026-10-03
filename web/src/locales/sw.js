@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Chagua somo moja au zaidi (R1.01, SAÉ…): vipindi vyake vitaonyeshwa pamoja, hata kama mwalimu hajaorodheshwa.',
   'picker.showSelection': ({ n }) => `Onyesha (${n})`,
   'picker.clearSelection': 'Futa yote',
+  'picker.severalTeachers': 'Walimu kadhaa hufundisha somo hili: ondoa alama kwa wale ambao hutaki kuona vipindi vyao.',
+  'picker.noTeacher': 'Hakuna mwalimu aliyeorodheshwa',
   'picker.expand': ({ name }) => `Panua ${name}`,
   'picker.collapse': ({ name }) => `Kunja ${name}`,
 

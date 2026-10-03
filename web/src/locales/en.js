@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Tick one or more subjects (R1.01, SAÉ…): their classes are shown together, even when no teacher is listed.',
   'picker.showSelection': ({ n }) => `Show (${n})`,
   'picker.clearSelection': 'Clear all',
+  'picker.severalTeachers': 'Several teachers share this subject: untick those whose classes you don’t want to see.',
+  'picker.noTeacher': 'No teacher listed',
   'picker.expand': ({ name }) => `Expand ${name}`,
   'picker.collapse': ({ name }) => `Collapse ${name}`,
 

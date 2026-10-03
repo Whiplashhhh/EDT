@@ -1,6 +1,7 @@
 import type { FastifyBaseLogger } from 'fastify';
 import type { AdeService } from '../ade/service.ts';
 import type { CourseEvent } from '../ade/ics.ts';
+import { parseSelection } from '../ade/subjects.ts';
 import { alignToSlots } from '../ade/slots.ts';
 import { mondayOf } from '../routes/api.ts';
 import { type PushSubscription, type SubscriptionStore } from './store.ts';
@@ -162,11 +163,13 @@ export class Notifier {
     if (known && now - known.fetchedAt < this.#options.pollMs) return { state: known, changes: [] };
 
     const from = mondayOf(new Date(now));
-    const ids = Array.isArray(sample.resourceId) ? sample.resourceId : [sample.resourceId];
+    const target =
+      typeof sample.resourceId === 'number' ? sample.resourceId : parseSelection(sample.resourceId);
+    if (target === null) throw new Error(`Sélection de ressources illisible : ${sample.resourceId}`);
     const schedule =
-      sample.kind === 'groups'
-        ? await this.#service.schedule(sample.department, ids[0], from)
-        : await this.#service.facetSchedule(sample.department, sample.kind, ids, from);
+      sample.kind === 'groups' && typeof target === 'number'
+        ? await this.#service.schedule(sample.department, target, from)
+        : await this.#service.facetSchedule(sample.department, sample.kind, target, from);
 
     /*
      * Les horaires d'ADE sont recalés sur la grille du département avant tout

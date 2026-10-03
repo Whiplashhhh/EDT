@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Zaɓi darasi ɗaya ko fiye (R1.01, SAÉ…): za a nuna azuzuwansu tare, ko da ba a rubuta sunan malami ba.',
   'picker.showSelection': ({ n }) => `Nuna (${n})`,
   'picker.clearSelection': 'Share duka',
+  'picker.severalTeachers': 'Malamai da dama ne ke koyar da wannan darasi: cire alamar waɗanda ba ka son ganin azuzuwansu.',
+  'picker.noTeacher': 'Babu malamin da aka rubuta',
   'picker.expand': ({ name }) => `Buɗe ${name}`,
   'picker.collapse': ({ name }) => `Rufe ${name}`,
 

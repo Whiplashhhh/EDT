@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'ایک یا زیادہ مضامین منتخب کریں (R1.01، SAÉ…): استاد کا نام درج نہ ہو تب بھی ان کی کلاسیں ایک ساتھ دکھائی جائیں گی۔',
   'picker.showSelection': ({ n }) => `دکھائیں (${n})`,
   'picker.clearSelection': 'سب ہٹائیں',
+  'picker.severalTeachers': 'یہ مضمون کئی اساتذہ پڑھاتے ہیں: جن کی کلاسیں آپ نہیں دیکھنا چاہتے ان کا انتخاب ہٹا دیں۔',
+  'picker.noTeacher': 'کوئی استاد درج نہیں',
   'picker.expand': ({ name }) => `${name} کھولیں`,
   'picker.collapse': ({ name }) => `${name} بند کریں`,
 

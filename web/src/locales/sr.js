@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Означите један или више предмета (R1.01, SAÉ…): њихова настава се приказује заједно, чак и кад наставник није наведен.',
   'picker.showSelection': ({ n }) => `Прикажи (${n})`,
   'picker.clearSelection': 'Поништи све',
+  'picker.severalTeachers': 'Овај предмет предаје више наставника: одзначите оне чију наставу не желите да видите.',
+  'picker.noTeacher': 'Без наведеног наставника',
   'picker.expand': ({ name }) => `Рашири ${name}`,
   'picker.collapse': ({ name }) => `Скупи ${name}`,
 
