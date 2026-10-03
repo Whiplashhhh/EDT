@@ -109,18 +109,6 @@ function reloadAll(force) {
 }
 
 /*
- * Thème et langue sont appliqués au document lui-même : le thème par un attribut
- * que la feuille de style écoute, la langue par le module de traduction.
- * « system » retire l'attribut et laisse `prefers-color-scheme` décider.
- */
-watch(() => settings.value.theme, (theme) => {
-  const explicit = theme === 'light' || theme === 'dark';
-  if (explicit) document.documentElement.dataset.theme = theme;
-  else delete document.documentElement.dataset.theme;
-  paintBrowserChrome(explicit ? theme : null);
-}, { immediate: true });
-
-/*
  * La barre du navigateur suit le thème choisi. Les deux balises `theme-color`
  * de l'index sont conditionnées à `prefers-color-scheme` : on en insère une
  * troisième, sans media et donc prioritaire, tant qu'un thème est imposé.
@@ -140,6 +128,19 @@ function paintBrowserChrome(theme) {
   }
   meta.content = CHROME_COLORS[theme];
 }
+
+/*
+ * Thème et langue sont appliqués au document lui-même : le thème par un attribut
+ * que la feuille de style écoute, la langue par le module de traduction.
+ * « system » retire l'attribut et laisse `prefers-color-scheme` décider.
+ * Le watcher part immédiatement : `CHROME_COLORS` doit être défini avant lui.
+ */
+watch(() => settings.value.theme, (theme) => {
+  const explicit = theme === 'light' || theme === 'dark';
+  if (explicit) document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+  paintBrowserChrome(explicit ? theme : null);
+}, { immediate: true });
 
 watch(() => settings.value.lang, setLocale, { immediate: true });
 
