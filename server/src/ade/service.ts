@@ -370,6 +370,18 @@ export class AdeService {
     };
   }
 
+  /**
+   * Ville d'une formation, ou `null` si on ne la connaît pas — `all`, une
+   * formation inconnue, ou ADE injoignable : le menu du Crous s'en passe.
+   */
+  async cityOf(departmentId: string): Promise<string | null> {
+    try {
+      return (await this.#list()).find((d) => d.id === departmentId)?.city ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   async #department(id: string): Promise<Composante> {
     const found = (await this.#list()).find((d) => d.id === id);
     if (!found) throw new NotFoundError(`Département inconnu : ${id}`);

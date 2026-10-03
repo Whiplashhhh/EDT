@@ -2,6 +2,10 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { CrousError, CrousService, normalizeDays, prettyName } from '../src/crous/service.ts';
 
+test('prettyName garde son sigle au restaurant écrit sans points', () => {
+  assert.equal(prettyName('ru longuenesse'), 'RU Longuenesse');
+});
+
 test('prettyName redresse les noms tout en minuscules du Crous', () => {
   assert.equal(prettyName('r.u. de la mi-voix (calais)'), 'R.U. de la Mi-Voix (Calais)');
 });
@@ -46,14 +50,22 @@ test('normalizeDays reconnaît une journée de fermeture', () => {
 });
 
 /** Un CROUStillant simulé : chaque chemin reçoit sa réponse. */
-function serviceWith(routes: Record<string, { status: number; body: unknown }>) {
-  const config = { crousApiBase: 'https://crous.test', crousRestaurantId: 1164, crousTtlMs: 60_000 } as any;
+function serviceWith(
+  routes: Record<string, { status: number; body: unknown }>,
+  cityOf?: (department: string) => Promise<string | null>,
+) {
+  const config = {
+    crousApiBase: 'https://crous.test',
+    crousRestaurantId: 1164,
+    crousTtlMs: 60_000,
+    campus: { cities: [{ id: 'dunkerque', crous: 1170 }, { id: 'calais', crous: null }], composantes: {} },
+  } as any;
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async (url: string) => {
     const route = routes[new URL(url).pathname];
     return new Response(JSON.stringify(route.body), { status: route.status });
   }) as typeof fetch;
-  return { service: new CrousService(config), restore: () => { globalThis.fetch = realFetch; } };
+  return { service: new CrousService(config, cityOf), restore: () => { globalThis.fetch = realFetch; } };
 }
 
 const RESTAURANT = { status: 200, body: { success: true, data: { nom: 'r.u. de la mi-voix (calais)', horaires: ['Service de 11h15 à 13h45'] } } };
@@ -79,6 +91,28 @@ test('un restaurant introuvable reste une erreur', async () => {
   });
   try {
     await assert.rejects(service.menu(), CrousError);
+  } finally {
+    restore();
+  }
+});
+
+test('le menu est celui du restaurant du campus de la formation', async () => {
+  const menu = { status: 200, body: { success: true, data: [] } };
+  const { service, restore } = serviceWith(
+    {
+      '/restaurants/1170': { status: 200, body: { success: true, data: { nom: 'r.u. de dunkerque' } } },
+      '/restaurants/1170/menu': menu,
+      '/restaurants/1164': RESTAURANT,
+      '/restaurants/1164/menu': menu,
+    },
+    async (department) => ({ 'iut-tc': 'dunkerque', 'iut-info': 'calais' })[department] ?? null,
+  );
+  try {
+    assert.equal((await service.menu('iut-tc')).restaurant.id, 1170);
+    // Une ville sans restaurant connu, une formation inconnue ou aucune : celui par défaut.
+    assert.equal((await service.menu('iut-info')).restaurant.id, 1164);
+    assert.equal((await service.menu('inconnue')).restaurant.id, 1164);
+    assert.equal((await service.menu()).restaurant.id, 1164);
   } finally {
     restore();
   }

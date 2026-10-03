@@ -3,11 +3,12 @@
   "origin": "https://edt.univ-littoral.fr",
   "projectId": 5,
   "cities": [
-    { "id": "boulogne", "label": "Boulogne-sur-Mer", "pattern": "boulogne" },
-    { "id": "calais", "label": "Calais", "pattern": "calais" },
-    { "id": "dunkerque", "label": "Dunkerque", "pattern": "dunkerque" },
-    { "id": "saint-omer", "label": "Saint-Omer", "pattern": "st[ -]omer|saint[ -]omer" }
+    { "id": "boulogne", "label": "Boulogne-sur-Mer", "pattern": "boulogne", "crous": 1163 },
+    { "id": "calais", "label": "Calais", "pattern": "calais", "crous": 1164 },
+    { "id": "dunkerque", "label": "Dunkerque", "pattern": "dunkerque", "crous": 1170 },
+    { "id": "saint-omer", "label": "Saint-Omer", "pattern": "st[ -]omer|saint[ -]omer", "crous": 1179 }
   ],
+  "$crous": "Restaurant universitaire le plus proche de chaque campus, par son identifiant CROUStillant : R.U. de Boulogne, R.U. de la Mi-Voix (Calais), R.U. de Dunkerque, R.U. de Longuenesse (Saint-Omer).",
   "$composantes": "Ville des composantes dont le nom ne la dit pas. Les autres se rangent d'après `pattern`.",
   "composantes": {
     "IUT INFO": "calais",

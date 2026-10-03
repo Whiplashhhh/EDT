@@ -98,9 +98,14 @@ semaines), là où il y a plus de deux mille groupes. Le serveur limite à six s
 simultanés à ADE, et parcourt l'arbre complet en arrière-plan dès le démarrage.
 
 Le menu du midi vient de l'API publique [CROUStillant](https://croustillant.menu), qui
-republie les menus du réseau Crous. Un seul restaurant est affiché — celui du campus,
-`CROUS_RESTAURANT_ID` (1164 = R.U. de la Mi-Voix, Calais) — et l'application ne propose
-pas d'en changer. Il apparaît dans la vue jour, calé sur le service de 11 h 15 à 13 h 45 :
+republie les menus du réseau Crous. Le restaurant affiché est le plus proche du campus de
+la formation, fixé par la clé `crous` de chaque ville dans `ade.json` : R.U. de Boulogne,
+R.U. de la Mi-Voix (Calais), R.U. de Dunkerque, R.U. de Longuenesse (Saint-Omer).
+L'application ne propose pas d'en changer : le client donne sa formation, jamais un
+restaurant. `CROUS_RESTAURANT_ID` (1164, la Mi-Voix) ne sert que pour une formation
+dont la ville n'a pas de restaurant. La notification du midi suit la formation des cours
+du jour : un enseignant qui intervient dans deux villes reçoit le menu de celle où il
+se trouve. Le menu apparaît dans la vue jour, calé sur le service de 11 h 15 à 13 h 45 :
 dans le trou entre deux cours qui recouvre le service, sinon avant un premier cours qui
 commence après 11 h 15, sinon après un dernier cours qui finit avant 13 h 45.
 
@@ -126,7 +131,7 @@ Les autres réglages sont dans `.env.example`.
 | Route | Description |
 |---|---|
 | `GET /api/health` | état du service |
-| `GET /api/crous/menu` | menu du restaurant universitaire (jours à venir) |
+| `GET /api/crous/menu?department=…` | menu du restaurant du campus de la formation (jours à venir) |
 | `GET /api/departments` | villes, et formations rangées par ville |
 | `GET /api/:dept/groups` | arbre des groupes |
 | `GET /api/:dept/groups/:id/schedule?from=AAAA-MM-JJ` | cours normalisés en JSON |

@@ -1,17 +1,19 @@
 <script setup>
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, toRef, watch } from 'vue';
 import { useCrousMenu } from '../composables/useCrousMenu.js';
 import { t } from '../i18n.js';
 
 const props = defineProps({
   /** Jour affiché (`AAAA-MM-JJ`). */
   day: { type: String, required: true },
+  /** Formation affichée : c'est son campus qui désigne le restaurant. */
+  department: { type: String, default: null },
 });
 
-const { restaurant, loading, failed, load, menuFor } = useCrousMenu();
+const { restaurant, loading, failed, load, menuFor } = useCrousMenu(toRef(props, 'department'));
 
 onMounted(() => load());
-watch(() => props.day, () => load());
+watch(() => [props.day, props.department], () => load());
 
 const menu = computed(() => menuFor(props.day));
 const name = computed(() => restaurant.value?.name || t('crous.fallbackName'));

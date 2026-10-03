@@ -13,6 +13,8 @@ export interface City {
   label: string;
   /** Reconnaît la ville dans le nom d'une composante (« CGU Calais », « EILCO Saint-Omer »). */
   pattern: RegExp;
+  /** Restaurant universitaire le plus proche du campus (identifiant CROUStillant). */
+  crous: number | null;
 }
 
 /**
@@ -58,7 +60,11 @@ export interface AppConfig {
   scheduleTtlMs: number;
   /** Base de l'API publique qui republie les menus Crous. */
   crousApiBase: string;
-  /** Restaurant universitaire affiché (identifiant CROUStillant), non modifiable côté client. */
+  /**
+   * Restaurant universitaire par défaut (identifiant CROUStillant) : celui d'une
+   * formation dont la ville n'a pas de restaurant dans `ade.json`. Les autres
+   * suivent leur campus ; le client ne choisit jamais un restaurant lui-même.
+   */
   crousRestaurantId: number;
   /** Durée de vie du menu en cache (ms). Le Crous publie une fois par jour. */
   crousTtlMs: number;
@@ -71,7 +77,7 @@ interface AdeFile {
   origin?: unknown;
   projectId?: unknown;
   token?: unknown;
-  cities?: Array<{ id?: unknown; label?: unknown; pattern?: unknown }>;
+  cities?: Array<{ id?: unknown; label?: unknown; pattern?: unknown; crous?: unknown }>;
   composantes?: Record<string, unknown>;
 }
 
@@ -97,7 +103,9 @@ function readCampus(file: AdeFile): CampusConfig {
     const id = String(raw.id ?? '');
     if (!ID_RE.test(id)) throw new Error(`ade.json : cities[${index}].id invalide`);
     if (!raw.label) throw new Error(`ade.json : cities[${index}].label manquant`);
-    return { id, label: String(raw.label), pattern: new RegExp(String(raw.pattern ?? id), 'i') };
+    const crous = raw.crous === undefined ? null : Number(raw.crous);
+    if (crous !== null && (!Number.isInteger(crous) || crous <= 0)) throw new Error(`ade.json : cities[${index}].crous invalide`);
+    return { id, label: String(raw.label), pattern: new RegExp(String(raw.pattern ?? id), 'i'), crous };
   });
   const composantes: Record<string, string> = {};
   for (const [name, city] of Object.entries(file.composantes ?? {})) {

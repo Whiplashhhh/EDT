@@ -88,6 +88,11 @@ const hovered = ref(new Set());
 /** Nœuds repliés à la main pendant le survol : on ne les rouvre pas tout seuls. */
 const hoverBlocked = ref(new Set());
 let hoverTimer = null;
+/**
+ * Pause du pointeur avant qu'une branche se déplie au survol : assez longue
+ * pour qu'un simple passage de la souris vers une autre ligne n'ouvre rien.
+ */
+const HOVER_OPEN_MS = 650;
 const searchInput = ref(null);
 
 const isTree = computed(() => selectedKind.value === 'groups');
@@ -191,10 +196,10 @@ function hoverNode(node, event) {
   clearTimeout(hoverTimer);
   if (!node.children) {
     // Sur une feuille, on garde seulement la branche qui y mène.
-    hoverTimer = setTimeout(() => openBranch(node.id, false), 450);
+    hoverTimer = setTimeout(() => openBranch(node.id, false), HOVER_OPEN_MS);
     return;
   }
-  hoverTimer = setTimeout(() => openBranch(node.id, true), 450);
+  hoverTimer = setTimeout(() => openBranch(node.id, true), HOVER_OPEN_MS);
 }
 
 function openBranch(id, self) {

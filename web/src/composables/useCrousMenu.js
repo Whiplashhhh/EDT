@@ -1,54 +1,62 @@
-import { readonly, ref } from 'vue';
+import { computed, reactive, unref } from 'vue';
 import { api } from '../api.js';
 
 /**
- * Menu du restaurant universitaire de l'établissement.
+ * Menu du restaurant universitaire le plus proche du campus de la formation.
  *
- * Le serveur n'expose qu'un seul restaurant : il n'y a donc rien à choisir.
- * L'état est partagé par tous les appelants — le menu couvre plusieurs jours,
- * un seul chargement suffit pour toute la session.
+ * Le client ne choisit pas de restaurant : il donne sa formation, et le
+ * serveur répond avec celui de sa ville. L'état est partagé par tous les
+ * appelants, une entrée par formation — le menu couvre plusieurs jours, un
+ * seul chargement suffit pour toute la session.
  */
-const days = ref([]);
-const restaurant = ref(null);
-const loading = ref(false);
-const failed = ref(false);
-let fetchedAt = 0;
-let pending = null;
+// Une `Map` ordinaire : créer une entrée ne doit pas réveiller qui lit les autres.
+const byDepartment = new Map();
 
 /** Au-delà d'une demi-heure, on redemande : le Crous peut publier en cours de journée. */
 const MAX_AGE_MS = 30 * 60_000;
 
-async function load(force = false) {
-  if (pending) return pending;
-  if (!force && fetchedAt && Date.now() - fetchedAt < MAX_AGE_MS) return null;
+function stateOf(department) {
+  const key = department ?? '';
+  if (!byDepartment.has(key)) {
+    byDepartment.set(key, reactive({ days: [], restaurant: null, loading: false, failed: false, fetchedAt: 0, pending: null }));
+  }
+  return byDepartment.get(key);
+}
 
-  loading.value = true;
-  pending = api.crousMenu()
+async function load(department, force = false) {
+  const state = stateOf(department);
+  if (state.pending) return state.pending;
+  if (!force && state.fetchedAt && Date.now() - state.fetchedAt < MAX_AGE_MS) return null;
+
+  state.loading = true;
+  state.pending = api.crousMenu(department)
     .then((data) => {
-      days.value = data.days ?? [];
-      restaurant.value = data.restaurant ?? null;
-      fetchedAt = Date.now();
-      failed.value = false;
+      state.days = data.days ?? [];
+      state.restaurant = data.restaurant ?? null;
+      state.fetchedAt = Date.now();
+      state.failed = false;
     })
     .catch(() => {
       // Un menu absent ne doit jamais masquer l'emploi du temps : on se tait.
-      failed.value = true;
+      state.failed = true;
     })
     .finally(() => {
-      loading.value = false;
-      pending = null;
+      state.loading = false;
+      state.pending = null;
     });
-  return pending;
+  return state.pending;
 }
 
-export function useCrousMenu() {
+/** `department` : la formation affichée, en valeur ou en `ref`. */
+export function useCrousMenu(department) {
+  const state = computed(() => stateOf(unref(department)));
   return {
-    days: readonly(days),
-    restaurant: readonly(restaurant),
-    loading: readonly(loading),
-    failed: readonly(failed),
-    load,
+    days: computed(() => state.value.days),
+    restaurant: computed(() => state.value.restaurant),
+    loading: computed(() => state.value.loading),
+    failed: computed(() => state.value.failed),
+    load: (force = false) => load(unref(department), force),
     /** Entrée du jour, ou `null` si le Crous n'a rien publié pour cette date. */
-    menuFor: (day) => days.value.find((d) => d.day === day) ?? null,
+    menuFor: (day) => state.value.days.find((d) => d.day === day) ?? null,
   };
 }

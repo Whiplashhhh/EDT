@@ -17,7 +17,8 @@ import { Notifier } from './push/notifier.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
-const crous = new CrousService(config);
+// Le menu suit le campus de la formation : c'est ADE qui sait où elle est.
+const crous = new CrousService(config, (department) => service.cityOf(department));
 
 /*
  * Notifications push. Le registre des abonnements est chargé même quand les
