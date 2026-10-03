@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Zgjidhni një ose më shumë lëndë (R1.01, SAÉ…): orët e tyre shfaqen bashkë, edhe kur mësuesi nuk është shënuar.',
   'picker.showSelection': ({ n }) => `Shfaq (${n})`,
   'picker.clearSelection': 'Hiq të gjitha',
+  'picker.severalTeachers': 'Këtë lëndë e japin disa mësues: hiqni shenjën nga ata orët e të cilëve nuk doni t’i shihni.',
+  'picker.noTeacher': 'Pa mësues të shënuar',
   'picker.expand': ({ name }) => `Zgjero ${name}`,
   'picker.collapse': ({ name }) => `Mbyll ${name}`,
 

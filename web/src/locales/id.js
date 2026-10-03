@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Centang satu atau beberapa mata kuliah (R1.01, SAÉ…): jadwalnya ditampilkan bersama, meski nama dosen tidak tercantum.',
   'picker.showSelection': ({ n }) => `Tampilkan (${n})`,
   'picker.clearSelection': 'Hapus semua',
+  'picker.severalTeachers': 'Beberapa dosen mengajar mata kuliah ini: hapus centang dosen yang jadwalnya tidak ingin Anda lihat.',
+  'picker.noTeacher': 'Tanpa dosen tercantum',
   'picker.expand': ({ name }) => `Buka ${name}`,
   'picker.collapse': ({ name }) => `Tutup ${name}`,
 

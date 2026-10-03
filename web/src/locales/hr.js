@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Označite jedan ili više kolegija (R1.01, SAÉ…): njihova se nastava prikazuje zajedno, čak i kad nastavnik nije naveden.',
   'picker.showSelection': ({ n }) => `Prikaži (${n})`,
   'picker.clearSelection': 'Poništi sve',
+  'picker.severalTeachers': 'Ovaj kolegij predaje više nastavnika: odznačite one čiju nastavu ne želite vidjeti.',
+  'picker.noTeacher': 'Bez navedenog nastavnika',
   'picker.expand': ({ name }) => `Proširi ${name}`,
   'picker.collapse': ({ name }) => `Sažmi ${name}`,
 

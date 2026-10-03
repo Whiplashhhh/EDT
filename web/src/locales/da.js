@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Markér et eller flere fag (R1.01, SAÉ…): deres timer vises samlet, også når der ikke står en underviser.',
   'picker.showSelection': ({ n }) => `Vis (${n})`,
   'picker.clearSelection': 'Fravælg alle',
+  'picker.severalTeachers': 'Flere undervisere deler dette fag: fjern markeringen ved dem, hvis timer du ikke vil se.',
+  'picker.noTeacher': 'Ingen underviser angivet',
   'picker.expand': ({ name }) => `Udvid ${name}`,
   'picker.collapse': ({ name }) => `Fold ${name} sammen`,
 

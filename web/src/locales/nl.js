@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Vink een of meer vakken aan (R1.01, SAÉ…): hun lessen worden samen getoond, ook als er geen docent vermeld staat.',
   'picker.showSelection': ({ n }) => `Tonen (${n})`,
   'picker.clearSelection': 'Alles wissen',
+  'picker.severalTeachers': 'Meerdere docenten geven dit vak: vink de docenten uit van wie je de lessen niet wilt zien.',
+  'picker.noTeacher': 'Geen docent vermeld',
   'picker.expand': ({ name }) => `${name} uitklappen`,
   'picker.collapse': ({ name }) => `${name} inklappen`,
 

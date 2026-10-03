@@ -3,6 +3,7 @@
  * Chaque accès est protégé — en navigation privée, `localStorage` peut lever.
  */
 import { LOCALE_IDS, preferredLocale } from '../i18n.js';
+import { formatSelection, parseSelection } from '../subjects.js';
 
 const KEY = 'edt-ulco:v1';
 
@@ -18,7 +19,7 @@ const EMPTY = {
   department: null,
   /** Ce qu'on consulte : une classe, une salle, un enseignant ou des ressources. */
   kind: 'groups',
-  /** Un entier — ou, pour les ressources, la liste triée de celles qu'on réunit. */
+  /** Un entier — ou, pour les ressources, la sélection écrite comme l'API la lit (`12,34-0`). */
   resourceId: null,
   resourceName: null,
   /**
@@ -48,8 +49,6 @@ function empty() {
 }
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
-/** Ressources réunies dans un même emploi du temps, au plus — la limite du serveur. */
-export const MAX_SUBJECTS = 20;
 /** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
 export const IDENTITY_KINDS = ['groups', 'teachers', 'subjects'];
 const THEMES = ['system', 'light', 'dark'];
@@ -58,19 +57,13 @@ const LANGS = LOCALE_IDS;
 
 /**
  * Relit l'identifiant de ce qu'on consulte : un entier, ou pour les ressources
- * une liste non vide d'entiers. `null` s'il ne correspond pas au type.
+ * une sélection, remise sous sa forme canonique. `null` s'il ne correspond pas
+ * au type.
  */
 function readResourceId(kind, raw) {
   if (kind !== 'subjects') return Number.isInteger(raw) ? raw : null;
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_SUBJECTS) return null;
-  if (!raw.every(Number.isInteger)) return null;
-  return [...raw].sort((a, b) => a - b);
-}
-
-/** Deux identifiants — entiers ou listes de ressources — désignent-ils la même chose ? */
-export function sameResourceId(a, b) {
-  if (!Array.isArray(a) || !Array.isArray(b)) return a === b;
-  return a.length === b.length && a.every((id, i) => id === b[i]);
+  const picks = parseSelection(raw);
+  return picks ? formatSelection(picks) : null;
 }
 
 /** Relit une identité enregistrée, ou `null` si elle est incomplète. */
@@ -176,7 +169,7 @@ export function readCachedSchedule(department, kind, resourceId, from, slot) {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed.department !== department || parsed.kind !== kind) return null;
-    if (!sameResourceId(parsed.resourceId, resourceId) || parsed.from !== from) return null;
+    if (parsed.resourceId !== resourceId || parsed.from !== from) return null;
     return parsed;
   } catch {
     return null;

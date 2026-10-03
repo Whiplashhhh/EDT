@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'เลือกรายวิชาอย่างน้อยหนึ่งวิชา (R1.01, SAÉ…): คาบเรียนจะแสดงรวมกัน แม้ไม่มีชื่อผู้สอน',
   'picker.showSelection': ({ n }) => `แสดง (${n})`,
   'picker.clearSelection': 'ล้างทั้งหมด',
+  'picker.severalTeachers': 'รายวิชานี้มีผู้สอนหลายคน: ยกเลิกการเลือกผู้สอนที่คุณไม่ต้องการเห็นคาบเรียน',
+  'picker.noTeacher': 'ไม่ระบุผู้สอน',
   'picker.expand': ({ name }) => `ขยาย ${name}`,
   'picker.collapse': ({ name }) => `ยุบ ${name}`,
 

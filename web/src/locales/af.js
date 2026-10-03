@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Merk een of meer vakke (R1.01, SAÉ…): hul klasse word saam gewys, selfs as geen dosent gelys is nie.',
   'picker.showSelection': ({ n }) => `Wys (${n})`,
   'picker.clearSelection': 'Maak alles skoon',
+  'picker.severalTeachers': 'Verskeie dosente bied hierdie vak aan: ontmerk dié wie se klasse jy nie wil sien nie.',
+  'picker.noTeacher': 'Geen dosent gelys nie',
   'picker.expand': ({ name }) => `Vou ${name} oop`,
   'picker.collapse': ({ name }) => `Vou ${name} toe`,
 

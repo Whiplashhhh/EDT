@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Markahan ang isa o higit pang asignatura (R1.01, SAÉ…): sabay na ipapakita ang mga klase nito, kahit walang nakalistang guro.',
   'picker.showSelection': ({ n }) => `Ipakita (${n})`,
   'picker.clearSelection': 'I-clear lahat',
+  'picker.severalTeachers': 'Ilang guro ang nagtuturo ng asignaturang ito: alisin ang marka sa mga ayaw mong makita ang klase.',
+  'picker.noTeacher': 'Walang nakalistang guro',
   'picker.expand': ({ name }) => `Buksan ang ${name}`,
   'picker.collapse': ({ name }) => `Isara ang ${name}`,
 

@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Tandakan satu atau lebih subjek (R1.01, SAÉ…): kelasnya dipaparkan bersama, walaupun nama pensyarah tidak disenaraikan.',
   'picker.showSelection': ({ n }) => `Papar (${n})`,
   'picker.clearSelection': 'Kosongkan semua',
+  'picker.severalTeachers': 'Beberapa pensyarah mengajar subjek ini: nyahtanda mereka yang kelasnya anda tidak mahu lihat.',
+  'picker.noTeacher': 'Tiada pensyarah disenaraikan',
   'picker.expand': ({ name }) => `Kembangkan ${name}`,
   'picker.collapse': ({ name }) => `Kuncupkan ${name}`,
 

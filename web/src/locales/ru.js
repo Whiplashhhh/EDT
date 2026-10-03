@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Отметьте одну или несколько дисциплин (R1.01, SAÉ…): их занятия покажутся вместе, даже если преподаватель не указан.',
   'picker.showSelection': ({ n }) => `Показать (${n})`,
   'picker.clearSelection': 'Снять все',
+  'picker.severalTeachers': 'Эту дисциплину ведут несколько преподавателей: снимите отметку с тех, чьи занятия вы не хотите видеть.',
+  'picker.noTeacher': 'Преподаватель не указан',
   'picker.expand': ({ name }) => `Развернуть ${name}`,
   'picker.collapse': ({ name }) => `Свернуть ${name}`,
 

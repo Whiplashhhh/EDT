@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Calaamadee hal maaddo ama dhowr (R1.01, SAÉ…): fasalladooda waa la wada muujinayaa, xitaa haddii aan macallin la qorin.',
   'picker.showSelection': ({ n }) => `Muuji (${n})`,
   'picker.clearSelection': 'Tirtir dhammaan',
+  'picker.severalTeachers': 'Macallimiin dhowr ah ayaa dhiga maaddadan: ka saar calaamadda kuwa aadan rabin inaad aragto fasalladooda.',
+  'picker.noTeacher': 'Macallin lama qorin',
   'picker.expand': ({ name }) => `Fur ${name}`,
   'picker.collapse': ({ name }) => `Xir ${name}`,
 

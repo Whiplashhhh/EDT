@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'एक या अधिक विषय चुनें (R1.01, SAÉ…): शिक्षक का नाम न होने पर भी उनकी कक्षाएँ एक साथ दिखेंगी।',
   'picker.showSelection': ({ n }) => `दिखाएँ (${n})`,
   'picker.clearSelection': 'सब हटाएँ',
+  'picker.severalTeachers': 'यह विषय कई शिक्षक पढ़ाते हैं: जिनकी कक्षाएँ आप नहीं देखना चाहते, उनका चयन हटाएँ।',
+  'picker.noTeacher': 'कोई शिक्षक दर्ज नहीं',
   'picker.expand': ({ name }) => `${name} खोलें`,
   'picker.collapse': ({ name }) => `${name} बंद करें`,
 

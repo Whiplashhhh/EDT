@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Kryss av for ett eller flere emner (R1.01, SAÉ…): timene deres vises samlet, også når det ikke står noen foreleser.',
   'picker.showSelection': ({ n }) => `Vis (${n})`,
   'picker.clearSelection': 'Fjern alle',
+  'picker.severalTeachers': 'Flere forelesere deler dette emnet: fjern avkrysningen for dem du ikke vil se timene til.',
+  'picker.noTeacher': 'Ingen foreleser oppgitt',
   'picker.expand': ({ name }) => `Utvid ${name}`,
   'picker.collapse': ({ name }) => `Skjul ${name}`,
 

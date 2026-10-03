@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'አንድ ወይም ከዚያ በላይ ትምህርቶችን ይምረጡ (R1.01, SAÉ…)፦ መምህር ባይመዘገብም ክፍለ ጊዜዎቻቸው በአንድ ላይ ይታያሉ።',
   'picker.showSelection': ({ n }) => `አሳይ (${n})`,
   'picker.clearSelection': 'ሁሉንም አጽዳ',
+  'picker.severalTeachers': 'ይህን ትምህርት በርካታ መምህራን ያስተምራሉ፦ ክፍለ ጊዜዎቻቸውን ማየት የማይፈልጉትን ምርጫ ያንሱ።',
+  'picker.noTeacher': 'መምህር አልተመዘገበም',
   'picker.expand': ({ name }) => `${name} ክፈት`,
   'picker.collapse': ({ name }) => `${name} ዝጋ`,
 

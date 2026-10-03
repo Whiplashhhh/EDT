@@ -26,8 +26,8 @@ async function getJson(path, signal) {
 }
 
 const seg = encodeURIComponent;
-/** Une ressource, ou plusieurs réunies : `12,34` dans l'URL. */
-const ids = (resourceId) => (Array.isArray(resourceId) ? resourceId.map(seg).join(',') : seg(resourceId));
+/** Une ressource, ou une sélection de ressources (`12,34-0`) : virgules et tirets restent lisibles. */
+const ids = (resourceId) => String(resourceId).split(',').map(seg).join(',');
 
 export const api = {
   departments: (signal) => getJson('/api/departments', signal),

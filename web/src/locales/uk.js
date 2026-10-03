@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Позначте одну або кілька дисциплін (R1.01, SAÉ…): їхні заняття відобразяться разом, навіть якщо викладача не вказано.',
   'picker.showSelection': ({ n }) => `Показати (${n})`,
   'picker.clearSelection': 'Зняти все',
+  'picker.severalTeachers': 'Цю дисципліну ведуть кілька викладачів: зніміть позначку з тих, чиї заняття ви не хочете бачити.',
+  'picker.noTeacher': 'Викладача не вказано',
   'picker.expand': ({ name }) => `Розгорнути ${name}`,
   'picker.collapse': ({ name }) => `Згорнути ${name}`,
 

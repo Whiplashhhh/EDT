@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Assinale uma ou mais unidades curriculares (R1.01, SAÉ…): as aulas aparecem juntas, mesmo quando o docente não está indicado.',
   'picker.showSelection': ({ n }) => `Mostrar (${n})`,
   'picker.clearSelection': 'Desmarcar tudo',
+  'picker.severalTeachers': 'Vários docentes lecionam esta unidade curricular: desmarque aqueles cujas aulas não quer ver.',
+  'picker.noTeacher': 'Sem docente indicado',
   'picker.expand': ({ name }) => `Expandir ${name}`,
   'picker.collapse': ({ name }) => `Recolher ${name}`,
 

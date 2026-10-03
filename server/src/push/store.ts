@@ -26,8 +26,8 @@ export interface PushIdentity {
    * ressources réunies). Jamais `rooms` : une salle n'a pas d'élèves.
    */
   kind: 'groups' | 'teachers' | 'subjects';
-  /** Pour les ressources, la liste triée de celles qu'on réunit. */
-  resourceId: number | number[];
+  /** Pour les ressources, la sélection sous sa forme canonique (voir `formatSelection`). */
+  resourceId: number | string;
   resourceName: string;
 }
 
@@ -47,8 +47,7 @@ export interface PushSubscription extends PushIdentity {
 
 /** Clé du groupe d'abonnés qui suivent la même ressource : un seul emploi du temps à charger pour tous. */
 export function resourceKey(identity: PushIdentity): string {
-  const id = Array.isArray(identity.resourceId) ? identity.resourceId.join(',') : identity.resourceId;
-  return `${identity.department}:${identity.kind}:${id}`;
+  return `${identity.department}:${identity.kind}:${identity.resourceId}`;
 }
 
 const MAX_SUBSCRIPTIONS = 20_000;

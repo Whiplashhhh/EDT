@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Coche une ou plusieurs ressources (R1.01, SAÉ…) : leurs cours s’affichent ensemble, même quand l’enseignant n’est pas renseigné.',
   'picker.showSelection': ({ n }) => `Afficher (${n})`,
   'picker.clearSelection': 'Tout décocher',
+  'picker.severalTeachers': 'Plusieurs enseignants assurent cette ressource : décoche ceux dont tu ne veux pas voir les cours.',
+  'picker.noTeacher': 'Sans enseignant indiqué',
   'picker.expand': ({ name }) => `Déplier ${name}`,
   'picker.collapse': ({ name }) => `Replier ${name}`,
 

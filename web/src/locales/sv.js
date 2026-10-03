@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Kryssa i en eller flera kurser (R1.01, SAÉ…): deras lektioner visas tillsammans, även när ingen lärare står angiven.',
   'picker.showSelection': ({ n }) => `Visa (${n})`,
   'picker.clearSelection': 'Avmarkera alla',
+  'picker.severalTeachers': 'Flera lärare delar på den här kursen: avmarkera dem vars lektioner du inte vill se.',
+  'picker.noTeacher': 'Ingen lärare angiven',
   'picker.expand': ({ name }) => `Expandera ${name}`,
   'picker.collapse': ({ name }) => `Fäll ihop ${name}`,
 

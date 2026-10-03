@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Επιλέξτε ένα ή περισσότερα μαθήματα (R1.01, SAÉ…): οι ώρες τους εμφανίζονται μαζί, ακόμη κι όταν δεν αναγράφεται διδάσκων.',
   'picker.showSelection': ({ n }) => `Εμφάνιση (${n})`,
   'picker.clearSelection': 'Αποεπιλογή όλων',
+  'picker.severalTeachers': 'Αυτό το μάθημα το διδάσκουν πολλοί διδάσκοντες: αποεπιλέξτε όσους δεν θέλετε να βλέπετε τις ώρες τους.',
+  'picker.noTeacher': 'Χωρίς διδάσκοντα',
   'picker.expand': ({ name }) => `Άνοιγμα ${name}`,
   'picker.collapse': ({ name }) => `Κλείσιμο ${name}`,
 

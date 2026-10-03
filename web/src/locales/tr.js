@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Bir veya daha fazla ders işaretleyin (R1.01, SAÉ…): öğretim üyesi belirtilmemiş olsa bile dersleri birlikte gösterilir.',
   'picker.showSelection': ({ n }) => `Göster (${n})`,
   'picker.clearSelection': 'Tümünü kaldır',
+  'picker.severalTeachers': 'Bu dersi birden fazla öğretim üyesi veriyor: derslerini görmek istemediklerinizin işaretini kaldırın.',
+  'picker.noTeacher': 'Öğretim üyesi belirtilmemiş',
   'picker.expand': ({ name }) => `${name} ögesini genişlet`,
   'picker.collapse': ({ name }) => `${name} ögesini daralt`,
 

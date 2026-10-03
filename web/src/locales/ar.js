@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'حدّد مادة أو أكثر (R1.01، SAÉ…): تُعرض حصصها معًا، حتى إن لم يُذكر الأستاذ.',
   'picker.showSelection': ({ n }) => `عرض (${n})`,
   'picker.clearSelection': 'إلغاء الكل',
+  'picker.severalTeachers': 'يدرّس هذه المادة عدة أساتذة: ألغِ تحديد من لا تريد رؤية حصصهم.',
+  'picker.noTeacher': 'بلا أستاذ محدّد',
   'picker.expand': ({ name }) => `توسيع ${name}`,
   'picker.collapse': ({ name }) => `طي ${name}`,
 

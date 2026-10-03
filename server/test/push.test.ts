@@ -745,9 +745,9 @@ test('le menu seul suffit à faire suivre une classe', () => {
 });
 
 test('les abonnés aux mêmes ressources partagent un seul emploi du temps', () => {
-  const identity = (resourceId: number | number[]) =>
+  const identity = (resourceId: string) =>
     ({ department: 'all', kind: 'subjects', resourceId, resourceName: '' }) as const;
-  assert.equal(resourceKey(identity([12, 34])), 'all:subjects:12,34');
-  assert.notEqual(resourceKey(identity([12, 34])), resourceKey(identity([12])));
+  assert.equal(resourceKey(identity('12,34-0')), 'all:subjects:12,34-0');
+  assert.notEqual(resourceKey(identity('12,34-0')), resourceKey(identity('12,34')));
   assert.equal(resourceKey({ department: 'iut-info', kind: 'groups', resourceId: 42, resourceName: '' }), 'iut-info:groups:42');
 });

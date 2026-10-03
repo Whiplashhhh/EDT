@@ -7,7 +7,7 @@ import WeekGrid from './components/WeekGrid.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
-import { readSettings, sameResourceId, writeSettings } from './composables/useStorage.js';
+import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
@@ -37,7 +37,7 @@ const viewingOther = computed(() => {
   return (
     mine.department !== settings.value.department ||
     mine.kind !== settings.value.kind ||
-    !sameResourceId(mine.resourceId, settings.value.resourceId)
+    mine.resourceId !== settings.value.resourceId
   );
 });
 

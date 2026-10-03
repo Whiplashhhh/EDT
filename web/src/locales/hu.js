@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Jelöljön be egy vagy több tantárgyat (R1.01, SAÉ…): óráik együtt jelennek meg, akkor is, ha nincs megadva oktató.',
   'picker.showSelection': ({ n }) => `Megjelenítés (${n})`,
   'picker.clearSelection': 'Összes törlése',
+  'picker.severalTeachers': 'Ezt a tantárgyat több oktató tanítja: vegye ki a jelölést azoknál, akiknek az óráit nem szeretné látni.',
+  'picker.noTeacher': 'Nincs megadott oktató',
   'picker.expand': ({ name }) => `${name} kibontása`,
   'picker.collapse': ({ name }) => `${name} összecsukása`,
 

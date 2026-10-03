@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Zaškrtněte jeden či více předmětů (R1.01, SAÉ…): jejich výuka se zobrazí společně, i když u ní není uveden vyučující.',
   'picker.showSelection': ({ n }) => `Zobrazit (${n})`,
   'picker.clearSelection': 'Zrušit vše',
+  'picker.severalTeachers': 'Tento předmět vyučuje více vyučujících: odškrtněte ty, jejichž výuku nechcete vidět.',
+  'picker.noTeacher': 'Bez uvedeného vyučujícího',
   'picker.expand': ({ name }) => `Rozbalit ${name}`,
   'picker.collapse': ({ name }) => `Sbalit ${name}`,
 

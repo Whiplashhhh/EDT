@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'یک یا چند درس را علامت بزنید (R1.01، SAÉ…): کلاس‌هایشان با هم نمایش داده می‌شوند، حتی اگر نام استاد ثبت نشده باشد.',
   'picker.showSelection': ({ n }) => `نمایش (${n})`,
   'picker.clearSelection': 'پاک کردن همه',
+  'picker.severalTeachers': 'چند استاد این درس را تدریس می‌کنند: علامت کسانی را که نمی‌خواهید کلاس‌هایشان را ببینید بردارید.',
+  'picker.noTeacher': 'بدون استاد مشخص',
   'picker.expand': ({ name }) => `باز کردن ${name}`,
   'picker.collapse': ({ name }) => `بستن ${name}`,
 

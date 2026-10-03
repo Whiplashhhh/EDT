@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
-import { MAX_SUBJECTS } from '../composables/useStorage.js';
+import { MAX_SUBJECTS, NO_TEACHER, formatSelection, parseSelection } from '../subjects.js';
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 /**
@@ -26,8 +26,8 @@ const SUBJECT_CODE_RE = /^(?:[RP]\d|SAE\d)/;
 const props = defineProps({
   department: { type: String, default: null },
   kind: { type: String, default: 'groups' },
-  /** Un entier, ou la liste des ressources réunies. */
-  resourceId: { type: [Number, Array], default: null },
+  /** Un entier, ou une sélection de ressources (`12,34-0`). */
+  resourceId: { type: [Number, String], default: null },
   /** Choix de l'identité : classe ou enseignant seulement, et un autre texte d'aide. */
   identityMode: { type: Boolean, default: false },
 });
@@ -71,8 +71,11 @@ const isCrossDepartment = computed(() => selectedKind.value !== 'groups');
 const showsDepartment = computed(() => !isCrossDepartment.value || isSubjects.value);
 const effectiveDept = computed(() => (isCrossDepartment.value ? ALL_DEPARTMENTS : selectedDept.value));
 
-/** Ressources cochées, toutes formations confondues. */
-const picked = ref(new Set(props.kind === 'subjects' && Array.isArray(props.resourceId) ? props.resourceId : []));
+/**
+ * Ressources cochées, toutes formations confondues, chacune avec les
+ * enseignants dont on écarte les séances.
+ */
+const picked = ref((props.kind === 'subjects' && parseSelection(props.resourceId)) || new Map());
 
 /** Aplatit l'arbre ADE : chaque nœud garde son chemin lisible pour la recherche. */
 function flatten(nodes, trail = []) {
@@ -188,10 +191,25 @@ function pick(id, name) {
 }
 
 function togglePicked(id) {
-  const next = new Set(picked.value);
+  const next = new Map(picked.value);
   if (next.has(id)) next.delete(id);
-  else if (next.size < MAX_SUBJECTS) next.add(id);
+  else if (next.size < MAX_SUBJECTS) next.set(id, new Set());
   picked.value = next;
+}
+
+/*
+ * Une ressource partagée entre plusieurs enseignants — ou dont une partie des
+ * séances n'en indique aucun — se filtre : chacun ne garde que les siennes.
+ */
+const isShared = (item) => isCurrent(item.id) && item.teachers?.length > 1;
+const isKept = (item, teacherId) => !picked.value.get(item.id)?.has(teacherId);
+
+function toggleTeacher(item, teacherId) {
+  const without = new Set(picked.value.get(item.id));
+  if (without.has(teacherId)) without.delete(teacherId);
+  // Écarter tout le monde viderait la ressource : mieux vaut la décocher.
+  else if (item.teachers.filter((t) => !without.has(t.id)).length > 1) without.add(teacherId);
+  picked.value = new Map(picked.value).set(item.id, without);
 }
 
 /** Les ressources cochées encore connues : la liste suit la fenêtre de douze semaines. */
@@ -215,10 +233,14 @@ function selectionName(list) {
 function showPicked() {
   const list = pickedEntries.value;
   if (!list.length) return;
+  // Un enseignant parti de la ressource n'a plus à être écarté.
+  const selection = new Map(
+    list.map((e) => [e.id, new Set([...picked.value.get(e.id)].filter((id) => e.teachers?.some((t) => t.id === id)))]),
+  );
   emit('choose', {
     department: ALL_DEPARTMENTS,
     kind: 'subjects',
-    resourceId: list.map((e) => e.id).sort((a, b) => a - b),
+    resourceId: formatSelection(selection),
     resourceName: selectionName(list),
   });
 }
@@ -315,7 +337,8 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 
     <!-- Ressources : une liste à cocher. -->
     <ul v-else-if="isSubjects" class="tree" role="listbox" aria-multiselectable="true">
-      <li v-for="item in results" :key="item.id">
+      <template v-for="item in results" :key="item.id">
+      <li>
         <button
           type="button"
           role="option"
@@ -332,6 +355,24 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
           <span class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
         </button>
       </li>
+      <li v-if="isShared(item)" class="teachers" role="group" :aria-label="t('picker.severalTeachers')">
+        <p class="teachers-note">{{ t('picker.severalTeachers') }}</p>
+        <button
+          v-for="teacher in item.teachers"
+          :key="teacher.id"
+          type="button"
+          role="checkbox"
+          class="teacher"
+          :class="{ on: isKept(item, teacher.id) }"
+          :aria-checked="isKept(item, teacher.id)"
+          @click="toggleTeacher(item, teacher.id)"
+        >
+          <span class="box" aria-hidden="true">{{ isKept(item, teacher.id) ? '✓' : '' }}</span>
+          <span class="name">{{ teacher.id === NO_TEACHER ? t('picker.noTeacher') : teacher.name }}</span>
+          <span class="trail">{{ t('picker.courses', { n: teacher.courses }) }}</span>
+        </button>
+      </li>
+      </template>
       <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
     </ul>
 
@@ -372,7 +413,7 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
     </ul>
 
     <div v-if="isSubjects && !loading && !error" class="selection">
-      <button v-if="picked.size" type="button" class="clear" @click="picked = new Set()">{{ t('picker.clearSelection') }}</button>
+      <button v-if="picked.size" type="button" class="clear" @click="picked = new Map()">{{ t('picker.clearSelection') }}</button>
       <button type="button" class="show" :disabled="!pickedEntries.length" @click="showPicked">
         {{ t('picker.showSelection', { n: pickedEntries.length }) }}
       </button>
@@ -512,7 +553,34 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
   border: 1.5px solid var(--line);
   border-radius: 0.3rem;
 }
-.check-row.current .box { background: var(--accent); border-color: var(--accent); }
+.check-row.current .box,
+.teacher.on .box { background: var(--accent); border-color: var(--accent); }
+
+/* Le filtre par enseignant se range sous sa ressource, en retrait. */
+.tree > li.teachers {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.1rem;
+  margin: 0 0 0.35rem 2.2rem;
+  padding: 0.4rem 0.45rem;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+}
+.teachers-note { margin: 0 0 0.2rem; font-size: 0.74rem; line-height: 1.35; color: var(--text-muted); }
+.teacher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.25rem;
+  font-size: 0.85rem;
+  text-align: start;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+}
+.teacher.on { color: var(--text); }
+.teacher:hover { background: var(--bg-elevated); }
+.teacher .name { flex: 1; min-width: 0; }
+.teacher .box { width: 1rem; height: 1rem; font-size: 0.65rem; }
 
 .selection {
   display: flex;

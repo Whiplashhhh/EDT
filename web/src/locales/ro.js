@@ -79,6 +79,8 @@ export default {
   'picker.subjectsHint': 'Bifați una sau mai multe discipline (R1.01, SAÉ…): orele lor sunt afișate împreună, chiar și când profesorul nu este trecut.',
   'picker.showSelection': ({ n }) => `Afișează (${n})`,
   'picker.clearSelection': 'Debifează tot',
+  'picker.severalTeachers': 'Mai mulți profesori predau această disciplină: debifați-i pe cei ale căror ore nu doriți să le vedeți.',
+  'picker.noTeacher': 'Fără profesor indicat',
   'picker.expand': ({ name }) => `Extinde ${name}`,
   'picker.collapse': ({ name }) => `Restrânge ${name}`,
 
