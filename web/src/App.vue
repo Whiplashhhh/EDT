@@ -7,7 +7,7 @@ import WeekGrid from './components/WeekGrid.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
-import { readSettings, writeSettings } from './composables/useStorage.js';
+import { readSettings, sameResourceId, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
@@ -37,7 +37,7 @@ const viewingOther = computed(() => {
   return (
     mine.department !== settings.value.department ||
     mine.kind !== settings.value.kind ||
-    mine.resourceId !== settings.value.resourceId
+    !sameResourceId(mine.resourceId, settings.value.resourceId)
   );
 });
 
@@ -404,7 +404,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <div class="identity">
         <p class="eyebrow">{{ t(`app.eyebrow.${settings.kind}`) }}</p>
         <button class="group-btn" type="button" :aria-expanded="pickerOpen && pickerTarget === 'main'" @click="pickerOpen ? (pickerOpen = false) : openPicker('main')">
-          {{ settings.resourceName || t('app.pickResource') }}
+          <span class="group-name">{{ settings.resourceName || t('app.pickResource') }}</span>
           <span class="chev" aria-hidden="true">▾</span>
         </button>
       </div>
@@ -731,6 +731,10 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   line-height: 1.2;
 }
 .chev { font-size: 0.7rem; color: var(--text-muted); }
+/* Plusieurs ressources réunies font un long nom : il se tronque, l'en-tête garde ses boutons. */
+.identity { min-width: 0; }
+.group-btn { max-width: 100%; }
+.group-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .actions { display: flex; align-items: center; gap: 0.4rem; }
 .pill {

@@ -222,8 +222,9 @@ const nowLine = computed(() => {
 /* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
 const deptOf = (event, context) => (context === 'groups' ? '' : departmentTag(event.department));
 
+/* Pour un enseignant ou des ressources, c'est la classe qui distingue deux séances. */
 const peopleOf = (event, context) =>
-  (context === 'teachers' ? event.groups : event.teachers || []).join(', ');
+  (context === 'teachers' || context === 'subjects' ? event.groups : event.teachers || []).join(', ');
 </script>
 
 <template>

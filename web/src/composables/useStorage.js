@@ -16,8 +16,9 @@ const PUSH_EPOCH = 2;
 
 const EMPTY = {
   department: null,
-  /** Ce qu'on consulte : une classe, une salle ou un enseignant. */
+  /** Ce qu'on consulte : une classe, une salle, un enseignant ou des ressources. */
   kind: 'groups',
+  /** Un entier — ou, pour les ressources, la liste triée de celles qu'on réunit. */
   resourceId: null,
   resourceName: null,
   /**
@@ -45,12 +46,31 @@ function empty() {
   return { ...EMPTY, lang: preferredLocale() };
 }
 
-const KINDS = ['groups', 'rooms', 'teachers'];
+const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
+/** Ressources réunies dans un même emploi du temps, au plus — la limite du serveur. */
+export const MAX_SUBJECTS = 20;
 /** Une salle n'a pas d'élèves : on ne peut pas être une salle. */
 export const IDENTITY_KINDS = ['groups', 'teachers'];
 const THEMES = ['system', 'light', 'dark'];
 /* La liste des langues vit dans le module de traduction : une seule source. */
 const LANGS = LOCALE_IDS;
+
+/**
+ * Relit l'identifiant de ce qu'on consulte : un entier, ou pour les ressources
+ * une liste non vide d'entiers. `null` s'il ne correspond pas au type.
+ */
+function readResourceId(kind, raw) {
+  if (kind !== 'subjects') return Number.isInteger(raw) ? raw : null;
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_SUBJECTS) return null;
+  if (!raw.every(Number.isInteger)) return null;
+  return [...raw].sort((a, b) => a - b);
+}
+
+/** Deux identifiants — entiers ou listes de ressources — désignent-ils la même chose ? */
+export function sameResourceId(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return a === b;
+  return a.length === b.length && a.every((id, i) => id === b[i]);
+}
 
 /** Relit une identité enregistrée, ou `null` si elle est incomplète. */
 function readIdentity(raw) {
@@ -69,11 +89,12 @@ function readIdentity(raw) {
 function readCompare(raw) {
   if (!raw || typeof raw !== 'object') return null;
   if (!KINDS.includes(raw.kind)) return null;
-  if (!Number.isInteger(raw.resourceId) || typeof raw.department !== 'string') return null;
+  const resourceId = readResourceId(raw.kind, raw.resourceId);
+  if (resourceId === null || typeof raw.department !== 'string') return null;
   return {
     department: raw.department,
     kind: raw.kind,
-    resourceId: raw.resourceId,
+    resourceId,
     resourceName: typeof raw.resourceName === 'string' ? raw.resourceName : '',
   };
 }
@@ -95,9 +116,9 @@ export function readSettings() {
     const parsed = JSON.parse(raw);
     // Avant l'arrivée des salles et des enseignants, seule une classe était
     // mémorisée, sous `groupId` / `groupName`.
-    const id = Number.isInteger(parsed.resourceId) ? parsed.resourceId : parsed.groupId;
-    const name = parsed.resourceName ?? parsed.groupName;
     const kind = KINDS.includes(parsed.kind) ? parsed.kind : 'groups';
+    const id = readResourceId(kind, parsed.resourceId ?? parsed.groupId);
+    const name = parsed.resourceName ?? parsed.groupName;
     const department = typeof parsed.department === 'string' ? parsed.department : null;
     /*
      * Les versions précédentes ne mémorisaient que la ressource consultée.
@@ -118,7 +139,7 @@ export function readSettings() {
        */
       department: kind !== 'groups' && department ? 'all' : department,
       kind,
-      resourceId: Number.isInteger(id) ? id : null,
+      resourceId: id,
       resourceName: typeof name === 'string' ? name : null,
       identity,
       push: readPush(parsed.push),
@@ -153,7 +174,7 @@ export function readCachedSchedule(department, kind, resourceId, from, slot) {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (parsed.department !== department || parsed.kind !== kind) return null;
-    if (parsed.resourceId !== resourceId || parsed.from !== from) return null;
+    if (!sameResourceId(parsed.resourceId, resourceId) || parsed.from !== from) return null;
     return parsed;
   } catch {
     return null;

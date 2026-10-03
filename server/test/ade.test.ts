@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs } from '../src/ade/ics.ts';
+import { subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
 import { TtlCache } from '../src/cache.ts';
 
@@ -142,4 +143,23 @@ test("le flux iCalendar réexposé échappe les caractères spéciaux", async ()
   assert.ok(res.body.includes('SUMMARY:Maths\\; TD\\, groupe A'));
   assert.ok(res.body.includes('LOCATION:S1\\,36'));
   await app.close();
+});
+
+test('subjectOf réunit les séances d’une ressource sous un même code', () => {
+  const of = (title: string) => subjectOf({ title, subject: title });
+  // Tiret ou point, type de séance au bout ou collé au code : même ressource.
+  assert.deepEqual(of('R1-01 Dev TPA'), { code: 'R1.01', label: 'Dev' });
+  assert.deepEqual(of('R1.13TD1 Expression/Communication'), { code: 'R1.13', label: 'Expression/Communication' });
+  assert.deepEqual(of('GEII R1.04 OML1 - TD1 - 1.5'), { code: 'R1.04', label: 'OML1' });
+  assert.deepEqual(of('R5.02.PPP'), { code: 'R5.02', label: 'PPP' });
+  assert.deepEqual(of('R5.A.05 Prog Avancée F#'), { code: 'R5.A.05', label: 'Prog Avancée F#' });
+  assert.deepEqual(of('AS SAE12 Mettre en oeuvre'), { code: 'SAE12', label: 'Mettre en oeuvre' });
+  assert.deepEqual(of('SAE 1.1 - CONCEVOIR - TP2 - SIN'), { code: 'SAE1.1', label: 'CONCEVOIR - SIN' });
+  assert.deepEqual(of('SAE5.B.00_JV'), { code: 'SAE5.B.00', label: 'JV' });
+  // « CC1 » est une matière des GEII, pas un contrôle continu.
+  assert.deepEqual(of('R3.02 CC3 - TP4'), { code: 'R3.02', label: 'CC3' });
+  // Sans code, l'intitulé lui-même fait office de ressource.
+  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', label: '' });
+  // Un type de séance n'est pas un code.
+  assert.equal(of('TP2')?.code, undefined);
 });

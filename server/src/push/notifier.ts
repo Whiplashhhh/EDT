@@ -165,7 +165,7 @@ export class Notifier {
     const schedule =
       sample.kind === 'groups'
         ? await this.#service.schedule(sample.department, sample.resourceId, from)
-        : await this.#service.facetSchedule(sample.department, sample.kind, sample.resourceId, from);
+        : await this.#service.facetSchedule(sample.department, sample.kind, [sample.resourceId], from);
 
     /*
      * Les horaires d'ADE sont recalés sur la grille du département avant tout
