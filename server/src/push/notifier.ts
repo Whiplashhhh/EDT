@@ -21,7 +21,8 @@ import { changesWithin, dueMenuReminders, dueReminders, diffSchedules, snapshotO
 
 /** Ce que le planificateur attend du Crous : le menu, et rien d'autre. */
 export interface MenuSource {
-  menu(): Promise<{ days: ({ day: string } & MenuOfDay)[] }>;
+  /** Menu du restaurant le plus proche de la formation `department`. */
+  menu(department?: string): Promise<{ days: ({ day: string } & MenuOfDay)[] }>;
 }
 
 /**
@@ -205,16 +206,17 @@ export class Notifier {
    */
   async #sendMenu(sub: PushSubscription, events: CourseEvent[], now: number): Promise<void> {
     for (const reminder of dueMenuReminders(events, now, this.#options.graceMs)) {
-      const menu = await this.#menuOf(reminder.day);
+      // Le campus du jour d'abord : une identité « enseignant » n'a pas de formation à elle.
+      const menu = await this.#menuOf(reminder.day, reminder.department ?? sub.department);
       await this.#deliver(sub, `menu:${reminder.day}`, menuNotification(menu, reminder.day, langOf(sub)), now);
     }
   }
 
   /** Le menu d'un jour, ou `null` si le Crous ne le publie pas ou ne répond pas. */
-  async #menuOf(day: string): Promise<MenuOfDay | null> {
+  async #menuOf(day: string, department: string): Promise<MenuOfDay | null> {
     if (!this.#crous) return null;
     try {
-      return (await this.#crous.menu()).days.find((entry) => entry.day === day) ?? null;
+      return (await this.#crous.menu(department)).days.find((entry) => entry.day === day) ?? null;
     } catch (err) {
       this.#log.warn({ err, day }, 'menu Crous indisponible pour la notification');
       return null;

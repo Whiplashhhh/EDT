@@ -17,7 +17,8 @@ import { Notifier } from './push/notifier.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
-const crous = new CrousService(config);
+// Le menu suit le campus de la formation : c'est ADE qui sait où elle est.
+const crous = new CrousService(config, (department) => service.cityOf(department));
 
 /*
  * Notifications push. Le registre des abonnements est chargé même quand les
@@ -162,3 +163,11 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
 }
 
 await app.listen({ host: config.host, port: config.port });
+
+// L'arbre de toute l'ULCO se parcourt en arrière-plan, une fois le serveur à
+// l'écoute : le premier visiteur n'a pas à l'attendre, et un ADE injoignable
+// au démarrage n'empêche pas de servir le reste.
+service.warmUp().then(
+  () => app.log.info('Arbre ADE chargé'),
+  (err: unknown) => app.log.warn({ err }, "Préchargement de l'arbre ADE interrompu"),
+);

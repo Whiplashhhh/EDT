@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, toRef, watch } from 'vue';
 import EventCard from './EventCard.vue';
 import CrousMenu from './CrousMenu.vue';
 import { useCrousMenu } from '../composables/useCrousMenu.js';
@@ -14,10 +14,13 @@ const props = defineProps({
      d'une salle ou d'un enseignant, il n'a rien à y faire. */
   showMenu: { type: Boolean, default: true },
   context: { type: String, default: 'groups' },
+  /** Formation affichée : le menu est celui du restaurant de son campus. */
+  department: { type: String, default: null },
 });
 
-const { load: loadMenu, menuFor } = useCrousMenu();
+const { load: loadMenu, menuFor } = useCrousMenu(toRef(props, 'department'));
 onMounted(() => loadMenu());
+watch(() => props.department, () => loadMenu());
 
 /* Un jour passé dont on n'a pas le menu ne mérite pas un bloc « rien de publié » :
    l'information ne servira plus à personne, la pause redevient une pause. */
@@ -243,7 +246,7 @@ function rowStyle(row) {
             :style="item.style"
           />
         </template>
-        <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" />
+        <CrousMenu v-else-if="row.lunch || row.type === 'crous'" :day="day" :department="department" />
         <p v-else class="gap-label">{{ gapLabel(row.minutes) }}</p>
       </li>
     </ol>

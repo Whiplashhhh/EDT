@@ -2,8 +2,9 @@
  * Menu du restaurant universitaire, via l'API publique CROUStillant
  * (https://croustillant.menu), qui republie les menus du réseau Crous.
  *
- * Le restaurant est fixé par la configuration : l'application ne propose pas
- * d'en changer, elle n'affiche que celui de l'établissement.
+ * Le restaurant suit le campus : celui de la ville de la formation, tel que
+ * le fixe `server/config/ade.json`. L'application ne propose pas d'en changer,
+ * et le client ne nomme jamais un restaurant — seulement sa formation.
  */
 import { TtlCache } from '../cache.ts';
 import type { AppConfig } from '../config.ts';
@@ -34,17 +35,31 @@ const MAX_BYTES = 2 * 1024 * 1024;
 /** Catégories sans intérêt pour l'affichage : elles n'annoncent aucun plat réel. */
 const NOISE = /^sous reserve|^menu non communiqu/i;
 
+/** Ville d'une formation, ou `null` si on ne la connaît pas. */
+export type CityResolver = (department: string) => Promise<string | null>;
+
 export class CrousService {
   readonly #config: AppConfig;
+  readonly #cityOf: CityResolver;
   readonly #cache: TtlCache<CrousMenu>;
 
-  constructor(config: AppConfig) {
+  constructor(config: AppConfig, cityOf: CityResolver = async () => null) {
     this.#config = config;
-    this.#cache = new TtlCache<CrousMenu>(config.crousTtlMs, 4);
+    this.#cityOf = cityOf;
+    // Un restaurant par campus, plus celui par défaut.
+    this.#cache = new TtlCache<CrousMenu>(config.crousTtlMs, 8);
   }
 
-  async menu(): Promise<CrousMenu> {
-    const id = this.#config.crousRestaurantId;
+  /** Restaurant du campus de la formation, sinon celui par défaut. */
+  async #restaurantOf(department: string | undefined): Promise<number> {
+    const city = department ? await this.#cityOf(department) : null;
+    const restaurant = this.#config.campus?.cities.find((c) => c.id === city)?.crous;
+    return restaurant ?? this.#config.crousRestaurantId;
+  }
+
+  /** Menu du restaurant le plus proche de la formation `department`. */
+  async menu(department?: string): Promise<CrousMenu> {
+    const id = await this.#restaurantOf(department);
     return this.#cache.get(String(id), async () => {
       const [restaurant, menu] = await Promise.all([
         this.#get(`/restaurants/${id}`),
@@ -87,8 +102,8 @@ const LOWERCASE_WORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'aux', 'a
 
 export function prettyName(raw: string): string {
   return raw.toLowerCase().replace(/[\p{L}][\p{L}'\u2019.-]*/gu, (word) => {
-    // « r.u. » est un sigle : il s'écrit en capitales.
-    if (word.includes('.')) return word.toUpperCase();
+    // « r.u. » est un sigle : il s'écrit en capitales, avec ou sans points (« ru longuenesse »).
+    if (word.includes('.') || word === 'ru') return word.toUpperCase();
     if (LOWERCASE_WORDS.has(word)) return word;
     // « mi-voix » → « Mi-Voix » : chaque partie prend sa majuscule.
     return word.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('-');

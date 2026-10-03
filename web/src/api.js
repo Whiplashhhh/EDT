@@ -37,8 +37,9 @@ export const api = {
   directory: (department, kind, signal) => getJson(`/api/${seg(department)}/${seg(kind)}`, signal),
   schedule: (department, kind, resourceId, from, signal) =>
     getJson(`/api/${seg(department)}/${seg(kind)}/${ids(resourceId)}/schedule?from=${seg(from)}`, signal),
-  // Le restaurant universitaire est fixé côté serveur : aucun paramètre ici.
-  crousMenu: (signal) => getJson('/api/crous/menu', signal),
+  // Le restaurant suit le campus de la formation : on donne la formation, le serveur choisit.
+  crousMenu: (department, signal) =>
+    getJson(department ? `/api/crous/menu?department=${seg(department)}` : '/api/crous/menu', signal),
   calendarUrl: (department, kind, resourceId) =>
     `${location.origin}/api/${seg(department)}/${seg(kind)}/${ids(resourceId)}/calendar.ics`,
 

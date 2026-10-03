@@ -608,6 +608,11 @@ test('le menu part 5 minutes avant la fin du dernier cours de la matinée', () =
   assert.equal(reminders[0].day, '2026-09-21');
 });
 
+test('le rappel du menu retient la formation du jour, qui désigne le restaurant', () => {
+  const inDunkerque = DAY.map((event) => ({ ...event, department: 'iut-tc' }));
+  assert.equal(menuRemindersFor(inDunkerque)[0].department, 'iut-tc');
+});
+
 test('une journée sans cours autour de midi n’annonce pas de menu', () => {
   // Uniquement le début de matinée, fini à 9 h 30 : on ne déjeunera pas ici.
   assert.deepEqual(menuRemindersFor([MORNING]), []);

@@ -143,6 +143,12 @@ export interface MenuReminder {
   at: number;
   /** Jour concerné (`AAAA-MM-JJ`), qui sert aussi de clé de dédoublonnage. */
   day: string;
+  /**
+   * Formation des cours de ce jour-là : elle dit sur quel campus on déjeune.
+   * Un enseignant qui intervient dans deux villes reçoit ainsi, chaque jour,
+   * le menu de celle où il se trouve.
+   */
+  department?: string;
 }
 
 /**
@@ -171,8 +177,9 @@ export function menuRemindersFor(events: CourseEvent[]): MenuReminder[] {
       if (end < LUNCH_END_WINDOW.from || end > LUNCH_END_WINDOW.to) continue;
       if (!before || session.end > before.end) before = session;
     }
+    const department = dayEvents.find((event) => event.department)?.department;
     if (before) {
-      reminders.push({ at: Date.parse(before.end) - MENU_LEAD_MS, day });
+      reminders.push({ at: Date.parse(before.end) - MENU_LEAD_MS, day, department });
       continue;
     }
 
@@ -181,7 +188,7 @@ export function menuRemindersFor(events: CourseEvent[]): MenuReminder[] {
       const start = minutesOfDay(session.start);
       return start >= LUNCH_ARRIVAL_WINDOW.from && start <= LUNCH_ARRIVAL_WINDOW.to;
     });
-    if (after) reminders.push({ at: startOfDay(day) + MENU_ARRIVAL_TIME * 60_000, day });
+    if (after) reminders.push({ at: startOfDay(day) + MENU_ARRIVAL_TIME * 60_000, day, department });
   }
   return reminders.sort((a, b) => a.at - b.at);
 }

@@ -97,17 +97,21 @@ export async function registerApi(
 
   app.get('/health', async () => ({ status: 'ok' }));
 
-  // Menu du restaurant universitaire de l'établissement : un seul restaurant,
-  // fixé par la configuration, donc pas de paramètre côté client.
-  app.get('/crous/menu', async (_req, reply) => {
-    const menu = await crous.menu();
+  // Menu du restaurant universitaire le plus proche du campus de la formation.
+  // Le client donne sa formation, jamais un restaurant : c'est la configuration
+  // qui les relie. Une formation absente ou inconnue reçoit le restaurant par défaut.
+  app.get<{ Querystring: { department?: string } }>('/crous/menu', async (req, reply) => {
+    const raw = req.query.department;
+    const department = typeof raw === 'string' && DEPARTMENT_RE.test(raw) ? raw : undefined;
+    const menu = await crous.menu(department);
     reply.header('Cache-Control', 'public, max-age=1800');
     return menu;
   });
 
   app.get('/departments', async (_req, reply) => {
     reply.header('Cache-Control', 'public, max-age=3600');
-    return { departments: service.departments() };
+    // Les villes d'abord : c'est par elles qu'on choisit sa formation.
+    return service.departments();
   });
 
   app.get<{ Params: Record<string, string> }>('/:department/groups', async (req, reply) => {

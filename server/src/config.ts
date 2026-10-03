@@ -1,12 +1,31 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-export interface Department {
-  id: string;
-  label: string;
+/** Le lien ADE public qui ouvre l'arbre de tout l'établissement. */
+export interface AdeSource {
   origin: string;
   projectId: number;
   token: string;
+}
+
+export interface City {
+  id: string;
+  label: string;
+  /** Reconnaît la ville dans le nom d'une composante (« CGU Calais », « EILCO Saint-Omer »). */
+  pattern: RegExp;
+  /** Restaurant universitaire le plus proche du campus (identifiant CROUStillant). */
+  crous: number | null;
+}
+
+/**
+ * Rangement des composantes par ville. ADE ne le connaît pas : il se lit dans
+ * le nom de la composante, et pour celles dont le nom ne le dit pas — les
+ * départements d'IUT —, dans une table tenue à la main.
+ */
+export interface CampusConfig {
+  cities: City[];
+  /** Nom ADE de la composante → identifiant de sa ville. */
+  composantes: Record<string, string>;
 }
 
 /**
@@ -33,14 +52,19 @@ export interface AppConfig {
   port: number;
   /** Origines autorisées à appeler l'API depuis un autre domaine (vide = même origine seulement). */
   allowedOrigins: string[];
-  departments: Department[];
+  ade: AdeSource;
+  campus: CampusConfig;
   /** Durée de vie du catalogue des groupes (ms). */
   catalogTtlMs: number;
   /** Durée de vie d'un emploi du temps en cache (ms). */
   scheduleTtlMs: number;
   /** Base de l'API publique qui republie les menus Crous. */
   crousApiBase: string;
-  /** Restaurant universitaire affiché (identifiant CROUStillant), non modifiable côté client. */
+  /**
+   * Restaurant universitaire par défaut (identifiant CROUStillant) : celui d'une
+   * formation dont la ville n'a pas de restaurant dans `ade.json`. Les autres
+   * suivent leur campus ; le client ne choisit jamais un restaurant lui-même.
+   */
   crousRestaurantId: number;
   /** Durée de vie du menu en cache (ms). Le Crous publie une fois par jour. */
   crousTtlMs: number;
@@ -49,29 +73,46 @@ export interface AppConfig {
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 
-function readDepartments(): Department[] {
-  const path = fileURLToPath(new URL('../config/departments.json', import.meta.url));
-  const parsed = JSON.parse(readFileSync(path, 'utf8')) as { departments?: unknown };
-  if (!Array.isArray(parsed.departments)) throw new Error('departments.json : clé "departments" manquante');
+interface AdeFile {
+  origin?: unknown;
+  projectId?: unknown;
+  token?: unknown;
+  cities?: Array<{ id?: unknown; label?: unknown; pattern?: unknown; crous?: unknown }>;
+  composantes?: Record<string, unknown>;
+}
 
-  return parsed.departments.map((raw, index) => {
-    const d = raw as Partial<Department>;
-    if (!d.id || !ID_RE.test(d.id)) throw new Error(`departments.json[${index}] : id invalide`);
-    // `all` est réservé : c'est le département fictif qui réunit toutes les formations.
-    if (d.id === 'all') throw new Error(`departments.json[${index}] : l'id « all » est réservé`);
-    if (!d.label) throw new Error(`departments.json[${index}] : label manquant`);
-    const origin = String(d.origin ?? '');
-    if (!/^https:\/\/[a-z0-9.-]+$/i.test(origin)) {
-      throw new Error(`departments.json[${index}] : origin doit être une URL https sans chemin`);
-    }
-    // Le jeton peut rester hors du dépôt : ADE_TOKEN_IUT_INFO écrase la valeur du fichier.
-    const envKey = `ADE_TOKEN_${d.id.replaceAll('-', '_').toUpperCase()}`;
-    const token = process.env[envKey] ?? d.token ?? '';
-    if (!/^[0-9a-f]{32,}$/i.test(token)) throw new Error(`departments.json[${index}] : jeton ADE absent ou invalide`);
-    const projectId = Number(d.projectId);
-    if (!Number.isInteger(projectId) || projectId < 0) throw new Error(`departments.json[${index}] : projectId invalide`);
-    return { id: d.id, label: d.label, origin, projectId, token };
+function readAdeFile(): AdeFile {
+  const path = fileURLToPath(new URL('../config/ade.json', import.meta.url));
+  return JSON.parse(readFileSync(path, 'utf8')) as AdeFile;
+}
+
+function readSource(file: AdeFile): AdeSource {
+  const origin = String(file.origin ?? '');
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(origin)) throw new Error('ade.json : origin doit être une URL https sans chemin');
+  // Le jeton reste hors du dépôt : la variable d'environnement a la priorité.
+  const token = process.env.ADE_TOKEN ?? String(file.token ?? '');
+  if (!/^[0-9a-f]{32,}$/i.test(token)) throw new Error('ADE_TOKEN absent ou invalide (paramètre `data=` du lien ADE public)');
+  const projectId = Number(file.projectId);
+  if (!Number.isInteger(projectId) || projectId < 0) throw new Error('ade.json : projectId invalide');
+  return { origin, projectId, token };
+}
+
+function readCampus(file: AdeFile): CampusConfig {
+  if (!Array.isArray(file.cities) || file.cities.length === 0) throw new Error('ade.json : clé "cities" manquante');
+  const cities = file.cities.map((raw, index) => {
+    const id = String(raw.id ?? '');
+    if (!ID_RE.test(id)) throw new Error(`ade.json : cities[${index}].id invalide`);
+    if (!raw.label) throw new Error(`ade.json : cities[${index}].label manquant`);
+    const crous = raw.crous === undefined ? null : Number(raw.crous);
+    if (crous !== null && (!Number.isInteger(crous) || crous <= 0)) throw new Error(`ade.json : cities[${index}].crous invalide`);
+    return { id, label: String(raw.label), pattern: new RegExp(String(raw.pattern ?? id), 'i'), crous };
   });
+  const composantes: Record<string, string> = {};
+  for (const [name, city] of Object.entries(file.composantes ?? {})) {
+    if (!cities.some((c) => c.id === city)) throw new Error(`ade.json : ville inconnue pour « ${name} »`);
+    composantes[name] = String(city);
+  }
+  return { cities, composantes };
 }
 
 /**
@@ -111,6 +152,7 @@ function positiveInt(value: string | undefined, fallback: number): number {
 }
 
 export function loadConfig(): AppConfig {
+  const adeFile = readAdeFile();
   return {
     host: process.env.HOST ?? '0.0.0.0',
     port: positiveInt(process.env.PORT, 3000),
@@ -118,7 +160,8 @@ export function loadConfig(): AppConfig {
       .split(',')
       .map((o) => o.trim())
       .filter(Boolean),
-    departments: readDepartments(),
+    ade: readSource(adeFile),
+    campus: readCampus(adeFile),
     catalogTtlMs: positiveInt(process.env.CATALOG_TTL_MS, 12 * 60 * 60 * 1000),
     scheduleTtlMs: positiveInt(process.env.SCHEDULE_TTL_MS, 10 * 60 * 1000),
     crousApiBase: (process.env.CROUS_API_BASE ?? 'https://api.croustillant.menu/v1').replace(/\/+$/, ''),

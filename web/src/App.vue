@@ -618,7 +618,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
                 </div>
               </template>
             </WeekGrid>
-            <DayAgenda v-else :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" />
+            <DayAgenda v-else :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" :department="settings.department" />
           </template>
           <WeekGrid v-else :focused="focusedDay" :department="grid" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
         </div>
