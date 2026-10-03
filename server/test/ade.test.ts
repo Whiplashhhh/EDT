@@ -4,6 +4,7 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
+import { decodeAdeName, slugOf } from '../src/ade/service.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -176,4 +177,21 @@ test('une sélection de ressources se lit et s’écrit sous une forme unique', 
   for (const bad of ['', '0', '12,', '12-a', '12;34', Array.from({ length: 21 }, (_, i) => i + 1).join(',')]) {
     assert.equal(parseSelection(bad), null, bad);
   }
+});
+
+test('decodeAdeName rend lisibles les noms échappés par ADE', () => {
+  assert.equal(decodeAdeName("FCU Côte d\\x27Opale BOULOGNE"), "FCU Côte d'Opale BOULOGNE");
+  assert.equal(decodeAdeName('DAEU \\x26quot;A\\x26quot; ET \\x26quot;B\\x26quot;'), 'DAEU "A" ET "B"');
+  assert.equal(decodeAdeName('BUT1-TD1'), 'BUT1-TD1');
+});
+
+test('slugOf garde aux départements d’IUT l’identifiant qu’ils avaient', () => {
+  assert.equal(slugOf('IUT INFO'), 'iut-info');
+  assert.equal(slugOf('IUT GEA'), 'iut-gea');
+  assert.equal(slugOf('IUT GEII'), 'iut-geii');
+  assert.equal(slugOf("FCU Côte d'Opale DUNKERQUE"), 'fcu-cote-d-opale-dunkerque');
+  // Il reste dans le format que l'API accepte : 32 caractères, sans tiret final.
+  const long = slugOf('LP ASSURANCE BANQUE FINANCE : CHARGE DE CLIENTELE');
+  assert.match(long, /^[a-z0-9][a-z0-9-]{0,31}$/);
+  assert.ok(!long.endsWith('-'));
 });

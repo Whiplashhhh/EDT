@@ -67,22 +67,35 @@ npm test
 
 ## Configuration
 
-`server/config/departments.json` liste les sources ADE. Une entrée = un lien ADE
-« direct planning » public :
+L'application couvre **toute l'ULCO** à partir d'un seul lien ADE « direct planning »
+public, dont l'arbre réunit les vingt-deux composantes de l'université (CGU, EILCO, FCU,
+ISCID-CO, départements d'IUT). Chaque composante devient une formation de l'application,
+avec un identifiant tiré de son nom : `IUT INFO` donne `iut-info`, comme avant — les classes
+mémorisées et les abonnements restent valables.
 
-```json
-{
-  "id": "iut-info",
-  "label": "IUT Informatique",
-  "origin": "https://edt.univ-littoral.fr",
-  "projectId": 5,
-  "token": "6b052c86…"
-}
-```
+Le jeton du lien (son paramètre `data=`) se donne par la variable d'environnement
+`ADE_TOKEN`, hors du dépôt. `server/config/ade.json` contient le reste : le serveur ADE,
+le projet (année universitaire) et le rangement par ville.
 
-Pour ajouter une formation, il suffit de récupérer son lien ADE public et d'en extraire
-le paramètre `data=`. Le jeton peut rester hors du dépôt via la variable d'environnement
-`ADE_TOKEN_<ID>` (ex. `ADE_TOKEN_IUT_INFO`), qui a la priorité sur le fichier.
+### Les villes
+
+On choisit d'abord sa ville — Boulogne-sur-Mer, Calais, Dunkerque ou Saint-Omer —, puis
+sa classe parmi toutes les formations qu'on y trouve. ADE ne connaît pas les campus :
+une composante se range d'après son nom (« CGU Calais », « EILCO Saint-Omer »), et celles
+dont le nom ne dit rien — les départements d'IUT — d'après la table `composantes` de
+`ade.json`. Une composante nouvelle qu'aucune règle ne range apparaît sous « Autres ».
+
+Les salles se rattachent à la ville de la formation qui les occupe : « SALLE 25 » existe
+à Boulogne comme à Dunkerque. Les enseignants se cherchent dans toute l'ULCO.
+
+### Rassembler les cours de toute l'université
+
+Les vues par salle, enseignant ou ressource demandent tous les cours. ADE publie
+volontiers le flux d'un nœud entier de l'arbre — un département d'IUT d'un seul tenant —,
+mais au-delà d'une certaine taille il répond une page vide : on redescend alors d'un
+niveau. Toute l'ULCO tient ainsi en moins de trois cents flux (environ 11 Mo pour douze
+semaines), là où il y a plus de deux mille groupes. Le serveur limite à six ses appels
+simultanés à ADE, et parcourt l'arbre complet en arrière-plan dès le démarrage.
 
 Le menu du midi vient de l'API publique [CROUStillant](https://croustillant.menu), qui
 republie les menus du réseau Crous. Un seul restaurant est affiché — celui du campus,
@@ -114,7 +127,7 @@ Les autres réglages sont dans `.env.example`.
 |---|---|
 | `GET /api/health` | état du service |
 | `GET /api/crous/menu` | menu du restaurant universitaire (jours à venir) |
-| `GET /api/departments` | formations disponibles |
+| `GET /api/departments` | villes, et formations rangées par ville |
 | `GET /api/:dept/groups` | arbre des groupes |
 | `GET /api/:dept/groups/:id/schedule?from=AAAA-MM-JJ` | cours normalisés en JSON |
 | `GET /api/:dept/groups/:id/calendar.ics` | flux iCalendar à ajouter à son calendrier |

@@ -20,6 +20,8 @@ const IDENTITY_KINDS = ['groups', 'teachers', 'subjects'];
  * alors qu'une autre l'occupe.
  */
 const ALL_DEPARTMENTS = 'all';
+/** Ville des formations que le serveur ne sait pas ranger (voir `server/config/ade.json`). */
+const OTHER_CITY = 'autres';
 /** Un vrai code de ressource — R1.01, P1.01, SAE5.B.00 — par opposition à un intitulé libre. */
 const SUBJECT_CODE_RE = /^(?:[RP]\d|SAE\d)/;
 
@@ -35,13 +37,46 @@ const emit = defineEmits(['choose', 'close']);
 
 const kinds = computed(() => (props.identityMode ? IDENTITY_KINDS : KINDS));
 
+/**
+ * On choisit d'abord sa ville, puis on voit toutes les formations qu'on y
+ * suit : l'ULCO compte quatre campus et plus de vingt composantes, que l'arbre
+ * d'ADE range sans ordre géographique.
+ */
+const cities = ref([]);
 const departments = ref([]);
+/** La dernière ville choisie, retenue sur l'appareil pour la prochaine ouverture. */
+const CITY_KEY = 'edt-ulco:city';
+function storedCity() {
+  try {
+    return localStorage.getItem(CITY_KEY);
+  } catch {
+    return null;
+  }
+}
+const selectedCity = ref(null);
+watch(selectedCity, (city) => {
+  try {
+    if (city) localStorage.setItem(CITY_KEY, city);
+  } catch {
+    // Navigation privée : la ville sera simplement redemandée.
+  }
+});
 // Ni une salle ni un enseignant n'appartiennent à une formation : `all` n'est
 // pas un choix à mémoriser ici.
 const selectedDept = ref(props.department === ALL_DEPARTMENTS ? null : props.department);
+const cityOf = (deptId) => departments.value.find((d) => d.id === deptId)?.city ?? null;
+const cityDepartments = computed(() => departments.value.filter((d) => d.city === selectedCity.value));
+/** Les enseignants se cherchent dans toute l'ULCO : un nom ne dit pas le campus. */
+const needsCity = computed(() => selectedKind.value !== 'teachers');
 // En mode identité, une salle mémorisée ne peut pas servir de point de départ.
 const selectedKind = ref(props.identityMode && !IDENTITY_KINDS.includes(props.kind) ? 'groups' : props.kind);
+/**
+ * Les arbres de toutes les formations de la ville, réunis : chaque formation
+ * devient une racine, qu'on déplie pour trouver sa classe.
+ */
 const catalog = ref(null);
+/** Formation de chaque nœud : c'est elle qui sert d'adresse à son emploi du temps. */
+const nodeDept = ref(new Map());
 const entries = ref([]);
 const query = ref('');
 const loading = ref(false);
@@ -63,13 +98,12 @@ const isTree = computed(() => selectedKind.value === 'groups');
  */
 const isSubjects = computed(() => selectedKind.value === 'subjects');
 /**
- * Seules les classes se chargent formation par formation. Les ressources se
- * chargent toutes ensemble — une sélection peut en mêler plusieurs — mais se
- * parcourent par formation : « R1.01 » n'est pas la même matière partout.
+ * Les classes se chargent ville par ville. Le reste se charge pour toute
+ * l'ULCO — une sélection de ressources peut mêler plusieurs formations — et se
+ * filtre ensuite : les salles par ville, les ressources par formation, car
+ * « R1.01 » n'est pas la même matière partout.
  */
-const isCrossDepartment = computed(() => selectedKind.value !== 'groups');
-const showsDepartment = computed(() => !isCrossDepartment.value || isSubjects.value);
-const effectiveDept = computed(() => (isCrossDepartment.value ? ALL_DEPARTMENTS : selectedDept.value));
+const showsDepartment = computed(() => isSubjects.value && cityDepartments.value.length > 1);
 
 /**
  * Ressources cochées, toutes formations confondues, chacune avec les
@@ -96,8 +130,10 @@ const results = computed(() => {
       // Les ressources codées d'abord : « FORUM » ou « Journée des anciens » ne sont que des séances isolées.
       .sort((a, b) => Number(!SUBJECT_CODE_RE.test(a.name)) - Number(!SUBJECT_CODE_RE.test(b.name)));
   }
-  // Salles et enseignants : une liste plate, filtrée au fil de la frappe.
-  return q ? entries.value.filter((e) => e.name.toLowerCase().includes(q)) : entries.value;
+  // Salles et enseignants : une liste plate, filtrée au fil de la frappe. Une
+  // salle appartient à sa ville — « SALLE 25 » existe à Boulogne comme à Dunkerque.
+  const inCity = selectedKind.value === 'rooms' ? entries.value.filter((e) => e.city === selectedCity.value) : entries.value;
+  return q ? inCity.filter((e) => e.name.toLowerCase().includes(q)) : inCity;
 });
 
 /** Chemin d'identifiants menant à chaque nœud, pour déplier la branche courante. */
@@ -119,7 +155,7 @@ const visible = computed(() => {
   const walk = (nodes, depth) => {
     for (const node of nodes) {
       const open = isOpen(node.id);
-      out.push({ id: node.id, name: node.name, depth, children: node.children.length, open });
+      out.push({ id: node.id, name: node.name, depth, children: node.children.length, open, root: node.root });
       if (node.children.length && open) walk(node.children, depth + 1);
     }
   };
@@ -127,10 +163,11 @@ const visible = computed(() => {
   return out;
 });
 
-const isCurrent = (id) =>
-  isSubjects.value
-    ? picked.value.has(id)
-    : id === props.resourceId && effectiveDept.value === props.department && selectedKind.value === props.kind;
+const isCurrent = (id) => {
+  if (isSubjects.value) return picked.value.has(id);
+  if (id !== props.resourceId || selectedKind.value !== props.kind) return false;
+  return isTree.value ? nodeDept.value.get(id) === props.department : props.department === ALL_DEPARTMENTS;
+};
 
 const isOpen = (id) => expanded.value.has(id) || hovered.value.has(id);
 
@@ -183,7 +220,7 @@ function resetHover() {
 
 function pick(id, name) {
   emit('choose', {
-    department: effectiveDept.value,
+    department: isTree.value ? nodeDept.value.get(id) : ALL_DEPARTMENTS,
     kind: selectedKind.value,
     resourceId: id,
     resourceName: name,
@@ -245,6 +282,18 @@ function showPicked() {
   });
 }
 
+/** Le serveur nomme les villes en français ; la case « autres » se traduit. */
+const cityLabel = (city) => (city.id === OTHER_CITY ? t('picker.otherCity') : city.label);
+
+function setCity(city) {
+  selectedCity.value = city;
+  query.value = '';
+  // Une formation d'une autre ville n'a plus rien à montrer.
+  if (cityOf(selectedDept.value) !== city) selectedDept.value = cityDepartments.value[0]?.id ?? null;
+  resetHover();
+  searchInput.value?.focus();
+}
+
 function setKind(kind) {
   if (kind === selectedKind.value) return;
   selectedKind.value = kind;
@@ -253,25 +302,58 @@ function setKind(kind) {
   searchInput.value?.focus();
 }
 
+/** Les arbres des formations de la ville, sous une racine chacune. */
+async function loadCity(city) {
+  const depts = departments.value.filter((d) => d.city === city);
+  const results = await Promise.allSettled(depts.map((d) => api.groups(d.id)));
+  const owner = new Map();
+  const roots = [];
+  results.forEach((result, i) => {
+    if (result.status !== 'fulfilled') return;
+    const dept = depts[i];
+    const mark = (nodes) => {
+      for (const node of nodes) {
+        owner.set(node.id, dept.id);
+        mark(node.children);
+      }
+    };
+    mark(result.value.groups);
+    // La racine n'est pas une classe : ADE refuse souvent de publier une
+    // composante entière d'un bloc, et personne n'y suit tous les cours.
+    roots.push({ id: `dept:${dept.id}`, name: dept.label, root: true, children: result.value.groups });
+  });
+  if (!roots.length && results.length) throw results[0].reason;
+  return { roots, owner };
+}
+
 async function loadResources() {
-  const dept = effectiveDept.value;
   const kind = selectedKind.value;
-  if (!dept) return;
+  const city = selectedCity.value;
+  if (kind === 'groups' && !city) return;
   loading.value = true;
   error.value = null;
   try {
     if (kind === 'groups') {
-      catalog.value = await api.groups(dept);
-      // À l'ouverture : racines dépliées, et la branche de la classe déjà choisie.
-      const open = new Set(catalog.value.groups.map((node) => node.id));
-      for (const parent of ancestors.value.get(props.resourceId) ?? []) open.add(parent);
+      const { roots, owner } = await loadCity(city);
+      if (selectedCity.value !== city) return;
+      nodeDept.value = owner;
+      catalog.value = { groups: roots };
+      // À l'ouverture : la branche de la classe déjà choisie, et elle seule.
+      const open = new Set(ancestors.value.get(props.resourceId) ?? []);
       expanded.value = open;
       resetHover();
     } else {
-      entries.value = (await api.directory(dept, kind)).entries;
+      entries.value = (await api.directory(ALL_DEPARTMENTS, kind)).entries;
       // On rouvre sur la formation de la sélection en cours, pas sur la première venue.
       const first = entries.value.find((e) => picked.value.has(e.id));
-      if (kind === 'subjects' && first?.department) selectedDept.value = first.department;
+      if (kind === 'subjects' && first?.department) {
+        selectedDept.value = first.department;
+        selectedCity.value = cityOf(first.department) ?? selectedCity.value;
+      }
+      if (kind === 'rooms' && props.kind === 'rooms') {
+        const current = entries.value.find((e) => e.id === props.resourceId);
+        if (current?.city) selectedCity.value = current.city;
+      }
     }
   } catch (err) {
     error.value = errorMessage(err, `error.${kind}`);
@@ -279,7 +361,7 @@ async function loadResources() {
     else entries.value = [];
   } finally {
     // Une réponse arrivée après un changement d'onglet ne doit plus rien afficher.
-    if (selectedKind.value === kind && effectiveDept.value === dept) loading.value = false;
+    if (selectedKind.value === kind && (kind !== 'groups' || selectedCity.value === city)) loading.value = false;
   }
 }
 
@@ -287,14 +369,21 @@ onMounted(async () => {
   searchInput.value?.focus();
   try {
     const data = await api.departments();
+    cities.value = data.cities;
     departments.value = data.departments;
-    if (!selectedDept.value && data.departments.length > 0) selectedDept.value = data.departments[0].id;
+    // La ville de ce qu'on regarde déjà, sinon celle de la dernière fois.
+    const known = (id) => (data.cities.some((c) => c.id === id) ? id : null);
+    selectedCity.value = known(cityOf(props.department)) ?? known(storedCity());
+    if (!selectedDept.value || cityOf(selectedDept.value) !== selectedCity.value) {
+      selectedDept.value = cityDepartments.value[0]?.id ?? null;
+    }
   } catch (err) {
     error.value = errorMessage(err, 'error.network');
   }
 });
 
-watch([effectiveDept, selectedKind], loadResources, { immediate: true });
+// Les classes attendent la ville ; le reste se charge une fois pour toute l'ULCO.
+watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadResources, { immediate: true });
 </script>
 
 <template>
@@ -313,11 +402,19 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 
     <div class="fields">
       <select
-        v-if="departments.length > 1 && showsDepartment"
+        v-if="needsCity && selectedCity"
+        :value="selectedCity"
+        :aria-label="t('picker.city')"
+        @change="setCity($event.target.value)"
+      >
+        <option v-for="city in cities" :key="city.id" :value="city.id">{{ cityLabel(city) }}</option>
+      </select>
+      <select
+        v-if="showsDepartment"
         v-model="selectedDept"
         :aria-label="t('picker.department')"
       >
-        <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+        <option v-for="dept in cityDepartments" :key="dept.id" :value="dept.id">
           {{ pickedPerDept.get(dept.id) ? `${dept.label} (${pickedPerDept.get(dept.id)})` : dept.label }}
         </option>
       </select>
@@ -332,7 +429,16 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
       />
     </div>
 
-    <p v-if="loading" class="state">{{ t('picker.loading') }}</p>
+    <!-- Première étape : la ville. Tant qu'elle manque, il n'y a rien à lister. -->
+    <div v-if="needsCity && !selectedCity && cities.length" class="cities">
+      <p class="state">{{ t('picker.chooseCity') }}</p>
+      <button v-for="city in cities" :key="city.id" type="button" class="city" @click="setCity(city.id)">
+        <span class="name">{{ cityLabel(city) }}</span>
+        <span class="trail">{{ departments.filter((d) => d.city === city.id).map((d) => d.label).join(' · ') }}</span>
+      </button>
+    </div>
+
+    <p v-else-if="loading" class="state">{{ t('picker.loading') }}</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
 
     <!-- Ressources : une liste à cocher. -->
@@ -405,7 +511,12 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
         >▸</button>
         <span v-else class="twist dot" aria-hidden="true">•</span>
 
-        <button type="button" class="row" :class="{ current: isCurrent(node.id) }" @click="pick(node.id, node.name)">
+        <button
+          type="button"
+          class="row"
+          :class="{ current: isCurrent(node.id), root: node.root }"
+          @click="node.root ? toggle(node.id) : pick(node.id, node.name)"
+        >
           <span class="name">{{ node.name }}</span>
           <span v-if="isCurrent(node.id)" class="check" aria-hidden="true">✓</span>
         </button>
@@ -599,6 +710,28 @@ watch([effectiveDept, selectedKind], loadResources, { immediate: true });
 .selection .clear:hover { color: var(--text); }
 .selection .show { color: var(--bg); background: var(--accent); }
 .selection .show:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Choix de la ville : une carte par campus, avec les formations qu'on y trouve. */
+.cities { display: flex; flex-direction: column; gap: 0.35rem; overflow-y: auto; padding: 0 0.15rem; }
+.city {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  text-align: start;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.city .name { font-weight: 650; font-size: 0.98rem; }
+.city .trail { white-space: normal; line-height: 1.35; }
+.city:hover { border-color: var(--accent); }
+.city:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Une formation n'est pas une classe : elle se déplie, elle ne se choisit pas. */
+.row.root { font-weight: 650; }
 
 .state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }
 .error { color: var(--danger); }

@@ -107,7 +107,8 @@ export async function registerApi(
 
   app.get('/departments', async (_req, reply) => {
     reply.header('Cache-Control', 'public, max-age=3600');
-    return { departments: service.departments() };
+    // Les villes d'abord : c'est par elles qu'on choisit sa formation.
+    return service.departments();
   });
 
   app.get<{ Params: Record<string, string> }>('/:department/groups', async (req, reply) => {

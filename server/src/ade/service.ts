@@ -2,7 +2,7 @@ import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
 import { TtlCache } from '../cache.ts';
-import type { AppConfig, Department } from '../config.ts';
+import type { AppConfig } from '../config.ts';
 
 /**
  * Les façons de consulter un emploi du temps, telles qu'elles apparaissent dans
@@ -28,6 +28,29 @@ export function isResourceKind(value: string): value is ResourceKind {
  * lui, reste propre à une formation.
  */
 export const ALL_DEPARTMENTS = 'all';
+
+/** Ville des composantes qu'aucune règle de `ade.json` ne range. */
+export const OTHER_CITY = 'autres';
+
+export interface CityInfo {
+  id: string;
+  label: string;
+}
+
+/**
+ * Une composante de l'ULCO — IUT INFO, CGU Calais, EILCO Dunkerque… —, que
+ * l'application appelle une formation. C'est le premier niveau de l'arbre ADE.
+ */
+export interface DepartmentInfo {
+  id: string;
+  label: string;
+  city: string;
+}
+
+interface Composante extends DepartmentInfo {
+  /** Le nœud ADE tel qu'ADE veut le revoir pour en lister les enfants. */
+  node: AdeResource;
+}
 
 export interface GroupNode {
   id: number;
@@ -56,6 +79,8 @@ export interface DirectoryEntry {
    */
   department?: string;
   label?: string;
+  /** Salles seulement : les noms se répètent d'une ville à l'autre. */
+  city?: string;
   /**
    * Ressources seulement : qui en assure les séances. Une ressource partagée
    * entre deux enseignants se filtre ainsi, chacun ne gardant que les siennes.
@@ -83,31 +108,82 @@ export interface Schedule {
   events: CourseEvent[];
 }
 
-/** Profondeur maximale explorée dans l'arbre ADE (garde-fou contre une récursion anormale). */
-const MAX_DEPTH = 6;
+/**
+ * Profondeur maximale explorée dans l'arbre ADE (garde-fou contre une récursion
+ * anormale). Les composantes sont au niveau 1 ; les plus profondes, comme les
+ * licences de la CGU, descendent jusqu'au niveau 6.
+ */
+const MAX_DEPTH = 9;
 /** Taille maximale acceptée pour un flux ICS (10 Mo). */
 const MAX_ICS_BYTES = 10 * 1024 * 1024;
 /**
- * Emplois du temps demandés simultanément lorsqu'on rassemble toute la formation.
- * ADE reste un serveur partagé : on étale les requêtes plutôt que de les lancer
- * toutes d'un coup.
+ * Appels simultanés à ADE, toutes requêtes confondues. ADE reste un serveur
+ * partagé : parcourir l'arbre de toute l'ULCO ou rassembler ses cours se fait
+ * en file, pas d'un seul coup.
  */
-const AGGREGATE_CONCURRENCY = 4;
+const ADE_CONCURRENCY = 6;
 
 export class NotFoundError extends Error {}
 
-/** Exécute `task` sur chaque élément, `limit` à la fois, en préservant l'ordre. */
-async function mapWithLimit<T, R>(items: T[], limit: number, task: (item: T) => Promise<R>): Promise<R[]> {
-  const out = new Array<R>(items.length);
-  let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    for (let i = next; i < items.length; i = next) {
-      next += 1;
-      out[i] = await task(items[i]);
+/**
+ * File d'attente qui borne le nombre de tâches en cours. Elle ne doit envelopper
+ * que des appels réseau, jamais une tâche qui en attend d'autres : celle-ci
+ * garderait sa place pendant que ses filles attendent la leur.
+ */
+class Limiter {
+  #free: number;
+  readonly #queue: Array<() => void> = [];
+
+  constructor(size: number) {
+    this.#free = size;
+  }
+
+  async run<T>(task: () => Promise<T>): Promise<T> {
+    if (this.#free > 0) this.#free -= 1;
+    else await new Promise<void>((resolve) => this.#queue.push(resolve));
+    try {
+      return await task();
+    } finally {
+      const next = this.#queue.shift();
+      if (next) next();
+      else this.#free += 1;
     }
-  });
-  await Promise.all(workers);
-  return out;
+  }
+}
+
+/**
+ * ADE renvoie certains noms échappés à la JavaScript, parfois par-dessus une
+ * entité HTML : « FCU Côte d\x27Opale », « DAEU \x26quot;A\x26quot; ».
+ */
+export function decodeAdeName(raw: string): string {
+  const entities: Record<string, string> = { quot: '"', amp: '&', apos: "'", '#39': "'", lt: '<', gt: '>' };
+  return raw
+    .replace(/\\x([0-9a-f]{2})/gi, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&(quot|amp|apos|#39|lt|gt);/g, (_, name: string) => entities[name])
+    .trim();
+}
+
+/**
+ * Identifiant d'URL d'une composante, tiré de son nom : « IUT INFO » donne
+ * `iut-info`, le même qu'avant l'ouverture à toute l'ULCO — les classes
+ * mémorisées et les abonnements aux notifications restent valables.
+ */
+export function slugOf(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+/, '')
+    .slice(0, 32)
+    .replace(/-+$/, '');
+}
+
+/** Dédoublonne des cours par UID ADE et les range par heure de début. */
+function uniqueByUid(events: CourseEvent[]): CourseEvent[] {
+  const byUid = new Map<string, CourseEvent>();
+  for (const event of events) byUid.set(event.uid, event);
+  return [...byUid.values()].sort((a, b) => a.start.localeCompare(b.start));
 }
 
 /**
@@ -161,6 +237,37 @@ function roomsOf(event: CourseEvent): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Les salles de Calais gardent l'identifiant qu'elles avaient quand
+ * l'application ne couvrait que ses trois départements d'IUT : une salle
+ * mémorisée sur un téléphone se retrouve ainsi. Ailleurs, la ville entre dans
+ * l'identifiant, puisque les noms se répètent d'un campus à l'autre.
+ */
+const LEGACY_ROOM_CITY = 'calais';
+
+const roomKey = (city: string, name: string): string => `${city}\n${name}`;
+
+function roomId(city: string, name: string): number {
+  return nameId(city === LEGACY_ROOM_CITY ? name : `${city}:${name}`);
+}
+
+/** Les salles présentes dans `events`, chacune située dans la ville de sa formation. */
+function roomEntries(events: CourseEvent[], cities: Map<string, string>): DirectoryEntry[] {
+  const counts = new Map<string, { city: string; name: string; courses: number }>();
+  for (const event of events) {
+    const city = cities.get(event.department ?? '') ?? OTHER_CITY;
+    for (const name of roomsOf(event)) {
+      const key = roomKey(city, name);
+      const entry = counts.get(key) ?? { city, name, courses: 0 };
+      entry.courses += 1;
+      counts.set(key, entry);
+    }
+  }
+  return [...counts.values()]
+    .map(({ city, name, courses }) => ({ id: roomId(city, name), name, city, courses }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr') || a.city.localeCompare(b.city));
+}
+
 /** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
 function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
   const byKey = new Map<
@@ -201,6 +308,8 @@ function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
 
 export class AdeService {
   readonly #config: AppConfig;
+  readonly #ade = new Limiter(ADE_CONCURRENCY);
+  readonly #composantes: TtlCache<Composante[]>;
   readonly #catalogs: TtlCache<Catalog>;
   readonly #icsUrls: TtlCache<string>;
   readonly #schedules: TtlCache<Schedule>;
@@ -209,20 +318,60 @@ export class AdeService {
 
   constructor(config: AppConfig) {
     this.#config = config;
-    this.#catalogs = new TtlCache<Catalog>(config.catalogTtlMs, 32);
+    this.#composantes = new TtlCache<Composante[]>(config.catalogTtlMs, 1);
+    this.#catalogs = new TtlCache<Catalog>(config.catalogTtlMs, 64);
     // Les URL `.shu` publiées par ADE sont stables : on les garde une journée.
-    this.#icsUrls = new TtlCache<string>(24 * 60 * 60 * 1000, 500);
+    // Il en faut une par nœud parcouru pour rassembler toute l'ULCO.
+    this.#icsUrls = new TtlCache<string>(24 * 60 * 60 * 1000, 5000);
     this.#schedules = new TtlCache<Schedule>(config.scheduleTtlMs, 300);
-    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 32);
+    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 128);
     this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32);
   }
 
-  departments(): Array<{ id: string; label: string }> {
-    return this.#config.departments.map(({ id, label }) => ({ id, label }));
+  #client(): AdeClient {
+    const { origin, token, projectId } = this.#config.ade;
+    return new AdeClient({ origin, token, projectId });
   }
 
-  #department(id: string): Department {
-    const found = this.#config.departments.find((d) => d.id === id);
+  /** Ville d'une composante : la table tenue à la main d'abord, puis son nom. */
+  #cityOf(label: string): string {
+    const { composantes, cities } = this.#config.campus;
+    return composantes[label] ?? cities.find((city) => city.pattern.test(label))?.id ?? OTHER_CITY;
+  }
+
+  /** Les composantes de l'établissement : le premier niveau de l'arbre ADE. */
+  async #list(): Promise<Composante[]> {
+    return this.#composantes.get('all', async () => {
+      const client = this.#client();
+      await this.#ade.run(() => client.connect());
+      const roots = await this.#ade.run(() => client.children({ id: -1 }));
+      const taken = new Set<string>([ALL_DEPARTMENTS]);
+      return roots.map((node) => {
+        const label = decodeAdeName(node.name);
+        let id = slugOf(label) || `c${node.id}`;
+        if (taken.has(id)) id = `${id.slice(0, 24)}-${node.id}`;
+        taken.add(id);
+        return { id, label, city: this.#cityOf(label), node };
+      });
+    });
+  }
+
+  /** Les villes et leurs formations, pour l'écran de choix. */
+  async departments(): Promise<{ cities: CityInfo[]; departments: DepartmentInfo[] }> {
+    const list = await this.#list();
+    const cities: CityInfo[] = this.#config.campus.cities.map(({ id, label }) => ({ id, label }));
+    // Une composante apparue depuis, et qu'aucune règle ne range : à part plutôt que perdue.
+    if (list.some((d) => d.city === OTHER_CITY)) cities.push({ id: OTHER_CITY, label: 'Autres' });
+    return {
+      cities,
+      departments: list
+        .map(({ id, label, city }) => ({ id, label, city }))
+        .sort((a, b) => a.label.localeCompare(b.label, 'fr')),
+    };
+  }
+
+  async #department(id: string): Promise<Composante> {
+    const found = (await this.#list()).find((d) => d.id === id);
     if (!found) throw new NotFoundError(`Département inconnu : ${id}`);
     return found;
   }
@@ -231,23 +380,20 @@ export class AdeService {
    * Départements visés par une requête : un seul, ou tous quand l'appelant
    * demande `all`.
    */
-  #departmentIds(id: string): string[] {
-    if (id === ALL_DEPARTMENTS) return this.#config.departments.map((d) => d.id);
-    return [this.#department(id).id];
-  }
-
-  #client(dept: Department): AdeClient {
-    return new AdeClient({ origin: dept.origin, token: dept.token, projectId: dept.projectId });
+  async #departmentIds(id: string): Promise<string[]> {
+    if (id === ALL_DEPARTMENTS) return (await this.#list()).map((d) => d.id);
+    return [(await this.#department(id)).id];
   }
 
   /** Arbre des groupes d'un département (mis en cache). */
   async catalog(departmentId: string): Promise<Catalog> {
-    const dept = this.#department(departmentId);
+    const dept = await this.#department(departmentId);
     return this.#catalogs.get(dept.id, async () => {
-      const client = this.#client(dept);
-      await client.connect();
-      const roots = await client.children({ id: -1 });
-      const groups = await Promise.all(roots.map((r) => this.#walk(client, r, 1)));
+      const client = this.#client();
+      await this.#ade.run(() => client.connect());
+      // La composante est au premier niveau de l'arbre ADE ; ses enfants, au second.
+      const children = await this.#ade.run(() => client.children({ ...dept.node, depth: 1 }));
+      const groups = await Promise.all(children.map((c) => this.#walk(client, c, 2)));
       return {
         department: dept.id,
         label: dept.label,
@@ -259,10 +405,10 @@ export class AdeService {
 
   async #walk(client: AdeClient, node: AdeResource, depth: number): Promise<GroupNode> {
     const children =
-      depth >= MAX_DEPTH ? [] : await client.children({ ...node, depth });
+      depth >= MAX_DEPTH ? [] : await this.#ade.run(() => client.children({ ...node, depth }));
     return {
       id: node.id,
-      name: node.name,
+      name: decodeAdeName(node.name),
       path: node.path,
       depth,
       children: await Promise.all(children.map((c) => this.#walk(client, c, depth + 1))),
@@ -286,46 +432,48 @@ export class AdeService {
    * ADE renvoie une fenêtre glissante d'environ douze semaines à partir de cette date.
    */
   async schedule(departmentId: string, groupId: number, from: string): Promise<Schedule> {
-    const dept = this.#department(departmentId);
+    const dept = await this.#department(departmentId);
     const group = await this.findGroup(dept.id, groupId);
 
-    return this.#schedules.get(`${dept.id}:${groupId}:${from}`, async () => {
-      const url = await this.#icsUrls.get(`${dept.id}:${groupId}`, async () => {
-        const client = this.#client(dept);
-        await client.connect();
-        return client.icsUrl(groupId, from, from);
-      });
-
-      const ics = await this.#fetchIcs(dept, url, from);
-      return {
-        department: dept.id,
-        kind: 'groups',
-        resourceId: groupId,
-        resourceName: group.name,
-        from,
-        fetchedAt: new Date().toISOString(),
-        // Chaque cours retient d'où il vient : c'est sa formation qui dit sur
-        // quelle grille horaire le recaler, y compris dans une vue transversale.
-        events: parseAdeIcs(ics).map((event) => ({ ...event, department: dept.id })),
-      };
-    });
+    return this.#schedules.get(`${dept.id}:${groupId}:${from}`, async () => ({
+      department: dept.id,
+      kind: 'groups',
+      resourceId: groupId,
+      resourceName: group.name,
+      from,
+      fetchedAt: new Date().toISOString(),
+      events: await this.#gather(dept, group, from),
+    }));
   }
 
   /**
-   * Groupes sans enfant du catalogue : ce sont eux qui portent les cours.
-   * Les nœuds intermédiaires (promotion, TD) reprendraient les mêmes séances.
+   * Cours d'un nœud de l'arbre et de toute sa descendance.
+   *
+   * ADE publie volontiers le flux d'un nœud entier — un département d'IUT d'un
+   * seul tenant —, mais au-delà d'une certaine taille il répond une page vide au
+   * lieu d'un calendrier : on redescend alors d'un niveau. Toute l'ULCO tient
+   * ainsi en moins de trois cents flux, là où il y a plus de deux mille groupes.
    */
-  async #leafGroups(departmentId: string): Promise<GroupNode[]> {
-    const catalog = await this.catalog(departmentId);
-    const leaves: GroupNode[] = [];
-    const walk = (nodes: GroupNode[]): void => {
-      for (const node of nodes) {
-        if (node.children.length === 0) leaves.push(node);
-        else walk(node.children);
-      }
-    };
-    walk(catalog.groups);
-    return leaves;
+  async #gather(dept: Composante, node: { id: number; children: GroupNode[] }, from: string): Promise<CourseEvent[]> {
+    const ics = await this.#icsOf(node.id, from);
+    if (ics !== null) {
+      // Chaque cours retient d'où il vient : c'est sa formation qui dit sur
+      // quelle grille horaire le recaler, y compris dans une vue transversale.
+      return parseAdeIcs(ics).map((event) => ({ ...event, department: dept.id }));
+    }
+    if (node.children.length === 0) throw new AdeError(`ADE refuse de publier le groupe ${node.id}`);
+    const parts = await Promise.all(node.children.map((child) => this.#gather(dept, child, from)));
+    return uniqueByUid(parts.flat());
+  }
+
+  /** Flux iCalendar d'un nœud, ou `null` si ADE le juge trop gros pour le publier d'un bloc. */
+  async #icsOf(resourceId: number, from: string): Promise<string | null> {
+    const url = await this.#icsUrls.get(String(resourceId), async () => {
+      const client = this.#client();
+      await this.#ade.run(() => client.connect());
+      return this.#ade.run(() => client.icsUrl(resourceId, from, from));
+    });
+    return this.#ade.run(() => this.#fetchIcs(url, from));
   }
 
   /**
@@ -334,35 +482,29 @@ export class AdeService {
    * ADE ne publie pas de flux par salle exploitable — son arbre des salles
    * s'arrête à l'étage, et son arbre des enseignants est tronqué par le serveur —
    * alors qu'un cours porte déjà sa salle et ses intervenants. On réunit donc
-   * les emplois du temps des groupes, déjà en cache, et on les dédoublonne :
-   * un cours partagé par deux groupes est une seule et même séance (même UID).
+   * les cours de toute la formation, et on les dédoublonne : un cours partagé
+   * par deux groupes est une seule et même séance (même UID).
    */
   async #allEvents(departmentId: string, from: string): Promise<CourseEvent[]> {
     if (departmentId === ALL_DEPARTMENTS) {
       const perDepartment = await Promise.all(
-        this.#departmentIds(ALL_DEPARTMENTS).map((id) => this.#allEvents(id, from)),
+        (await this.#departmentIds(ALL_DEPARTMENTS)).map((id) => this.#allEvents(id, from)),
       );
       // Un cours mutualisé entre deux formations garde le même UID ADE :
       // le dédoublonnage vaut donc aussi entre départements.
-      const byUid = new Map<string, CourseEvent>();
-      for (const events of perDepartment) {
-        for (const event of events) byUid.set(event.uid, event);
-      }
-      return [...byUid.values()].sort((a, b) => a.start.localeCompare(b.start));
+      return uniqueByUid(perDepartment.flat());
     }
 
-    const dept = this.#department(departmentId);
+    const dept = await this.#department(departmentId);
     return this.#aggregates.get(`${dept.id}:${from}`, async () => {
-      const groups = await this.#leafGroups(dept.id);
-      const schedules = await mapWithLimit(groups, AGGREGATE_CONCURRENCY, (group) =>
-        this.schedule(dept.id, group.id, from),
-      );
-      const byUid = new Map<string, CourseEvent>();
-      for (const schedule of schedules) {
-        for (const event of schedule.events) byUid.set(event.uid, event);
-      }
-      return [...byUid.values()].sort((a, b) => a.start.localeCompare(b.start));
+      const catalog = await this.catalog(dept.id);
+      return this.#gather(dept, { id: dept.node.id, children: catalog.groups }, from);
     });
+  }
+
+  /** Ville de chaque formation, pour situer les salles. */
+  async #cities(): Promise<Map<string, string>> {
+    return new Map((await this.#list()).map((d) => [d.id, d.city]));
   }
 
   /**
@@ -373,23 +515,25 @@ export class AdeService {
   async directory(departmentId: string, kind: ResourceKind, from: string): Promise<Directory> {
     if (kind === 'groups') throw new NotFoundError('Les groupes se consultent via le catalogue.');
     // Valide `departmentId` : `all`, ou une formation connue.
-    this.#departmentIds(departmentId);
+    await this.#departmentIds(departmentId);
 
     return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
       const events = await this.#allEvents(departmentId, from);
+      const fetchedAt = new Date().toISOString();
       if (kind === 'subjects') {
-        return { department: departmentId, kind, fetchedAt: new Date().toISOString(), entries: subjectEntries(events) };
+        return { department: departmentId, kind, fetchedAt, entries: subjectEntries(events) };
+      }
+      if (kind === 'rooms') {
+        return { department: departmentId, kind, fetchedAt, entries: roomEntries(events, await this.#cities()) };
       }
       const counts = new Map<string, number>();
       for (const event of events) {
-        for (const name of kind === 'rooms' ? roomsOf(event) : event.teachers) {
-          counts.set(name, (counts.get(name) ?? 0) + 1);
-        }
+        for (const name of event.teachers) counts.set(name, (counts.get(name) ?? 0) + 1);
       }
       const entries = [...counts.entries()]
         .map(([name, courses]) => ({ id: nameId(name), name, courses }))
         .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-      return { department: departmentId, kind, fetchedAt: new Date().toISOString(), entries };
+      return { department: departmentId, kind, fetchedAt, entries };
     });
   }
 
@@ -420,10 +564,16 @@ export class AdeService {
       return entry;
     });
     const names = new Set(entries.map((e) => e.name));
+    // Une salle se désigne par sa ville et son nom : « SALLE 25 » existe à Boulogne comme à Dunkerque.
+    const rooms = new Set(entries.map((e) => roomKey(e.city ?? '', e.name)));
+    const cities = kind === 'rooms' ? await this.#cities() : new Map<string, string>();
 
     const events = await this.#allEvents(departmentId, from);
     const matches = events.filter((event) => {
-      if (kind === 'rooms') return roomsOf(event).some((room) => names.has(room));
+      if (kind === 'rooms') {
+        const city = cities.get(event.department ?? '') ?? OTHER_CITY;
+        return roomsOf(event).some((room) => rooms.has(roomKey(city, room)));
+      }
       if (kind === 'teachers') return event.teachers.some((teacher) => names.has(teacher));
       const key = subjectKey(event);
       const excluded = key === null ? undefined : without.get(nameId(key));
@@ -444,10 +594,20 @@ export class AdeService {
     };
   }
 
-  async #fetchIcs(dept: Department, url: string, from: string): Promise<string> {
+  /**
+   * Remplit les caches au démarrage : l'arbre de toute l'ULCO compte plus de
+   * trois mille nœuds, qu'il vaut mieux parcourir avant le premier visiteur
+   * qu'à sa place.
+   */
+  async warmUp(): Promise<void> {
+    for (const dept of await this.#list()) await this.catalog(dept.id);
+  }
+
+  /** Le flux, ou `null` quand ADE renvoie sa page vide au lieu d'un calendrier. */
+  async #fetchIcs(url: string, from: string): Promise<string | null> {
     // Défense en profondeur : l'URL vient d'ADE, on revérifie qu'elle reste sur son domaine.
     const target = new URL(url);
-    if (target.origin !== dept.origin) throw new AdeError('Flux iCalendar hors du domaine ADE attendu');
+    if (target.origin !== this.#config.ade.origin) throw new AdeError('Flux iCalendar hors du domaine ADE attendu');
     target.searchParams.set('firstDate', from);
 
     const res = await fetch(target, {
@@ -462,7 +622,8 @@ export class AdeService {
 
     const body = await res.text();
     if (body.length > MAX_ICS_BYTES) throw new AdeError('Flux iCalendar trop volumineux');
-    if (!body.startsWith('BEGIN:VCALENDAR')) throw new AdeError("ADE n'a pas renvoyé un flux iCalendar");
-    return body;
+    if (body.startsWith('BEGIN:VCALENDAR')) return body;
+    if (/<html/i.test(body)) return null;
+    throw new AdeError("ADE n'a pas renvoyé un flux iCalendar");
   }
 }

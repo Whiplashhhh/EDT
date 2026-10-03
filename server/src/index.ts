@@ -162,3 +162,11 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
 }
 
 await app.listen({ host: config.host, port: config.port });
+
+// L'arbre de toute l'ULCO se parcourt en arrière-plan, une fois le serveur à
+// l'écoute : le premier visiteur n'a pas à l'attendre, et un ADE injoignable
+// au démarrage n'empêche pas de servir le reste.
+service.warmUp().then(
+  () => app.log.info('Arbre ADE chargé'),
+  (err: unknown) => app.log.warn({ err }, "Préchargement de l'arbre ADE interrompu"),
+);

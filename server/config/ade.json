@@ -1,0 +1,23 @@
+{
+  "$comment": "Source ADE unique : un lien « direct planning » public qui ouvre l'arbre de toute l'ULCO. Chaque composante (premier niveau de l'arbre) devient une formation de l'application, rangée dans sa ville. Le jeton (paramètre `data=` du lien) se donne par la variable d'environnement ADE_TOKEN, hors du dépôt.",
+  "origin": "https://edt.univ-littoral.fr",
+  "projectId": 5,
+  "cities": [
+    { "id": "boulogne", "label": "Boulogne-sur-Mer", "pattern": "boulogne" },
+    { "id": "calais", "label": "Calais", "pattern": "calais" },
+    { "id": "dunkerque", "label": "Dunkerque", "pattern": "dunkerque" },
+    { "id": "saint-omer", "label": "Saint-Omer", "pattern": "st[ -]omer|saint[ -]omer" }
+  ],
+  "$composantes": "Ville des composantes dont le nom ne la dit pas. Les autres se rangent d'après `pattern`.",
+  "composantes": {
+    "IUT INFO": "calais",
+    "IUT GEA": "calais",
+    "IUT GEII": "calais",
+    "IUT GB": "boulogne",
+    "IUT TC": "dunkerque",
+    "IUT MLT": "dunkerque",
+    "IUT MT2E": "dunkerque",
+    "IUT GACO": "saint-omer",
+    "IUT GIM": "saint-omer"
+  }
+}
