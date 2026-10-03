@@ -672,6 +672,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           <div>
             <h1 class="gate-title">{{ t('gate.title') }}</h1>
             <p class="gate-intro">{{ t('gate.intro') }}</p>
+            <p class="gate-intro">{{ t('gate.subjects') }}</p>
           </div>
           <button
             v-if="hasIdentity"
@@ -960,6 +961,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
 .gate-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 .gate-title { margin: 0 0 0.2rem; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+.gate-intro + .gate-intro { margin-top: 0.35rem; }
 .gate-intro { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-muted); }
 .gate-why { margin: 0; font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
 

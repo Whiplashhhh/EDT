@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Välj din klass för att börja. Om du undervisar, välj ditt namn: då visas ditt eget schema.',
   'gate.why': 'Valet stannar på den här enheten. Det är ditt standardschema och styr aviseringarna.',
+  'gate.subjects': 'Undervisar du men ditt namn finns inte i ADE? Öppna fliken ”Kurser” och kryssa i dem du undervisar i.',
   'gate.action': 'Välj klass eller namn',
 
   'push.section': 'Aviseringar',

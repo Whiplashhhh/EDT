@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Pilih kelasmu untuk memulai. Jika kamu mengajar, pilih namamu: jadwalmu sendiri yang akan tampil.',
   'gate.why': 'Pilihan ini tersimpan di perangkat ini. Inilah jadwal bawaanmu dan penentu notifikasi.',
+  'gate.subjects': 'Mengajar tetapi nama Anda tidak ada di ADE? Buka tab “Mata kuliah” lalu centang yang Anda ajar.',
   'gate.action': 'Pilih kelas atau namaku',
 
   'push.section': 'Notifikasi',

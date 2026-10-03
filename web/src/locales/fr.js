@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Choisis ta classe pour commencer. Si tu enseignes, choisis ton nom : c’est ton emploi du temps qui s’affichera.',
   'gate.why': 'Ce choix reste sur cet appareil. Il sert d’emploi du temps par défaut et décide des notifications.',
+  'gate.subjects': 'Tu enseignes mais ton nom n’apparaît pas dans ADE ? Ouvre l’onglet « Ressources » et coche celles que tu assures.',
   'gate.action': 'Choisir ma classe ou mon nom',
 
   'push.section': 'Notifications',
@@ -75,7 +76,7 @@ export default {
   'picker.empty': 'Aucun résultat.',
   'picker.hint': 'Le choix est mémorisé sur cet appareil.',
   'picker.identityHint': 'Modifiable à tout moment depuis le menu ⋯.',
-  'picker.subjectsHint': 'Cochez une ou plusieurs ressources (R1.01, SAÉ…) : leurs cours s’affichent ensemble, même quand l’enseignant n’est pas renseigné.',
+  'picker.subjectsHint': 'Coche une ou plusieurs ressources (R1.01, SAÉ…) : leurs cours s’affichent ensemble, même quand l’enseignant n’est pas renseigné.',
   'picker.showSelection': ({ n }) => `Afficher (${n})`,
   'picker.clearSelection': 'Tout décocher',
   'picker.expand': ({ name }) => `Déplier ${name}`,

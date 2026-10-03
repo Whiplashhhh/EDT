@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Piliin ang iyong klase para magsimula. Kung nagtuturo ka, piliin ang iyong pangalan: ang sarili mong iskedyul ang lalabas.',
   'gate.why': 'Nananatili ang piniling ito sa device na ito. Ito ang default mong iskedyul at siyang nagtatakda ng mga abiso.',
+  'gate.subjects': 'Nagtuturo ka pero wala ang pangalan mo sa ADE? Buksan ang tab na “Mga asignatura” at markahan ang mga itinuturo mo.',
   'gate.action': 'Piliin ang aking klase o pangalan',
 
   'push.section': 'Mga abiso',

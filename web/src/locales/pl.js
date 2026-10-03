@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Wybierz swoją grupę, aby zacząć. Jeśli prowadzisz zajęcia, wybierz swoje nazwisko: zobaczysz własny plan.',
   'gate.why': 'Ten wybór zostaje na urządzeniu. Jest twoim domyślnym planem i decyduje o powiadomieniach.',
+  'gate.subjects': 'Prowadzisz zajęcia, ale nie ma cię w ADE? Otwórz kartę „Przedmioty” i zaznacz te, które prowadzisz.',
   'gate.action': 'Wybierz grupę lub nazwisko',
 
   'push.section': 'Powiadomienia',

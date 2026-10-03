@@ -25,6 +25,7 @@ import {
   notificationLang,
   readLang,
 } from '../src/push/messages.ts';
+import { resourceKey } from '../src/push/store.ts';
 import { createECDH, randomBytes } from 'node:crypto';
 import webpush from 'web-push';
 import { SubscriptionStore, type PushSubscription } from '../src/push/store.ts';
@@ -741,4 +742,12 @@ test('le menu seul suffit à faire suivre une classe', () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('les abonnés aux mêmes ressources partagent un seul emploi du temps', () => {
+  const identity = (resourceId: number | number[]) =>
+    ({ department: 'all', kind: 'subjects', resourceId, resourceName: '' }) as const;
+  assert.equal(resourceKey(identity([12, 34])), 'all:subjects:12,34');
+  assert.notEqual(resourceKey(identity([12, 34])), resourceKey(identity([12])));
+  assert.equal(resourceKey({ department: 'iut-info', kind: 'groups', resourceId: 42, resourceName: '' }), 'iut-info:groups:42');
 });

@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Alege-ți grupa pentru a începe. Dacă predai, alege-ți numele: se va afișa propriul tău orar.',
   'gate.why': 'Alegerea rămâne pe acest dispozitiv. Este orarul tău implicit și decide notificările.',
+  'gate.subjects': 'Predați, dar numele dumneavoastră lipsește din ADE? Deschideți fila „Discipline” și bifați-le pe cele pe care le predați.',
   'gate.action': 'Alege grupa sau numele',
 
   'push.section': 'Notificări',

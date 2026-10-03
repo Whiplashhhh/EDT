@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Wähle deinen Kurs, um zu beginnen. Wenn du unterrichtest, wähle deinen Namen: dann erscheint dein eigener Stundenplan.',
   'gate.why': 'Diese Auswahl bleibt auf dem Gerät. Sie ist dein Standard-Stundenplan und bestimmt die Benachrichtigungen.',
+  'gate.subjects': 'Sie unterrichten, aber Ihr Name fehlt in ADE? Öffnen Sie den Reiter „Module“ und kreuzen Sie Ihre Module an.',
   'gate.action': 'Kurs oder Namen wählen',
 
   'push.section': 'Benachrichtigungen',

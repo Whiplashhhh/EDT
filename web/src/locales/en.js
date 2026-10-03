@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Pick your class to get started. If you teach, pick your name instead — your own timetable will be shown.',
   'gate.why': 'This stays on your device. It is your default timetable, and it decides what you get notified about.',
+  'gate.subjects': 'Teaching, but your name isn’t in ADE? Open the “Subjects” tab and tick the ones you teach.',
   'gate.action': 'Pick my class or my name',
 
   'push.section': 'Notifications',

@@ -8,9 +8,10 @@ const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 /**
  * Quand on choisit qui l'on est, les salles disparaissent : une salle n'a pas
  * d'emploi du temps « à soi », et personne ne reçoit de notification pour elle.
- * Les ressources non plus : elles se consultent, elles ne sont personne.
+ * Les ressources restent : un vacataire absent d'ADE se reconnaît à celles
+ * qu'il assure.
  */
-const IDENTITY_KINDS = ['groups', 'teachers'];
+const IDENTITY_KINDS = ['groups', 'teachers', 'subjects'];
 /**
  * Département fictif du serveur : toutes les formations réunies. Une salle est
  * partagée par tout l'établissement, et un enseignant peut intervenir dans

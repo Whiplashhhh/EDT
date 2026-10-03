@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Vælg dit hold for at komme i gang. Underviser du, så vælg dit navn: dit eget skema bliver vist.',
   'gate.why': 'Valget bliver på denne enhed. Det er dit standardskema og bestemmer dine notifikationer.',
+  'gate.subjects': 'Underviser du, men står dit navn ikke i ADE? Åbn fanen “Fag”, og markér dem, du underviser i.',
   'gate.action': 'Vælg hold eller navn',
 
   'push.section': 'Notifikationer',

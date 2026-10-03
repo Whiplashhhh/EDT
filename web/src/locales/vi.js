@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Chọn lớp của bạn để bắt đầu. Nếu bạn giảng dạy, hãy chọn tên mình: thời khoá biểu của bạn sẽ hiện ra.',
   'gate.why': 'Lựa chọn này chỉ nằm trên thiết bị. Đó là thời khoá biểu mặc định và quyết định các thông báo.',
+  'gate.subjects': 'Bạn giảng dạy nhưng tên không có trong ADE? Mở thẻ “Học phần” và đánh dấu các học phần bạn dạy.',
   'gate.action': 'Chọn lớp hoặc tên của tôi',
 
   'push.section': 'Thông báo',

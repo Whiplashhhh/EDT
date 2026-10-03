@@ -45,6 +45,7 @@ export default {
   'gate.intro':
     'Za početak odaberi svoju grupu. Ako predaješ, odaberi svoje ime: prikazat će se tvoj raspored.',
   'gate.why': 'Odabir ostaje na ovom uređaju. To je tvoj zadani raspored i određuje obavijesti.',
+  'gate.subjects': 'Predajete, ali vašeg imena nema u ADE-u? Otvorite karticu „Kolegiji” i označite one koje predajete.',
   'gate.action': 'Odaberi grupu ili ime',
 
   'push.section': 'Obavijesti',
