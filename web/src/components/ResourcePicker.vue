@@ -66,8 +66,6 @@ watch(selectedCity, (city) => {
 const selectedDept = ref(props.department === ALL_DEPARTMENTS ? null : props.department);
 const cityOf = (deptId) => departments.value.find((d) => d.id === deptId)?.city ?? null;
 const cityDepartments = computed(() => departments.value.filter((d) => d.city === selectedCity.value));
-/** Les enseignants se cherchent dans toute l'ULCO : un nom ne dit pas le campus. */
-const needsCity = computed(() => selectedKind.value !== 'teachers');
 // En mode identité, une salle mémorisée ne peut pas servir de point de départ.
 const selectedKind = ref(props.identityMode && !IDENTITY_KINDS.includes(props.kind) ? 'groups' : props.kind);
 /**
@@ -105,7 +103,7 @@ const isSubjects = computed(() => selectedKind.value === 'subjects');
 /**
  * Les classes se chargent ville par ville. Le reste se charge pour toute
  * l'ULCO — une sélection de ressources peut mêler plusieurs formations — et se
- * filtre ensuite : les salles par ville, les ressources par formation, car
+ * filtre ensuite : salles et enseignants par ville, ressources par formation, car
  * « R1.01 » n'est pas la même matière partout.
  */
 const showsDepartment = computed(() => isSubjects.value && cityDepartments.value.length > 1);
@@ -136,8 +134,11 @@ const results = computed(() => {
       .sort((a, b) => Number(!SUBJECT_CODE_RE.test(a.name)) - Number(!SUBJECT_CODE_RE.test(b.name)));
   }
   // Salles et enseignants : une liste plate, filtrée au fil de la frappe. Une
-  // salle appartient à sa ville — « SALLE 25 » existe à Boulogne comme à Dunkerque.
-  const inCity = selectedKind.value === 'rooms' ? entries.value.filter((e) => e.city === selectedCity.value) : entries.value;
+  // salle appartient à sa ville — « SALLE 25 » existe à Boulogne comme à
+  // Dunkerque ; un enseignant, à chacune de celles où il intervient.
+  const inCity = entries.value.filter((e) =>
+    selectedKind.value === 'rooms' ? e.city === selectedCity.value : e.cities?.includes(selectedCity.value),
+  );
   return q ? inCity.filter((e) => e.name.toLowerCase().includes(q)) : inCity;
 });
 
@@ -359,6 +360,11 @@ async function loadResources() {
         const current = entries.value.find((e) => e.id === props.resourceId);
         if (current?.city) selectedCity.value = current.city;
       }
+      // Un enseignant se retrouve dans une ville où il intervient, de préférence la dernière choisie.
+      if (kind === 'teachers' && props.kind === 'teachers') {
+        const current = entries.value.find((e) => e.id === props.resourceId);
+        if (current?.cities?.length && !current.cities.includes(selectedCity.value)) selectedCity.value = current.cities[0];
+      }
     }
   } catch (err) {
     error.value = errorMessage(err, `error.${kind}`);
@@ -407,7 +413,7 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
 
     <div class="fields">
       <select
-        v-if="needsCity && selectedCity"
+        v-if="selectedCity"
         :value="selectedCity"
         :aria-label="t('picker.city')"
         @change="setCity($event.target.value)"
@@ -435,7 +441,7 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
     </div>
 
     <!-- Première étape : la ville. Tant qu'elle manque, il n'y a rien à lister. -->
-    <div v-if="needsCity && !selectedCity && cities.length" class="cities">
+    <div v-if="!selectedCity && cities.length" class="cities">
       <p class="state">{{ t('picker.chooseCity') }}</p>
       <button v-for="city in cities" :key="city.id" type="button" class="city" @click="setCity(city.id)">
         <span class="name">{{ cityLabel(city) }}</span>
