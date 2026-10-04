@@ -33,9 +33,39 @@ const TRAILING_WORDS_RE = /((?:\.[A-Z]+)+)$/;
 const NOISE_RE =
   /(?<![\p{L}\d.])(?:(?:CM|TD|TP)[A-Z]?\d*(?:\/(?:CM|TD|TP)[A-Z]?\d*)*|DS|CC|EXAM|FI|\(?\d+[.,]\d+\)?)(?![\p{L}\d.])/giu;
 
+/**
+ * Intitulés libres, sans code : ADE les écrit pour le classement de ses
+ * plannings plus que pour être lus. Ce qui suit n'y nomme pas la matière.
+ */
+const FREE_NOISE: RegExp[] = [
+  // Préfixe de tri : « aaaaaPOO », « 000000CM - Matériaux », « 0LV1 Anglais ».
+  /^(?:a{2,}|0+)(?=[\p{Lu}\d\s])/u,
+  // Numéro d'ordre : « 1 - Ecrit 1 », « 2 méthodologie documentaire », « 1.2.1 Tourism… ».
+  /^\s*\d+(?:\.\d+)*\s*-?\s+(?=\p{L})/u,
+  // Salle : « J2EE - Archi SALLE C3 », « SALLE A113-A114 Problèmes inverses ».
+  /(?<![\p{L}\d])SALLES?\s+[\p{L}\d-]*\d[\p{L}\d-]*/giu,
+  // Sous-groupe : « EEO _ Groupe 1 », « Ss-Gr 13 », « adressage protéique (1+2a) ».
+  /(?<![\p{L}\d])(?:Ss-?)?(?:Groupe|Grp|Gr\.?)\s?(?:\d+|\p{Lu})(?![\p{L}\d])/giu,
+  /\((?:[\dA-Za-z]{1,2}\s*\+\s*)+[\dA-Za-z]{1,2}\)/gu,
+  // Enseignant : « Mme Tawk », « M. VAN MARCKE », « M.DELAVALLE », « G. DELMAIRE », « (J. Hochart) ».
+  /(?<![\p{L}\d])(?:Mme|Mlle|Mr|M\.)\s?\p{Lu}[\p{L}'-]+(?:\s\p{Lu}{2,}[\p{Lu}'-]*)*(?:\s\p{Lu}\.?(?![\p{L}\d]))?/gu,
+  /(?<![\p{L}\d])\p{Lu}\.\s?\p{Lu}{2,}[\p{Lu}'-]*/gu,
+  /\(\p{Lu}\.\s?\p{Lu}[\p{L}'-]+\)/gu,
+  // Durée et évaluation : « 2h30 », « 1hx2 », « EXAMEN », « EVAL ».
+  /(?<![\p{L}\d])\d+h\d*(?:x\d+)?(?![\p{L}\d])/giu,
+  /(?<![\p{L}\d])(?:EXAMEN|EVAL)(?![\p{L}\d])/gu,
+  // Parenthèses vidées par ce qui précède : « ( ) Histoire ».
+  /\(\s*\)/gu,
+];
+
 export interface Subject {
-  /** Code normalisé, ex. « R1.01 » : la clé qui réunit les séances. */
+  /** Code normalisé, ex. « R1.01 », ou l'intitulé d'une séance sans code. */
   code: string;
+  /**
+   * La clé qui réunit les séances : le code, ou l'intitulé sans casse ni
+   * accents — « Anglais », « ANGLAIS » et « anglais » sont une même matière.
+   */
+  key: string;
   /** Ce que l'intitulé dit de la matière, ex. « Dev » — vide quand il ne dit rien. */
   label: string;
 }
@@ -49,8 +79,9 @@ export function subjectOf(event: Pick<CourseEvent, 'title' | 'subject'>): Subjec
   const title = event.title;
   const m = CODE_RE.exec(title);
   if (!m) {
-    const label = clean(event.subject || title);
-    return label ? { code: label, label: '' } : null;
+    const name = clean(FREE_NOISE.reduce((text, re) => text.replace(re, ' '), (event.subject || title).trim()));
+    const key = foldName(name);
+    return key ? { code: name, key, label: '' } : null;
   }
   const raw = m[1] ? `${m[1]}${m[2]}` : `SAE${m[4]}`;
   // « R1-01 » et « R1.01 » sont la même ressource ; un type collé n'en fait pas partie.
@@ -61,7 +92,19 @@ export function subjectOf(event: Pick<CourseEvent, 'title' | 'subject'>): Subjec
     code = code.slice(0, words.index);
     rest = `${words[1].replace(/\./g, ' ')} ${rest}`;
   }
-  return { code, label: clean(rest) };
+  return { code, key: code, label: clean(rest) };
+}
+
+/** Intitulé ramené à sa forme de comparaison : « ANCIEN FRANçAIS » vaut « Ancien français ». */
+function foldName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    // « (E.E.O) » et « (EEO) » ne diffèrent que par la ponctuation.
+    .replace(/[.'’]/g, '')
+    .replace(/[^\p{L}\d]+/gu, ' ')
+    .trim();
 }
 
 /** Retire de l'intitulé ce qui décrit la séance plutôt que la matière. */

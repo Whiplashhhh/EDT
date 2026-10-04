@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Traži nastavnika…',
   'picker.search.subjects': 'Traži kolegij…',
   'picker.courses': ({ n }) => `${n} sati`,
+  'picker.coursesUntil': ({ date }) => `Broj nastavnih sati planiranih do ${date}.`,
   'picker.city': 'Grad',
   'picker.chooseCity': 'Odaberite svoj grad',
   'picker.otherCity': 'Ostalo',

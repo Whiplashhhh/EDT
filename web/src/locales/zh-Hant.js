@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': '搜尋教師…',
   'picker.search.subjects': '搜尋課程…',
   'picker.courses': ({ n }) => `${n} 堂課`,
+  'picker.coursesUntil': ({ date }) => `截至${date}安排的課程數。`,
   'picker.city': '城市',
   'picker.chooseCity': '選擇你的城市',
   'picker.otherCity': '其他',

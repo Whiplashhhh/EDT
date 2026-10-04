@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
+import { formatDayMonth } from '../dates.js';
 import { searchGroups } from '../search.js';
 import { useScrollThumb } from '../composables/useScrollThumb.js';
 import { MAX_SUBJECTS, NO_TEACHER, formatSelection, parseSelection } from '../subjects.js';
@@ -71,6 +72,11 @@ const cityDepartments = computed(() => departments.value.filter((d) => d.city ==
 // En mode identité, une salle mémorisée ne peut pas servir de point de départ.
 const selectedKind = ref(props.identityMode && !IDENTITY_KINDS.includes(props.kind) ? 'groups' : props.kind);
 /**
+ * Un enseignant n'a pas de ville : beaucoup interviennent à Calais et à
+ * Boulogne. On le cherche donc parmi tous ceux de l'ULCO, sans choisir de campus.
+ */
+const needsCity = computed(() => selectedKind.value !== 'teachers');
+/**
  * Les arbres de toutes les formations de la ville, réunis : chaque formation
  * devient une racine, qu'on déplie pour trouver sa classe.
  */
@@ -78,6 +84,8 @@ const catalog = ref(null);
 /** Formation de chaque nœud : c'est elle qui sert d'adresse à son emploi du temps. */
 const nodeDept = ref(new Map());
 const entries = ref([]);
+/** Fin de la période sur laquelle se comptent les cours de chacun. */
+const until = ref(null);
 const query = ref('');
 const loading = ref(false);
 const error = ref(null);
@@ -148,11 +156,9 @@ const results = computed(() => {
   }
   // Salles et enseignants : une liste plate, filtrée au fil de la frappe. Une
   // salle appartient à sa ville — « SALLE 25 » existe à Boulogne comme à
-  // Dunkerque ; un enseignant, à chacune de celles où il intervient.
+  // Dunkerque ; un enseignant, à toute l'ULCO.
   const inCity = entries.value.filter(
-    (e) =>
-      !e.uncertain &&
-      (selectedKind.value === 'rooms' ? e.city === selectedCity.value : e.cities?.includes(selectedCity.value)),
+    (e) => !e.uncertain && (selectedKind.value !== 'rooms' || e.city === selectedCity.value),
   );
   return q ? inCity.filter((e) => matches(e, q)) : inCity;
 });
@@ -168,8 +174,32 @@ const matches = (entry, q) => [entry.name, ...(entry.aliases ?? [])].join(' ').t
 const uncertainResults = computed(() => {
   const q = query.value.trim().toLowerCase();
   if (selectedKind.value !== 'teachers' || !q) return [];
-  return entries.value.filter((e) => e.uncertain && e.cities?.includes(selectedCity.value) && matches(e, q));
+  return entries.value.filter((e) => e.uncertain && matches(e, q));
 });
+
+/** Les campus d'un enseignant, pour distinguer deux homonymes et rassurer qui enseigne sur plusieurs. */
+function teacherCities(entry) {
+  return (entry.cities ?? [])
+    .map((id) => cities.value.find((c) => c.id === id))
+    .filter(Boolean)
+    .map(cityLabel)
+    .join(', ');
+}
+
+/** Ce que dit la ligne sous un enseignant ou une salle : sa charge, et ses campus. */
+function entryTrail(entry) {
+  const parts = [entry.courses ? t('picker.courses', { n: entry.courses }) : null];
+  if (selectedKind.value === 'teachers') parts.push(teacherCities(entry));
+  return parts.filter(Boolean).join(' · ');
+}
+
+/**
+ * Les cours se comptent sur toute la fenêtre d'ADE, plusieurs semaines : sans
+ * le dire, « 20 cours » se lirait comme ceux de la semaine affichée.
+ */
+const periodNote = computed(() =>
+  !isTree.value && until.value ? t('picker.coursesUntil', { date: formatDayMonth(until.value) }) : null,
+);
 
 /** Chemin d'identifiants menant à chaque nœud, pour déplier la branche courante. */
 const ancestors = computed(() => {
@@ -451,7 +481,9 @@ async function loadResources() {
       expanded.value = open;
       resetHover();
     } else {
-      entries.value = (await api.directory(ALL_DEPARTMENTS, kind)).entries;
+      const directory = await api.directory(ALL_DEPARTMENTS, kind);
+      entries.value = directory.entries;
+      until.value = directory.until ?? null;
       // On rouvre sur la formation de la sélection en cours, pas sur la première venue.
       const first = entries.value.find((e) => picked.value.has(e.id));
       if (kind === 'subjects' && first?.department) {
@@ -461,11 +493,6 @@ async function loadResources() {
       if (kind === 'rooms' && props.kind === 'rooms') {
         const current = entries.value.find((e) => e.id === props.resourceId);
         if (current?.city) selectedCity.value = current.city;
-      }
-      // Un enseignant se retrouve dans une ville où il intervient, de préférence la dernière choisie.
-      if (kind === 'teachers' && props.kind === 'teachers') {
-        const current = entries.value.find((e) => e.id === props.resourceId);
-        if (current?.cities?.length && !current.cities.includes(selectedCity.value)) selectedCity.value = current.cities[0];
       }
     }
   } catch (err) {
@@ -490,7 +517,7 @@ onMounted(async () => {
       selectedDept.value = cityDepartments.value[0]?.id ?? null;
     }
     // Sans ville connue, rien ne doit masquer les cartes des campus.
-    if (selectedCity.value) nextTick(focusSearch);
+    if (selectedCity.value || !needsCity.value) nextTick(focusSearch);
   } catch (err) {
     error.value = errorMessage(err, 'error.network');
   }
@@ -533,8 +560,9 @@ watch(loading, async (busy) => {
     </div>
 
     <!-- Tant que la ville manque, seules ses cartes s'affichent : pas de recherche à l'aveugle. -->
-    <div v-if="selectedCity" class="fields">
+    <div v-if="selectedCity || !needsCity" class="fields">
       <select
+        v-if="needsCity"
         :value="selectedCity"
         :aria-label="t('picker.city')"
         @change="setCity($event.target.value)"
@@ -561,8 +589,11 @@ watch(loading, async (busy) => {
       />
     </div>
 
+    <!-- Les cours se comptent sur plusieurs semaines : on dit jusqu'à quand. -->
+    <p v-if="periodNote && !loading && !error && (selectedCity || !needsCity)" class="period">{{ periodNote }}</p>
+
     <!-- Première étape : la ville. Tant qu'elle manque, il n'y a rien à lister. -->
-    <div v-if="!selectedCity && cities.length" class="cities">
+    <div v-if="needsCity && !selectedCity && cities.length" class="cities">
       <p class="state">{{ t('picker.chooseCity') }}</p>
       <button v-for="city in cities" :key="city.id" type="button" class="city" @click="setCity(city.id)">
         <span class="name">{{ cityLabel(city) }}</span>
@@ -643,7 +674,7 @@ watch(loading, async (busy) => {
         <button type="button" class="row lone" :class="{ current: isCurrent(item.id) }" @click="pick(item.id, item.name)">
           <span class="name">{{ item.name }}</span>
           <span v-if="item.parents?.length" class="trail">{{ item.parents.join(' › ') }}</span>
-          <span v-else-if="item.courses" class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
+          <span v-else-if="entryTrail(item)" class="trail">{{ entryTrail(item) }}</span>
         </button>
       </li>
       <template v-if="uncertainResults.length">
@@ -651,7 +682,7 @@ watch(loading, async (busy) => {
         <li v-for="item in uncertainResults" :key="item.id">
           <button type="button" class="row lone uncertain" :class="{ current: isCurrent(item.id) }" @click="pick(item.id, item.name)">
             <span class="name">{{ item.name }}</span>
-            <span class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
+            <span class="trail">{{ entryTrail(item) }}</span>
           </button>
         </li>
       </template>
@@ -935,5 +966,6 @@ watch(loading, async (busy) => {
 
 .state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }
 .error { color: var(--danger); }
+.period { margin: 0 0.6rem 0.3rem; font-size: 0.74rem; color: var(--text-muted); }
 .hint { margin: 0.35rem 0.6rem 0.2rem; font-size: 0.74rem; color: var(--text-muted); }
 </style>

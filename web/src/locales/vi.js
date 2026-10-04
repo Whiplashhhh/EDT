@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Tìm một giảng viên…',
   'picker.search.subjects': 'Tìm học phần…',
   'picker.courses': ({ n }) => `${n} buổi học`,
+  'picker.coursesUntil': ({ date }) => `Số buổi học dự kiến đến ${date}.`,
   'picker.city': 'Thành phố',
   'picker.chooseCity': 'Chọn thành phố của bạn',
   'picker.otherCity': 'Khác',

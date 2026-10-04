@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'חיפוש מרצה…',
   'picker.search.subjects': 'חיפוש קורס…',
   'picker.courses': ({ n }) => `${n} שיעורים`,
+  'picker.coursesUntil': ({ date }) => `מספר השיעורים המתוכננים עד ${date}.`,
   'picker.city': 'עיר',
   'picker.chooseCity': 'בחרו את העיר שלכם',
   'picker.otherCity': 'אחרות',

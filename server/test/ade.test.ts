@@ -150,20 +150,52 @@ test("le flux iCalendar réexposé échappe les caractères spéciaux", async ()
 test('subjectOf réunit les séances d’une ressource sous un même code', () => {
   const of = (title: string) => subjectOf({ title, subject: title });
   // Tiret ou point, type de séance au bout ou collé au code : même ressource.
-  assert.deepEqual(of('R1-01 Dev TPA'), { code: 'R1.01', label: 'Dev' });
-  assert.deepEqual(of('R1.13TD1 Expression/Communication'), { code: 'R1.13', label: 'Expression/Communication' });
-  assert.deepEqual(of('GEII R1.04 OML1 - TD1 - 1.5'), { code: 'R1.04', label: 'OML1' });
-  assert.deepEqual(of('R5.02.PPP'), { code: 'R5.02', label: 'PPP' });
-  assert.deepEqual(of('R5.A.05 Prog Avancée F#'), { code: 'R5.A.05', label: 'Prog Avancée F#' });
-  assert.deepEqual(of('AS SAE12 Mettre en oeuvre'), { code: 'SAE12', label: 'Mettre en oeuvre' });
-  assert.deepEqual(of('SAE 1.1 - CONCEVOIR - TP2 - SIN'), { code: 'SAE1.1', label: 'CONCEVOIR - SIN' });
-  assert.deepEqual(of('SAE5.B.00_JV'), { code: 'SAE5.B.00', label: 'JV' });
+  assert.deepEqual(of('R1-01 Dev TPA'), { code: 'R1.01', key: 'R1.01', label: 'Dev' });
+  assert.deepEqual(of('R1.13TD1 Expression/Communication'), { code: 'R1.13', key: 'R1.13', label: 'Expression/Communication' });
+  assert.deepEqual(of('GEII R1.04 OML1 - TD1 - 1.5'), { code: 'R1.04', key: 'R1.04', label: 'OML1' });
+  assert.deepEqual(of('R5.02.PPP'), { code: 'R5.02', key: 'R5.02', label: 'PPP' });
+  assert.deepEqual(of('R5.A.05 Prog Avancée F#'), { code: 'R5.A.05', key: 'R5.A.05', label: 'Prog Avancée F#' });
+  assert.deepEqual(of('AS SAE12 Mettre en oeuvre'), { code: 'SAE12', key: 'SAE12', label: 'Mettre en oeuvre' });
+  assert.deepEqual(of('SAE 1.1 - CONCEVOIR - TP2 - SIN'), { code: 'SAE1.1', key: 'SAE1.1', label: 'CONCEVOIR - SIN' });
+  assert.deepEqual(of('SAE5.B.00_JV'), { code: 'SAE5.B.00', key: 'SAE5.B.00', label: 'JV' });
   // « CC1 » est une matière des GEII, pas un contrôle continu.
-  assert.deepEqual(of('R3.02 CC3 - TP4'), { code: 'R3.02', label: 'CC3' });
+  assert.deepEqual(of('R3.02 CC3 - TP4'), { code: 'R3.02', key: 'R3.02', label: 'CC3' });
   // Sans code, l'intitulé lui-même fait office de ressource.
-  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', label: '' });
+  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', key: 'portfolio', label: '' });
   // Un type de séance n'est pas un code.
   assert.equal(of('TP2')?.code, undefined);
+});
+
+test('subjectOf nettoie les intitulés sans code et en réunit les graphies', () => {
+  const of = (title: string) => subjectOf({ title, subject: title });
+  const name = (title: string) => of(title)?.code;
+  // Préfixes de tri et numéros d'ordre d'ADE.
+  assert.equal(name('aaaaaPOO'), 'POO');
+  assert.equal(name('aaa Programmation Fonct Av'), 'Programmation Fonct Av');
+  assert.equal(name('000000000000000CM - Matériaux'), 'Matériaux');
+  assert.equal(name('0LV1 Anglais'), 'LV1 Anglais');
+  assert.equal(name('1 - Ecrit 1'), 'Ecrit 1');
+  assert.equal(name('1.2.1 Tourism and screens (cinema)'), 'Tourism and screens (cinema)');
+  assert.equal(name('( ) Histoire : les hommes et la mer'), 'Histoire : les hommes et la mer');
+  // Salle, sous-groupe, enseignant, durée : rien de tout cela ne nomme la matière.
+  assert.equal(name('aaaJ2EE - Archi SALLE C3'), 'J2EE - Archi');
+  assert.equal(name('aaaSALLE A113-A114 Problèmes inverses G. DELMAIRE'), 'Problèmes inverses');
+  assert.equal(name('Expression Ecrite et Orale (EEO) _ Groupe 2'), 'Expression Ecrite et Orale (EEO)');
+  assert.equal(name('000000000000000000CM - Biologie cellulaire - Mme Tawk'), 'Biologie cellulaire');
+  assert.equal(name('000000000000000TP - Fabrication additive et impression 3D (J. Hochart)'), 'Fabrication additive et impression 3D');
+  assert.equal(name('Atelier d\'Ecriture Juridique M.DELAVALLE 3h30'), 'Atelier d\'Ecriture Juridique');
+  assert.equal(name('aaModélisation et simulation EXAMEN'), 'Modélisation et simulation');
+  assert.equal(name('JALON 1 - M. VAN MARCKE'), 'JALON 1');
+  assert.equal(name('LEA 1 PLO Anglais Ss-Gr 13'), 'LEA 1 PLO Anglais');
+  assert.equal(name('Badminton Groupe B'), 'Badminton');
+  // Casse, accents, sous-groupes : une seule ressource.
+  const key = (title: string) => of(title)?.key;
+  for (const variant of ['Adressage Protéique', 'adressage protéique (1+2a)', 'adressage protéique (2b+3)']) {
+    assert.equal(key(variant), key('Adressage protéique'), variant);
+  }
+  assert.equal(key('ANCIEN FRANçAIS'), key('Ancien français'));
+  assert.equal(key('Expression Ecrite et Orale (E.E.O)'), key('Expression Ecrite et Orale (EEO) _ Groupe 1'));
+  assert.equal(key('000000000000000TD - Matériaux'), key('000000000000000000000000000TP - Matériaux'));
 });
 
 test('une sélection de ressources se lit et s’écrit sous une forme unique', () => {

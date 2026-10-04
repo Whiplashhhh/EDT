@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'استاد تلاش کریں…',
   'picker.search.subjects': 'مضمون تلاش کریں…',
   'picker.courses': ({ n }) => `${n} کلاسیں`,
+  'picker.coursesUntil': ({ date }) => `${date} تک طے شدہ کلاسوں کی تعداد۔`,
   'picker.city': 'شہر',
   'picker.chooseCity': 'اپنا شہر منتخب کریں',
   'picker.otherCity': 'دیگر',

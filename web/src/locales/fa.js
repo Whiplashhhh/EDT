@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'جست‌وجوی استاد…',
   'picker.search.subjects': 'جست‌وجوی درس…',
   'picker.courses': ({ n }) => `${n} کلاس`,
+  'picker.coursesUntil': ({ date }) => `تعداد کلاس‌های برنامه‌ریزی‌شده تا ${date}.`,
   'picker.city': 'شهر',
   'picker.chooseCity': 'شهر خود را انتخاب کنید',
   'picker.otherCity': 'سایر',

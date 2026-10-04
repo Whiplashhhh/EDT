@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Procurar um docente…',
   'picker.search.subjects': 'Procurar uma unidade curricular…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'aula' : 'aulas'}`,
+  'picker.coursesUntil': ({ date }) => `Número de aulas previstas até ${date}.`,
   'picker.city': 'Cidade',
   'picker.chooseCity': 'Escolher a minha cidade',
   'picker.otherCity': 'Outras',

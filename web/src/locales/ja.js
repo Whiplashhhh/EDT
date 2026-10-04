@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': '教員を検索…',
   'picker.search.subjects': '科目を検索…',
   'picker.courses': ({ n }) => `${n} コマ`,
+  'picker.coursesUntil': ({ date }) => `${date}までに予定されている授業の数。`,
   'picker.city': '都市',
   'picker.chooseCity': '都市を選ぶ',
   'picker.otherCity': 'その他',

@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Search for a teacher…',
   'picker.search.subjects': 'Search for a subject…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'class' : 'classes'}`,
+  'picker.coursesUntil': ({ date }) => `Number of classes scheduled until ${date}.`,
   'picker.city': 'City',
   'picker.chooseCity': 'Choose your city',
   'picker.otherCity': 'Other',

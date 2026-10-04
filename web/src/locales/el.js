@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Αναζήτηση διδάσκοντα…',
   'picker.search.subjects': 'Αναζήτηση μαθήματος…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'μάθημα' : 'μαθήματα'}`,
+  'picker.coursesUntil': ({ date }) => `Αριθμός μαθημάτων έως ${date}.`,
   'picker.city': 'Πόλη',
   'picker.chooseCity': 'Επιλέξτε την πόλη σας',
   'picker.otherCity': 'Άλλες',

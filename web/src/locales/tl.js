@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Maghanap ng guro…',
   'picker.search.subjects': 'Maghanap ng asignatura…',
   'picker.courses': ({ n }) => `${n} klase`,
+  'picker.coursesUntil': ({ date }) => `Bilang ng mga klaseng nakaiskedyul hanggang ${date}.`,
   'picker.city': 'Lungsod',
   'picker.chooseCity': 'Piliin ang iyong lungsod',
   'picker.otherCity': 'Iba pa',

@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Buscar un profesor…',
   'picker.search.subjects': 'Buscar una asignatura…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'clase' : 'clases'}`,
+  'picker.coursesUntil': ({ date }) => `Número de clases previstas hasta el ${date}.`,
   'picker.city': 'Ciudad',
   'picker.chooseCity': 'Elegir mi ciudad',
   'picker.otherCity': 'Otras',

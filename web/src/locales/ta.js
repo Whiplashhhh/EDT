@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'ஆசிரியரைத் தேடு…',
   'picker.search.subjects': 'பாடத்தைத் தேடுக…',
   'picker.courses': ({ n }) => `${n} வகுப்புகள்`,
+  'picker.coursesUntil': ({ date }) => `${date} வரை திட்டமிடப்பட்ட வகுப்புகளின் எண்ணிக்கை.`,
   'picker.city': 'நகரம்',
   'picker.chooseCity': 'உங்கள் நகரத்தைத் தேர்ந்தெடுக்கவும்',
   'picker.otherCity': 'மற்றவை',
