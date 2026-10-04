@@ -205,8 +205,30 @@ function toggle(id) {
   } else {
     expanded.value.add(id);
     hoverBlocked.value.delete(id);
+    nextTick(() => revealChildren(id));
   }
   expanded.value = new Set(expanded.value);
+}
+
+/**
+ * Une branche qu'on déplie près du bas de la liste s'ouvrirait hors de vue :
+ * la liste défile juste assez pour montrer tout ce qui vient d'apparaître,
+ * sans pousser hors du haut la ligne qu'on vient d'ouvrir.
+ */
+function revealChildren(id) {
+  const list = root.value?.querySelector('.tree[role="tree"]');
+  const start = visible.value.findIndex((node) => node.id === id);
+  if (!list || start < 0) return;
+  let end = start + 1;
+  while (end < visible.value.length && visible.value[end].depth > visible.value[start].depth) end++;
+  const first = list.children[start];
+  const last = list.children[end - 1];
+  if (!first || !last) return;
+  const box = list.getBoundingClientRect();
+  const overflow = last.getBoundingClientRect().bottom - box.bottom;
+  if (overflow <= 0) return;
+  const room = first.getBoundingClientRect().top - box.top;
+  list.scrollBy({ top: Math.min(overflow, room), behavior: 'smooth' });
 }
 
 /** Survol : déplie la branche pointée après une courte pause, sans gêner le clic. */
