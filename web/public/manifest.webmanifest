@@ -1,7 +1,7 @@
 {
   "name": "EDT ULCO",
   "short_name": "EDT",
-  "description": "Emploi du temps de l'ULCO, lisible sur téléphone.",
+  "description": "Une façon plus claire de consulter l'emploi du temps de l'ULCO.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
