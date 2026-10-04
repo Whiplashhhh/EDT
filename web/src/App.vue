@@ -144,9 +144,14 @@ watch(() => settings.value.theme, (theme) => {
 
 watch(() => settings.value.lang, setLocale, { immediate: true });
 
+/*
+ * Masquer le menu, c'est dire qu'on ne mange pas au Crous : la notification du
+ * menu n'a plus de raison d'être, on l'éteint avec lui.
+ */
 function setCrousMenu(crousMenu) {
   settings.value = { ...settings.value, crousMenu };
   writeSettings(settings.value);
+  if (!crousMenu && settings.value.push.menu) setPushOption('menu', false);
 }
 
 function setTheme(theme) {
@@ -518,7 +523,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           </span>
         </label>
 
-        <label class="toggle">
+        <label v-if="settings.crousMenu" class="toggle">
           <input
             type="checkbox"
             :checked="settings.push.menu"
