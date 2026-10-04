@@ -4,6 +4,7 @@ import { formatTime, formatDuration, formatMinutesSpan } from '../dates.js';
 import { t } from '../i18n.js';
 import { courseStyle } from '../colors.js';
 import { departmentTag } from '../departments.js';
+import { useEventDetail } from '../composables/useEventDetail.js';
 
 const props = defineProps({
   event: { type: Object, required: true },
@@ -26,6 +27,9 @@ const dept = computed(() => (props.context === 'groups' ? '' : departmentTag(pro
 
 const tint = computed(() => courseStyle(props.event));
 
+const { openDetail } = useEventDetail();
+const open = () => openDetail(props.event, props.context);
+
 const state = computed(() => {
   const start = new Date(props.event.start).getTime();
   const end = new Date(props.event.end).getTime();
@@ -42,7 +46,17 @@ const remaining = computed(() => {
 </script>
 
 <template>
-  <article class="card tinted" :class="[state, { compact }]" :style="tint">
+  <!-- Toucher la carte ouvre sa fiche : tout ce que la carte a dû couper y est. -->
+  <article
+    class="card tinted"
+    :class="[state, { compact }]"
+    :style="tint"
+    role="button"
+    tabindex="0"
+    @click="open"
+    @keydown.enter.prevent="open"
+    @keydown.space.prevent="open"
+  >
     <div class="hours">
       <time :datetime="event.start">{{ formatTime(event.start) }}</time>
       <span class="dash" aria-hidden="true"></span>
@@ -81,7 +95,12 @@ const remaining = computed(() => {
   border-inline-start: 4px solid var(--kind);
   border-radius: var(--radius);
   overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, background 0.15s ease;
 }
+.card:hover { background: color-mix(in srgb, var(--kind) calc(var(--tint-bg) + 6%), var(--bg-elevated)); }
+.card:active { transform: scale(0.985); }
 /* Côte à côte, la colonne d'horaires mangerait la moitié de la carte :
    les heures repassent sur une ligne, au-dessus du titre. */
 /* Le contenu reste en haut : une carte tient la hauteur de sa durée, l'espace

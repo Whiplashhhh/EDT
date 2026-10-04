@@ -5,9 +5,11 @@ import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
 import FeedbackModal from './components/FeedbackModal.vue';
+import EventDetail from './components/EventDetail.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
+import { useEventDetail } from './composables/useEventDetail.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, mondayOf, today } from './dates.js';
 import { api } from './api.js';
@@ -82,6 +84,8 @@ const {
   loadConfig: loadPushConfig,
   sync: syncPush,
 } = usePush();
+
+const { opened: detail, closeDetail } = useEventDetail();
 
 const { mode: installMode, guideOpen: installGuideOpen, install, markDone: markInstalled } = useInstall();
 
@@ -511,11 +515,12 @@ function onKeydown(event) {
     menuOpen.value = false;
     installGuideOpen.value = false;
     feedbackKind.value = null;
+    closeDetail();
     // Tant qu'aucune identité n'est choisie, il n'y a rien derrière à découvrir.
     if (hasIdentity.value) identityOpen.value = false;
     return;
   }
-  if (pickerOpen.value || menuOpen.value || identityOpen.value || feedbackKind.value) return;
+  if (pickerOpen.value || menuOpen.value || identityOpen.value || feedbackKind.value || detail.value) return;
   if (event.key === 'ArrowRight') step(1);
   if (event.key === 'ArrowLeft') step(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
@@ -806,6 +811,8 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </footer>
 
     <FeedbackModal v-if="feedbackKind" :kind="feedbackKind" :context="feedbackContext" @close="feedbackKind = null" />
+
+    <EventDetail v-if="detail" :key="detail.event.uid" :event="detail.event" :context="detail.context" :now="now" @close="closeDetail" />
 
     <!--
       Mode d'emploi, là où le navigateur ne laisse pas la page installer

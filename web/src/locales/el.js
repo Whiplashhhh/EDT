@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} ${n === 1 ? 'μάθημα' : 'μαθήματα'}`,
   'day.break': ({ duration }) => `διάλειμμα ${duration}`,
   'card.remaining': ({ duration }) => `απομένουν ${duration}`,
+  'detail.room': 'Αίθουσα',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Διδάσκων' : 'Διδάσκοντες'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Ομάδα' : 'Ομάδες'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Μενού Crous',

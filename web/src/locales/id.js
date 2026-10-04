@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} kelas`,
   'day.break': ({ duration }) => `jeda ${duration}`,
   'card.remaining': ({ duration }) => `sisa ${duration}`,
+  'detail.room': 'Ruang',
+  'detail.teachers': 'Pengajar',
+  'detail.groups': 'Kelompok',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menu Crous',

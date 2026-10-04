@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} buổi học`,
   'day.break': ({ duration }) => `nghỉ ${duration}`,
   'card.remaining': ({ duration }) => `còn ${duration}`,
+  'detail.room': 'Phòng',
+  'detail.teachers': 'Giảng viên',
+  'detail.groups': 'Nhóm',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Thực đơn Crous',

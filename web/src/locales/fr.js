@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} cours`,
   'day.break': ({ duration }) => `${duration} de pause`,
   'card.remaining': ({ duration }) => `encore ${duration}`,
+  'detail.room': 'Salle',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Enseignant' : 'Enseignants'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Groupe' : 'Groupes'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menu du Crous',

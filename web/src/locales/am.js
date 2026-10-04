@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} ትምህርቶች`,
   'day.break': ({ duration }) => `${duration} እረፍት`,
   'card.remaining': ({ duration }) => `${duration} ቀርቷል`,
+  'detail.room': 'ክፍል',
+  'detail.teachers': ({ n }) => (n === 1 ? 'መምህር' : 'መምህራን'),
+  'detail.groups': ({ n }) => (n === 1 ? 'ቡድን' : 'ቡድኖች'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'የCrous ምናሌ',

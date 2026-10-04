@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n}টি ক্লাস`,
   'day.break': ({ duration }) => `${duration} বিরতি`,
   'card.remaining': ({ duration }) => `${duration} বাকি`,
+  'detail.room': 'কক্ষ',
+  'detail.teachers': ({ n }) => (n === 1 ? 'শিক্ষক' : 'শিক্ষকগণ'),
+  'detail.groups': ({ n }) => (n === 1 ? 'দল' : 'দলসমূহ'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous-এর মেনু',

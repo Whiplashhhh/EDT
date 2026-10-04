@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} کلاس`,
   'day.break': ({ duration }) => `${duration} استراحت`,
   'card.remaining': ({ duration }) => `${duration} مانده`,
+  'detail.room': 'کلاس',
+  'detail.teachers': ({ n }) => (n === 1 ? 'استاد' : 'استادان'),
+  'detail.groups': ({ n }) => (n === 1 ? 'گروه' : 'گروه‌ها'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'منوی Crous',

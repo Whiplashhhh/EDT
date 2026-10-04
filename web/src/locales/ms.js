@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} kelas`,
   'day.break': ({ duration }) => `rehat ${duration}`,
   'card.remaining': ({ duration }) => `tinggal ${duration}`,
+  'detail.room': 'Bilik',
+  'detail.teachers': 'Pensyarah',
+  'detail.groups': 'Kumpulan',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menu Crous',

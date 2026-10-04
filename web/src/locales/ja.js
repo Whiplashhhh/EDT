@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} コマ`,
   'day.break': ({ duration }) => `${duration} の空き`,
   'card.remaining': ({ duration }) => `残り ${duration}`,
+  'detail.room': '教室',
+  'detail.teachers': '担当教員',
+  'detail.groups': 'グループ',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous の献立',

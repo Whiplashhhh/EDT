@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} कक्षाएँ`,
   'day.break': ({ duration }) => `${duration} का अवकाश`,
   'card.remaining': ({ duration }) => `${duration} बाकी`,
+  'detail.room': 'कक्ष',
+  'detail.teachers': 'शिक्षक',
+  'detail.groups': 'समूह',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous का मेन्यू',

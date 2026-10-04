@@ -7,6 +7,7 @@ import {
 import { breaksOf, defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
 import { courseStyle } from '../colors.js';
 import { departmentTag } from '../departments.js';
+import { useEventDetail } from '../composables/useEventDetail.js';
 
 const props = defineProps({
   focused: { type: String, required: true },
@@ -233,6 +234,8 @@ onMounted(() => {
   el.scrollLeft += head.getBoundingClientRect().left - axisEnd;
 });
 
+const { openDetail } = useEventDetail();
+
 /* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
 const deptOf = (event, context) => (context === 'groups' ? '' : departmentTag(event.department));
 
@@ -292,6 +295,11 @@ const peopleOf = (event, context) =>
           class="block tinted"
           :class="{ tiny: block.minutes < 55, small: block.minutes < 85, narrow: block.narrow, shared: block.shared }"
           :style="[block.style, courseStyle(block.event)]"
+          role="button"
+          tabindex="0"
+          @click="openDetail(block.event, column.context)"
+          @keydown.enter.prevent="openDetail(block.event, column.context)"
+          @keydown.space.prevent="openDetail(block.event, column.context)"
         >
           <span class="hours">
             <!-- Une colonne dédoublée est trop étroite pour la plage complète. -->
@@ -398,7 +406,10 @@ const peopleOf = (event, context) =>
   border-radius: 6px;
   font-size: 0.72rem;
   line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.block:hover { background: color-mix(in srgb, var(--kind) calc(var(--tint-bg) + 8%), var(--bg-elevated)); }
 /* Posé sur la colonne voisine : il doit passer devant ses graduations. */
 .block.shared { z-index: 1; }
 /* Il a toute la largeur : un cours court range horaire, titre et salle sur une

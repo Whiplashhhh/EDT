@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} занятий`,
   'day.break': ({ duration }) => `перерыв ${duration}`,
   'card.remaining': ({ duration }) => `ещё ${duration}`,
+  'detail.room': 'Аудитория',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Преподаватель' : 'Преподаватели'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Группа' : 'Группы'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Меню Crous',

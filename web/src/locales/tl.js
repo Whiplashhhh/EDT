@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} klase`,
   'day.break': ({ duration }) => `${duration} na pahinga`,
   'card.remaining': ({ duration }) => `${duration} na lang`,
+  'detail.room': 'Silid',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Guro' : 'Mga guro'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Grupo' : 'Mga grupo'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menu ng Crous',

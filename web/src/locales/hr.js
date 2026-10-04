@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} sati`,
   'day.break': ({ duration }) => `pauza ${duration}`,
   'card.remaining': ({ duration }) => `još ${duration}`,
+  'detail.room': 'Dvorana',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Nastavnik' : 'Nastavnici'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Grupa' : 'Grupe'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Jelovnik Crousa',

@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} cashar`,
   'day.break': ({ duration }) => `nasasho ${duration}`,
   'card.remaining': ({ duration }) => `waxaa hadhay ${duration}`,
+  'detail.room': 'Fasalka',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Macallinka' : 'Macallimiinta'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Kooxda' : 'Kooxaha'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Liiska cuntada Crous',

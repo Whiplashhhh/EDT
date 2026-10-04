@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} ders`,
   'day.break': ({ duration }) => `${duration} ara`,
   'card.remaining': ({ duration }) => `${duration} kaldı`,
+  'detail.room': 'Derslik',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Öğretim elemanı' : 'Öğretim elemanları'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Grup' : 'Gruplar'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous menüsü',

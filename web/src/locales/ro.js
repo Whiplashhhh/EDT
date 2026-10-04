@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} ${n === 1 ? 'curs' : 'cursuri'}`,
   'day.break': ({ duration }) => `pauză de ${duration}`,
   'card.remaining': ({ duration }) => `încă ${duration}`,
+  'detail.room': 'Sală',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Profesor' : 'Profesori'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Grupă' : 'Grupe'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Meniul Crous',
