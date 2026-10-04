@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'У денному поданні, в обідню пору.',
 
   'about.section': 'Про сайт',
-  'about.notice': 'Неофіційний сайт, створений студентом. Дані з ADE.',
+  'about.notice': 'Неофіційний сайт, автор: Willem Vanbaelinghem. Дані з ADE.',
   'about.contact': 'Контакт',
   'feedback.kind': 'Тип повідомлення',
   'feedback.kind.contact': 'Контакт',

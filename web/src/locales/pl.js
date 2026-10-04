@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'W widoku dnia, w porze obiadowej.',
 
   'about.section': 'O stronie',
-  'about.notice': 'Nieoficjalna strona stworzona przez studenta. Dane pochodzą z ADE.',
+  'about.notice': 'Nieoficjalna strona stworzona przez: Willem Vanbaelinghem. Dane pochodzą z ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Rodzaj wiadomości',
   'feedback.kind.contact': 'Kontakt',

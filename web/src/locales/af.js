@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'In die dagaansig, rondom middagete.',
 
   'about.section': 'Oor',
-  'about.notice': 'Nie-amptelike webwerf, gemaak deur ’n student. Data uit ADE.',
+  'about.notice': 'Nie-amptelike webwerf, gemaak deur Willem Vanbaelinghem. Data uit ADE.',
   'about.contact': 'Kontak',
   'feedback.kind': 'Soort boodskap',
   'feedback.kind.contact': 'Kontak',

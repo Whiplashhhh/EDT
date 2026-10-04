@@ -113,7 +113,7 @@ export default {
   'crous.showHint': '日表示の昼食時間帯に表示します。',
 
   'about.section': 'このサイトについて',
-  'about.notice': '学生が作成した非公式サイトです。データは ADE から取得しています。',
+  'about.notice': 'Willem Vanbaelinghem が作成した非公式サイトです。データは ADE から取得しています。',
   'about.contact': 'お問い合わせ',
   'feedback.kind': 'メッセージの種類',
   'feedback.kind.contact': 'お問い合わせ',

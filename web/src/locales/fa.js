@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'در نمای روزانه، هنگام ناهار.',
 
   'about.section': 'درباره',
-  'about.notice': 'سایتی غیررسمی، ساختهٔ یک دانشجو. داده‌ها از ADE.',
+  'about.notice': 'سایتی غیررسمی، ساختهٔ Willem Vanbaelinghem. داده‌ها از ADE.',
   'about.contact': 'تماس',
   'feedback.kind': 'نوع پیام',
   'feedback.kind.contact': 'تماس',

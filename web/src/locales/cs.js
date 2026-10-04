@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'V denním zobrazení, v době oběda.',
 
   'about.section': 'O webu',
-  'about.notice': 'Neoficiální web, vytvořený studentem. Data pocházejí z ADE.',
+  'about.notice': 'Neoficiální web, autor: Willem Vanbaelinghem. Data pocházejí z ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Typ zprávy',
   'feedback.kind.contact': 'Kontakt',

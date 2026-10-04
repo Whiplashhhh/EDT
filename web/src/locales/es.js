@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'En la vista diaria, a la hora de comer.',
 
   'about.section': 'Acerca de',
-  'about.notice': 'Sitio no oficial, hecho por un estudiante. Datos procedentes de ADE.',
+  'about.notice': 'Sitio no oficial, hecho por Willem Vanbaelinghem. Datos procedentes de ADE.',
   'about.contact': 'Contacto',
   'feedback.kind': 'Tipo de mensaje',
   'feedback.kind.contact': 'Contacto',

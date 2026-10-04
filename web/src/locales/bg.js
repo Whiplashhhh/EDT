@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'В дневния изглед, по обяд.',
 
   'about.section': 'Относно',
-  'about.notice': 'Неофициален сайт, създаден от студент. Данни от ADE.',
+  'about.notice': 'Неофициален сайт, създаден от Willem Vanbaelinghem. Данни от ADE.',
   'about.contact': 'Контакт',
   'feedback.kind': 'Вид съобщение',
   'feedback.kind.contact': 'Контакт',

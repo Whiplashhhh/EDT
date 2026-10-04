@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'In de dagweergave, rond lunchtijd.',
 
   'about.section': 'Over',
-  'about.notice': 'Onofficiële site, gemaakt door een student. Gegevens afkomstig uit ADE.',
+  'about.notice': 'Onofficiële site, gemaakt door Willem Vanbaelinghem. Gegevens afkomstig uit ADE.',
   'about.contact': 'Contact',
   'feedback.kind': 'Soort bericht',
   'feedback.kind.contact': 'Contact',

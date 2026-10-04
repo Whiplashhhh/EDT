@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Sa day view, sa oras ng tanghalian.',
 
   'about.section': 'Tungkol dito',
-  'about.notice': 'Hindi opisyal na site, ginawa ng isang estudyante. Datos mula sa ADE.',
+  'about.notice': 'Hindi opisyal na site, ginawa ni Willem Vanbaelinghem. Datos mula sa ADE.',
   'about.contact': 'Makipag-ugnayan',
   'feedback.kind': 'Uri ng mensahe',
   'feedback.kind.contact': 'Makipag-ugnayan',

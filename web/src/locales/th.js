@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'ในมุมมองรายวัน ช่วงพักกลางวัน',
 
   'about.section': 'เกี่ยวกับ',
-  'about.notice': 'เว็บไซต์ไม่เป็นทางการ จัดทำโดยนักศึกษา ข้อมูลจาก ADE',
+  'about.notice': 'เว็บไซต์ไม่เป็นทางการ จัดทำโดย Willem Vanbaelinghem ข้อมูลจาก ADE',
   'about.contact': 'ติดต่อ',
   'feedback.kind': 'ประเภทข้อความ',
   'feedback.kind.contact': 'ติดต่อ',

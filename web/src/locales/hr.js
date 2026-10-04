@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'U dnevnom prikazu, u vrijeme ručka.',
 
   'about.section': 'O stranici',
-  'about.notice': 'Neslužbena stranica koju je izradio student. Podaci iz ADE-a.',
+  'about.notice': 'Neslužbena stranica, autor: Willem Vanbaelinghem. Podaci iz ADE-a.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Vrsta poruke',
   'feedback.kind.contact': 'Kontakt',

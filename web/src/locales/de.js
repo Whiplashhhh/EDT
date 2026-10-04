@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'In der Tagesansicht, zur Mittagszeit.',
 
   'about.section': 'Über',
-  'about.notice': 'Inoffizielle Website, erstellt von einem Studenten. Daten aus ADE.',
+  'about.notice': 'Inoffizielle Website, erstellt von Willem Vanbaelinghem. Daten aus ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Art der Nachricht',
   'feedback.kind.contact': 'Kontakt',

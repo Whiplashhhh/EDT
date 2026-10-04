@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'A duban rana, lokacin abincin rana.',
 
   'about.section': 'Game da shafin',
-  'about.notice': 'Shafi ne marar hukuma, ɗalibi ne ya ƙirƙira shi. Bayanai daga ADE.',
+  'about.notice': 'Shafi ne marar hukuma, Willem Vanbaelinghem ne ya ƙirƙira shi. Bayanai daga ADE.',
   'about.contact': 'Tuntuɓa',
   'feedback.kind': 'Nau’in saƙo',
   'feedback.kind.contact': 'Tuntuɓa',

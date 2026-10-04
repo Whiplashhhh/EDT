@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'দিনের ভিউতে, দুপুরের খাবারের সময়।',
 
   'about.section': 'এই সাইট সম্পর্কে',
-  'about.notice': 'অনানুষ্ঠানিক সাইট, একজন শিক্ষার্থীর তৈরি। তথ্য ADE থেকে নেওয়া।',
+  'about.notice': 'অনানুষ্ঠানিক সাইট, Willem Vanbaelinghem-এর তৈরি। তথ্য ADE থেকে নেওয়া।',
   'about.contact': 'যোগাযোগ',
   'feedback.kind': 'বার্তার ধরন',
   'feedback.kind.contact': 'যোগাযোগ',

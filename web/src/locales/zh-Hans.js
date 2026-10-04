@@ -113,7 +113,7 @@ export default {
   'crous.showHint': '在日视图中，午餐时间显示。',
 
   'about.section': '关于',
-  'about.notice': '非官方网站，由一名学生制作。数据来自 ADE。',
+  'about.notice': '非官方网站，由 Willem Vanbaelinghem 制作。数据来自 ADE。',
   'about.contact': '联系',
   'feedback.kind': '消息类型',
   'feedback.kind.contact': '联系',

@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'I dagsvisningen, omkring frokosttid.',
 
   'about.section': 'Om',
-  'about.notice': 'Uofficielt website, lavet af en studerende. Data fra ADE.',
+  'about.notice': 'Uofficielt website, lavet af Willem Vanbaelinghem. Data fra ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Beskedtype',
   'feedback.kind.contact': 'Kontakt',

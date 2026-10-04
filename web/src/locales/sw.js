@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Katika mwonekano wa siku, wakati wa chakula cha mchana.',
 
   'about.section': 'Kuhusu',
-  'about.notice': 'Tovuti isiyo rasmi, iliyotengenezwa na mwanafunzi. Data kutoka ADE.',
+  'about.notice': 'Tovuti isiyo rasmi, iliyotengenezwa na Willem Vanbaelinghem. Data kutoka ADE.',
   'about.contact': 'Mawasiliano',
   'feedback.kind': 'Aina ya ujumbe',
   'feedback.kind.contact': 'Mawasiliano',

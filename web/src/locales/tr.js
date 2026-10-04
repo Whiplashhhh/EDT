@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Günlük görünümde, öğle yemeği saatinde.',
 
   'about.section': 'Hakkında',
-  'about.notice': 'Resmî olmayan site, bir öğrenci tarafından yapılmıştır. Veriler ADE’den alınır.',
+  'about.notice': 'Resmî olmayan site, Willem Vanbaelinghem tarafından yapılmıştır. Veriler ADE’den alınır.',
   'about.contact': 'İletişim',
   'feedback.kind': 'Mesaj türü',
   'feedback.kind.contact': 'İletişim',

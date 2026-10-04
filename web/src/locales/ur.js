@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'دن کے منظر میں، دوپہر کے کھانے کے وقت۔',
 
   'about.section': 'سائٹ کے بارے میں',
-  'about.notice': 'غیر سرکاری سائٹ، ایک طالب علم کی بنائی ہوئی۔ ڈیٹا ADE سے لیا گیا ہے۔',
+  'about.notice': 'غیر سرکاری سائٹ، Willem Vanbaelinghem کی بنائی ہوئی۔ ڈیٹا ADE سے لیا گیا ہے۔',
   'about.contact': 'رابطہ',
   'feedback.kind': 'پیغام کی قسم',
   'feedback.kind.contact': 'رابطہ',
