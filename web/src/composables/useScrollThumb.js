@@ -5,7 +5,9 @@
  * défilement que pendant le geste, et ignore `::-webkit-scrollbar` : rien
  * n'indique qu'une liste continue sous le bord. On dessine donc notre propre
  * curseur, posé sur le bord droit de la liste qui défile. Là où le navigateur
- * réserve déjà une vraie barre (Chrome sur PC), on n'ajoute rien.
+ * réserve déjà une vraie barre (Chrome sur PC), on n'ajoute rien. Sinon, la
+ * liste reçoit `data-scroll-thumb`, qui masque la barre native : pendant le
+ * geste, les deux se superposaient.
  */
 import { onBeforeUnmount, onMounted } from 'vue';
 
@@ -33,19 +35,24 @@ export function useScrollThumb(root, thumb, selector) {
     if (!box || !bar) return;
     const next = box.querySelector(selector);
     if (next !== list) {
-      if (list) resize.unobserve(list);
+      if (list) {
+        resize.unobserve(list);
+        delete list.dataset.scrollThumb;
+      }
       list = next;
       if (list) resize.observe(list);
     }
     // Une vraie barre occupe de la place : le navigateur l'affiche déjà.
     if (!list || list.offsetWidth !== list.clientWidth || list.scrollHeight <= list.clientHeight + 1) {
       bar.hidden = true;
+      if (list) delete list.dataset.scrollThumb;
       return;
     }
     const { scrollHeight, clientHeight, scrollTop } = list;
     const size = Math.max(MIN_THUMB, (clientHeight * clientHeight) / scrollHeight);
     const ratio = Math.min(1, Math.max(0, scrollTop / (scrollHeight - clientHeight)));
     bar.hidden = false;
+    list.dataset.scrollThumb = '';
     bar.style.height = `${size}px`;
     bar.style.top = `${list.offsetTop + (clientHeight - size) * ratio}px`;
     bar.style.left = `${list.offsetLeft + list.offsetWidth - bar.offsetWidth - 1}px`;

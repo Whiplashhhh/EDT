@@ -714,6 +714,8 @@ watch(loading, async (busy) => {
   opacity: 0.55;
   pointer-events: none;
 }
+.tree[data-scroll-thumb], .cities[data-scroll-thumb] { scrollbar-width: none; }
+.tree[data-scroll-thumb]::-webkit-scrollbar, .cities[data-scroll-thumb]::-webkit-scrollbar { display: none; }
 
 .tabs {
   display: flex;
