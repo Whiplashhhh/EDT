@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} ${n === 1 ? 'tunti' : 'tuntia'}`,
   'day.break': ({ duration }) => `${duration} taukoa`,
   'card.remaining': ({ duration }) => `${duration} jäljellä`,
+  'detail.room': 'Sali',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Opettaja' : 'Opettajat'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Ryhmä' : 'Ryhmät'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous-ruokalista',

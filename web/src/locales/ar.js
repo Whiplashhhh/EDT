@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} حصة`,
   'day.break': ({ duration }) => `استراحة ${duration}`,
   'card.remaining': ({ duration }) => `بقي ${duration}`,
+  'detail.room': 'القاعة',
+  'detail.teachers': ({ n }) => (n === 1 ? 'الأستاذ' : 'الأساتذة'),
+  'detail.groups': ({ n }) => (n === 1 ? 'الفوج' : 'الأفواج'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'قائمة مطعم Crous',

@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} வகுப்புகள்`,
   'day.break': ({ duration }) => `${duration} இடைவேளை`,
   'card.remaining': ({ duration }) => `${duration} மீதம்`,
+  'detail.room': 'அறை',
+  'detail.teachers': ({ n }) => (n === 1 ? 'ஆசிரியர்' : 'ஆசிரியர்கள்'),
+  'detail.groups': ({ n }) => (n === 1 ? 'குழு' : 'குழுக்கள்'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous உணவுப் பட்டியல்',

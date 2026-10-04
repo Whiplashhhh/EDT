@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} hod.`,
   'day.break': ({ duration }) => `prestávka ${duration}`,
   'card.remaining': ({ duration }) => `ešte ${duration}`,
+  'detail.room': 'Učebňa',
+  'detail.teachers': 'Vyučujúci',
+  'detail.groups': ({ n }) => (n === 1 ? 'Skupina' : 'Skupiny'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Jedálny lístok Crous',

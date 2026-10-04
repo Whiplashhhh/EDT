@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} שיעורים`,
   'day.break': ({ duration }) => `הפסקה של ${duration}`,
   'card.remaining': ({ duration }) => `נותרו ${duration}`,
+  'detail.room': 'חדר',
+  'detail.teachers': ({ n }) => (n === 1 ? 'מרצה' : 'מרצים'),
+  'detail.groups': ({ n }) => (n === 1 ? 'קבוצה' : 'קבוצות'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'תפריט Crous',

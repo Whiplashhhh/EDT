@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `darussa ${n}`,
   'day.break': ({ duration }) => `hutu na ${duration}`,
   'card.remaining': ({ duration }) => `saura ${duration}`,
+  'detail.room': 'Aji',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Malami' : 'Malamai'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Rukuni' : 'Rukunoni'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menu na Crous',

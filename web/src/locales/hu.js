@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} óra`,
   'day.break': ({ duration }) => `${duration} szünet`,
   'card.remaining': ({ duration }) => `még ${duration}`,
+  'detail.room': 'Terem',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Oktató' : 'Oktatók'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Csoport' : 'Csoportok'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous étlap',

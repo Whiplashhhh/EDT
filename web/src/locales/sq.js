@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} orë`,
   'day.break': ({ duration }) => `pushim ${duration}`,
   'card.remaining': ({ duration }) => `edhe ${duration}`,
+  'detail.room': 'Salla',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Pedagogu' : 'Pedagogët'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Grupi' : 'Grupet'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menyja e Crous',

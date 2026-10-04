@@ -29,7 +29,7 @@ const state = computed(() => {
 
 <template>
   <!-- Rien à dire si l'API est injoignable : l'emploi du temps reste prioritaire. -->
-  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed', muted: state === 'unknown' }" :aria-label="t('crous.aria')">
+  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed', muted: state === 'unknown' || state === 'loading' }" :aria-label="t('crous.aria')">
     <header class="head">
       <span class="tag">{{ t('crous.tag') }}</span>
       <span class="name">{{ name }}</span>
@@ -121,11 +121,18 @@ const state = computed(() => {
 
 .crous.closed .courses { display: none; }
 
-/* Menu pas encore publié : on garde le cadre rouge mais sans aplat, pour ne pas crier. */
-.crous.muted { background: transparent; }
+/*
+ * Menu pas encore publié (ou en chemin) : rien d'anormal, donc rien de rouge.
+ * Le rouge du Crous ferait lire une erreur ou un cours annulé ; un cadre neutre
+ * en pointillés dit seulement « ici, le déjeuner ».
+ */
+.crous.muted {
+  background: transparent;
+  border: 1px dashed var(--line);
+}
 .crous.muted .head { background: transparent; }
 .crous.muted .tag,
-.crous.muted .name { color: var(--crous); }
+.crous.muted .name { color: var(--text-muted); }
 .crous.muted .hours { color: var(--text-muted); }
 .crous.muted .note { color: var(--text-muted); font-weight: 500; }
 

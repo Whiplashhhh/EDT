@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `masomo ${n}`,
   'day.break': ({ duration }) => `mapumziko ya ${duration}`,
   'card.remaining': ({ duration }) => `zimebaki ${duration}`,
+  'detail.room': 'Chumba',
+  'detail.teachers': ({ n }) => (n === 1 ? 'Mhadhiri' : 'Wahadhiri'),
+  'detail.groups': ({ n }) => (n === 1 ? 'Kikundi' : 'Vikundi'),
 
   'crous.tag': 'Crous',
   'crous.aria': 'Menyu ya Crous',

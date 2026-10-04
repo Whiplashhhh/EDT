@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `수업 ${n}개`,
   'day.break': ({ duration }) => `${duration} 휴식`,
   'card.remaining': ({ duration }) => `${duration} 남음`,
+  'detail.room': '강의실',
+  'detail.teachers': '교수',
+  'detail.groups': '그룹',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous 식단',

@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} คาบ`,
   'day.break': ({ duration }) => `พัก ${duration}`,
   'card.remaining': ({ duration }) => `เหลืออีก ${duration}`,
+  'detail.room': 'ห้อง',
+  'detail.teachers': 'ผู้สอน',
+  'detail.groups': 'กลุ่ม',
 
   'crous.tag': 'Crous',
   'crous.aria': 'เมนูของ Crous',

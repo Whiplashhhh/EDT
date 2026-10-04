@@ -101,6 +101,9 @@ export default {
   'day.courses': ({ n }) => `${n} 堂課`,
   'day.break': ({ duration }) => `休息 ${duration}`,
   'card.remaining': ({ duration }) => `還剩 ${duration}`,
+  'detail.room': '教室',
+  'detail.teachers': '教師',
+  'detail.groups': '班級',
 
   'crous.tag': 'Crous',
   'crous.aria': 'Crous 菜單',
