@@ -82,6 +82,11 @@ export interface DirectoryEntry {
   /** Salles seulement : les noms se répètent d'une ville à l'autre. */
   city?: string;
   /**
+   * Enseignants seulement : les villes où ils interviennent. Un nom ne dit pas
+   * le campus, et certains enseignent sur deux d'entre eux.
+   */
+  cities?: string[];
+  /**
    * Ressources seulement : qui en assure les séances. Une ressource partagée
    * entre deux enseignants se filtre ainsi, chacun ne gardant que les siennes.
    * `NO_TEACHER` regroupe les séances qu'ADE ne rattache à personne.
@@ -538,12 +543,19 @@ export class AdeService {
       if (kind === 'rooms') {
         return { department: departmentId, kind, fetchedAt, entries: roomEntries(events, await this.#cities()) };
       }
-      const counts = new Map<string, number>();
+      const cities = await this.#cities();
+      const counts = new Map<string, { courses: number; cities: Set<string> }>();
       for (const event of events) {
-        for (const name of event.teachers) counts.set(name, (counts.get(name) ?? 0) + 1);
+        const city = cities.get(event.department ?? '') ?? OTHER_CITY;
+        for (const name of event.teachers) {
+          const entry = counts.get(name) ?? { courses: 0, cities: new Set<string>() };
+          entry.courses += 1;
+          entry.cities.add(city);
+          counts.set(name, entry);
+        }
       }
       const entries = [...counts.entries()]
-        .map(([name, courses]) => ({ id: nameId(name), name, courses }))
+        .map(([name, { courses, cities: where }]) => ({ id: nameId(name), name, courses, cities: [...where].sort() }))
         .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
       return { department: departmentId, kind, fetchedAt, entries };
     });
