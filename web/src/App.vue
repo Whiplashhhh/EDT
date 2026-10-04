@@ -205,6 +205,32 @@ watch(focusedDay, (day, previous) => {
 const calendarUrl = computed(() =>
   department.value && resourceId.value ? api.calendarUrl(department.value, kind.value, resourceId.value) : null,
 );
+/**
+ * En `webcal://`, le téléphone s'abonne au lieu d'importer le fichier une
+ * fois : les changements de salle ou d'horaire suivent d'eux-mêmes.
+ */
+const webcalUrl = computed(() => calendarUrl.value?.replace(/^https?:/, 'webcal:') ?? null);
+
+/**
+ * Google Agenda ne connaît pas `webcal://` : on s'y abonne en collant l'adresse
+ * dans « À partir de l'URL ». Le lien copié reste donc en `https://`.
+ */
+const linkCopied = ref(false);
+let copiedTimer;
+async function copyCalendarLink() {
+  const url = calendarUrl.value;
+  if (!url) return;
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    // Presse-papiers refusé (page non sécurisée, vieux navigateur) : on montre le lien à copier à la main.
+    window.prompt(t('app.copyCalendarLink'), url);
+    return;
+  }
+  linkCopied.value = true;
+  clearTimeout(copiedTimer);
+  copiedTimer = setTimeout(() => { linkCopied.value = false; }, 2500);
+}
 
 let ticker;
 let refresher;
@@ -242,6 +268,7 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(ticker);
   clearInterval(refresher);
+  clearTimeout(copiedTimer);
   document.removeEventListener('visibilitychange', onVisible);
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.removeEventListener('message', onServiceWorkerMessage);
@@ -486,7 +513,10 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <button v-if="comparing" type="button" role="menuitem" @click="closeColumn('compare'); menuOpen = false">{{ t('compare.stop') }}</button>
       <button v-else type="button" role="menuitem" @click="openPicker('compare')">{{ t('compare.start') }}</button>
       <button type="button" role="menuitem" @click="identityOpen = true">{{ t('app.changeIdentity') }}</button>
-      <a v-if="calendarUrl" role="menuitem" :href="calendarUrl">{{ t('app.subscribe') }}</a>
+      <a v-if="webcalUrl" role="menuitem" :href="webcalUrl">{{ t('app.subscribe') }}</a>
+      <button v-if="calendarUrl" type="button" role="menuitem" @click="copyCalendarLink">
+        {{ linkCopied ? t('app.linkCopied') : t('app.copyCalendarLink') }}
+      </button>
       <button type="button" role="menuitem" @click="reloadAll(true); menuOpen = false">{{ t('app.refresh') }}</button>
 
       <!--
