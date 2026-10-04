@@ -471,9 +471,10 @@ function dayToOpen() {
   return addDays(mondayOf(day), 7);
 }
 
-function toggleView() {
-  if (settings.value.view === 'week') focusedDay.value = dayToOpen();
-  setView(settings.value.view === 'day' ? 'week' : 'day');
+function switchView(view) {
+  if (view === settings.value.view) return;
+  if (view === 'day') focusedDay.value = dayToOpen();
+  setView(view);
 }
 
 /* En vue semaine, les jours ne se sélectionnent plus un à un : on avance d'une semaine. */
@@ -594,9 +595,6 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
     <div v-if="menuOpen" class="menu-backdrop" @click="menuOpen = false"></div>
     <div v-if="menuOpen" class="dropdown menu" role="menu">
-      <button type="button" role="menuitem" @click="toggleView(); menuOpen = false">
-        {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
-      </button>
       <button type="button" role="menuitem" @click="openPicker('main')">{{ t('app.changeResource') }}</button>
       <button v-if="comparing" type="button" role="menuitem" @click="closeColumn('compare'); menuOpen = false">{{ t('compare.stop') }}</button>
       <button v-else type="button" role="menuitem" @click="openPicker('compare')">{{ t('compare.start') }}</button>
@@ -715,6 +713,17 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </div>
 
     <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+      <div class="view-switch segmented" role="group" :aria-label="t('app.display')">
+        <button
+          v-for="view in ['day', 'week']"
+          :key="view"
+          type="button"
+          :class="{ on: settings.view === view }"
+          :aria-pressed="settings.view === view"
+          @click="switchView(view)"
+        >{{ t(view === 'day' ? 'app.viewDay' : 'app.viewWeek') }}</button>
+      </div>
+
       <div class="strip-stage">
         <Transition :name="slideName">
           <WeekStrip
@@ -1046,6 +1055,10 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 .segmented button:hover { color: var(--text); }
 .segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
+
+/* Le choix jour / semaine reste sous la main, au-dessus de la semaine affichée. */
+.view-switch { width: fit-content; margin: 0 auto 0.4rem; }
+.view-switch button { padding: 0.3rem 0.9rem; }
 
 /* Liste déroulante native : elle sait déjà chercher au clavier et s'ouvre en
    plein écran sur mobile, ce qu'aucun menu maison ne fait aussi bien. */
