@@ -200,7 +200,7 @@ function toIcs(resourceName: string, events: Array<import('../ade/ics.ts').Cours
       `DTEND:${icsStamp(event.end)}`,
       `SUMMARY:${icsEscape(event.title)}`,
       ...(event.room ? [`LOCATION:${icsEscape(event.room)}`] : []),
-      `DESCRIPTION:${icsEscape([event.kind, event.groups.join(', '), event.teachers.join(', ')].filter(Boolean).join('\n'))}`,
+      `DESCRIPTION:${icsEscape([event.kind, event.groups.join(', '), event.teachers.join(', '), ...(event.notes ?? [])].filter(Boolean).join('\n'))}`,
       'END:VEVENT',
     );
   }

@@ -64,6 +64,7 @@ test('parseAdeIcs extrait matière, type, salle, enseignant et groupe', () => {
     room: 'Grand amphi',
     teachers: ['LETREZ Séverine'],
     groups: ['BUT1'],
+    notes: [],
   });
 
   // Le suffixe numéroté « TD1 » doit être reconnu comme un TD…
