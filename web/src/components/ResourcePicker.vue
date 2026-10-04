@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
 import { searchGroups } from '../search.js';
+import { useScrollThumb } from '../composables/useScrollThumb.js';
 import { MAX_SUBJECTS, NO_TEACHER, formatSelection, parseSelection } from '../subjects.js';
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
@@ -504,6 +505,8 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
  * défile, pas la page derrière.
  */
 const root = ref(null);
+const thumb = ref(null);
+useScrollThumb(root, thumb, '.tree, .cities');
 watch(loading, async (busy) => {
   if (busy) return;
   await nextTick();
@@ -695,11 +698,22 @@ watch(loading, async (busy) => {
     <p v-else-if="identityMode || !resourceId" class="hint">
       {{ t(identityMode ? 'picker.identityHint' : 'picker.hint') }}
     </p>
+    <div ref="thumb" class="scroll-thumb" aria-hidden="true" hidden></div>
   </div>
 </template>
 
 <style scoped>
-.picker { display: flex; flex-direction: column; min-height: 0; padding: 0.5rem; }
+.picker { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 0.5rem; }
+
+/* Curseur de défilement dessiné à la main : voir `useScrollThumb`. */
+.scroll-thumb {
+  position: absolute;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--text-muted);
+  opacity: 0.55;
+  pointer-events: none;
+}
 
 .tabs {
   display: flex;
