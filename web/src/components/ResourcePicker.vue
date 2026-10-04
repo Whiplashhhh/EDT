@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
 import { searchGroups } from '../search.js';
@@ -413,10 +413,26 @@ onMounted(async () => {
 
 // Les classes attendent la ville ; le reste se charge une fois pour toute l'ULCO.
 watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadResources, { immediate: true });
+
+/**
+ * La liste rouvre sur le choix en cours : sa branche est dépliée, encore
+ * faut-il qu'il soit à l'écran et non trente lignes plus bas. Seule la liste
+ * défile, pas la page derrière.
+ */
+const root = ref(null);
+watch(loading, async (busy) => {
+  if (busy) return;
+  await nextTick();
+  const row = root.value?.querySelector('.tree .current');
+  const list = row?.closest('.tree');
+  if (!list) return;
+  const offset = row.getBoundingClientRect().top - list.getBoundingClientRect().top;
+  list.scrollTop += offset - (list.clientHeight - row.offsetHeight) / 2;
+});
 </script>
 
 <template>
-  <div class="picker" @keydown.esc.stop="emit('close')">
+  <div ref="root" class="picker" @keydown.esc.stop="emit('close')">
     <div class="tabs" role="tablist" :aria-label="t('picker.mode')">
       <button
         v-for="option in kinds"
