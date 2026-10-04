@@ -106,6 +106,11 @@ export interface Directory {
   department: string;
   kind: ResourceKind;
   fetchedAt: string;
+  /**
+   * Fin du dernier cours de la fenêtre (instant ISO) : la charge de chacun se
+   * compte jusque-là, sur plusieurs semaines — pas sur la semaine affichée.
+   */
+  until: string | null;
   entries: DirectoryEntry[];
 }
 
@@ -216,7 +221,7 @@ export function nameId(name: string): number {
 /** Clé d'une ressource : son code, dans sa formation. */
 function subjectKey(event: CourseEvent): string | null {
   const subject = subjectOf(event);
-  return subject ? `${event.department ?? ''}:${subject.code}` : null;
+  return subject ? `${event.department ?? ''}:${subject.key}` : null;
 }
 
 /**
@@ -281,33 +286,51 @@ function roomEntries(events: CourseEvent[], cities: Map<string, string>): Direct
     .sort((a, b) => a.name.localeCompare(b.name, 'fr') || a.city.localeCompare(b.city));
 }
 
+/**
+ * Nom retenu pour une ressource sans code, parmi les graphies de ses séances :
+ * une qui ne crie pas et commence par une capitale (« Anglais » plutôt que
+ * « ANGLAIS » ou « anglais »), la plus fréquente.
+ */
+function pickName(names: Map<string, number>): string {
+  const rank = (name: string) =>
+    name === name.toUpperCase() && name !== name.toLowerCase() ? 2 : /^\p{Ll}/u.test(name) ? 1 : 0;
+  return [...names.entries()].sort(
+    ([a, n], [b, m]) => rank(a) - rank(b) || m - n || a.length - b.length || a.localeCompare(b, 'fr'),
+  )[0][0];
+}
+
 /** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
 function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
-  const byKey = new Map<
-    string,
-    { department: string; code: string; courses: number; labels: Map<string, number>; teachers: Map<string, number> }
-  >();
+  type Tally = {
+    department: string;
+    key: string;
+    courses: number;
+    names: Map<string, number>;
+    labels: Map<string, number>;
+    teachers: Map<string, number>;
+  };
+  const byKey = new Map<string, Tally>();
+  const count = (map: Map<string, number>, name: string) => map.set(name, (map.get(name) ?? 0) + 1);
   for (const event of events) {
     const subject = subjectOf(event);
     if (!subject) continue;
     const department = event.department ?? '';
-    const key = `${department}:${subject.code}`;
+    const key = `${department}:${subject.key}`;
     let entry = byKey.get(key);
     if (!entry) {
-      entry = { department, code: subject.code, courses: 0, labels: new Map(), teachers: new Map() };
+      entry = { department, key, courses: 0, names: new Map(), labels: new Map(), teachers: new Map() };
       byKey.set(key, entry);
     }
     entry.courses += 1;
-    entry.labels.set(subject.label, (entry.labels.get(subject.label) ?? 0) + 1);
+    count(entry.names, subject.code);
+    count(entry.labels, subject.label);
     // Une séance sans enseignant compte sous le nom vide.
-    for (const teacher of event.teachers.length ? event.teachers : ['']) {
-      entry.teachers.set(teacher, (entry.teachers.get(teacher) ?? 0) + 1);
-    }
+    for (const teacher of event.teachers.length ? event.teachers : ['']) count(entry.teachers, teacher);
   }
-  return [...byKey.entries()]
-    .map(([key, entry]) => ({
-      id: nameId(key),
-      name: entry.code,
+  return [...byKey.values()]
+    .map((entry) => ({
+      id: nameId(entry.key),
+      name: pickName(entry.names),
       courses: entry.courses,
       department: entry.department,
       label: pickLabel(entry.labels),
@@ -545,11 +568,12 @@ export class AdeService {
     return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
       const events = await this.#allEvents(departmentId, from);
       const fetchedAt = new Date().toISOString();
+      const until = events.reduce<string | null>((last, e) => (!last || e.end > last ? e.end : last), null);
       if (kind === 'subjects') {
-        return { department: departmentId, kind, fetchedAt, entries: subjectEntries(events) };
+        return { department: departmentId, kind, fetchedAt, until, entries: subjectEntries(events) };
       }
       if (kind === 'rooms') {
-        return { department: departmentId, kind, fetchedAt, entries: roomEntries(events, await this.#cities()) };
+        return { department: departmentId, kind, fetchedAt, until, entries: roomEntries(events, await this.#cities()) };
       }
       const cities = await this.#cities();
       // « M. Basse » et « BASSE David » sont la même personne : un seul nom dans la liste.
@@ -594,7 +618,7 @@ export class AdeService {
           .filter(([name]) => !counts.has(name))
           .map(([name, entry]) => ({ ...entryOf(name, entry), uncertain: true })),
       ].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-      return { department: departmentId, kind, fetchedAt, entries };
+      return { department: departmentId, kind, fetchedAt, until, entries };
     });
   }
 
