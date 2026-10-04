@@ -188,6 +188,9 @@ watch(eventsByDay, (map) => {
 
 const dayEvents = computed(() => eventsByDay.value.get(focusedDay.value) || []);
 const isToday = computed(() => focusedDay.value === today());
+/* En vue semaine, aujourd'hui est déjà à l'écran tant que sa semaine est affichée. */
+const showTodayButton = computed(() =>
+  settings.value.view === 'day' ? !isToday.value : mondayOf(focusedDay.value) !== mondayOf(today()));
 
 /*
  * Glissement d'un jour (ou d'une semaine) à l'autre : le sens du mouvement suit
@@ -398,6 +401,37 @@ function setView(view) {
   writeSettings(settings.value);
 }
 
+const isWeekend = (day) => day >= addDays(mondayOf(day), 5);
+
+/**
+ * Jour à ouvrir en passant de la semaine au jour. Sur la semaine en cours,
+ * c'est aujourd'hui — ou, un week-end sans cours, le prochain jour de cours,
+ * fût-il la semaine suivante. Sur une autre semaine, c'est le jour sélectionné,
+ * sauf un week-end sans cours : on revient alors au lundi de cette semaine,
+ * dont les cours ne sont pas encore passés.
+ */
+function dayToOpen() {
+  const map = eventsByDay.value;
+  const hasCourses = (day) => Boolean(map.get(day)?.length);
+  const day = mondayOf(focusedDay.value) === mondayOf(today()) ? today() : focusedDay.value;
+  if (!isWeekend(day) || hasCourses(day)) return day;
+  if (day !== today()) return mondayOf(day);
+  for (let i = 1; i <= 10; i += 1) {
+    if (hasCourses(addDays(day, i))) return addDays(day, i);
+  }
+  return addDays(mondayOf(day), 7);
+}
+
+function toggleView() {
+  if (settings.value.view === 'week') focusedDay.value = dayToOpen();
+  setView(settings.value.view === 'day' ? 'week' : 'day');
+}
+
+/* En vue semaine, les jours ne se sélectionnent plus un à un : on avance d'une semaine. */
+function step(direction) {
+  shiftDay(direction * (settings.value.view === 'week' ? 7 : 1));
+}
+
 function shiftDay(delta) {
   focusedDay.value = addDays(focusedDay.value, delta);
 }
@@ -414,7 +448,7 @@ function onTouchEnd(event) {
   const dx = touch.clientX - touchStart.x;
   const dy = touch.clientY - touchStart.y;
   touchStart = null;
-  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.8) shiftDay(dx < 0 ? 1 : -1);
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.8) step(dx < 0 ? 1 : -1);
 }
 
 function onKeydown(event) {
@@ -427,8 +461,8 @@ function onKeydown(event) {
     return;
   }
   if (pickerOpen.value || menuOpen.value || identityOpen.value) return;
-  if (event.key === 'ArrowRight') shiftDay(1);
-  if (event.key === 'ArrowLeft') shiftDay(-1);
+  if (event.key === 'ArrowRight') step(1);
+  if (event.key === 'ArrowLeft') step(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
 }
 watch(pickerOpen, (open) => { if (open) { menuOpen.value = false; identityOpen.value = false; } });
@@ -452,9 +486,9 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           la place quand le retour et « aujourd'hui » occupent déjà l'en-tête.
         -->
         <button
-          v-if="installMode && !(viewingOther && !isToday)"
+          v-if="installMode && !(viewingOther && showTodayButton)"
           class="pill install"
-          :class="{ compact: viewingOther || !isToday }"
+          :class="{ compact: viewingOther || showTodayButton }"
           type="button"
           :aria-label="t('install.title')"
           :title="t('install.title')"
@@ -462,7 +496,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         >
           <span aria-hidden="true">＋</span>
           <!-- Aux côtés d'autres pastilles, le libellé ferait déborder l'en-tête. -->
-          <span v-if="!viewingOther && isToday">{{ t('install.short') }}</span>
+          <span v-if="!viewingOther && !showTodayButton">{{ t('install.short') }}</span>
         </button>
         <!-- Le chemin du retour reste visible tant qu'on regarde ailleurs que chez soi. -->
         <button
@@ -477,7 +511,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           <span class="mine-name">{{ identity.resourceName }}</span>
         </button>
         <button
-          v-if="!isToday"
+          v-if="showTodayButton"
           class="pill"
           type="button"
           @click="focusedDay = today()"
@@ -506,7 +540,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
     <div v-if="menuOpen" class="menu-backdrop" @click="menuOpen = false"></div>
     <div v-if="menuOpen" class="dropdown menu" role="menu">
-      <button type="button" role="menuitem" @click="setView(settings.view === 'day' ? 'week' : 'day'); menuOpen = false">
+      <button type="button" role="menuitem" @click="toggleView(); menuOpen = false">
         {{ settings.view === 'day' ? t('app.viewWeek') : t('app.viewDay') }}
       </button>
       <button type="button" role="menuitem" @click="openPicker('main')">{{ t('app.changeResource') }}</button>
@@ -622,6 +656,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
             :key="weekKey"
             :focused="focusedDay"
             :events-by-day="eventsByDay"
+            :show-days="settings.view === 'day'"
             @select="focusedDay = $event"
             @shift="shiftDay"
           />
