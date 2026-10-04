@@ -1,6 +1,6 @@
 /** Appels à l'API locale. Le serveur est le seul à parler à ADE. */
 
-/** Les deux seules routes qui écrivent : l'abonnement aux notifications. */
+/** Les routes qui écrivent : l'abonnement aux notifications et le formulaire de contact. */
 async function postJson(path, body, signal) {
   const res = await fetch(path, {
     method: 'POST',
@@ -12,7 +12,7 @@ async function postJson(path, body, signal) {
     const payload = await res.json().catch(() => ({}));
     throw Object.assign(new Error(payload.error || `HTTP ${res.status}`), { code: payload.code });
   }
-  // Les deux répondent 204 : rien à lire.
+  // Toutes répondent 204 : rien à lire.
 }
 
 async function getJson(path, signal) {
@@ -48,4 +48,9 @@ export const api = {
   /** Enregistre ou met à jour l'abonnement de cet appareil. */
   pushSubscribe: (payload, signal) => postJson('/api/push/subscribe', payload, signal),
   pushUnsubscribe: (endpoint, signal) => postJson('/api/push/unsubscribe', { endpoint }, signal),
+
+  /** Le serveur sait-il transmettre un message ? Sans SMTP, le formulaire reste caché. */
+  feedbackConfig: (signal) => getJson('/api/feedback/config', signal),
+  /** Contact, suggestion ou problème : le serveur le relaie par courriel. */
+  sendFeedback: (payload, signal) => postJson('/api/feedback', payload, signal),
 };

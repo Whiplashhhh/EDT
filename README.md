@@ -141,6 +141,8 @@ Les autres réglages sont dans `.env.example`.
 | `GET /api/push/config` | notifications proposées ? clé publique VAPID |
 | `POST /api/push/subscribe` | enregistre ou met à jour l'abonnement d'un appareil |
 | `POST /api/push/unsubscribe` | supprime l'abonnement d'un appareil |
+| `GET /api/feedback/config` | formulaire de contact proposé ? |
+| `POST /api/feedback` | transmet par courriel un message de contact, une suggestion ou un problème |
 
 `:dept` vaut `all` pour les salles et les enseignants : une salle est partagée
 par tout l'établissement, un enseignant intervient souvent dans plusieurs
@@ -239,6 +241,54 @@ le cas dans `compose.yaml`.
 Le contenu des notifications est chiffré de bout en bout (RFC 8291) : le service
 de push relaie un message qu'il ne peut pas lire.
 
+## Contact, suggestions et problèmes
+
+Le pied de page et le menu ⋯ rappellent que le site n'est pas officiel, et proposent
+trois entrées : **Contact**, **Suggérer une amélioration**, **Signaler un problème**.
+Elles ouvrent la même fenêtre, sans quitter l'application : un objet facultatif,
+le message, et en option une adresse pour recevoir une réponse, le statut
+(étudiant, enseignant, personnel, autre) et le nom.
+
+L'application joint d'elle-même, sauf si on décoche la case, de quoi comprendre
+un problème : l'emploi du temps choisi, la formation, la langue, le navigateur,
+la taille d'écran. Le serveur résout la formation et sa ville d'après ADE.
+
+Le message part au serveur, qui le relaie par courriel à `FEEDBACK_TO`, avec pour
+objet `[EDT - contact]`, `[EDT - suggestion]` ou `[EDT - problème]` suivi de
+l'objet saisi. L'adresse de l'auteur du site n'apparaît nulle part dans la page ;
+celle de l'expéditeur, s'il en donne une, est mise en `Reply-To` : « Répondre »
+lui écrit directement. Rien n'est conservé sur le serveur.
+
+### Mise en service
+
+Le serveur n'envoie pas lui-même (port 25 souvent fermé sur un VPS, aucune
+réputation d'expéditeur) : il passe par le SMTP d'un service d'envoi. Avec
+[Resend](https://resend.com) — gratuit jusqu'à 100 courriels par jour :
+
+1. Créer un compte, ajouter le domaine `edt-iut.online` et publier les
+   enregistrements DNS proposés (SPF et DKIM, sur un sous-domaine qui ne gêne
+   rien d'autre ; Resend sait les poser lui-même chez Cloudflare).
+2. Créer une clé d'API avec le seul droit d'envoi.
+3. Dans `.env` :
+
+   ```
+   FEEDBACK_TO=votre-adresse@example.org
+   FEEDBACK_FROM=EDT ULCO <noreply@edt-iut.online>
+   SMTP_HOST=smtp.resend.com
+   SMTP_PORT=465
+   SMTP_USER=resend
+   SMTP_PASS=re_…
+   ```
+
+N'importe quel autre SMTP authentifié convient (Brevo, Mailjet…). Sans ces
+variables, le formulaire reste caché ; à moitié renseignées, le serveur refuse de
+démarrer plutôt que de perdre des messages en silence.
+
+**Contre les abus :** cinq messages par heure et par adresse IP, un champ piège
+invisible qui écarte les robots sans captcha, des longueurs bornées (objet 120,
+message 4 000 caractères), un courriel en texte brut et des champs d'une ligne
+débarrassés des retours à la ligne, ce qui empêche d'injecter des en-têtes.
+
 ## Sécurité
 
 Choix faits pour que l'application puisse être exposée publiquement :
@@ -246,7 +296,8 @@ Choix faits pour que l'application puisse être exposée publiquement :
 - **Aucune authentification, aucune donnée personnelle.** Les emplois du temps de l'ULCO
   sont déjà publics via le lien ADE ; l'application n'ajoute ni compte, ni cookie, ni
   journal nominatif. Seuls les abonnements aux notifications sont conservés, et
-  uniquement pour qui les demande (voir plus haut).
+  uniquement pour qui les demande (voir plus haut). Les messages du formulaire de
+  contact sont relayés par courriel, jamais enregistrés.
 - **Les routes d'abonnement valident la ressource auprès d'ADE** avant d'enregistrer
   quoi que ce soit, n'acceptent qu'une URL de push `https`, et refusent les salles :
   une salle n'a pas d'élèves à prévenir.

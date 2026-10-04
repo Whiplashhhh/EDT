@@ -47,6 +47,20 @@ export interface PushConfig {
   pollMs: number;
 }
 
+/**
+ * Formulaire de contact. Les messages partent par SMTP authentifié chez un
+ * service d'envoi ; sans destinataire ni serveur SMTP, le formulaire reste
+ * caché. L'adresse de destination ne quitte jamais le serveur.
+ */
+export interface FeedbackConfig {
+  enabled: boolean;
+  /** Boîte de l'exploitant, qui reçoit les messages. */
+  to: string;
+  /** Expéditeur, sur un domaine authentifié chez le service d'envoi. */
+  from: string;
+  smtp: { host: string; port: number; secure: boolean; user: string; pass: string };
+}
+
 export interface AppConfig {
   host: string;
   port: number;
@@ -69,6 +83,7 @@ export interface AppConfig {
   /** Durée de vie du menu en cache (ms). Le Crous publie une fois par jour. */
   crousTtlMs: number;
   push: PushConfig;
+  feedback: FeedbackConfig;
 }
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -146,6 +161,37 @@ function readPushConfig(): PushConfig {
   };
 }
 
+/**
+ * Lecture des réglages du formulaire de contact. Une configuration à moitié
+ * faite arrête le démarrage, comme pour VAPID : mieux vaut le savoir tout de
+ * suite qu'au premier message perdu.
+ */
+function readFeedbackConfig(): FeedbackConfig {
+  const to = process.env.FEEDBACK_TO ?? '';
+  const from = process.env.FEEDBACK_FROM ?? '';
+  const host = process.env.SMTP_HOST ?? '';
+  const port = positiveInt(process.env.SMTP_PORT, 465);
+  const enabled = Boolean(to && from && host);
+
+  if (!enabled && (to || from || host)) {
+    throw new Error('Formulaire de contact : FEEDBACK_TO, FEEDBACK_FROM et SMTP_HOST vont ensemble');
+  }
+
+  return {
+    enabled,
+    to,
+    from,
+    smtp: {
+      host,
+      port,
+      // 465 : TLS d'emblée ; 587 : STARTTLS, négocié par nodemailer.
+      secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465,
+      user: process.env.SMTP_USER ?? '',
+      pass: process.env.SMTP_PASS ?? '',
+    },
+  };
+}
+
 function positiveInt(value: string | undefined, fallback: number): number {
   const n = Number(value);
   return Number.isInteger(n) && n > 0 ? n : fallback;
@@ -169,5 +215,6 @@ export function loadConfig(): AppConfig {
     crousRestaurantId: positiveInt(process.env.CROUS_RESTAURANT_ID, 1164),
     crousTtlMs: positiveInt(process.env.CROUS_TTL_MS, 60 * 60 * 1000),
     push: readPushConfig(),
+    feedback: readFeedbackConfig(),
   };
 }
