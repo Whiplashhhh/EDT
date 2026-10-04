@@ -16,6 +16,7 @@ const monday = computed(() => mondayOf(props.focused));
 const days = computed(() => Array.from({ length: 7 }, (_, i) => addDays(monday.value, i)));
 const label = computed(() => t('week.label', { n: weekNumber(monday.value) }));
 const month = computed(() => formatMonthSpan(monday.value));
+const countOf = (day) => (props.eventsByDay.get(day) || []).length;
 </script>
 
 <template>
@@ -39,10 +40,10 @@ const month = computed(() => formatMonthSpan(monday.value));
         >
           <span class="name">{{ formatDayShort(day) }}</span>
           <span class="num">{{ dayNumber(day) }}</span>
-          <span class="dots" aria-hidden="true">
-            <i v-for="n in Math.min(3, (eventsByDay.get(day) || []).length)" :key="n"></i>
-          </span>
-          <span class="sr-only">{{ t('day.courses', { n: (eventsByDay.get(day) || []).length }) }}</span>
+          <!-- Le nombre de cours, pas des points : trois points ne disent pas si
+               la journée en compte trois ou cinq. Un jour sans cours reste vide. -->
+          <span class="count" aria-hidden="true">{{ countOf(day) || '' }}</span>
+          <span class="sr-only">{{ t('day.courses', { n: countOf(day) }) }}</span>
         </button>
       </li>
     </ol>
@@ -97,7 +98,13 @@ const month = computed(() => formatMonthSpan(monday.value));
 .day.active { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .day.active .name { color: var(--text); }
 
-.dots { display: flex; gap: 2px; height: 4px; align-items: center; }
-.dots i { width: 4px; height: 4px; border-radius: 999px; background: var(--text-muted); }
-.day.active .dots i { background: var(--accent); }
+.count {
+  min-height: 0.8rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.day.active .count { color: var(--accent); }
 </style>
