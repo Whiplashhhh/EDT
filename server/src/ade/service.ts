@@ -1,6 +1,7 @@
 import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
+import { teacherAliases } from './teachers.ts';
 import { TtlCache } from '../cache.ts';
 import type { AppConfig } from '../config.ts';
 
@@ -86,6 +87,8 @@ export interface DirectoryEntry {
    * le campus, et certains enseignent sur deux d'entre eux.
    */
   cities?: string[];
+  /** Enseignants seulement : les autres formes de leur nom dans ADE (« M. Basse », « BASSE D. »). */
+  aliases?: string[];
   /**
    * Ressources seulement : qui en assure les séances. Une ressource partagée
    * entre deux enseignants se filtre ainsi, chacun ne gardant que les siennes.
@@ -544,18 +547,36 @@ export class AdeService {
         return { department: departmentId, kind, fetchedAt, entries: roomEntries(events, await this.#cities()) };
       }
       const cities = await this.#cities();
-      const counts = new Map<string, { courses: number; cities: Set<string> }>();
+      // « M. Basse » et « BASSE David » sont la même personne : un seul nom dans la liste.
+      const aliases = teacherAliases(
+        events.flatMap((e) => e.teachers),
+        events.flatMap((e) => e.notes ?? []),
+      );
+      const counts = new Map<string, { courses: number; cities: Set<string>; aliases: Set<string> }>();
       for (const event of events) {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;
-        for (const name of event.teachers) {
-          const entry = counts.get(name) ?? { courses: 0, cities: new Set<string>() };
+        // Chaque enseignant compte une fois par cours, sous quelque forme qu'il y figure.
+        const named = new Map<string, string[]>();
+        for (const raw of [...event.teachers, ...(event.notes ?? []).filter((note) => aliases.has(note))]) {
+          const name = aliases.get(raw) ?? raw;
+          named.set(name, [...(named.get(name) ?? []), raw]);
+        }
+        for (const [name, forms] of named) {
+          const entry = counts.get(name) ?? { courses: 0, cities: new Set<string>(), aliases: new Set<string>() };
           entry.courses += 1;
           entry.cities.add(city);
+          for (const raw of forms) if (raw !== name) entry.aliases.add(raw);
           counts.set(name, entry);
         }
       }
       const entries = [...counts.entries()]
-        .map(([name, { courses, cities: where }]) => ({ id: nameId(name), name, courses, cities: [...where].sort() }))
+        .map(([name, entry]) => ({
+          id: nameId(name),
+          name,
+          courses: entry.courses,
+          cities: [...entry.cities].sort(),
+          ...(entry.aliases.size ? { aliases: [...entry.aliases].sort() } : {}),
+        }))
         .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
       return { department: departmentId, kind, fetchedAt, entries };
     });
@@ -587,7 +608,7 @@ export class AdeService {
       if (!entry) throw new NotFoundError(`Ressource inconnue : ${id}`);
       return entry;
     });
-    const names = new Set(entries.map((e) => e.name));
+    const names = new Set(entries.flatMap((e) => [e.name, ...(e.aliases ?? [])]));
     // Une salle se désigne par sa ville et son nom : « SALLE 25 » existe à Boulogne comme à Dunkerque.
     const rooms = new Set(entries.map((e) => roomKey(e.city ?? '', e.name)));
     const cities = kind === 'rooms' ? await this.#cities() : new Map<string, string>();
@@ -598,7 +619,9 @@ export class AdeService {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;
         return roomsOf(event).some((room) => rooms.has(roomKey(city, room)));
       }
-      if (kind === 'teachers') return event.teachers.some((teacher) => names.has(teacher));
+      if (kind === 'teachers') {
+        return event.teachers.some((teacher) => names.has(teacher)) || (event.notes ?? []).some((note) => names.has(note));
+      }
       const key = subjectKey(event);
       const excluded = key === null ? undefined : without.get(nameId(key));
       if (!excluded) return false;

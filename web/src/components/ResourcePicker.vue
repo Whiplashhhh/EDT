@@ -139,7 +139,8 @@ const results = computed(() => {
   const inCity = entries.value.filter((e) =>
     selectedKind.value === 'rooms' ? e.city === selectedCity.value : e.cities?.includes(selectedCity.value),
   );
-  return q ? inCity.filter((e) => e.name.toLowerCase().includes(q)) : inCity;
+  // Un enseignant se cherche aussi sous les autres formes de son nom : « Basse » trouve « BASSE David ».
+  return q ? inCity.filter((e) => [e.name, ...(e.aliases ?? [])].join(' ').toLowerCase().includes(q)) : inCity;
 });
 
 /** Chemin d'identifiants menant à chaque nœud, pour déplier la branche courante. */

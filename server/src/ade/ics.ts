@@ -1,5 +1,7 @@
 /** Lecture des flux iCalendar produits par ADE et mise en forme « cours ». */
 
+import { readTeachers } from './teachers.ts';
+
 export interface CourseEvent {
   /** Identifiant stable du cours (UID iCalendar). */
   uid: string;
@@ -13,8 +15,14 @@ export interface CourseEvent {
   /** CM, TD, TP, DS… ou null si non déductible. */
   kind: string | null;
   room: string | null;
+  /** Les intervenants, au format « NOM Prénom » d'ADE autant que possible (voir `teachers.ts`). */
   teachers: string[];
   groups: string[];
+  /**
+   * Ce que la description dit d'autre, tel quel : « (Blender) », « + 40 minutes
+   * pour 1/3 temps », un groupe qu'ADE ne nomme pas en capitales…
+   */
+  notes: string[];
   /**
    * Formation d'où vient le cours. Renseigné par le service, pas par le flux :
    * c'est lui qui dit sur quelle grille horaire recaler la séance lorsqu'une vue
@@ -127,10 +135,16 @@ function toCourse(fields: Record<string, string>): CourseEvent | null {
     .filter((l) => l.length > 0 && !l.startsWith('(Export'));
 
   const groups: string[] = [];
-  const teachers: string[] = [];
+  const teachers = new Set<string>();
+  const notes: string[] = [];
   for (const line of lines) {
-    if (GROUP_RE.test(line)) groups.push(line);
-    else teachers.push(line);
+    if (GROUP_RE.test(line)) {
+      groups.push(line);
+      continue;
+    }
+    const read = readTeachers(line);
+    for (const teacher of read.teachers) teachers.add(teacher);
+    if (read.note) notes.push(read.note);
   }
 
   const found = findKind(title);
@@ -148,7 +162,8 @@ function toCourse(fields: Record<string, string>): CourseEvent | null {
     subject,
     kind,
     room,
-    teachers,
+    teachers: [...teachers],
     groups,
+    notes,
   };
 }

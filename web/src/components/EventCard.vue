@@ -19,6 +19,8 @@ const props = defineProps({
 
 const showTeachers = computed(() => props.context !== 'teachers' && props.event.teachers?.length > 0);
 const showGroups = computed(() => props.event.groups?.length > 0);
+/* Ce qu'ADE dit d'autre du cours : « (Blender) », « + 40 minutes pour 1/3 temps »… */
+const notes = computed(() => props.event.notes ?? []);
 /* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
 const dept = computed(() => (props.context === 'groups' ? '' : departmentTag(props.event.department)));
 
@@ -59,6 +61,7 @@ const remaining = computed(() => {
         <span v-if="showTeachers && showGroups" aria-hidden="true"> · </span>
         <span v-if="showGroups" class="groups">{{ event.groups.join(', ') }}</span>
       </p>
+      <p v-if="notes.length" class="notes">{{ notes.join(' · ') }}</p>
       <p v-if="remaining" class="live">{{ remaining }}</p>
     </div>
   </article>
@@ -146,5 +149,6 @@ const remaining = computed(() => {
 .people { margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--text-muted); overflow-wrap: anywhere; }
 .teachers { color: var(--text); font-weight: 500; }
 .groups { opacity: 0.85; }
+.notes { margin: 0.2rem 0 0; font-size: 0.82rem; font-style: italic; color: var(--text-muted); overflow-wrap: anywhere; }
 .live { margin: 0.35rem 0 0; font-size: 0.8rem; font-weight: 600; color: var(--kind); }
 </style>
