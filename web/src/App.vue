@@ -440,14 +440,18 @@ function shiftDay(delta) {
 let touchStart = null;
 function onTouchStart(event) {
   if (event.touches.length !== 1) return;
-  touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  // La grille de la semaine défile en largeur sur téléphone : la faire défiler n'est pas changer de semaine.
+  const scroller = event.target.closest?.('.scroller');
+  touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY, scroller, left: scroller?.scrollLeft };
 }
 function onTouchEnd(event) {
   if (!touchStart) return;
   const touch = event.changedTouches[0];
   const dx = touch.clientX - touchStart.x;
   const dy = touch.clientY - touchStart.y;
+  const scrolled = touchStart.scroller && touchStart.scroller.scrollLeft !== touchStart.left;
   touchStart = null;
+  if (scrolled) return;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.8) step(dx < 0 ? 1 : -1);
 }
 

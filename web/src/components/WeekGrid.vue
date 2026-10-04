@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import {
   addDays, dayNumber, formatDayShort, formatMinutes, formatTime,
   minutesOfDay, mondayOf, today,
@@ -219,6 +219,20 @@ const nowLine = computed(() => {
   return { day: iso, top: `${y(minutes)}px` };
 });
 
+/*
+ * Sur téléphone, la fin de la semaine déborde : on ouvre la grille sur
+ * aujourd'hui plutôt que sur un lundi déjà passé.
+ */
+const scroller = ref(null);
+onMounted(() => {
+  const el = scroller.value;
+  const head = el?.querySelector('.col-head.today');
+  if (!head || el.scrollWidth <= el.clientWidth) return;
+  // La colonne du jour vient se ranger juste après l'axe des heures, qui reste en place.
+  const axisEnd = el.querySelector('.axis').getBoundingClientRect().right;
+  el.scrollLeft += head.getBoundingClientRect().left - axisEnd;
+});
+
 /* Une salle ou un enseignant sert plusieurs formations : on dit laquelle. */
 const deptOf = (event, context) => (context === 'groups' ? '' : departmentTag(event.department));
 
@@ -228,7 +242,7 @@ const peopleOf = (event, context) =>
 </script>
 
 <template>
-  <div class="scroller">
+  <div ref="scroller" class="scroller">
     <div class="grid" :class="{ compare: sources }" :style="{ '--cols': columns.length, '--body-h': `${bodyHeight}px` }">
       <div class="head-corner"></div>
       <template v-if="sources">
@@ -339,7 +353,16 @@ const peopleOf = (event, context) =>
 .grid.compare .block { font-size: 0.8rem; padding: 0.3rem 0.4rem; }
 .grid.compare .hours { font-size: 0.7rem; }
 
-.axis { position: relative; }
+/* Quand la grille défile en largeur, les heures restent en place. */
+.axis,
+.head-corner {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 3;
+  background: var(--bg);
+  /* Couvre aussi la marge du défileur, où passeraient sinon les cours glissant sous l'axe. */
+  box-shadow: -0.75rem 0 0 var(--bg);
+}
 .axis-hour {
   position: absolute;
   inset-inline-end: 0.3rem;
@@ -432,26 +455,24 @@ const peopleOf = (event, context) =>
 .block.narrow .room { font-size: 0.7rem; }
 
 /*
- * Semaine sur téléphone : les jours se partagent la largeur au lieu de défiler.
- * Une colonne ne fait plus qu'une soixantaine de pixels : l'horaire, que l'axe
- * donne déjà, et l'enseignant cèdent la place au titre et à la salle, et un mot
- * trop long se coupe à une syllabe plutôt qu'au hasard d'une lettre.
+ * Semaine sur téléphone : des colonnes assez larges pour lire un cours, quitte à
+ * faire défiler la fin de la semaine. L'horaire, que l'axe donne déjà, cède la
+ * place au titre et à la salle, et un mot trop long se coupe à une syllabe
+ * plutôt qu'au hasard d'une lettre.
  */
 @media (max-width: 699px) {
-  .scroller:has(.grid:not(.compare)) { overflow-x: visible; padding-inline: 0.4rem; }
+  .scroller:has(.grid:not(.compare)) { padding-inline: 0.4rem; }
   .grid:not(.compare) {
-    grid-template-columns: 2.3rem repeat(var(--cols), minmax(0, 1fr));
-    column-gap: 0.15rem;
+    grid-template-columns: 2.3rem repeat(var(--cols), minmax(5.6rem, 1fr));
+    column-gap: 0.2rem;
   }
-  .grid:not(.compare) .name { font-size: 0.6rem; }
   .grid:not(.compare) .axis-hour { font-size: 0.6rem; inset-inline-end: 0.2rem; }
-  .grid:not(.compare) .block { padding: 0.15rem 0.2rem; border-inline-start-width: 2px; font-size: 0.64rem; line-height: 1.15; }
-  .grid:not(.compare) .hours,
-  .grid:not(.compare) .teacher { display: none; }
-  .grid:not(.compare) .tag.inline { display: inline; margin-inline-start: 0.2rem; font-size: 0.55rem; }
+  .grid:not(.compare) .block { padding: 0.2rem 0.25rem; }
+  .grid:not(.compare) .hours { display: none; }
+  .grid:not(.compare) .tag.inline { display: inline; }
   .grid:not(.compare) .title,
-  .grid:not(.compare) .room { overflow-wrap: break-word; hyphens: auto; }
-  .grid:not(.compare) .room { padding: 0 0.15rem; font-size: 0.62rem; }
+  .grid:not(.compare) .room,
+  .grid:not(.compare) .teacher { overflow-wrap: break-word; hyphens: auto; }
 }
 
 .now {
