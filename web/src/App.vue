@@ -58,6 +58,18 @@ const requestedDay = dayFromUrl();
 const focusedDay = ref(requestedDay ?? today());
 /** Choix de l'identité. Bloquant tant qu'elle n'est pas faite. */
 const identityOpen = ref(!settings.value.identity);
+
+/*
+ * Zone réellement visible de la page. Sur iPhone, le clavier recouvre le bas
+ * de l'écran sans réduire la fenêtre : un panneau fixe calé sur elle passe en
+ * partie dessous, et sa barre de recherche avec. On se cale donc sur la zone
+ * que le clavier laisse libre.
+ */
+const visibleArea = ref(null);
+function measureVisibleArea() {
+  const vv = window.visualViewport;
+  visibleArea.value = vv ? { top: `${vv.offsetTop}px`, height: `${vv.height}px` } : null;
+}
 const pickerOpen = ref(false);
 const menuOpen = ref(false);
 const now = ref(Date.now());
@@ -285,6 +297,9 @@ onMounted(() => {
     if (document.visibilityState === 'visible') reloadAll(true);
   }, 10 * 60_000);
   document.addEventListener('visibilitychange', onVisible);
+  measureVisibleArea();
+  window.visualViewport?.addEventListener('resize', measureVisibleArea);
+  window.visualViewport?.addEventListener('scroll', measureVisibleArea);
 
   /*
    * Un abonnement push peut mourir sans que la page le sache : autorisation
@@ -305,6 +320,8 @@ onUnmounted(() => {
   clearInterval(refresher);
   clearTimeout(copiedTimer);
   document.removeEventListener('visibilitychange', onVisible);
+  window.visualViewport?.removeEventListener('resize', measureVisibleArea);
+  window.visualViewport?.removeEventListener('scroll', measureVisibleArea);
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.removeEventListener('message', onServiceWorkerMessage);
   }
@@ -814,7 +831,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       temps à montrer ni de cours dont prévenir. Une fois l'identité choisie,
       le même écran redevient un panneau ordinaire, que l'on referme.
     -->
-    <div v-if="identityOpen" class="gate" :class="{ blocking: !hasIdentity }">
+    <div v-if="identityOpen" class="gate" :class="{ blocking: !hasIdentity }" :style="visibleArea">
       <div v-if="hasIdentity" class="gate-backdrop" @click="identityOpen = false"></div>
       <div class="gate-card" role="dialog" aria-modal="true" :aria-label="t('gate.title')">
         <div class="gate-head">
@@ -1100,7 +1117,9 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   width: min(26rem, 100%);
   /* Sans cela, la largeur minimale du sélecteur pousse la carte hors de l'écran. */
   min-width: 0;
-  max-height: min(88vh, 42rem);
+  max-height: min(100%, 42rem);
+  /* Dernier recours si rien ne tient : la carte défile, rien ne se chevauche. */
+  overflow-y: auto;
   padding: 1rem 0.9rem 0.8rem;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
@@ -1114,8 +1133,20 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .gate-intro { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-muted); }
 .gate-why { margin: 0; font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
 
-/* Le sélecteur occupe la place qui reste : c'est sa liste qui défile, pas la carte. */
-.gate-card :deep(.picker) { flex: 1; min-width: 0; min-height: 0; padding: 0; }
+/*
+ * Le sélecteur occupe la place qui reste : c'est sa liste qui défile, pas la
+ * carte. Il ne descend pas sous la hauteur de ses onglets et de ses champs.
+ */
+.gate-card :deep(.picker) { flex: 1; min-width: 0; padding: 0; }
+/*
+ * Sur téléphone, le clavier ne laisse qu'une bande d'écran : pendant la
+ * frappe, les explications s'effacent devant la recherche et ses résultats.
+ */
+@media (pointer: coarse) {
+  .gate-card:has(input:focus) .gate-intro,
+  .gate-card:has(input:focus) .gate-why,
+  .gate-card:has(input:focus) :deep(.hint) { display: none; }
+}
 
 .main { flex: 1; padding-top: 0.6rem; overflow-x: clip; }
 
