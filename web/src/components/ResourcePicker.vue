@@ -93,6 +93,16 @@ let hoverTimer = null;
  */
 const HOVER_OPEN_MS = 650;
 const searchInput = ref(null);
+/**
+ * Sur ordinateur, la recherche prend le focus : on tape directement. Sur
+ * téléphone, non : le clavier couvrirait la moitié de l'écran et masquerait la
+ * liste qu'on vient de faire apparaître. On la parcourt, on déplie, et l'on
+ * touche la barre de recherche si l'on préfère chercher.
+ */
+const touchScreen = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+function focusSearch() {
+  if (!touchScreen) searchInput.value?.focus();
+}
 
 const isTree = computed(() => selectedKind.value === 'groups');
 /**
@@ -187,6 +197,56 @@ const visible = computed(() => {
   return out;
 });
 
+const nodeById = computed(() => {
+  const map = new Map();
+  const walk = (nodes) => {
+    for (const node of nodes) {
+      map.set(node.id, node);
+      walk(node.children);
+    }
+  };
+  if (catalog.value) walk(catalog.value.groups);
+  return map;
+});
+
+/**
+ * Dans la recherche, un résultat qui contient d'autres groupes se déplie sur
+ * place : « BUT3 » montre ses TD sans qu'il faille préciser la recherche. Un
+ * même groupe peut paraître sous plusieurs résultats ; on retient donc le
+ * chemin déplié (`BUT3/BUT3-TD1`), pas le seul groupe.
+ */
+const searchOpen = ref(new Set());
+watch(query, () => {
+  searchOpen.value = new Set();
+});
+
+const searchRows = computed(() => {
+  if (!isTree.value) return [];
+  const out = [];
+  const add = (node, depth, key, parents) => {
+    const open = searchOpen.value.has(key);
+    out.push({ key, id: node.id, name: node.name, depth, children: node.children.length, open, parents });
+    if (open) for (const child of node.children) add(child, depth + 1, `${key}/${child.id}`, null);
+  };
+  for (const group of results.value) {
+    const node = nodeById.value.get(group.id);
+    if (node) add(node, 0, String(group.id), group.parents);
+  }
+  return out;
+});
+
+function toggleSearch(key) {
+  const next = new Set(searchOpen.value);
+  if (next.has(key)) {
+    // Replier un résultat replie aussi ce qu'on avait ouvert dessous.
+    for (const k of next) if (k === key || k.startsWith(`${key}/`)) next.delete(k);
+  } else {
+    next.add(key);
+    nextTick(() => revealChildren(searchRows.value, searchRows.value.findIndex((row) => row.key === key)));
+  }
+  searchOpen.value = next;
+}
+
 const isCurrent = (id) => {
   if (isSubjects.value) return picked.value.has(id);
   if (id !== props.resourceId || selectedKind.value !== props.kind) return false;
@@ -205,7 +265,7 @@ function toggle(id) {
   } else {
     expanded.value.add(id);
     hoverBlocked.value.delete(id);
-    nextTick(() => revealChildren(id));
+    nextTick(() => revealChildren(visible.value, visible.value.findIndex((node) => node.id === id)));
   }
   expanded.value = new Set(expanded.value);
 }
@@ -213,14 +273,14 @@ function toggle(id) {
 /**
  * Une branche qu'on déplie près du bas de la liste s'ouvrirait hors de vue :
  * la liste défile juste assez pour montrer tout ce qui vient d'apparaître,
- * sans pousser hors du haut la ligne qu'on vient d'ouvrir.
+ * sans pousser hors du haut la ligne qu'on vient d'ouvrir. `rows` sont les
+ * lignes affichées (l'arbre ou la recherche), `start` celle qu'on déplie.
  */
-function revealChildren(id) {
+function revealChildren(rows, start) {
   const list = root.value?.querySelector('.tree[role="tree"]');
-  const start = visible.value.findIndex((node) => node.id === id);
   if (!list || start < 0) return;
   let end = start + 1;
-  while (end < visible.value.length && visible.value[end].depth > visible.value[start].depth) end++;
+  while (end < rows.length && rows[end].depth > rows[start].depth) end++;
   const first = list.children[start];
   const last = list.children[end - 1];
   if (!first || !last) return;
@@ -338,7 +398,7 @@ function setCity(city) {
   if (cityOf(selectedDept.value) !== city) selectedDept.value = cityDepartments.value[0]?.id ?? null;
   resetHover();
   // La barre de recherche n'apparaît qu'avec la ville : on attend qu'elle soit là.
-  nextTick(() => searchInput.value?.focus());
+  nextTick(focusSearch);
 }
 
 function setKind(kind) {
@@ -346,7 +406,7 @@ function setKind(kind) {
   selectedKind.value = kind;
   query.value = '';
   resetHover();
-  searchInput.value?.focus();
+  focusSearch();
 }
 
 /** Les arbres des formations de la ville, sous une racine chacune. */
@@ -429,7 +489,7 @@ onMounted(async () => {
       selectedDept.value = cityDepartments.value[0]?.id ?? null;
     }
     // Sans ville connue, rien ne doit masquer les cartes des campus.
-    if (selectedCity.value) nextTick(() => searchInput.value?.focus());
+    if (selectedCity.value) nextTick(focusSearch);
   } catch (err) {
     error.value = errorMessage(err, 'error.network');
   }
@@ -550,8 +610,32 @@ watch(loading, async (busy) => {
       <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
     </ul>
 
-    <!-- Salles et enseignants, ou recherche dans l'arbre : une liste plate. -->
-    <ul v-else-if="!isTree || query.trim()" class="tree" role="listbox">
+    <!-- Recherche d'une classe : les résultats qui en contiennent d'autres se déplient. -->
+    <ul v-else-if="isTree && query.trim()" class="tree" role="tree">
+      <li v-for="item in searchRows" :key="item.key" :style="{ '--depth': item.depth }">
+        <button
+          v-if="item.children"
+          type="button"
+          class="twist"
+          :aria-expanded="item.open"
+          :aria-label="t(item.open ? 'picker.collapse' : 'picker.expand', { name: item.name })"
+          @click="toggleSearch(item.key)"
+        >▸</button>
+        <button
+          type="button"
+          class="row stack"
+          :class="{ lone: !item.children, current: isCurrent(item.id) }"
+          @click="pick(item.id, item.name)"
+        >
+          <span class="name">{{ item.name }}</span>
+          <span v-if="item.parents?.length" class="trail">{{ item.parents.join(' › ') }}</span>
+        </button>
+      </li>
+      <li v-if="!searchRows.length" class="state">{{ t('picker.empty') }}</li>
+    </ul>
+
+    <!-- Salles et enseignants : une liste plate. -->
+    <ul v-else-if="!isTree" class="tree" role="listbox">
       <li v-for="item in results" :key="item.id">
         <button type="button" class="row lone" :class="{ current: isCurrent(item.id) }" @click="pick(item.id, item.name)">
           <span class="name">{{ item.name }}</span>
@@ -715,7 +799,10 @@ watch(loading, async (busy) => {
   font-size: 0.92rem;
   color: var(--text);
 }
-.row.lone { margin-inline-start: 2.05rem; flex-direction: column; align-items: flex-start; gap: 0.05rem; }
+.row.lone { margin-inline-start: 2.05rem; }
+.row.lone, .row.stack { flex-direction: column; align-items: flex-start; gap: 0.05rem; }
+/* En colonne, un long nom garderait sa largeur et ferait défiler la liste de côté. */
+.row.lone > *, .row.stack > * { max-width: 100%; }
 .row:hover { background: var(--bg-sunken); }
 .row.current { background: var(--accent-soft); color: var(--accent); font-weight: 650; }
 .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
