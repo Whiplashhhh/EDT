@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Hapus semua',
   'picker.severalTeachers': 'Beberapa dosen mengajar mata kuliah ini: hapus centang dosen yang jadwalnya tidak ingin Anda lihat.',
   'picker.noTeacher': 'Tanpa dosen tercantum',
+  'picker.uncertain': 'Nama lain di ADE (belum dipastikan)',
   'picker.expand': ({ name }) => `Buka ${name}`,
   'picker.collapse': ({ name }) => `Tutup ${name}`,
 

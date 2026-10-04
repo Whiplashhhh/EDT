@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Futa yote',
   'picker.severalTeachers': 'Walimu kadhaa hufundisha somo hili: ondoa alama kwa wale ambao hutaki kuona vipindi vyao.',
   'picker.noTeacher': 'Hakuna mwalimu aliyeorodheshwa',
+  'picker.uncertain': 'Majina mengine katika ADE (hayajathibitishwa)',
   'picker.expand': ({ name }) => `Panua ${name}`,
   'picker.collapse': ({ name }) => `Kunja ${name}`,
 

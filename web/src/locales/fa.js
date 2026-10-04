@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'پاک کردن همه',
   'picker.severalTeachers': 'چند استاد این درس را تدریس می‌کنند: علامت کسانی را که نمی‌خواهید کلاس‌هایشان را ببینید بردارید.',
   'picker.noTeacher': 'بدون استاد مشخص',
+  'picker.uncertain': 'نام\u200cهای دیگر در ADE (تأییدنشده)',
   'picker.expand': ({ name }) => `باز کردن ${name}`,
   'picker.collapse': ({ name }) => `بستن ${name}`,
 

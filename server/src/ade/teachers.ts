@@ -139,6 +139,18 @@ export function readTeachers(line: string): { teachers: string[]; note: string |
   return { teachers, note: trimDecorations(text.slice(consumed)) || null };
 }
 
+/**
+ * Une remarque qui n'est peut-être qu'un nom : « Lemoine Chloé », « Ahlem Mallem ».
+ * Rien ne distingue ici le nom du prénom, ni une personne de « Droit Fiscal » :
+ * l'annuaire ne la propose qu'à la recherche, comme nom non vérifié.
+ */
+export function nameLike(note: string): string | null {
+  const text = trimDecorations(note);
+  const words = text.split(' ');
+  if (words.length < 2 || words.length > 3 || !words.every(isCapWord)) return null;
+  return NOT_FIRST_NAMES.has(words[0].toLowerCase()) ? null : text;
+}
+
 /** Clé de comparaison d'un nom : sans accents ni casse. */
 const fold = (s: string): string =>
   s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();

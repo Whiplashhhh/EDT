@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Зняти все',
   'picker.severalTeachers': 'Цю дисципліну ведуть кілька викладачів: зніміть позначку з тих, чиї заняття ви не хочете бачити.',
   'picker.noTeacher': 'Викладача не вказано',
+  'picker.uncertain': 'Інші імена в ADE (не підтверджені)',
   'picker.expand': ({ name }) => `Розгорнути ${name}`,
   'picker.collapse': ({ name }) => `Згорнути ${name}`,
 

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Poništi sve',
   'picker.severalTeachers': 'Ovaj kolegij predaje više nastavnika: odznačite one čiju nastavu ne želite vidjeti.',
   'picker.noTeacher': 'Bez navedenog nastavnika',
+  'picker.uncertain': 'Ostala imena u ADE-u (nepotvrđena)',
   'picker.expand': ({ name }) => `Proširi ${name}`,
   'picker.collapse': ({ name }) => `Sažmi ${name}`,
 

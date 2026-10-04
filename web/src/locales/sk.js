@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Zrušiť všetko',
   'picker.severalTeachers': 'Tento predmet vyučuje viac vyučujúcich: odznačte tých, ktorých výučbu nechcete vidieť.',
   'picker.noTeacher': 'Bez uvedeného vyučujúceho',
+  'picker.uncertain': 'Ďalšie mená v ADE (neoverené)',
   'picker.expand': ({ name }) => `Rozbaliť ${name}`,
   'picker.collapse': ({ name }) => `Zbaliť ${name}`,
 

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Изчисти всичко',
   'picker.severalTeachers': 'Тази дисциплина се води от няколко преподаватели: махнете отметката от тези, чиито занятия не искате да виждате.',
   'picker.noTeacher': 'Без посочен преподавател',
+  'picker.uncertain': 'Други имена в ADE (непотвърдени)',
   'picker.expand': ({ name }) => `Разгъни ${name}`,
   'picker.collapse': ({ name }) => `Сгъни ${name}`,
 

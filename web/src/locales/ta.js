@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'அனைத்தையும் நீக்கு',
   'picker.severalTeachers': 'இந்தப் பாடத்தைப் பல ஆசிரியர்கள் கற்பிக்கின்றனர்: யாருடைய வகுப்புகளைப் பார்க்க விரும்பவில்லையோ அவர்களின் தேர்வை நீக்குங்கள்.',
   'picker.noTeacher': 'ஆசிரியர் குறிப்பிடப்படவில்லை',
+  'picker.uncertain': 'ADE-இல் உள்ள பிற பெயர்கள் (உறுதிப்படுத்தப்படவில்லை)',
   'picker.expand': ({ name }) => `${name} விரி`,
   'picker.collapse': ({ name }) => `${name} சுருக்கு`,
 

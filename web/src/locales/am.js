@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'ሁሉንም አጽዳ',
   'picker.severalTeachers': 'ይህን ትምህርት በርካታ መምህራን ያስተምራሉ፦ ክፍለ ጊዜዎቻቸውን ማየት የማይፈልጉትን ምርጫ ያንሱ።',
   'picker.noTeacher': 'መምህር አልተመዘገበም',
+  'picker.uncertain': 'በADE ውስጥ የተገኙ ሌሎች ስሞች (ያልተረጋገጡ)',
   'picker.expand': ({ name }) => `${name} ክፈት`,
   'picker.collapse': ({ name }) => `${name} ዝጋ`,
 

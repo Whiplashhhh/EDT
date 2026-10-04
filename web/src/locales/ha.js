@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Share duka',
   'picker.severalTeachers': 'Malamai da dama ne ke koyar da wannan darasi: cire alamar waɗanda ba ka son ganin azuzuwansu.',
   'picker.noTeacher': 'Babu malamin da aka rubuta',
+  'picker.uncertain': 'Wasu sunaye a ADE (ba a tabbatar ba)',
   'picker.expand': ({ name }) => `Buɗe ${name}`,
   'picker.collapse': ({ name }) => `Rufe ${name}`,
 

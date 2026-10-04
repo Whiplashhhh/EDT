@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'I-clear lahat',
   'picker.severalTeachers': 'Ilang guro ang nagtuturo ng asignaturang ito: alisin ang marka sa mga ayaw mong makita ang klase.',
   'picker.noTeacher': 'Walang nakalistang guro',
+  'picker.uncertain': 'Iba pang pangalan sa ADE (hindi kumpirmado)',
   'picker.expand': ({ name }) => `Buksan ang ${name}`,
   'picker.collapse': ({ name }) => `Isara ang ${name}`,
 

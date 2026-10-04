@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'すべて解除',
   'picker.severalTeachers': 'この科目は複数の教員が担当しています。表示しない教員のチェックを外してください。',
   'picker.noTeacher': '担当教員なし',
+  'picker.uncertain': 'ADE 内のその他の名前（未確認）',
   'picker.expand': ({ name }) => `${name} を開く`,
   'picker.collapse': ({ name }) => `${name} を閉じる`,
 

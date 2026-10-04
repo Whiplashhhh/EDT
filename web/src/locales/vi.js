@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Bỏ chọn tất cả',
   'picker.severalTeachers': 'Học phần này do nhiều giảng viên dạy: bỏ chọn những người mà bạn không muốn xem buổi học.',
   'picker.noTeacher': 'Không ghi giảng viên',
+  'picker.uncertain': 'Tên khác trong ADE (chưa xác nhận)',
   'picker.expand': ({ name }) => `Mở rộng ${name}`,
   'picker.collapse': ({ name }) => `Thu gọn ${name}`,
 

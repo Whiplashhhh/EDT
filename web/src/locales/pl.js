@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Odznacz wszystko',
   'picker.severalTeachers': 'Ten przedmiot prowadzi kilku prowadzących: odznacz tych, których zajęć nie chcesz widzieć.',
   'picker.noTeacher': 'Bez podanego prowadzącego',
+  'picker.uncertain': 'Inne nazwiska w ADE (niepotwierdzone)',
   'picker.expand': ({ name }) => `Rozwiń ${name}`,
   'picker.collapse': ({ name }) => `Zwiń ${name}`,
 

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Поништи све',
   'picker.severalTeachers': 'Овај предмет предаје више наставника: одзначите оне чију наставу не желите да видите.',
   'picker.noTeacher': 'Без наведеног наставника',
+  'picker.uncertain': 'Друга имена у ADE-у (непотврђена)',
   'picker.expand': ({ name }) => `Рашири ${name}`,
   'picker.collapse': ({ name }) => `Скупи ${name}`,
 

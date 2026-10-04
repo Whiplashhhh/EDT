@@ -136,11 +136,26 @@ const results = computed(() => {
   // Salles et enseignants : une liste plate, filtrée au fil de la frappe. Une
   // salle appartient à sa ville — « SALLE 25 » existe à Boulogne comme à
   // Dunkerque ; un enseignant, à chacune de celles où il intervient.
-  const inCity = entries.value.filter((e) =>
-    selectedKind.value === 'rooms' ? e.city === selectedCity.value : e.cities?.includes(selectedCity.value),
+  const inCity = entries.value.filter(
+    (e) =>
+      !e.uncertain &&
+      (selectedKind.value === 'rooms' ? e.city === selectedCity.value : e.cities?.includes(selectedCity.value)),
   );
-  // Un enseignant se cherche aussi sous les autres formes de son nom : « Basse » trouve « BASSE David ».
-  return q ? inCity.filter((e) => [e.name, ...(e.aliases ?? [])].join(' ').toLowerCase().includes(q)) : inCity;
+  return q ? inCity.filter((e) => matches(e, q)) : inCity;
+});
+
+/** Un enseignant se cherche aussi sous les autres formes de son nom : « Basse » trouve « BASSE David ». */
+const matches = (entry, q) => [entry.name, ...(entry.aliases ?? [])].join(' ').toLowerCase().includes(q);
+
+/**
+ * Noms lus dans les remarques d'ADE — « Lemoine Chloé » — que rien ne confirme :
+ * rien ne les distingue de « Droit Fiscal ». Ils ne sortent qu'à la recherche,
+ * sous les vrais enseignants.
+ */
+const uncertainResults = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  if (selectedKind.value !== 'teachers' || !q) return [];
+  return entries.value.filter((e) => e.uncertain && e.cities?.includes(selectedCity.value) && matches(e, q));
 });
 
 /** Chemin d'identifiants menant à chaque nœud, pour déplier la branche courante. */
@@ -503,7 +518,16 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
           <span v-else-if="item.courses" class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
         </button>
       </li>
-      <li v-if="!results.length" class="state">{{ t('picker.empty') }}</li>
+      <template v-if="uncertainResults.length">
+        <li class="section" role="presentation">{{ t('picker.uncertain') }}</li>
+        <li v-for="item in uncertainResults" :key="item.id">
+          <button type="button" class="row lone uncertain" :class="{ current: isCurrent(item.id) }" @click="pick(item.id, item.name)">
+            <span class="name">{{ item.name }}</span>
+            <span class="trail">{{ t('picker.courses', { n: item.courses }) }}</span>
+          </button>
+        </li>
+      </template>
+      <li v-if="!results.length && !uncertainResults.length" class="state">{{ t('picker.empty') }}</li>
     </ul>
 
     <ul v-else class="tree" role="tree" @pointerleave="leaveTree">
@@ -744,6 +768,15 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
 
 /* Une formation n'est pas une classe : elle se déplie, elle ne se choisit pas. */
 .row.root { font-weight: 650; }
+/* Noms non vérifiés : à part, et plus discrets que les vrais enseignants. */
+.section {
+  margin: 0.6rem 0 0.15rem 2.05rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+.row.uncertain .name { font-style: italic; }
 
 .state { padding: 0.8rem 0.6rem; margin: 0; color: var(--text-muted); font-size: 0.88rem; }
 .error { color: var(--danger); }

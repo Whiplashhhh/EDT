@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Desmarcar tudo',
   'picker.severalTeachers': 'Vários docentes lecionam esta unidade curricular: desmarque aqueles cujas aulas não quer ver.',
   'picker.noTeacher': 'Sem docente indicado',
+  'picker.uncertain': 'Outros nomes no ADE (não confirmados)',
   'picker.expand': ({ name }) => `Expandir ${name}`,
   'picker.collapse': ({ name }) => `Recolher ${name}`,
 

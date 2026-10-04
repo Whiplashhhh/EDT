@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Desmarcar todo',
   'picker.severalTeachers': 'Varios profesores imparten esta asignatura: desmarca aquellos cuyas clases no quieres ver.',
   'picker.noTeacher': 'Sin profesor indicado',
+  'picker.uncertain': 'Otros nombres en ADE (sin confirmar)',
   'picker.expand': ({ name }) => `Desplegar ${name}`,
   'picker.collapse': ({ name }) => `Plegar ${name}`,
 

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'সব মুছুন',
   'picker.severalTeachers': 'এই বিষয়টি একাধিক শিক্ষক পড়ান: যাঁদের ক্লাস দেখতে চান না তাঁদের টিক তুলে দিন।',
   'picker.noTeacher': 'কোনো শিক্ষক উল্লেখ নেই',
+  'picker.uncertain': 'ADE-তে পাওয়া অন্যান্য নাম (যাচাই করা হয়নি)',
   'picker.expand': ({ name }) => `${name} খোলো`,
   'picker.collapse': ({ name }) => `${name} বন্ধ করো`,
 

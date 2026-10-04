@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'ล้างทั้งหมด',
   'picker.severalTeachers': 'รายวิชานี้มีผู้สอนหลายคน: ยกเลิกการเลือกผู้สอนที่คุณไม่ต้องการเห็นคาบเรียน',
   'picker.noTeacher': 'ไม่ระบุผู้สอน',
+  'picker.uncertain': 'ชื่ออื่นใน ADE (ยังไม่ยืนยัน)',
   'picker.expand': ({ name }) => `ขยาย ${name}`,
   'picker.collapse': ({ name }) => `ยุบ ${name}`,
 

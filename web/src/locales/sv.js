@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Avmarkera alla',
   'picker.severalTeachers': 'Flera lärare delar på den här kursen: avmarkera dem vars lektioner du inte vill se.',
   'picker.noTeacher': 'Ingen lärare angiven',
+  'picker.uncertain': 'Andra namn i ADE (ej bekräftade)',
   'picker.expand': ({ name }) => `Expandera ${name}`,
   'picker.collapse': ({ name }) => `Fäll ihop ${name}`,
 

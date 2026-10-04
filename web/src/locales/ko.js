@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': '모두 해제',
   'picker.severalTeachers': '이 과목은 여러 교수가 담당합니다. 수업을 보고 싶지 않은 교수의 선택을 해제하세요.',
   'picker.noTeacher': '담당 교수 없음',
+  'picker.uncertain': 'ADE에서 찾은 다른 이름 (미확인)',
   'picker.expand': ({ name }) => `${name} 펼치기`,
   'picker.collapse': ({ name }) => `${name} 접기`,
 

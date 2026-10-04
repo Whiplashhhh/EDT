@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Összes törlése',
   'picker.severalTeachers': 'Ezt a tantárgyat több oktató tanítja: vegye ki a jelölést azoknál, akiknek az óráit nem szeretné látni.',
   'picker.noTeacher': 'Nincs megadott oktató',
+  'picker.uncertain': 'További nevek az ADE-ben (nem ellenőrzött)',
   'picker.expand': ({ name }) => `${name} kibontása`,
   'picker.collapse': ({ name }) => `${name} összecsukása`,
 

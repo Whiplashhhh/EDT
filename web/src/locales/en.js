@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Clear all',
   'picker.severalTeachers': 'Several teachers share this subject: untick those whose classes you don’t want to see.',
   'picker.noTeacher': 'No teacher listed',
+  'picker.uncertain': 'Other names found in ADE (unconfirmed)',
   'picker.expand': ({ name }) => `Expand ${name}`,
   'picker.collapse': ({ name }) => `Collapse ${name}`,
 

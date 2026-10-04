@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'إلغاء الكل',
   'picker.severalTeachers': 'يدرّس هذه المادة عدة أساتذة: ألغِ تحديد من لا تريد رؤية حصصهم.',
   'picker.noTeacher': 'بلا أستاذ محدّد',
+  'picker.uncertain': 'أسماء أخرى في ADE (غير مؤكدة)',
   'picker.expand': ({ name }) => `توسيع ${name}`,
   'picker.collapse': ({ name }) => `طي ${name}`,
 

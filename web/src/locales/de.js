@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Alle abwählen',
   'picker.severalTeachers': 'Mehrere Lehrkräfte teilen sich dieses Modul: Entfernen Sie den Haken bei denen, deren Veranstaltungen Sie nicht sehen möchten.',
   'picker.noTeacher': 'Keine Lehrkraft angegeben',
+  'picker.uncertain': 'Weitere Namen in ADE (nicht bestätigt)',
   'picker.expand': ({ name }) => `${name} aufklappen`,
   'picker.collapse': ({ name }) => `${name} zuklappen`,
 
