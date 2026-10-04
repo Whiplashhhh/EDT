@@ -29,7 +29,7 @@ const state = computed(() => {
 
 <template>
   <!-- Rien à dire si l'API est injoignable : l'emploi du temps reste prioritaire. -->
-  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed' }" :aria-label="t('crous.aria')">
+  <section v-if="!failed" class="crous" :class="{ closed: state === 'closed', muted: state === 'unknown' }" :aria-label="t('crous.aria')">
     <header class="head">
       <span class="tag">{{ t('crous.tag') }}</span>
       <span class="name">{{ name }}</span>
@@ -120,6 +120,14 @@ const state = computed(() => {
 .courses li + li { margin-top: 0.1rem; }
 
 .crous.closed .courses { display: none; }
+
+/* Menu pas encore publié : on garde le cadre rouge mais sans aplat, pour ne pas crier. */
+.crous.muted { background: transparent; }
+.crous.muted .head { background: transparent; }
+.crous.muted .tag,
+.crous.muted .name { color: var(--crous); }
+.crous.muted .hours { color: var(--text-muted); }
+.crous.muted .note { color: var(--text-muted); font-weight: 500; }
 
 @media (max-width: 420px) {
   .courses { grid-template-columns: 1fr; gap: 0.1rem; }
