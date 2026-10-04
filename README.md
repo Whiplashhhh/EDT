@@ -1,6 +1,6 @@
 # EDT ULCO
 
-Emploi du temps de l'ULCO, lisible sur téléphone.
+Une façon plus claire de consulter l'emploi du temps de l'ULCO.
 
 L'application officielle (ADE Campus 6.13) est un client GWT de 2011 : elle n'est pas
 responsive et demande à chaque ouverture de choisir le projet, puis de déplier l'arbre
