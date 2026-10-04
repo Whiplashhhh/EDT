@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Світла',
   'app.themeDark': 'Темна',
   'app.language': 'Мова',
+  'app.display': 'Відображення',
   'app.changeIdentity': 'Мій календар',
   'app.backToMine': ({ name }) => `Повернутися до ${name}`,
   'app.viewingOther': 'Ти переглядаєш чужий розклад',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Їдальня цього дня зачинена.',
   'crous.loading': 'Завантаження меню…',
   'crous.unknown': 'Меню на цей день не оприлюднене.',
+  'crous.show': 'Меню Crous',
+  'crous.showHint': 'У денному поданні, в обідню пору.',
 
   'error.generic': 'Сталася помилка.',
   'error.network': 'Не вдається зв’язатися із сервером.',

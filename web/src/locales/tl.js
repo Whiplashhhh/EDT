@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Maliwanag',
   'app.themeDark': 'Madilim',
   'app.language': 'Wika',
+  'app.display': 'Display',
   'app.changeIdentity': 'Aking kalendaryo',
   'app.backToMine': ({ name }) => `Bumalik sa ${name}`,
   'app.viewingOther': 'Tinitingnan mo ang iskedyul ng iba',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Sarado ang kantina sa araw na iyon.',
   'crous.loading': 'Nilo-load ang menu…',
   'crous.unknown': 'Walang menung inilabas para sa araw na iyon.',
+  'crous.show': 'Menu ng Crous',
+  'crous.showHint': 'Sa day view, sa oras ng tanghalian.',
 
   'error.generic': 'May naganap na error.',
   'error.network': 'Hindi maabot ang server.',

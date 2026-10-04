@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Vaalea',
   'app.themeDark': 'Tumma',
   'app.language': 'Kieli',
+  'app.display': 'Näkymä',
   'app.changeIdentity': 'Oma kalenteri',
   'app.backToMine': ({ name }) => `Takaisin: ${name}`,
   'app.viewingOther': 'Katselet toisen lukujärjestystä',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Ravintola on suljettu sinä päivänä.',
   'crous.loading': 'Ladataan ruokalistaa…',
   'crous.unknown': 'Sille päivälle ei ole julkaistu ruokalistaa.',
+  'crous.show': 'Crousin ruokalista',
+  'crous.showHint': 'Päivänäkymässä, lounasaikaan.',
 
   'error.generic': 'Tapahtui virhe.',
   'error.network': 'Palvelimeen ei saatu yhteyttä.',

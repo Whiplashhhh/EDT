@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'روشن',
   'app.themeDark': 'تیره',
   'app.language': 'زبان',
+  'app.display': 'نمایش',
   'app.changeIdentity': 'تقویم من',
   'app.backToMine': ({ name }) => `بازگشت به ${name}`,
   'app.viewingOther': 'در حال دیدن برنامهٔ شخص دیگری هستی',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'سلف آن روز تعطیل است.',
   'crous.loading': 'در حال بارگذاری منو…',
   'crous.unknown': 'برای آن روز منویی منتشر نشده است.',
+  'crous.show': 'منوی Crous',
+  'crous.showHint': 'در نمای روزانه، هنگام ناهار.',
 
   'error.generic': 'خطایی رخ داد.',
   'error.network': 'ارتباط با سرور ممکن نشد.',

@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Clair',
   'app.themeDark': 'Sombre',
   'app.language': 'Langue',
+  'app.display': 'Affichage',
   'app.changeIdentity': 'Mon calendrier',
   'app.backToMine': ({ name }) => `Revenir à ${name}`,
   'app.viewingOther': 'Vous consultez un autre emploi du temps',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Restaurant fermé ce jour-là.',
   'crous.loading': 'Chargement du menu…',
   'crous.unknown': 'Menu non communiqué pour ce jour.',
+  'crous.show': 'Menu du Crous',
+  'crous.showHint': 'Dans la vue jour, à l’heure du déjeuner.',
 
   'error.generic': 'Une erreur est survenue.',
   'error.network': 'Impossible de contacter le serveur.',

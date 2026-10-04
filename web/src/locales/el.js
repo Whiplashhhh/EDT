@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Ανοιχτό',
   'app.themeDark': 'Σκούρο',
   'app.language': 'Γλώσσα',
+  'app.display': 'Εμφάνιση',
   'app.changeIdentity': 'Το ημερολόγιό μου',
   'app.backToMine': ({ name }) => `Επιστροφή σε ${name}`,
   'app.viewingOther': 'Βλέπεις άλλο πρόγραμμα',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Το εστιατόριο είναι κλειστό εκείνη την ημέρα.',
   'crous.loading': 'Φόρτωση μενού…',
   'crous.unknown': 'Δεν έχει ανακοινωθεί μενού για εκείνη την ημέρα.',
+  'crous.show': 'Μενού του Crous',
+  'crous.showHint': 'Στην προβολή ημέρας, την ώρα του μεσημεριανού.',
 
   'error.generic': 'Παρουσιάστηκε σφάλμα.',
   'error.network': 'Αδύνατη η επικοινωνία με τον διακομιστή.',

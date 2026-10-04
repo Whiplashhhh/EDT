@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Cerah',
   'app.themeDark': 'Gelap',
   'app.language': 'Bahasa',
+  'app.display': 'Paparan',
   'app.changeIdentity': 'Kalendar saya',
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Anda sedang melihat jadual orang lain',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Kafeteria tutup pada hari itu.',
   'crous.loading': 'Memuatkan menu…',
   'crous.unknown': 'Tiada menu diterbitkan untuk hari itu.',
+  'crous.show': 'Menu Crous',
+  'crous.showHint': 'Dalam paparan harian, pada waktu makan tengah hari.',
 
   'error.generic': 'Ralat telah berlaku.',
   'error.network': 'Pelayan tidak dapat dihubungi.',

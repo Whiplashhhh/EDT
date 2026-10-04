@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Claro',
   'app.themeDark': 'Escuro',
   'app.language': 'Idioma',
+  'app.display': 'Apresentação',
   'app.changeIdentity': 'O meu calendário',
   'app.backToMine': ({ name }) => `Voltar a ${name}`,
   'app.viewingOther': 'Estás a ver outro horário',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Cantina encerrada nesse dia.',
   'crous.loading': 'A carregar a ementa…',
   'crous.unknown': 'Ementa não publicada para esse dia.',
+  'crous.show': 'Ementa do Crous',
+  'crous.showHint': 'Na vista diária, à hora de almoço.',
 
   'error.generic': 'Ocorreu um erro.',
   'error.network': 'Não foi possível contactar o servidor.',

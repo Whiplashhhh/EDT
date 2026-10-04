@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Ljust',
   'app.themeDark': 'Mörkt',
   'app.language': 'Språk',
+  'app.display': 'Visning',
   'app.changeIdentity': 'Min kalender',
   'app.backToMine': ({ name }) => `Tillbaka till ${name}`,
   'app.viewingOther': 'Du tittar på ett annat schema',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Restaurangen är stängd den dagen.',
   'crous.loading': 'Laddar menyn…',
   'crous.unknown': 'Ingen meny publicerad för den dagen.',
+  'crous.show': 'Crous-menyn',
+  'crous.showHint': 'I dagsvyn, runt lunchtid.',
 
   'error.generic': 'Något gick fel.',
   'error.network': 'Servern kunde inte nås.',

@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'হালকা',
   'app.themeDark': 'গাঢ়',
   'app.language': 'ভাষা',
+  'app.display': 'প্রদর্শন',
   'app.changeIdentity': 'আমার ক্যালেন্ডার',
   'app.backToMine': ({ name }) => `${name}-এ ফিরে যাও`,
   'app.viewingOther': 'তুমি অন্য কারও রুটিন দেখছ',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'সেদিন ক্যান্টিন বন্ধ।',
   'crous.loading': 'মেনু লোড হচ্ছে…',
   'crous.unknown': 'সেদিনের জন্য কোনো মেনু প্রকাশিত হয়নি।',
+  'crous.show': 'Crous মেনু',
+  'crous.showHint': 'দিনের ভিউতে, দুপুরের খাবারের সময়।',
 
   'error.generic': 'একটি সমস্যা হয়েছে।',
   'error.network': 'সার্ভারে পৌঁছানো গেল না।',

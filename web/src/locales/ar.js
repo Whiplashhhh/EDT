@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'فاتح',
   'app.themeDark': 'داكن',
   'app.language': 'اللغة',
+  'app.display': 'العرض',
   'app.changeIdentity': 'تقويمي',
   'app.backToMine': ({ name }) => `العودة إلى ${name}`,
   'app.viewingOther': 'أنت تطالع جدولًا آخر',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'المطعم مغلق في ذلك اليوم.',
   'crous.loading': 'جارٍ تحميل القائمة…',
   'crous.unknown': 'لم تُنشر قائمة لذلك اليوم.',
+  'crous.show': 'قائمة طعام Crous',
+  'crous.showHint': 'في عرض اليوم، وقت الغداء.',
 
   'error.generic': 'حدث خطأ.',
   'error.network': 'تعذّر الاتصال بالخادم.',

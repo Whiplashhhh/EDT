@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Светлая',
   'app.themeDark': 'Тёмная',
   'app.language': 'Язык',
+  'app.display': 'Отображение',
   'app.changeIdentity': 'Мой календарь',
   'app.backToMine': ({ name }) => `Вернуться к ${name}`,
   'app.viewingOther': 'Ты смотришь чужое расписание',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Столовая в этот день закрыта.',
   'crous.loading': 'Загрузка меню…',
   'crous.unknown': 'Меню на этот день не опубликовано.',
+  'crous.show': 'Меню Crous',
+  'crous.showHint': 'В дневном виде, в обеденное время.',
 
   'error.generic': 'Произошла ошибка.',
   'error.network': 'Не удаётся связаться с сервером.',

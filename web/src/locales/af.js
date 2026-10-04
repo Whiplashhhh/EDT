@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Lig',
   'app.themeDark': 'Donker',
   'app.language': 'Taal',
+  'app.display': 'Vertoning',
   'app.changeIdentity': 'My kalender',
   'app.backToMine': ({ name }) => `Terug na ${name}`,
   'app.viewingOther': 'Jy bekyk ’n ander rooster',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Eetsaal daardie dag gesluit.',
   'crous.loading': 'Laai die spyskaart…',
   'crous.unknown': 'Geen spyskaart vir daardie dag gepubliseer nie.',
+  'crous.show': 'Crous-spyskaart',
+  'crous.showHint': 'In die dagaansig, rondom middagete.',
 
   'error.generic': 'Iets het verkeerd geloop.',
   'error.network': 'Kon nie die bediener bereik nie.',

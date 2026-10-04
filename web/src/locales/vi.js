@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Sáng',
   'app.themeDark': 'Tối',
   'app.language': 'Ngôn ngữ',
+  'app.display': 'Hiển thị',
   'app.changeIdentity': 'Lịch của tôi',
   'app.backToMine': ({ name }) => `Quay lại ${name}`,
   'app.viewingOther': 'Bạn đang xem thời khoá biểu của người khác',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Nhà ăn đóng cửa hôm đó.',
   'crous.loading': 'Đang tải thực đơn…',
   'crous.unknown': 'Chưa công bố thực đơn cho ngày đó.',
+  'crous.show': 'Thực đơn Crous',
+  'crous.showHint': 'Trong chế độ xem ngày, vào giờ ăn trưa.',
 
   'error.generic': 'Đã xảy ra lỗi.',
   'error.network': 'Không liên lạc được với máy chủ.',

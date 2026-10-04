@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'ライト',
   'app.themeDark': 'ダーク',
   'app.language': '言語',
+  'app.display': '表示',
   'app.changeIdentity': 'マイカレンダー',
   'app.backToMine': ({ name }) => `${name} に戻る`,
   'app.viewingOther': '他の人の時間割を表示しています',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'その日は食堂が休みです。',
   'crous.loading': '献立を読み込み中…',
   'crous.unknown': 'その日の献立は公開されていません。',
+  'crous.show': 'Crous の献立',
+  'crous.showHint': '日表示の昼食時間帯に表示します。',
 
   'error.generic': 'エラーが発生しました。',
   'error.network': 'サーバーに接続できません。',

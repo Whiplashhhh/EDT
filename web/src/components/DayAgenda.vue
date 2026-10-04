@@ -11,7 +11,8 @@ const props = defineProps({
   events: { type: Array, default: () => [] },
   now: { type: Number, default: 0 },
   /* Le menu du Crous accompagne la journée d'une classe ; sur l'emploi du temps
-     d'une salle ou d'un enseignant, il n'a rien à y faire. */
+     d'une salle ou d'un enseignant, il n'a rien à y faire. Il disparaît aussi
+     quand on l'a masqué dans les options. */
   showMenu: { type: Boolean, default: true },
   context: { type: String, default: 'groups' },
   /** Formation affichée : le menu est celui du restaurant de son campus. */
@@ -19,8 +20,9 @@ const props = defineProps({
 });
 
 const { load: loadMenu, menuFor } = useCrousMenu(toRef(props, 'department'));
-onMounted(() => loadMenu());
-watch(() => props.department, () => loadMenu());
+/* Menu masqué : inutile de le demander au serveur. */
+onMounted(() => { if (props.showMenu) loadMenu(); });
+watch([() => props.department, () => props.showMenu], () => { if (props.showMenu) loadMenu(); });
 
 /* Un jour passé dont on n'a pas le menu ne mérite pas un bloc « rien de publié » :
    l'information ne servira plus à personne, la pause redevient une pause. */

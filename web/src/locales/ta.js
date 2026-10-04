@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'வெளிர்',
   'app.themeDark': 'இருள்',
   'app.language': 'மொழி',
+  'app.display': 'காட்சி',
   'app.changeIdentity': 'எனது நாள்காட்டி',
   'app.backToMine': ({ name }) => `${name} க்குத் திரும்பு`,
   'app.viewingOther': 'நீங்கள் வேறொருவரின் அட்டவணையைப் பார்க்கிறீர்கள்',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'அந்த நாளில் உணவகம் மூடப்பட்டுள்ளது.',
   'crous.loading': 'உணவுப் பட்டியல் ஏற்றப்படுகிறது…',
   'crous.unknown': 'அந்த நாளுக்கு உணவுப் பட்டியல் வெளியிடப்படவில்லை.',
+  'crous.show': 'Crous உணவுப் பட்டியல்',
+  'crous.showHint': 'நாள் காட்சியில், மதிய உணவு நேரத்தில்.',
 
   'error.generic': 'பிழை ஏற்பட்டது.',
   'error.network': 'சேவையகத்தைத் தொடர்புகொள்ள முடியவில்லை.',

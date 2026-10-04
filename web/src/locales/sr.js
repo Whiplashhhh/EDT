@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Светла',
   'app.themeDark': 'Тамна',
   'app.language': 'Језик',
+  'app.display': 'Приказ',
   'app.changeIdentity': 'Мој календар',
   'app.backToMine': ({ name }) => `Назад на ${name}`,
   'app.viewingOther': 'Гледаш туђи распоред',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Мензa је тог дана затворена.',
   'crous.loading': 'Учитавање јеловника…',
   'crous.unknown': 'За тај дан јеловник није објављен.',
+  'crous.show': 'Јеловник Crous-а',
+  'crous.showHint': 'У дневном приказу, у време ручка.',
 
   'error.generic': 'Дошло је до грешке.',
   'error.network': 'Сервер није доступан.',

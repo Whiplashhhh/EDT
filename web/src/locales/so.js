@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Iftiin',
   'app.themeDark': 'Mugdi',
   'app.language': 'Luqad',
+  'app.display': 'Muuqaalka',
   'app.changeIdentity': 'Kalandarkayga',
   'app.backToMine': ({ name }) => `Ku noqo ${name}`,
   'app.viewingOther': 'Waxaad eegaysaa jadwal kale',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Maqaayaddu maalintaas way xiran tahay.',
   'crous.loading': 'Liiska cuntada waa la soo raraya…',
   'crous.unknown': 'Maalintaas liis cunto lama daabicin.',
+  'crous.show': 'Liiska cuntada Crous',
+  'crous.showHint': 'Muuqaalka maalinta, waqtiga qadada.',
 
   'error.generic': 'Khalad ayaa dhacay.',
   'error.network': 'Lama gaari karin serferka.',
