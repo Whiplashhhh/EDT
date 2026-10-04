@@ -610,7 +610,7 @@ watch([selectedKind, () => (isTree.value ? selectedCity.value : null)], loadReso
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
 }
-.fields select { flex: 0 1 auto; }
+.fields select { flex: 0 1 auto; cursor: pointer; }
 /*
   iOS Safari zoome automatiquement sur un champ dont la police fait moins de
   16px, et ne dézoome jamais ensuite. Sur écran tactile on garde donc 16px.
