@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Αποεπιλογή όλων',
   'picker.severalTeachers': 'Αυτό το μάθημα το διδάσκουν πολλοί διδάσκοντες: αποεπιλέξτε όσους δεν θέλετε να βλέπετε τις ώρες τους.',
   'picker.noTeacher': 'Χωρίς διδάσκοντα',
+  'picker.uncertain': 'Άλλα ονόματα στο ADE (μη επιβεβαιωμένα)',
   'picker.expand': ({ name }) => `Άνοιγμα ${name}`,
   'picker.collapse': ({ name }) => `Κλείσιμο ${name}`,
 

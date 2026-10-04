@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Deseleziona tutto',
   'picker.severalTeachers': 'Più docenti tengono questo insegnamento: deseleziona quelli di cui non vuoi vedere le lezioni.',
   'picker.noTeacher': 'Nessun docente indicato',
+  'picker.uncertain': 'Altri nomi in ADE (non verificati)',
   'picker.expand': ({ name }) => `Espandi ${name}`,
   'picker.collapse': ({ name }) => `Comprimi ${name}`,
 

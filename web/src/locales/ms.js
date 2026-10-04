@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Kosongkan semua',
   'picker.severalTeachers': 'Beberapa pensyarah mengajar subjek ini: nyahtanda mereka yang kelasnya anda tidak mahu lihat.',
   'picker.noTeacher': 'Tiada pensyarah disenaraikan',
+  'picker.uncertain': 'Nama lain dalam ADE (belum disahkan)',
   'picker.expand': ({ name }) => `Kembangkan ${name}`,
   'picker.collapse': ({ name }) => `Kuncupkan ${name}`,
 

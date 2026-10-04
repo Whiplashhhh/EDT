@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Poista valinnat',
   'picker.severalTeachers': 'Tätä opintojaksoa opettaa useampi opettaja: poista valinta niiltä, joiden tunteja et halua nähdä.',
   'picker.noTeacher': 'Ei merkittyä opettajaa',
+  'picker.uncertain': 'Muita nimiä ADE:ssa (vahvistamattomia)',
   'picker.expand': ({ name }) => `Avaa ${name}`,
   'picker.collapse': ({ name }) => `Sulje ${name}`,
 

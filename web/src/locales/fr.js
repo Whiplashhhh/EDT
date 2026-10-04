@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Tout décocher',
   'picker.severalTeachers': 'Plusieurs enseignants assurent cette ressource : décoche ceux dont tu ne veux pas voir les cours.',
   'picker.noTeacher': 'Sans enseignant indiqué',
+  'picker.uncertain': 'Autres noms trouvés dans ADE (non vérifiés)',
   'picker.expand': ({ name }) => `Déplier ${name}`,
   'picker.collapse': ({ name }) => `Replier ${name}`,
 

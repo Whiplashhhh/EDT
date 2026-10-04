@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Maak alles skoon',
   'picker.severalTeachers': 'Verskeie dosente bied hierdie vak aan: ontmerk dié wie se klasse jy nie wil sien nie.',
   'picker.noTeacher': 'Geen dosent gelys nie',
+  'picker.uncertain': 'Ander name in ADE (nie bevestig nie)',
   'picker.expand': ({ name }) => `Vou ${name} oop`,
   'picker.collapse': ({ name }) => `Vou ${name} toe`,
 

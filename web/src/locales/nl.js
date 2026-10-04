@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Alles wissen',
   'picker.severalTeachers': 'Meerdere docenten geven dit vak: vink de docenten uit van wie je de lessen niet wilt zien.',
   'picker.noTeacher': 'Geen docent vermeld',
+  'picker.uncertain': 'Andere namen in ADE (niet bevestigd)',
   'picker.expand': ({ name }) => `${name} uitklappen`,
   'picker.collapse': ({ name }) => `${name} inklappen`,
 

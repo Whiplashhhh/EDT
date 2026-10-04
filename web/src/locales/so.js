@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Tirtir dhammaan',
   'picker.severalTeachers': 'Macallimiin dhowr ah ayaa dhiga maaddadan: ka saar calaamadda kuwa aadan rabin inaad aragto fasalladooda.',
   'picker.noTeacher': 'Macallin lama qorin',
+  'picker.uncertain': 'Magacyo kale oo ku jira ADE (lama xaqiijin)',
   'picker.expand': ({ name }) => `Fur ${name}`,
   'picker.collapse': ({ name }) => `Xir ${name}`,
 

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'सब हटाएँ',
   'picker.severalTeachers': 'यह विषय कई शिक्षक पढ़ाते हैं: जिनकी कक्षाएँ आप नहीं देखना चाहते, उनका चयन हटाएँ।',
   'picker.noTeacher': 'कोई शिक्षक दर्ज नहीं',
+  'picker.uncertain': 'ADE में मिले अन्य नाम (असत्यापित)',
   'picker.expand': ({ name }) => `${name} खोलें`,
   'picker.collapse': ({ name }) => `${name} बंद करें`,
 

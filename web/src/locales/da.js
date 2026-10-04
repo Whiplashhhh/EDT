@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Fravælg alle',
   'picker.severalTeachers': 'Flere undervisere deler dette fag: fjern markeringen ved dem, hvis timer du ikke vil se.',
   'picker.noTeacher': 'Ingen underviser angivet',
+  'picker.uncertain': 'Andre navne i ADE (ikke bekræftet)',
   'picker.expand': ({ name }) => `Udvid ${name}`,
   'picker.collapse': ({ name }) => `Fold ${name} sammen`,
 

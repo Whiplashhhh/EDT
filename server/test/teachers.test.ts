@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { parseAdeIcs } from '../src/ade/ics.ts';
-import { personOf, readTeachers, teacherAliases } from '../src/ade/teachers.ts';
+import { nameLike, personOf, readTeachers, teacherAliases } from '../src/ade/teachers.ts';
 
 // Exemples relevés dans les descriptions ADE de l'ULCO.
 
@@ -85,4 +85,14 @@ test('parseAdeIcs sépare enseignants et remarques', () => {
   assert.deepEqual(event.teachers, ['PERON Line', 'BASSE']);
   assert.deepEqual(event.notes, ['(Blender)']);
   assert.deepEqual(event.groups, ['BUT1']);
+});
+
+test('une remarque « Mot Mot » est un nom possible, pas un enseignant', () => {
+  assert.equal(nameLike('Lemoine Chloé'), 'Lemoine Chloé');
+  assert.equal(nameLike('- Ahlem Mallem -'), 'Ahlem Mallem');
+  // Indiscernable d'un nom : proposé quand même, à la recherche seulement.
+  assert.equal(nameLike('Droit Fiscal'), 'Droit Fiscal');
+  for (const note of ['Atelier MLP', 'Visite Fromagerie', 'Autonomie', 'Promo L1 Info', 'Laurent Mignot - A la BU']) {
+    assert.equal(nameLike(note), null, note);
+  }
 });

@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'سب ہٹائیں',
   'picker.severalTeachers': 'یہ مضمون کئی اساتذہ پڑھاتے ہیں: جن کی کلاسیں آپ نہیں دیکھنا چاہتے ان کا انتخاب ہٹا دیں۔',
   'picker.noTeacher': 'کوئی استاد درج نہیں',
+  'picker.uncertain': 'ADE میں دیگر نام (غیر تصدیق شدہ)',
   'picker.expand': ({ name }) => `${name} کھولیں`,
   'picker.collapse': ({ name }) => `${name} بند کریں`,
 

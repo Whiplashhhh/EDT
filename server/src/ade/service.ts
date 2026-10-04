@@ -1,7 +1,7 @@
 import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
-import { teacherAliases } from './teachers.ts';
+import { nameLike, teacherAliases } from './teachers.ts';
 import { TtlCache } from '../cache.ts';
 import type { AppConfig } from '../config.ts';
 
@@ -89,6 +89,11 @@ export interface DirectoryEntry {
   cities?: string[];
   /** Enseignants seulement : les autres formes de leur nom dans ADE (« M. Basse », « BASSE D. »). */
   aliases?: string[];
+  /**
+   * Enseignants seulement : un nom que rien ne confirme (« Lemoine Chloé »),
+   * lu dans une remarque. Proposé à la recherche, à part des autres.
+   */
+  uncertain?: boolean;
   /**
    * Ressources seulement : qui en assure les séances. Une ressource partagée
    * entre deux enseignants se filtre ainsi, chacun ne gardant que les siennes.
@@ -552,7 +557,16 @@ export class AdeService {
         events.flatMap((e) => e.teachers),
         events.flatMap((e) => e.notes ?? []),
       );
-      const counts = new Map<string, { courses: number; cities: Set<string>; aliases: Set<string> }>();
+      type Tally = { courses: number; cities: Set<string>; aliases: Set<string> };
+      const counts = new Map<string, Tally>();
+      const uncertain = new Map<string, Tally>();
+      const tally = (into: Map<string, Tally>, name: string, forms: string[], city: string) => {
+        const entry = into.get(name) ?? { courses: 0, cities: new Set<string>(), aliases: new Set<string>() };
+        entry.courses += 1;
+        entry.cities.add(city);
+        for (const raw of forms) if (raw !== name) entry.aliases.add(raw);
+        into.set(name, entry);
+      };
       for (const event of events) {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;
         // Chaque enseignant compte une fois par cours, sous quelque forme qu'il y figure.
@@ -561,23 +575,25 @@ export class AdeService {
           const name = aliases.get(raw) ?? raw;
           named.set(name, [...(named.get(name) ?? []), raw]);
         }
-        for (const [name, forms] of named) {
-          const entry = counts.get(name) ?? { courses: 0, cities: new Set<string>(), aliases: new Set<string>() };
-          entry.courses += 1;
-          entry.cities.add(city);
-          for (const raw of forms) if (raw !== name) entry.aliases.add(raw);
-          counts.set(name, entry);
+        for (const [name, forms] of named) tally(counts, name, forms, city);
+        for (const note of new Set(event.notes ?? [])) {
+          const name = aliases.has(note) ? null : nameLike(note);
+          if (name) tally(uncertain, name, [note], city);
         }
       }
-      const entries = [...counts.entries()]
-        .map(([name, entry]) => ({
-          id: nameId(name),
-          name,
-          courses: entry.courses,
-          cities: [...entry.cities].sort(),
-          ...(entry.aliases.size ? { aliases: [...entry.aliases].sort() } : {}),
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+      const entryOf = (name: string, entry: Tally) => ({
+        id: nameId(name),
+        name,
+        courses: entry.courses,
+        cities: [...entry.cities].sort(),
+        ...(entry.aliases.size ? { aliases: [...entry.aliases].sort() } : {}),
+      });
+      const entries: DirectoryEntry[] = [
+        ...[...counts].map(([name, entry]) => entryOf(name, entry)),
+        ...[...uncertain]
+          .filter(([name]) => !counts.has(name))
+          .map(([name, entry]) => ({ ...entryOf(name, entry), uncertain: true })),
+      ].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
       return { department: departmentId, kind, fetchedAt, entries };
     });
   }

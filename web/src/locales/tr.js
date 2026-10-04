@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Tümünü kaldır',
   'picker.severalTeachers': 'Bu dersi birden fazla öğretim üyesi veriyor: derslerini görmek istemediklerinizin işaretini kaldırın.',
   'picker.noTeacher': 'Öğretim üyesi belirtilmemiş',
+  'picker.uncertain': 'ADE’de bulunan diğer adlar (doğrulanmamış)',
   'picker.expand': ({ name }) => `${name} ögesini genişlet`,
   'picker.collapse': ({ name }) => `${name} ögesini daralt`,
 

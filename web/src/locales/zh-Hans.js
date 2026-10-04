@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': '全部取消',
   'picker.severalTeachers': '这门课程由多位教师讲授：取消勾选你不想看到其课的教师。',
   'picker.noTeacher': '未登记教师',
+  'picker.uncertain': 'ADE 中的其他姓名（未核实）',
   'picker.expand': ({ name }) => `展开 ${name}`,
   'picker.collapse': ({ name }) => `收起 ${name}`,
 

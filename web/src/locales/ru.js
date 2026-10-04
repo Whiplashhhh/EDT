@@ -85,6 +85,7 @@ export default {
   'picker.clearSelection': 'Снять все',
   'picker.severalTeachers': 'Эту дисциплину ведут несколько преподавателей: снимите отметку с тех, чьи занятия вы не хотите видеть.',
   'picker.noTeacher': 'Преподаватель не указан',
+  'picker.uncertain': 'Другие имена в ADE (не подтверждены)',
   'picker.expand': ({ name }) => `Развернуть ${name}`,
   'picker.collapse': ({ name }) => `Свернуть ${name}`,
 
