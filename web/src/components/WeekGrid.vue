@@ -431,6 +431,29 @@ const peopleOf = (event, context) =>
 .block.tiny .hours { display: none; }
 .block.narrow .room { font-size: 0.7rem; }
 
+/*
+ * Semaine sur téléphone : les jours se partagent la largeur au lieu de défiler.
+ * Une colonne ne fait plus qu'une soixantaine de pixels : l'horaire, que l'axe
+ * donne déjà, et l'enseignant cèdent la place au titre et à la salle, et un mot
+ * trop long se coupe à une syllabe plutôt qu'au hasard d'une lettre.
+ */
+@media (max-width: 699px) {
+  .scroller:has(.grid:not(.compare)) { overflow-x: visible; padding-inline: 0.4rem; }
+  .grid:not(.compare) {
+    grid-template-columns: 2.3rem repeat(var(--cols), minmax(0, 1fr));
+    column-gap: 0.15rem;
+  }
+  .grid:not(.compare) .name { font-size: 0.6rem; }
+  .grid:not(.compare) .axis-hour { font-size: 0.6rem; inset-inline-end: 0.2rem; }
+  .grid:not(.compare) .block { padding: 0.15rem 0.2rem; border-inline-start-width: 2px; font-size: 0.64rem; line-height: 1.15; }
+  .grid:not(.compare) .hours,
+  .grid:not(.compare) .teacher { display: none; }
+  .grid:not(.compare) .tag.inline { display: inline; margin-inline-start: 0.2rem; font-size: 0.55rem; }
+  .grid:not(.compare) .title,
+  .grid:not(.compare) .room { overflow-wrap: break-word; hyphens: auto; }
+  .grid:not(.compare) .room { padding: 0 0.15rem; font-size: 0.62rem; }
+}
+
 .now {
   position: absolute;
   z-index: 2;

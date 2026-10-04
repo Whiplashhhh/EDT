@@ -6,6 +6,8 @@ import { t } from '../i18n.js';
 const props = defineProps({
   focused: { type: String, required: true },
   eventsByDay: { type: Map, required: true },
+  /* En vue semaine, les en-têtes de colonnes nomment déjà les jours : la rangée ferait doublon. */
+  showDays: { type: Boolean, default: true },
 });
 const emit = defineEmits(['select', 'shift']);
 
@@ -26,7 +28,7 @@ const month = computed(() => formatMonthSpan(monday.value));
       </span>
       <button class="nav" type="button" :aria-label="t('week.next')" @click="emit('shift', 7)">›</button>
     </div>
-    <ol class="days">
+    <ol v-if="showDays" class="days">
       <li v-for="day in days" :key="day">
         <button
           type="button"
