@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'I dagsvyn, runt lunchtid.',
 
   'about.section': 'Om',
-  'about.notice': 'Inofficiell webbplats, gjord av en student. Data från ADE.',
+  'about.notice': 'Inofficiell webbplats, gjord av Willem Vanbaelinghem. Data från ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Typ av meddelande',
   'feedback.kind.contact': 'Kontakt',

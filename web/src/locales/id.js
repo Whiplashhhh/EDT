@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Di tampilan harian, saat jam makan siang.',
 
   'about.section': 'Tentang',
-  'about.notice': 'Situs tidak resmi, dibuat oleh seorang mahasiswa. Data dari ADE.',
+  'about.notice': 'Situs tidak resmi, dibuat oleh Willem Vanbaelinghem. Data dari ADE.',
   'about.contact': 'Kontak',
   'feedback.kind': 'Jenis pesan',
   'feedback.kind.contact': 'Kontak',

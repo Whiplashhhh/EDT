@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Muuqaalka maalinta, waqtiga qadada.',
 
   'about.section': 'Ku saabsan',
-  'about.notice': 'Bog aan rasmi ahayn, uu sameeyay arday. Xogta waxaa laga soo qaatay ADE.',
+  'about.notice': 'Bog aan rasmi ahayn, uu sameeyay Willem Vanbaelinghem. Xogta waxaa laga soo qaatay ADE.',
   'about.contact': 'La xiriir',
   'feedback.kind': 'Nooca fariinta',
   'feedback.kind.contact': 'La xiriir',

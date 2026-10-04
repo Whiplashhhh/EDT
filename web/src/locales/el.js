@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Στην προβολή ημέρας, την ώρα του μεσημεριανού.',
 
   'about.section': 'Σχετικά',
-  'about.notice': 'Ανεπίσημος ιστότοπος, φτιαγμένος από έναν φοιτητή. Δεδομένα από το ADE.',
+  'about.notice': 'Ανεπίσημος ιστότοπος, φτιαγμένος από τον Willem Vanbaelinghem. Δεδομένα από το ADE.',
   'about.contact': 'Επικοινωνία',
   'feedback.kind': 'Τύπος μηνύματος',
   'feedback.kind.contact': 'Επικοινωνία',

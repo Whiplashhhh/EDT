@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Napi nézetben, ebédidőben.',
 
   'about.section': 'Névjegy',
-  'about.notice': 'Nem hivatalos oldal, egy hallgató készítette. Az adatok az ADE-ből származnak.',
+  'about.notice': 'Nem hivatalos oldal, Willem Vanbaelinghem készítette. Az adatok az ADE-ből származnak.',
   'about.contact': 'Kapcsolat',
   'feedback.kind': 'Üzenet típusa',
   'feedback.kind.contact': 'Kapcsolat',

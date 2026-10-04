@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'நாள் காட்சியில், மதிய உணவு நேரத்தில்.',
 
   'about.section': 'இதைப் பற்றி',
-  'about.notice': 'அதிகாரப்பூர்வமற்ற தளம், ஒரு மாணவரால் உருவாக்கப்பட்டது. தரவு ADE-இலிருந்து பெறப்படுகிறது.',
+  'about.notice': 'அதிகாரப்பூர்வமற்ற தளம், Willem Vanbaelinghem உருவாக்கியது. தரவு ADE-இலிருந்து பெறப்படுகிறது.',
   'about.contact': 'தொடர்பு',
   'feedback.kind': 'செய்தி வகை',
   'feedback.kind.contact': 'தொடர்பு',

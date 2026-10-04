@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'In day view, around lunchtime.',
 
   'about.section': 'About',
-  'about.notice': 'Unofficial site, made by a student. Data from ADE.',
+  'about.notice': 'Unofficial site, made by Willem Vanbaelinghem. Data from ADE.',
   'about.contact': 'Contact',
 
   'feedback.kind': 'Message type',

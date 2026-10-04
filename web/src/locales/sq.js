@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Në pamjen ditore, në orën e drekës.',
 
   'about.section': 'Rreth',
-  'about.notice': 'Faqe jozyrtare, e krijuar nga një student. Të dhënat vijnë nga ADE.',
+  'about.notice': 'Faqe jozyrtare, e krijuar nga Willem Vanbaelinghem. Të dhënat vijnë nga ADE.',
   'about.contact': 'Kontakt',
   'feedback.kind': 'Lloji i mesazhit',
   'feedback.kind.contact': 'Kontakt',

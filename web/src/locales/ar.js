@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'في عرض اليوم، وقت الغداء.',
 
   'about.section': 'حول',
-  'about.notice': 'موقع غير رسمي أنشأه طالب. البيانات مأخوذة من ADE.',
+  'about.notice': 'موقع غير رسمي أنشأه Willem Vanbaelinghem. البيانات مأخوذة من ADE.',
   'about.contact': 'تواصل',
   'feedback.kind': 'نوع الرسالة',
   'feedback.kind.contact': 'تواصل',

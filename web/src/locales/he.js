@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'בתצוגת היום, בשעת הצהריים.',
 
   'about.section': 'אודות',
-  'about.notice': 'אתר לא רשמי, שנבנה על ידי סטודנט. הנתונים מ-ADE.',
+  'about.notice': 'אתר לא רשמי, שנבנה על ידי Willem Vanbaelinghem. הנתונים מ-ADE.',
   'about.contact': 'יצירת קשר',
   'feedback.kind': 'סוג ההודעה',
   'feedback.kind.contact': 'יצירת קשר',

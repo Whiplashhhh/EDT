@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'በቀን እይታ፣ በምሳ ሰዓት።',
 
   'about.section': 'ስለ ጣቢያው',
-  'about.notice': 'ኦፊሴላዊ ያልሆነ ጣቢያ፣ በአንድ ተማሪ የተሠራ። መረጃው ከADE የተወሰደ ነው።',
+  'about.notice': 'ኦፊሴላዊ ያልሆነ ጣቢያ፣ በWillem Vanbaelinghem የተሠራ። መረጃው ከADE የተወሰደ ነው።',
   'about.contact': 'ግንኙነት',
   'feedback.kind': 'የመልእክት ዓይነት',
   'feedback.kind.contact': 'ግንኙነት',

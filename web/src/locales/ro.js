@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'În vizualizarea pe zi, la ora prânzului.',
 
   'about.section': 'Despre',
-  'about.notice': 'Site neoficial, realizat de un student. Date provenite din ADE.',
+  'about.notice': 'Site neoficial, realizat de Willem Vanbaelinghem. Date provenite din ADE.',
   'about.contact': 'Contact',
   'feedback.kind': 'Tipul mesajului',
   'feedback.kind.contact': 'Contact',

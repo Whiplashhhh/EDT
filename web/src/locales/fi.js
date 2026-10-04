@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Päivänäkymässä, lounasaikaan.',
 
   'about.section': 'Tietoja',
-  'about.notice': 'Epävirallinen sivusto, jonka on tehnyt opiskelija. Tiedot ovat peräisin ADE:sta.',
+  'about.notice': 'Epävirallinen sivusto, jonka on tehnyt Willem Vanbaelinghem. Tiedot ovat peräisin ADE:sta.',
   'about.contact': 'Yhteystiedot',
   'feedback.kind': 'Viestin tyyppi',
   'feedback.kind.contact': 'Yhteydenotto',

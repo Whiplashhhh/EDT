@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Trong chế độ xem ngày, vào giờ ăn trưa.',
 
   'about.section': 'Giới thiệu',
-  'about.notice': 'Trang web không chính thức, do một sinh viên thực hiện. Dữ liệu lấy từ ADE.',
+  'about.notice': 'Trang web không chính thức, do Willem Vanbaelinghem thực hiện. Dữ liệu lấy từ ADE.',
   'about.contact': 'Liên hệ',
   'feedback.kind': 'Loại tin nhắn',
   'feedback.kind.contact': 'Liên hệ',

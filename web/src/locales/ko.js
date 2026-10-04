@@ -113,7 +113,7 @@ export default {
   'crous.showHint': '일간 보기의 점심시간에 표시합니다.',
 
   'about.section': '정보',
-  'about.notice': '학생이 만든 비공식 사이트입니다. 데이터 출처: ADE.',
+  'about.notice': 'Willem Vanbaelinghem이(가) 만든 비공식 사이트입니다. 데이터 출처: ADE.',
   'about.contact': '문의',
   'feedback.kind': '메시지 유형',
   'feedback.kind.contact': '문의',

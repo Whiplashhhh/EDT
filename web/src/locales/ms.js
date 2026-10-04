@@ -113,7 +113,7 @@ export default {
   'crous.showHint': 'Dalam paparan harian, pada waktu makan tengah hari.',
 
   'about.section': 'Perihal',
-  'about.notice': 'Laman tidak rasmi, dibina oleh seorang pelajar. Data daripada ADE.',
+  'about.notice': 'Laman tidak rasmi, dibina oleh Willem Vanbaelinghem. Data daripada ADE.',
   'about.contact': 'Hubungi',
   'feedback.kind': 'Jenis mesej',
   'feedback.kind.contact': 'Hubungi',
