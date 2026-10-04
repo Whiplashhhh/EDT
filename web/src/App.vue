@@ -1118,6 +1118,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   padding-top: calc(1rem + var(--safe-top));
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
+  container: gate / size;
 }
 .gate-backdrop { position: absolute; inset: 0; }
 
@@ -1151,6 +1152,16 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
  * carte. Il ne descend pas sous la hauteur de ses onglets et de ses champs.
  */
 .gate-card :deep(.picker) { flex: 1; min-width: 0; padding: 0; }
+/*
+ * Sur un écran peu haut — téléphone à l'horizontale, petite fenêtre — il ne
+ * reste pas de quoi faire défiler la liste à part : elle s'écrasait à rien et
+ * le sélecteur débordait sur les onglets. On la laisse alors à sa hauteur, et
+ * c'est la carte entière qui défile. La hauteur mesurée est celle de l'écran
+ * de choix, qui suit la zone visible : le clavier ouvert compte aussi.
+ */
+@container gate (max-height: 32rem) {
+  .gate-card :deep(.picker) { min-height: auto; }
+}
 /*
  * Sur téléphone, le clavier ne laisse qu'une bande d'écran : pendant la
  * frappe, les explications s'effacent devant la recherche et ses résultats.
