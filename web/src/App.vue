@@ -305,7 +305,7 @@ function choose({ department: dept, kind: pickedKind, resourceId: id, resourceNa
   const picked = { department: dept, kind: pickedKind, resourceId: id, resourceName };
   if (pickerTarget.value === 'compare') {
     // On compare un jour précis : celui qu'on regardait reste à l'écran.
-    settings.value = { ...settings.value, compare: picked, view: 'day' };
+    settings.value = { ...settings.value, compare: picked, view: 'day', viewChosen: true };
   } else {
     settings.value = { ...settings.value, ...picked };
     focusedDay.value = today();
@@ -394,7 +394,7 @@ function onServiceWorkerMessage(event) {
 
 function setView(view) {
   // La comparaison n'existe qu'en vue jour : passer en semaine y met fin.
-  settings.value = { ...settings.value, view, ...(view === 'week' ? { compare: null } : {}) };
+  settings.value = { ...settings.value, view, viewChosen: true, ...(view === 'week' ? { compare: null } : {}) };
   writeSettings(settings.value);
 }
 

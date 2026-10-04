@@ -37,6 +37,11 @@ const EMPTY = {
    */
   compare: null,
   view: 'day',
+  /**
+   * Vrai dès qu'on a choisi soi-même entre jour et semaine. Tant que ce n'est
+   * pas le cas, la vue suit la taille de l'écran (voir `defaultView`).
+   */
+  viewChosen: false,
   /** Menu du Crous dans la vue jour. Affiché par défaut ; on le masque si l'on n'y mange jamais. */
   crousMenu: true,
   theme: 'system',
@@ -47,7 +52,20 @@ const EMPTY = {
  * dur : tant que personne n'a choisi, on affiche celle du navigateur.
  */
 function empty() {
-  return { ...EMPTY, lang: preferredLocale() };
+  return { ...EMPTY, view: defaultView(), lang: preferredLocale() };
+}
+
+/*
+ * Vue de qui n'a pas encore choisi : la semaine entière tient sur un ordinateur
+ * ou une tablette, le jour seul sur un téléphone. La hauteur écarte un
+ * téléphone tenu à l'horizontale.
+ */
+function defaultView() {
+  try {
+    return window.matchMedia('(min-width: 700px) and (min-height: 500px)').matches ? 'week' : 'day';
+  } catch {
+    return 'day';
+  }
 }
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
@@ -96,6 +114,17 @@ function readCompare(raw) {
   };
 }
 
+/**
+ * Relit la vue. Avant `viewChosen`, « jour » était enregistré d'office : seule
+ * « semaine » trahit un vrai choix. Une comparaison en cours n'existe qu'en vue
+ * jour, on ne la fait pas disparaître.
+ */
+function readView(raw, compare) {
+  const viewChosen = raw.viewChosen === true || raw.view === 'week';
+  if (viewChosen) return { view: raw.view === 'week' ? 'week' : 'day', viewChosen };
+  return { view: compare ? 'day' : defaultView(), viewChosen };
+}
+
 function readPush(raw) {
   if (raw?.epoch !== PUSH_EPOCH) return { ...EMPTY.push };
   return {
@@ -127,6 +156,7 @@ export function readSettings() {
       (IDENTITY_KINDS.includes(kind) && department && Number.isInteger(id)
         ? { department: kind === 'groups' ? department : 'all', kind, resourceId: id, resourceName: name ?? '' }
         : null);
+    const compare = readCompare(parsed.compare);
     return {
       /*
        * Les salles et les enseignants se consultent toutes formations
@@ -140,8 +170,8 @@ export function readSettings() {
       resourceName: typeof name === 'string' ? name : null,
       identity,
       push: readPush(parsed.push),
-      compare: readCompare(parsed.compare),
-      view: parsed.view === 'week' ? 'week' : 'day',
+      compare,
+      ...readView(parsed, compare),
       crousMenu: parsed.crousMenu !== false,
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : preferredLocale(),
