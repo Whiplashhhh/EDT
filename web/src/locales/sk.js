@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Svetlý',
   'app.themeDark': 'Tmavý',
   'app.language': 'Jazyk',
+  'app.display': 'Zobrazenie',
   'app.changeIdentity': 'Môj kalendár',
   'app.backToMine': ({ name }) => `Späť na ${name}`,
   'app.viewingOther': 'Prezeráš si cudzí rozvrh',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Jedáleň je v ten deň zatvorená.',
   'crous.loading': 'Načítava sa jedálny lístok…',
   'crous.unknown': 'Na ten deň nie je zverejnený jedálny lístok.',
+  'crous.show': 'Jedálny lístok Crous',
+  'crous.showHint': 'V dennom zobrazení, v čase obeda.',
 
   'error.generic': 'Nastala chyba.',
   'error.network': 'Server je nedostupný.',

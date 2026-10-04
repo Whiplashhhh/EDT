@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Açık',
   'app.themeDark': 'Koyu',
   'app.language': 'Dil',
+  'app.display': 'Görünüm',
   'app.changeIdentity': 'Takvimim',
   'app.backToMine': ({ name }) => `${name} sayfasına dön`,
   'app.viewingOther': 'Başka bir ders programına bakıyorsun',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Yemekhane o gün kapalı.',
   'crous.loading': 'Menü yükleniyor…',
   'crous.unknown': 'O gün için menü yayımlanmadı.',
+  'crous.show': 'Crous menüsü',
+  'crous.showHint': 'Günlük görünümde, öğle yemeği saatinde.',
 
   'error.generic': 'Bir hata oluştu.',
   'error.network': 'Sunucuya ulaşılamadı.',

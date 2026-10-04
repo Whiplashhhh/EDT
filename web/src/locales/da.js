@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Lyst',
   'app.themeDark': 'Mørkt',
   'app.language': 'Sprog',
+  'app.display': 'Visning',
   'app.changeIdentity': 'Min kalender',
   'app.backToMine': ({ name }) => `Tilbage til ${name}`,
   'app.viewingOther': 'Du ser et andet skema',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Kantinen er lukket den dag.',
   'crous.loading': 'Indlæser menuen…',
   'crous.unknown': 'Ingen menu offentliggjort for den dag.',
+  'crous.show': 'Crous-menuen',
+  'crous.showHint': 'I dagsvisningen, omkring frokosttid.',
 
   'error.generic': 'Der opstod en fejl.',
   'error.network': 'Serveren kunne ikke kontaktes.',

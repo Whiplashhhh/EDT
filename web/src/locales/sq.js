@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'E çelët',
   'app.themeDark': 'E errët',
   'app.language': 'Gjuha',
+  'app.display': 'Shfaqja',
   'app.changeIdentity': 'Kalendari im',
   'app.backToMine': ({ name }) => `Kthehu te ${name}`,
   'app.viewingOther': 'Po shikon një orar tjetër',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Mensa është e mbyllur atë ditë.',
   'crous.loading': 'Duke ngarkuar menynë…',
   'crous.unknown': 'Nuk ka meny të publikuar për atë ditë.',
+  'crous.show': 'Menuja e Crous',
+  'crous.showHint': 'Në pamjen ditore, në orën e drekës.',
 
   'error.generic': 'Ndodhi një gabim.',
   'error.network': 'Serveri nuk u arrit.',

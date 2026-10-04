@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Luminoasă',
   'app.themeDark': 'Întunecată',
   'app.language': 'Limbă',
+  'app.display': 'Afișare',
   'app.changeIdentity': 'Calendarul meu',
   'app.backToMine': ({ name }) => `Înapoi la ${name}`,
   'app.viewingOther': 'Vizualizezi un alt orar',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Cantina este închisă în ziua aceea.',
   'crous.loading': 'Se încarcă meniul…',
   'crous.unknown': 'Niciun meniu publicat pentru ziua aceea.',
+  'crous.show': 'Meniul Crous',
+  'crous.showHint': 'În vizualizarea pe zi, la ora prânzului.',
 
   'error.generic': 'A apărut o eroare.',
   'error.network': 'Serverul nu poate fi contactat.',

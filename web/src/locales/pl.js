@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Jasny',
   'app.themeDark': 'Ciemny',
   'app.language': 'Język',
+  'app.display': 'Wyświetlanie',
   'app.changeIdentity': 'Mój kalendarz',
   'app.backToMine': ({ name }) => `Wróć do ${name}`,
   'app.viewingOther': 'Przeglądasz cudzy plan zajęć',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Stołówka tego dnia zamknięta.',
   'crous.loading': 'Wczytywanie menu…',
   'crous.unknown': 'Brak menu na ten dzień.',
+  'crous.show': 'Menu Crous',
+  'crous.showHint': 'W widoku dnia, w porze obiadowej.',
 
   'error.generic': 'Wystąpił błąd.',
   'error.network': 'Nie można połączyć się z serwerem.',

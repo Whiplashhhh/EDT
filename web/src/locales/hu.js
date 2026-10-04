@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Világos',
   'app.themeDark': 'Sötét',
   'app.language': 'Nyelv',
+  'app.display': 'Megjelenítés',
   'app.changeIdentity': 'A naptáram',
   'app.backToMine': ({ name }) => `Vissza: ${name}`,
   'app.viewingOther': 'Egy másik órarendet nézel',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'A menza aznap zárva.',
   'crous.loading': 'Étlap betöltése…',
   'crous.unknown': 'Arra a napra nincs közzétett étlap.',
+  'crous.show': 'Crous-menü',
+  'crous.showHint': 'Napi nézetben, ebédidőben.',
 
   'error.generic': 'Hiba történt.',
   'error.network': 'A kiszolgáló nem érhető el.',

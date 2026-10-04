@@ -21,6 +21,7 @@ export default {
   'app.themeLight': '밝게',
   'app.themeDark': '어둡게',
   'app.language': '언어',
+  'app.display': '표시',
   'app.changeIdentity': '내 캘린더',
   'app.backToMine': ({ name }) => `${name}(으)로 돌아가기`,
   'app.viewingOther': '다른 사람의 시간표를 보고 있습니다',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': '그날은 식당이 문을 닫습니다.',
   'crous.loading': '식단을 불러오는 중…',
   'crous.unknown': '그날 식단은 공개되지 않았습니다.',
+  'crous.show': 'Crous 메뉴',
+  'crous.showHint': '일간 보기의 점심시간에 표시합니다.',
 
   'error.generic': '오류가 발생했습니다.',
   'error.network': '서버에 연결할 수 없습니다.',

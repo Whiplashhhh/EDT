@@ -37,6 +37,8 @@ const EMPTY = {
    */
   compare: null,
   view: 'day',
+  /** Menu du Crous dans la vue jour. Affiché par défaut ; on le masque si l'on n'y mange jamais. */
+  crousMenu: true,
   theme: 'system',
 };
 
@@ -140,6 +142,7 @@ export function readSettings() {
       push: readPush(parsed.push),
       compare: readCompare(parsed.compare),
       view: parsed.view === 'week' ? 'week' : 'day',
+      crousMenu: parsed.crousMenu !== false,
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : preferredLocale(),
     };

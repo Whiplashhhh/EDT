@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Light',
   'app.themeDark': 'Dark',
   'app.language': 'Language',
+  'app.display': 'Display',
   'app.changeIdentity': 'My calendar',
   'app.backToMine': ({ name }) => `Back to ${name}`,
   'app.viewingOther': 'You are viewing another timetable',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Restaurant closed that day.',
   'crous.loading': 'Loading the menu…',
   'crous.unknown': 'No menu published for that day.',
+  'crous.show': 'Crous menu',
+  'crous.showHint': 'In day view, around lunchtime.',
 
   'error.generic': 'Something went wrong.',
   'error.network': 'Could not reach the server.',

@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Světlý',
   'app.themeDark': 'Tmavý',
   'app.language': 'Jazyk',
+  'app.display': 'Zobrazení',
   'app.changeIdentity': 'Můj kalendář',
   'app.backToMine': ({ name }) => `Zpět na ${name}`,
   'app.viewingOther': 'Prohlížíš si cizí rozvrh',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Menza je ten den zavřená.',
   'crous.loading': 'Načítání jídelníčku…',
   'crous.unknown': 'Pro ten den není zveřejněný jídelníček.',
+  'crous.show': 'Jídelníček Crous',
+  'crous.showHint': 'V denním zobrazení, v době oběda.',
 
   'error.generic': 'Došlo k chybě.',
   'error.network': 'Server není dostupný.',

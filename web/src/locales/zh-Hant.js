@@ -21,6 +21,7 @@ export default {
   'app.themeLight': '淺色',
   'app.themeDark': '深色',
   'app.language': '語言',
+  'app.display': '顯示',
   'app.changeIdentity': '我的行事曆',
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的課表',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': '餐廳當天不營業。',
   'crous.loading': '正在載入菜單…',
   'crous.unknown': '當天未公布菜單。',
+  'crous.show': 'Crous 菜單',
+  'crous.showHint': '在日檢視中，午餐時間顯示。',
 
   'error.generic': '發生錯誤。',
   'error.network': '無法連線伺服器。',

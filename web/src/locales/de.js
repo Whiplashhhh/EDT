@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Hell',
   'app.themeDark': 'Dunkel',
   'app.language': 'Sprache',
+  'app.display': 'Anzeige',
   'app.changeIdentity': 'Mein Kalender',
   'app.backToMine': ({ name }) => `Zurück zu ${name}`,
   'app.viewingOther': 'Du siehst einen fremden Stundenplan',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Mensa an diesem Tag geschlossen.',
   'crous.loading': 'Speiseplan wird geladen…',
   'crous.unknown': 'Für diesen Tag ist kein Speiseplan veröffentlicht.',
+  'crous.show': 'Crous-Speiseplan',
+  'crous.showHint': 'In der Tagesansicht, zur Mittagszeit.',
 
   'error.generic': 'Ein Fehler ist aufgetreten.',
   'error.network': 'Der Server ist nicht erreichbar.',

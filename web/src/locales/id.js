@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Terang',
   'app.themeDark': 'Gelap',
   'app.language': 'Bahasa',
+  'app.display': 'Tampilan',
   'app.changeIdentity': 'Kalenderku',
   'app.backToMine': ({ name }) => `Kembali ke ${name}`,
   'app.viewingOther': 'Kamu sedang melihat jadwal orang lain',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Kantin tutup hari itu.',
   'crous.loading': 'Memuat menu…',
   'crous.unknown': 'Tidak ada menu yang diumumkan untuk hari itu.',
+  'crous.show': 'Menu Crous',
+  'crous.showHint': 'Di tampilan harian, saat jam makan siang.',
 
   'error.generic': 'Terjadi kesalahan.',
   'error.network': 'Server tidak dapat dihubungi.',

@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'ብሩህ',
   'app.themeDark': 'ጨለማ',
   'app.language': 'ቋንቋ',
+  'app.display': 'ማሳያ',
   'app.changeIdentity': 'የእኔ የቀን መቁጠሪያ',
   'app.backToMine': ({ name }) => `ወደ ${name} ተመለስ`,
   'app.viewingOther': 'ሌላ መርሐግብር እያየህ ነው',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'ምግብ ቤቱ በዚያ ቀን ዝግ ነው።',
   'crous.loading': 'ምናሌ በመጫን ላይ…',
   'crous.unknown': 'ለዚያ ቀን የታተመ ምናሌ የለም።',
+  'crous.show': 'የCrous ምናሌ',
+  'crous.showHint': 'በቀን እይታ፣ በምሳ ሰዓት።',
 
   'error.generic': 'ስህተት ተፈጥሯል።',
   'error.network': 'አገልጋዩን ማግኘት አልተቻለም።',

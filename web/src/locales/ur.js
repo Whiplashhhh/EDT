@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'روشن',
   'app.themeDark': 'گہرا',
   'app.language': 'زبان',
+  'app.display': 'ڈسپلے',
   'app.changeIdentity': 'میرا کیلنڈر',
   'app.backToMine': ({ name }) => `${name} پر واپس جائیں`,
   'app.viewingOther': 'آپ کسی اور کا ٹائم ٹیبل دیکھ رہے ہیں',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'اس دن کھانا گھر بند ہے۔',
   'crous.loading': 'مینو لوڈ ہو رہا ہے…',
   'crous.unknown': 'اس دن کے لیے کوئی مینو شائع نہیں ہوا۔',
+  'crous.show': 'Crous کا مینو',
+  'crous.showHint': 'دن کے منظر میں، دوپہر کے کھانے کے وقت۔',
 
   'error.generic': 'کوئی خرابی پیش آئی۔',
   'error.network': 'سرور تک رسائی نہ ہو سکی۔',

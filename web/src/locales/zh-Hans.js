@@ -21,6 +21,7 @@ export default {
   'app.themeLight': '浅色',
   'app.themeDark': '深色',
   'app.language': '语言',
+  'app.display': '显示',
   'app.changeIdentity': '我的日历',
   'app.backToMine': ({ name }) => `返回 ${name}`,
   'app.viewingOther': '你正在查看他人的课程表',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': '食堂当天关闭。',
   'crous.loading': '正在加载餐单…',
   'crous.unknown': '当天未公布餐单。',
+  'crous.show': 'Crous 菜单',
+  'crous.showHint': '在日视图中，午餐时间显示。',
 
   'error.generic': '发生错误。',
   'error.network': '无法连接服务器。',

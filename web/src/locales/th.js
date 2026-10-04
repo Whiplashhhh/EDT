@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'สว่าง',
   'app.themeDark': 'มืด',
   'app.language': 'ภาษา',
+  'app.display': 'การแสดงผล',
   'app.changeIdentity': 'ปฏิทินของฉัน',
   'app.backToMine': ({ name }) => `กลับไปที่ ${name}`,
   'app.viewingOther': 'คุณกำลังดูตารางเรียนของคนอื่น',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'โรงอาหารปิดในวันนั้น',
   'crous.loading': 'กำลังโหลดเมนู…',
   'crous.unknown': 'ยังไม่มีเมนูสำหรับวันนั้น',
+  'crous.show': 'เมนู Crous',
+  'crous.showHint': 'ในมุมมองรายวัน ช่วงพักกลางวัน',
 
   'error.generic': 'เกิดข้อผิดพลาด',
   'error.network': 'ติดต่อเซิร์ฟเวอร์ไม่ได้',

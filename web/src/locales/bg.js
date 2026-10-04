@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Светла',
   'app.themeDark': 'Тъмна',
   'app.language': 'Език',
+  'app.display': 'Изглед',
   'app.changeIdentity': 'Моят календар',
   'app.backToMine': ({ name }) => `Обратно към ${name}`,
   'app.viewingOther': 'Разглеждаш чуждо разписание',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Столът е затворен този ден.',
   'crous.loading': 'Зареждане на менюто…',
   'crous.unknown': 'Няма публикувано меню за този ден.',
+  'crous.show': 'Менюто на Crous',
+  'crous.showHint': 'В дневния изглед, по обяд.',
 
   'error.generic': 'Възникна грешка.',
   'error.network': 'Сървърът е недостъпен.',

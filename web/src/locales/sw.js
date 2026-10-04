@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Nyepesi',
   'app.themeDark': 'Nyeusi',
   'app.language': 'Lugha',
+  'app.display': 'Mwonekano',
   'app.changeIdentity': 'Kalenda yangu',
   'app.backToMine': ({ name }) => `Rudi kwa ${name}`,
   'app.viewingOther': 'Unaangalia ratiba ya mtu mwingine',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Mkahawa umefungwa siku hiyo.',
   'crous.loading': 'Inapakia menyu…',
   'crous.unknown': 'Hakuna menyu iliyochapishwa kwa siku hiyo.',
+  'crous.show': 'Menyu ya Crous',
+  'crous.showHint': 'Katika mwonekano wa siku, wakati wa chakula cha mchana.',
 
   'error.generic': 'Hitilafu imetokea.',
   'error.network': 'Imeshindikana kufikia seva.',

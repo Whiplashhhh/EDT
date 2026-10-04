@@ -144,6 +144,11 @@ watch(() => settings.value.theme, (theme) => {
 
 watch(() => settings.value.lang, setLocale, { immediate: true });
 
+function setCrousMenu(crousMenu) {
+  settings.value = { ...settings.value, crousMenu };
+  writeSettings(settings.value);
+}
+
 function setTheme(theme) {
   settings.value = { ...settings.value, theme };
   writeSettings(settings.value);
@@ -531,6 +536,21 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         <p v-else-if="!pushAvailable" class="toggle-note">{{ t('push.unavailable') }}</p>
       </div>
 
+      <div class="setting stack" role="group" :aria-label="t('app.display')">
+        <span class="setting-label">{{ t('app.display') }}</span>
+        <label class="toggle">
+          <input
+            type="checkbox"
+            :checked="settings.crousMenu"
+            @change="setCrousMenu($event.target.checked)"
+          />
+          <span class="toggle-text">
+            <span class="toggle-title">{{ t('crous.show') }}</span>
+            <span class="toggle-hint">{{ t('crous.showHint') }}</span>
+          </span>
+        </label>
+      </div>
+
       <div class="setting" role="group" :aria-label="t('app.theme')">
         <span class="setting-label">{{ t('app.theme') }}</span>
         <div class="segmented">
@@ -618,7 +638,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
                 </div>
               </template>
             </WeekGrid>
-            <DayAgenda v-else :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.kind === 'groups'" :context="settings.kind" :department="settings.department" />
+            <DayAgenda v-else :day="focusedDay" :events="dayEvents" :now="now" :show-menu="settings.crousMenu && settings.kind === 'groups'" :context="settings.kind" :department="settings.department" />
           </template>
           <WeekGrid v-else :focused="focusedDay" :department="grid" :events-by-day="eventsByDay" :now="now" :context="settings.kind" @select="focusedDay = $event; setView('day')" />
         </div>

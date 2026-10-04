@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Licht',
   'app.themeDark': 'Donker',
   'app.language': 'Taal',
+  'app.display': 'Weergave',
   'app.changeIdentity': 'Mijn agenda',
   'app.backToMine': ({ name }) => `Terug naar ${name}`,
   'app.viewingOther': 'Je bekijkt een ander rooster',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Restaurant die dag gesloten.',
   'crous.loading': 'Menu laden…',
   'crous.unknown': 'Geen menu bekend voor die dag.',
+  'crous.show': 'Crous-menu',
+  'crous.showHint': 'In de dagweergave, rond lunchtijd.',
 
   'error.generic': 'Er is een fout opgetreden.',
   'error.network': 'De server is niet bereikbaar.',

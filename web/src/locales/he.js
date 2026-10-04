@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'בהיר',
   'app.themeDark': 'כהה',
   'app.language': 'שפה',
+  'app.display': 'תצוגה',
   'app.changeIdentity': 'היומן שלי',
   'app.backToMine': ({ name }) => `חזרה אל ${name}`,
   'app.viewingOther': 'אתה צופה במערכת שעות אחרת',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'המסעדה סגורה באותו יום.',
   'crous.loading': 'טוען את התפריט…',
   'crous.unknown': 'לא פורסם תפריט ליום הזה.',
+  'crous.show': 'התפריט של Crous',
+  'crous.showHint': 'בתצוגת היום, בשעת הצהריים.',
 
   'error.generic': 'אירעה שגיאה.',
   'error.network': 'לא ניתן להגיע לשרת.',

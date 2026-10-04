@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'हल्का',
   'app.themeDark': 'गहरा',
   'app.language': 'भाषा',
+  'app.display': 'प्रदर्शन',
   'app.changeIdentity': 'मेरा कैलेंडर',
   'app.backToMine': ({ name }) => `${name} पर लौटें`,
   'app.viewingOther': 'आप किसी और की समय-सारणी देख रहे हैं',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'उस दिन भोजनालय बंद है।',
   'crous.loading': 'मेन्यू लोड हो रहा है…',
   'crous.unknown': 'उस दिन के लिए कोई मेन्यू प्रकाशित नहीं है।',
+  'crous.show': 'Crous मेन्यू',
+  'crous.showHint': 'दिन के दृश्य में, दोपहर के भोजन के समय।',
 
   'error.generic': 'कोई त्रुटि हुई।',
   'error.network': 'सर्वर से संपर्क नहीं हो सका।',

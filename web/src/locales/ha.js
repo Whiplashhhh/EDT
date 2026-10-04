@@ -21,6 +21,7 @@ export default {
   'app.themeLight': 'Mai haske',
   'app.themeDark': 'Mai duhu',
   'app.language': 'Harshe',
+  'app.display': 'Nuni',
   'app.changeIdentity': 'Kalandata',
   'app.backToMine': ({ name }) => `Koma zuwa ${name}`,
   'app.viewingOther': 'Kana kallon wani jadawalin ne',
@@ -105,6 +106,8 @@ export default {
   'crous.closed': 'Gidan cin abinci a rufe yake a wannan ranar.',
   'crous.loading': 'Ana loda menu…',
   'crous.unknown': 'Ba a buga menu na wannan ranar ba.',
+  'crous.show': 'Jerin abincin Crous',
+  'crous.showHint': 'A duban rana, lokacin abincin rana.',
 
   'error.generic': 'An samu matsala.',
   'error.network': 'An kasa tuntuɓar sabar.',
