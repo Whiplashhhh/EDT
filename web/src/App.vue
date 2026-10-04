@@ -1154,11 +1154,14 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 /*
  * Sur téléphone, le clavier ne laisse qu'une bande d'écran : pendant la
  * frappe, les explications s'effacent devant la recherche et ses résultats.
+ * Elles restent effacées tant qu'une recherche est saisie : toucher un
+ * résultat ferme le clavier, et si elles revenaient à cet instant, la liste
+ * descendrait sous le doigt et le toucher tomberait à côté.
  */
 @media (pointer: coarse) {
-  .gate-card:has(input:focus) .gate-intro,
-  .gate-card:has(input:focus) .gate-why,
-  .gate-card:has(input:focus) :deep(.hint) { display: none; }
+  .gate-card:has(input:is(:focus, :not(:placeholder-shown))) .gate-intro,
+  .gate-card:has(input:is(:focus, :not(:placeholder-shown))) .gate-why,
+  .gate-card:has(input:is(:focus, :not(:placeholder-shown))) :deep(.hint) { display: none; }
 }
 
 .main { flex: 1; padding-top: 0.6rem; overflow-x: clip; }
