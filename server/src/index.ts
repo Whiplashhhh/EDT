@@ -11,6 +11,8 @@ import { CrousService, CrousError } from './crous/service.ts';
 import { AdeError } from './ade/gwt.ts';
 import { registerApi } from './routes/api.ts';
 import { registerPushRoutes } from './routes/push.ts';
+import { registerFeedbackRoutes } from './routes/feedback.ts';
+import { smtpMailer } from './feedback/mailer.ts';
 import { SubscriptionStore } from './push/store.ts';
 import { PushSender } from './push/sender.ts';
 import { Notifier } from './push/notifier.ts';
@@ -84,7 +86,17 @@ if (config.allowedOrigins.length > 0) {
  * le front est bilingue et traduit le code lui-même plutôt que d'afficher la prose
  * du serveur. Le message reste utile dans les journaux et pour les appels directs.
  */
+const OWN_CODE_RE = /^(push|feedback)-[a-z-]+$/;
+
 app.setErrorHandler((error, req, reply) => {
+  // Les routes qui écrivent portent leurs propres codes (`feedback-send`, `push-disabled`…).
+  const own = typeof error.code === 'string' && OWN_CODE_RE.test(error.code) ? error.code : null;
+  if (own && typeof error.statusCode === 'number') {
+    return reply.code(error.statusCode).send({ code: own, error: error.message });
+  }
+  if (error.statusCode === 429) {
+    return reply.code(429).send({ code: 'rate-limit', error: 'Trop de requêtes, réessayez plus tard.' });
+  }
   if (error instanceof NotFoundError) return reply.code(404).send({ code: 'generic', error: error.message });
   if (error instanceof CrousError) {
     req.log.warn({ err: error }, 'menu Crous indisponible');
@@ -108,6 +120,18 @@ await app.register(registerPushRoutes, {
   store: subscriptions,
   publicKey: config.push.enabled ? config.push.publicKey : null,
 });
+
+await app.register(registerFeedbackRoutes, {
+  prefix: '/api',
+  send: config.feedback.enabled ? smtpMailer(config.feedback) : null,
+  describeDepartment: async (id) => {
+    const { cities, departments } = await service.departments();
+    const dept = departments.find((d) => d.id === id);
+    if (!dept) return null;
+    return { label: dept.label, city: cities.find((c) => c.id === dept.city)?.label ?? null };
+  },
+});
+app.log.info(config.feedback.enabled ? 'formulaire de contact actif' : 'formulaire de contact désactivé (SMTP non configuré)');
 
 if (config.push.enabled) {
   const sender = new PushSender(

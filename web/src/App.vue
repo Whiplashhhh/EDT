@@ -4,6 +4,7 @@ import ResourcePicker from './components/ResourcePicker.vue';
 import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
+import FeedbackModal from './components/FeedbackModal.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
@@ -71,6 +72,33 @@ const {
 } = usePush();
 
 const { mode: installMode, guideOpen: installGuideOpen, install, markDone: markInstalled } = useInstall();
+
+/*
+ * Contact, suggestion, problème : une seule fenêtre, ouverte sur le type du
+ * bouton touché. Le message part au serveur, qui le relaie par courriel ;
+ * l'adresse de l'auteur n'apparaît nulle part dans la page.
+ */
+const feedbackEnabled = ref(false);
+/** Type de la fenêtre ouverte, ou `null` si elle est fermée. */
+const feedbackKind = ref(null);
+
+function openFeedback(kind) {
+  feedbackKind.value = kind;
+  menuOpen.value = false;
+  pickerOpen.value = false;
+}
+
+/** Joint au message si on le laisse faire : de quoi comprendre un problème sans avoir à demander. */
+const feedbackContext = computed(() => ({
+  department: identity.value?.department ?? settings.value.department ?? null,
+  identity: identity.value?.resourceName ?? null,
+  identityKind: identity.value?.kind ?? null,
+  viewing: settings.value.resourceName ?? null,
+  lang: settings.value.lang ?? null,
+  installed: Boolean(window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true),
+  userAgent: navigator.userAgent,
+  screen: `${window.innerWidth}×${window.innerHeight}`,
+}));
 
 const { eventsByDay, grid, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
 
@@ -264,6 +292,10 @@ onMounted(() => {
    * renvoyer à chaque ouverture est la façon la plus simple de le garder vivant.
    */
   loadPushConfig().then(() => resyncPush());
+  api.feedbackConfig().then(
+    (config) => { feedbackEnabled.value = Boolean(config.enabled); },
+    () => {},
+  );
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', onServiceWorkerMessage);
   }
@@ -460,11 +492,12 @@ function onKeydown(event) {
     pickerOpen.value = false;
     menuOpen.value = false;
     installGuideOpen.value = false;
+    feedbackKind.value = null;
     // Tant qu'aucune identité n'est choisie, il n'y a rien derrière à découvrir.
     if (hasIdentity.value) identityOpen.value = false;
     return;
   }
-  if (pickerOpen.value || menuOpen.value || identityOpen.value) return;
+  if (pickerOpen.value || menuOpen.value || identityOpen.value || feedbackKind.value) return;
   if (event.key === 'ArrowRight') step(1);
   if (event.key === 'ArrowLeft') step(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
@@ -651,6 +684,17 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           </optgroup>
         </select>
       </div>
+
+      <!-- Qui fait ce site, et comment le joindre : sans adresse affichée, le serveur relaie. -->
+      <div class="setting stack about" role="group" :aria-label="t('about.section')">
+        <span class="setting-label">{{ t('about.section') }}</span>
+        <p class="toggle-note">{{ t('about.notice') }}</p>
+        <template v-if="feedbackEnabled">
+          <button type="button" role="menuitem" @click="openFeedback('contact')">{{ t('feedback.title.contact') }}</button>
+          <button type="button" role="menuitem" @click="openFeedback('suggestion')">{{ t('feedback.title.suggestion') }}</button>
+          <button type="button" role="menuitem" @click="openFeedback('bug')">{{ t('feedback.title.bug') }}</button>
+        </template>
+      </div>
     </div>
 
     <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
@@ -725,6 +769,17 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <span class="emoji" aria-hidden="true">🎓</span>
       {{ t('app.welcome') }}
     </p>
+
+    <footer v-if="hasIdentity" class="colophon">
+      <span>{{ t('about.notice') }}</span>
+      <template v-if="feedbackEnabled">
+        <button type="button" @click="openFeedback('contact')">{{ t('about.contact') }}</button>
+        <button type="button" @click="openFeedback('suggestion')">{{ t('feedback.title.suggestion') }}</button>
+        <button type="button" @click="openFeedback('bug')">{{ t('feedback.title.bug') }}</button>
+      </template>
+    </footer>
+
+    <FeedbackModal v-if="feedbackKind" :kind="feedbackKind" :context="feedbackContext" @close="feedbackKind = null" />
 
     <!--
       Mode d'emploi, là où le navigateur ne laisse pas la page installer
@@ -1108,6 +1163,32 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   color: var(--text-muted);
 }
 .welcome .emoji { font-size: 1.8rem; }
+
+/* Mentions discrètes en bas de page : présentes pour qui les cherche, sans rien disputer à l'emploi du temps. */
+.colophon {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem 0.9rem;
+  padding: 1.4rem 1rem calc(1rem + var(--safe-bottom));
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-muted);
+}
+.colophon button { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Les boutons de contact se lisent comme les autres entrées du menu. */
+.setting.about > button {
+  margin-inline: -0.7rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  text-align: start;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.setting.about > button:hover { background: var(--bg-sunken); }
 
 /*
  * En-tête d'une colonne comparée : le nom se touche pour changer d'emploi du
