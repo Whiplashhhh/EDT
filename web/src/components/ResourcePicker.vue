@@ -481,7 +481,6 @@ watch(loading, async (busy) => {
       <p class="state">{{ t('picker.chooseCity') }}</p>
       <button v-for="city in cities" :key="city.id" type="button" class="city" @click="setCity(city.id)">
         <span class="name">{{ cityLabel(city) }}</span>
-        <span class="trail">{{ departments.filter((d) => d.city === city.id).map((d) => d.label).join(' · ') }}</span>
       </button>
     </div>
 
@@ -769,22 +768,31 @@ watch(loading, async (busy) => {
 .selection .show { color: var(--bg); background: var(--accent); }
 .selection .show:disabled { opacity: 0.45; cursor: not-allowed; }
 
-/* Choix de la ville : une carte par campus, avec les formations qu'on y trouve. */
-.cities { display: flex; flex-direction: column; gap: 0.35rem; overflow-y: auto; padding: 0 0.15rem; }
+/*
+ * Choix de la ville : une tuile par campus, côte à côte deux par deux. Toutes
+ * doivent tenir à l'écran d'un coup — une carte coupée par le bas laisse croire
+ * qu'il n'y a que trois villes.
+ */
+.cities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  overflow-y: auto;
+  padding: 0 0.15rem;
+}
+.cities .state { grid-column: 1 / -1; }
 .city {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-  padding: 0.65rem 0.75rem;
-  text-align: start;
+  display: grid;
+  place-items: center;
+  min-height: 4.2rem;
+  padding: 0.65rem 0.3rem;
+  text-align: center;
   color: var(--text);
   background: var(--bg-sunken);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
 }
-.city .name { font-weight: 650; font-size: 0.98rem; }
-.city .trail { white-space: normal; line-height: 1.35; }
+.city .name { font-weight: 650; font-size: 0.98rem; white-space: normal; line-height: 1.25; }
 .city:hover { border-color: var(--accent); }
 .city:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
