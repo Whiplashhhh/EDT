@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Тражи наставника…',
   'picker.search.subjects': 'Тражи предмет…',
   'picker.courses': ({ n }) => `${n} часова`,
+  'picker.coursesUntil': ({ date }) => `Број часова планираних до ${date}.`,
   'picker.city': 'Град',
   'picker.chooseCity': 'Изаберите свој град',
   'picker.otherCity': 'Остало',

@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Nemi malami…',
   'picker.search.subjects': 'Nemo darasi…',
   'picker.courses': ({ n }) => `darussa ${n}`,
+  'picker.coursesUntil': ({ date }) => `Adadin darussan da aka tsara har zuwa ${date}.`,
   'picker.city': 'Birni',
   'picker.chooseCity': 'Zaɓi birninka',
   'picker.otherCity': 'Sauran',

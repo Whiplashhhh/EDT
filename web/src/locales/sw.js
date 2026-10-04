@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Tafuta mwalimu…',
   'picker.search.subjects': 'Tafuta somo…',
   'picker.courses': ({ n }) => `masomo ${n}`,
+  'picker.coursesUntil': ({ date }) => `Idadi ya vipindi vilivyopangwa hadi ${date}.`,
   'picker.city': 'Mji',
   'picker.chooseCity': 'Chagua mji wako',
   'picker.otherCity': 'Mingineyo',

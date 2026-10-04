@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'መምህር ፈልግ…',
   'picker.search.subjects': 'ትምህርት ይፈልጉ…',
   'picker.courses': ({ n }) => `${n} ትምህርቶች`,
+  'picker.coursesUntil': ({ date }) => `እስከ ${date} ድረስ የታቀዱ ትምህርቶች።`,
   'picker.city': 'ከተማ',
   'picker.chooseCity': 'ከተማዎን ይምረጡ',
   'picker.otherCity': 'ሌሎች',

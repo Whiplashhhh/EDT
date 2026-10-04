@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Søk etter en lærer…',
   'picker.search.subjects': 'Søk etter et emne…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'time' : 'timer'}`,
+  'picker.coursesUntil': ({ date }) => `Antall undervisningstimer planlagt frem til ${date}.`,
   'picker.city': 'By',
   'picker.chooseCity': 'Velg byen din',
   'picker.otherCity': 'Andre',

@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Търси преподавател…',
   'picker.search.subjects': 'Търсене на дисциплина…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'занятие' : 'занятия'}`,
+  'picker.coursesUntil': ({ date }) => `Брой занятия, планирани до ${date}.`,
   'picker.city': 'Град',
   'picker.chooseCity': 'Изберете своя град',
   'picker.otherCity': 'Други',

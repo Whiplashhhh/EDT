@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Hae opettajaa…',
   'picker.search.subjects': 'Hae opintojaksoa…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'tunti' : 'tuntia'}`,
+  'picker.coursesUntil': ({ date }) => `Suunniteltujen opetuskertojen määrä ${date} asti.`,
   'picker.city': 'Kaupunki',
   'picker.chooseCity': 'Valitse kaupunkisi',
   'picker.otherCity': 'Muut',

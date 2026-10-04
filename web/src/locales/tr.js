@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Öğretim elemanı ara…',
   'picker.search.subjects': 'Ders ara…',
   'picker.courses': ({ n }) => `${n} ders`,
+  'picker.coursesUntil': ({ date }) => `${date} tarihine kadar planlanan ders sayısı.`,
   'picker.city': 'Şehir',
   'picker.chooseCity': 'Şehrini seç',
   'picker.otherCity': 'Diğer',

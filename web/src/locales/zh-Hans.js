@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': '搜索教师…',
   'picker.search.subjects': '搜索课程…',
   'picker.courses': ({ n }) => `${n} 节课`,
+  'picker.coursesUntil': ({ date }) => `截至${date}安排的课程数。`,
   'picker.city': '城市',
   'picker.chooseCity': '选择你的城市',
   'picker.otherCity': '其他',

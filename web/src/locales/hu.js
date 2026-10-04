@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Oktató keresése…',
   'picker.search.subjects': 'Tantárgy keresése…',
   'picker.courses': ({ n }) => `${n} óra`,
+  'picker.coursesUntil': ({ date }) => `A(z) ${date}-ig tervezett órák száma.`,
   'picker.city': 'Város',
   'picker.chooseCity': 'Válaszd ki a városodat',
   'picker.otherCity': 'Egyéb',

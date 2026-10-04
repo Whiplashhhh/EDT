@@ -55,6 +55,7 @@ const fmt = computed(() => ({
   time: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }),
   dayLong: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' }),
   dayShort: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'short' }),
+  dayMonth: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, day: 'numeric', month: 'long' }),
   month: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long' }),
   monthYear: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long', year: 'numeric' }),
 }));
@@ -68,6 +69,8 @@ export function setDateLocale(localeTag, localeId) {
 export const formatTime = (iso) => fmt.value.time.format(new Date(iso));
 export const formatDayLong = (iso) => fmt.value.dayLong.format(new Date(`${iso}T12:00:00Z`));
 export const formatDayShort = (iso) => fmt.value.dayShort.format(new Date(`${iso}T12:00:00Z`)).replace('.', '');
+/** Jour et mois d'un instant ISO : « 28 décembre ». */
+export const formatDayMonth = (iso) => fmt.value.dayMonth.format(new Date(iso));
 export const dayNumber = (iso) => Number(iso.slice(8, 10));
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);

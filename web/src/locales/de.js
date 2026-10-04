@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Lehrkraft suchen…',
   'picker.search.subjects': 'Modul suchen…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'Veranstaltung' : 'Veranstaltungen'}`,
+  'picker.coursesUntil': ({ date }) => `Anzahl der geplanten Veranstaltungen bis ${date}.`,
   'picker.city': 'Stadt',
   'picker.chooseCity': 'Stadt auswählen',
   'picker.otherCity': 'Weitere',

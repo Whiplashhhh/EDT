@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Kërko një pedagog…',
   'picker.search.subjects': 'Kërko një lëndë…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'orë' : 'orë'}`,
+  'picker.coursesUntil': ({ date }) => `Numri i orëve të planifikuara deri më ${date}.`,
   'picker.city': 'Qyteti',
   'picker.chooseCity': 'Zgjidh qytetin tënd',
   'picker.otherCity': 'Të tjera',

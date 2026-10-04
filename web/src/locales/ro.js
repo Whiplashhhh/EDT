@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Caută un profesor…',
   'picker.search.subjects': 'Caută o disciplină…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'curs' : 'cursuri'}`,
+  'picker.coursesUntil': ({ date }) => `Numărul de cursuri programate până la ${date}.`,
   'picker.city': 'Oraș',
   'picker.chooseCity': 'Alege-ți orașul',
   'picker.otherCity': 'Altele',

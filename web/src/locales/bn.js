@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'শিক্ষক খোঁজো…',
   'picker.search.subjects': 'বিষয় খুঁজুন…',
   'picker.courses': ({ n }) => `${n}টি ক্লাস`,
+  'picker.coursesUntil': ({ date }) => `${date} পর্যন্ত নির্ধারিত ক্লাসের সংখ্যা।`,
   'picker.city': 'শহর',
   'picker.chooseCity': 'আপনার শহর বেছে নিন',
   'picker.otherCity': 'অন্যান্য',

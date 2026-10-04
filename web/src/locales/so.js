@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Raadi macallin…',
   'picker.search.subjects': 'Raadi maaddo…',
   'picker.courses': ({ n }) => `${n} cashar`,
+  'picker.coursesUntil': ({ date }) => `Tirada casharrada la qorsheeyay ilaa ${date}.`,
   'picker.city': 'Magaalo',
   'picker.chooseCity': 'Dooro magaaladaada',
   'picker.otherCity': 'Kuwo kale',

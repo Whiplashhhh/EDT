@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Hledat vyučujícího…',
   'picker.search.subjects': 'Hledat předmět…',
   'picker.courses': ({ n }) => `${n} hod.`,
+  'picker.coursesUntil': ({ date }) => `Počet výuk naplánovaných do ${date}.`,
   'picker.city': 'Město',
   'picker.chooseCity': 'Vyberte své město',
   'picker.otherCity': 'Ostatní',

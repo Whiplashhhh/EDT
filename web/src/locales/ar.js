@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'ابحث عن أستاذ…',
   'picker.search.subjects': 'ابحث عن مادة…',
   'picker.courses': ({ n }) => `${n} حصة`,
+  'picker.coursesUntil': ({ date }) => `عدد الحصص المقررة حتى ${date}.`,
   'picker.city': 'المدينة',
   'picker.chooseCity': 'اختر مدينتك',
   'picker.otherCity': 'أخرى',

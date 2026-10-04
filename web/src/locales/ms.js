@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Cari pensyarah…',
   'picker.search.subjects': 'Cari subjek…',
   'picker.courses': ({ n }) => `${n} kelas`,
+  'picker.coursesUntil': ({ date }) => `Bilangan kelas yang dijadualkan sehingga ${date}.`,
   'picker.city': 'Bandar',
   'picker.chooseCity': 'Pilih bandar anda',
   'picker.otherCity': 'Lain-lain',

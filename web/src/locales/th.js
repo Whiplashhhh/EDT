@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'ค้นหาอาจารย์…',
   'picker.search.subjects': 'ค้นหารายวิชา…',
   'picker.courses': ({ n }) => `${n} คาบ`,
+  'picker.coursesUntil': ({ date }) => `จำนวนคาบเรียนที่กำหนดไว้จนถึง ${date}`,
   'picker.city': 'เมือง',
   'picker.chooseCity': 'เลือกเมืองของคุณ',
   'picker.otherCity': 'อื่น ๆ',

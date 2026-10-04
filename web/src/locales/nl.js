@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Zoek een docent…',
   'picker.search.subjects': 'Zoek een vak…',
   'picker.courses': ({ n }) => `${n} ${n === 1 ? 'les' : 'lessen'}`,
+  'picker.coursesUntil': ({ date }) => `Aantal geplande lessen tot ${date}.`,
   'picker.city': 'Stad',
   'picker.chooseCity': 'Kies je stad',
   'picker.otherCity': 'Overige',

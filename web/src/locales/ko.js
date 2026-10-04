@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': '교수 검색…',
   'picker.search.subjects': '과목 검색…',
   'picker.courses': ({ n }) => `수업 ${n}개`,
+  'picker.coursesUntil': ({ date }) => `${date}까지 예정된 수업 수.`,
   'picker.city': '도시',
   'picker.chooseCity': '도시 선택',
   'picker.otherCity': '기타',

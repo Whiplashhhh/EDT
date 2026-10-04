@@ -74,6 +74,7 @@ export default {
   'picker.search.teachers': 'Пошук викладача…',
   'picker.search.subjects': 'Шукати дисципліну…',
   'picker.courses': ({ n }) => `${n} занять`,
+  'picker.coursesUntil': ({ date }) => `Кількість занять, запланованих до ${date}.`,
   'picker.city': 'Місто',
   'picker.chooseCity': 'Обери своє місто',
   'picker.otherCity': 'Інші',
