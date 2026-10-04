@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { errorMessage, t } from '../i18n.js';
+import { searchGroups } from '../search.js';
 import { MAX_SUBJECTS, NO_TEACHER, formatSelection, parseSelection } from '../subjects.js';
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
@@ -118,7 +119,7 @@ const picked = ref((props.kind === 'subjects' && parseSelection(props.resourceId
 function flatten(nodes, trail = []) {
   return nodes.flatMap((node) => {
     const path = [...trail, node.name];
-    return [{ id: node.id, name: node.name, parents: trail, label: path.join(' › ') }, ...flatten(node.children, path)];
+    return [{ id: node.id, name: node.name, parents: trail, root: node.root }, ...flatten(node.children, path)];
   });
 }
 
@@ -126,7 +127,8 @@ const allGroups = computed(() => (catalog.value ? flatten(catalog.value.groups) 
 
 const results = computed(() => {
   const q = query.value.trim().toLowerCase();
-  if (isTree.value) return q ? allGroups.value.filter((g) => g.label.toLowerCase().includes(q)) : [];
+  // Une formation entière ne se choisit pas : elle ne sert qu'à trouver ses classes.
+  if (isTree.value) return searchGroups(allGroups.value, q).filter((g) => !g.root);
   if (isSubjects.value) {
     return entries.value
       .filter((e) => e.department === selectedDept.value && `${e.name} ${e.label}`.toLowerCase().includes(q))
