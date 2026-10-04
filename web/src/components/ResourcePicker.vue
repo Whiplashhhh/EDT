@@ -315,7 +315,8 @@ function setCity(city) {
   // Une formation d'une autre ville n'a plus rien à montrer.
   if (cityOf(selectedDept.value) !== city) selectedDept.value = cityDepartments.value[0]?.id ?? null;
   resetHover();
-  searchInput.value?.focus();
+  // La barre de recherche n'apparaît qu'avec la ville : on attend qu'elle soit là.
+  nextTick(() => searchInput.value?.focus());
 }
 
 function setKind(kind) {
@@ -395,7 +396,6 @@ async function loadResources() {
 }
 
 onMounted(async () => {
-  searchInput.value?.focus();
   try {
     const data = await api.departments();
     cities.value = data.cities;
@@ -406,6 +406,8 @@ onMounted(async () => {
     if (!selectedDept.value || cityOf(selectedDept.value) !== selectedCity.value) {
       selectedDept.value = cityDepartments.value[0]?.id ?? null;
     }
+    // Sans ville connue, rien ne doit masquer les cartes des campus.
+    if (selectedCity.value) nextTick(() => searchInput.value?.focus());
   } catch (err) {
     error.value = errorMessage(err, 'error.network');
   }
@@ -445,9 +447,9 @@ watch(loading, async (busy) => {
       >{{ t(`picker.kind.${option}`) }}</button>
     </div>
 
-    <div class="fields">
+    <!-- Tant que la ville manque, seules ses cartes s'affichent : pas de recherche à l'aveugle. -->
+    <div v-if="selectedCity" class="fields">
       <select
-        v-if="selectedCity"
         :value="selectedCity"
         :aria-label="t('picker.city')"
         @change="setCity($event.target.value)"
@@ -614,7 +616,7 @@ watch(loading, async (busy) => {
 .tabs button:hover { color: var(--text); }
 .tabs button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
 
-.fields { display: flex; gap: 0.4rem; padding: 0 0.15rem 0.45rem; }
+.fields { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 0.15rem 0.45rem; }
 .fields select, .fields input {
   flex: 1;
   min-width: 0;
@@ -626,7 +628,9 @@ watch(loading, async (busy) => {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
 }
-.fields select { flex: 0 1 auto; cursor: pointer; }
+.fields select { flex: 1 1 auto; cursor: pointer; }
+/* La recherche a sa propre ligne, sous la ville et la formation : on y lit ce qu'on tape. */
+.fields input { flex-basis: 100%; }
 /*
   iOS Safari zoome automatiquement sur un champ dont la police fait moins de
   16px, et ne dézoome jamais ensuite. Sur écran tactile on garde donc 16px.
