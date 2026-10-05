@@ -215,7 +215,7 @@ export function snapshotOf(events: CourseEvent[]): Map<string, CourseEvent> {
  * pas comme une suppression suivie d'un ajout.
  *
  * La comparaison porte sur *toute* la fenêtre connue, et le filtrage à la
- * journée en cours et à la suivante n'intervient qu'ensuite (`changesWithin`).
+ * journée concernée n'intervient qu'ensuite (`splitChanges`).
  * Comparer directement deux fenêtres glissantes ferait apparaître comme
  * « ajouté » tout cours que le simple passage du temps fait entrer dans la
  * fenêtre.
@@ -252,29 +252,106 @@ function changeKind(before: CourseEvent, after: CourseEvent): ScheduleChange['ki
 }
 
 /**
- * Fin de la fenêtre des notifications de changement : la fin de la journée de
- * demain, heure de Paris.
+ * Heure à partir de laquelle les changements du lendemain sont annoncés, en
+ * minutes depuis minuit, heure de Paris.
+ *
+ * Dans la journée, seul ce qui bouge aujourd'hui fait sonner le téléphone :
+ * apprendre à 10 h qu'un cours de demain change de salle ne sert à rien, et
+ * l'information serait oubliée d'ici là. Le soir, on prépare le lendemain.
+ */
+export const TOMORROW_CHANGES_FROM = 20 * 60;
+
+/**
+ * Fin de la fenêtre des notifications de changement, heure de Paris : la fin
+ * de la journée en cours, ou celle de demain à partir de 20 h.
  *
  * Une durée fixe ferait varier la portée selon l'heure d'envoi ; une fin de
- * journée se raisonne comme on lit un emploi du temps : ce qui bouge
- * aujourd'hui ou demain.
+ * journée se raisonne comme on lit un emploi du temps.
  */
 export function changeHorizon(now: number): number {
+  const iso = new Date(now).toISOString();
+  const evening = minutesOfDay(iso) >= TOMORROW_CHANGES_FROM;
+  return startOfDay(addDays(dayOf(iso), evening ? 2 : 1));
+}
+
+/**
+ * Limite au-delà de laquelle un changement n'est jamais annoncé : la fin de la
+ * journée de demain. Plus loin, un réaménagement d'emploi du temps n'a pas à
+ * faire sonner un téléphone : il sera vu en ouvrant l'application.
+ */
+function watchHorizon(now: number): number {
   return startOfDay(addDays(dayOf(new Date(now).toISOString()), 2));
 }
 
 /**
- * Ne garde que les changements qui concernent les cours à venir d'ici la fin
- * de la journée de demain. Au-delà, un réaménagement d'emploi du temps n'a pas
- * à faire sonner un téléphone : il sera vu en ouvrant l'application.
+ * Premier horaire encore à venir que touche un changement. Un cours déplacé
+ * concerne son ancien créneau autant que le nouveau : avancé d'aujourd'hui à
+ * demain, il libère un créneau d'aujourd'hui, et c'est aujourd'hui qu'il faut
+ * le savoir. Pour une suppression, c'est l'horaire qu'avait le cours qui compte.
  */
-export function changesWithin(changes: ScheduleChange[], now: number): ScheduleChange[] {
+function nextStartOf(change: ScheduleChange, now: number): number | null {
+  const starts = [change.event.start, change.previous?.start]
+    .filter((start): start is string => start !== undefined)
+    .map((start) => Date.parse(start))
+    .filter((start) => start > now);
+  return starts.length > 0 ? Math.min(...starts) : null;
+}
+
+/**
+ * Trie des changements selon le moment de les annoncer :
+ *
+ * - `due` : à annoncer maintenant, car ils touchent un cours d'ici la fin de
+ *   la fenêtre (`changeHorizon`) ;
+ * - `deferred` : ils touchent un cours de demain, mais il n'est pas encore
+ *   20 h. Le planificateur les garde de côté et les annonce le soir venu.
+ *
+ * Le reste — cours passés, ou au-delà de demain — est abandonné.
+ */
+export function splitChanges(
+  changes: ScheduleChange[],
+  now: number,
+): { due: ScheduleChange[]; deferred: ScheduleChange[] } {
   const horizon = changeHorizon(now);
-  return changes
-    .filter((change) => {
-      // Pour une suppression, c'est l'horaire qu'avait le cours qui compte.
-      const start = Date.parse(change.event.start);
-      return start > now && start <= horizon;
-    })
-    .sort((a, b) => a.event.start.localeCompare(b.event.start));
+  const limit = watchHorizon(now);
+  const due: ScheduleChange[] = [];
+  const deferred: ScheduleChange[] = [];
+  for (const change of changes) {
+    const start = nextStartOf(change, now);
+    if (start === null || start >= limit) continue;
+    (start < horizon ? due : deferred).push(change);
+  }
+  due.sort((a, b) => a.event.start.localeCompare(b.event.start));
+  return { due, deferred };
+}
+
+/** Changements à annoncer maintenant (voir `splitChanges`). */
+export function changesWithin(changes: ScheduleChange[], now: number): ScheduleChange[] {
+  return splitChanges(changes, now).due;
+}
+
+/**
+ * Ajoute de nouveaux changements à ceux qui attendent encore d'être annoncés.
+ *
+ * Un même cours modifié deux fois avant 20 h ne doit donner qu'une
+ * notification, qui va de l'état d'origine — le dernier que l'abonné a pu
+ * voir — à l'état actuel. Et un cours qui revient à son état d'origine
+ * n'annonce plus rien.
+ */
+export function mergeChanges(older: ScheduleChange[], newer: ScheduleChange[]): ScheduleChange[] {
+  const byUid = new Map<string, ScheduleChange | null>(older.map((change) => [change.event.uid, change]));
+  for (const change of newer) {
+    const first = byUid.get(change.event.uid);
+    byUid.set(change.event.uid, first ? combine(first, change) : change);
+  }
+  return [...byUid.values()].filter((change): change is ScheduleChange => change !== null);
+}
+
+/** Les deux changements successifs d'un même cours, résumés en un seul (ou en rien). */
+function combine(first: ScheduleChange, then: ScheduleChange): ScheduleChange | null {
+  // L'état d'avant le premier changement ; `null` si le cours n'existait pas.
+  const origin = first.kind === 'added' ? null : first.kind === 'removed' ? first.event : (first.previous ?? null);
+  if (then.kind === 'removed') return origin ? { kind: 'removed', event: origin } : null;
+  if (!origin) return { kind: 'added', event: then.event };
+  if (fingerprint(origin) === fingerprint(then.event)) return null;
+  return { kind: changeKind(origin, then.event), event: then.event, previous: origin };
 }
