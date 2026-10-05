@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} ändern`,
   'compare.close': ({ name }) => `${name} ausblenden`,
 
+  'share.view': 'Diesen Stundenplan teilen',
+  'share.department': 'Link zum ganzen Studiengang teilen',
+  'share.received': 'Geteilter Link',
+  'share.yes': 'Ja, das ist mein Kurs',
+  'share.orPick': 'In einer bestimmten Praktikumsgruppe oder nicht dein Kurs? Wähle unten deinen eigenen.',
+  'share.pickInPromo': 'Wähle unten deine Übungs- oder Praktikumsgruppe.',
+  'share.pickFirst': ({ name }) => `Wähle zuerst deinen Kurs oder, wenn du unterrichtest, deinen Namen: danach erscheint ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Wähle deinen Kurs im Studiengang ${name}.`,
+
   'install.short': 'Installieren',
   'install.title': 'Zum Home-Bildschirm hinzufügen',
   'install.close': 'Schließen',

@@ -6,6 +6,7 @@ import { formatDayMonth } from '../dates.js';
 import { searchGroups } from '../search.js';
 import { useScrollThumb } from '../composables/useScrollThumb.js';
 import { MAX_SUBJECTS, NO_TEACHER, formatSelection, parseSelection } from '../subjects.js';
+import { selectionName } from '../share.js';
 
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 /**
@@ -35,6 +36,8 @@ const props = defineProps({
   resourceId: { type: [Number, String], default: null },
   /** Choix de l'identité : classe ou enseignant seulement, et un autre texte d'aide. */
   identityMode: { type: Boolean, default: false },
+  /** Déplie aussi la classe courante : un lien reçu vers une promo montre ses TD. */
+  openCurrent: { type: Boolean, default: false },
 });
 const emit = defineEmits(['choose', 'close']);
 
@@ -398,12 +401,6 @@ const pickedPerDept = computed(() => {
   return counts;
 });
 
-/** Une ressource seule se nomme en entier ; plusieurs, par leurs seuls codes. */
-function selectionName(list) {
-  if (list.length === 1) return [list[0].name, list[0].label].filter(Boolean).join(' ');
-  return list.map((e) => e.name).join(', ');
-}
-
 function showPicked() {
   const list = pickedEntries.value;
   if (!list.length) return;
@@ -477,7 +474,9 @@ async function loadResources() {
       nodeDept.value = owner;
       catalog.value = { groups: roots };
       // À l'ouverture : la branche de la classe déjà choisie, et elle seule.
-      const open = new Set(ancestors.value.get(props.resourceId) ?? []);
+      // Sans classe — un lien vers toute une formation —, la formation elle-même.
+      const open = new Set(ancestors.value.get(props.resourceId) ?? [`dept:${props.department}`]);
+      if (props.openCurrent && nodeById.value.get(props.resourceId)?.children.length) open.add(props.resourceId);
       expanded.value = open;
       resetHover();
     } else {
@@ -537,11 +536,15 @@ useScrollThumb(root, thumb, '.tree, .cities');
 watch(loading, async (busy) => {
   if (busy) return;
   await nextTick();
-  const row = root.value?.querySelector('.tree .current');
+  const tree = root.value?.querySelector('.tree');
+  // Sans choix en cours, la formation dépliée à l'ouverture.
+  const deptRow = isTree.value ? tree?.children[visible.value.findIndex((n) => n.id === `dept:${props.department}`)] : null;
+  const row = tree?.querySelector('.current') ?? deptRow;
   const list = row?.closest('.tree');
   if (!list) return;
   const offset = row.getBoundingClientRect().top - list.getBoundingClientRect().top;
-  list.scrollTop += offset - (list.clientHeight - row.offsetHeight) / 2;
+  // La formation se cale en haut, ses classes dessous ; un choix en cours, au milieu.
+  list.scrollTop += offset - (row === deptRow ? 0 : (list.clientHeight - row.offsetHeight) / 2);
 });
 </script>
 

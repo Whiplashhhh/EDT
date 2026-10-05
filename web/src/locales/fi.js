@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Vaihda ${name}`,
   'compare.close': ({ name }) => `Piilota ${name}`,
 
+  'share.view': 'Jaa tämä lukujärjestys',
+  'share.department': 'Jaa linkki koko koulutusohjelmaan',
+  'share.received': 'Jaettu linkki',
+  'share.yes': 'Kyllä, tämä on ryhmäni',
+  'share.orPick': 'Oletko tietyssä laboratorioryhmässä, vai eikö tämä ole ryhmäsi? Valitse omasi alta.',
+  'share.pickInPromo': 'Valitse alta harjoitus- tai laboratorioryhmäsi.',
+  'share.pickFirst': ({ name }) => `Valitse ensin ryhmäsi, tai nimesi jos opetat: sen jälkeen näytetään ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Valitse ryhmäsi koulutusohjelmasta ${name}.`,
+
   'install.short': 'Asenna',
   'install.title': 'Lisää Koti-valikkoon',
   'install.close': 'Sulje',

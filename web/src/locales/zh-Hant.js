@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `更換 ${name}`,
   'compare.close': ({ name }) => `不再顯示 ${name}`,
 
+  'share.view': '分享此課表',
+  'share.department': '分享整個學程的連結',
+  'share.received': '收到的連結',
+  'share.yes': '是的，這是我的班級',
+  'share.orPick': '你在某個實驗小組，或者這不是你的班級？請在下方選擇你的班級。',
+  'share.pickInPromo': '請在下方選擇你的習題課小組或實驗小組。',
+  'share.pickFirst': ({ name }) => `請先選擇你的班級；如果你是授課教師，請選擇自己的姓名。隨後將顯示 ${name}。`,
+  'share.pickInDepartment': ({ name }) => `請從 ${name} 的班級中選擇你的班級。`,
+
   'install.short': '安裝',
   'install.title': '加入主畫面',
   'install.close': '關閉',

@@ -14,6 +14,7 @@ import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
+import { readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
 
 const THEMES = ['system', 'light', 'dark'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -50,16 +51,42 @@ const viewingOther = computed(() => {
  * ramener indéfiniment à ce jour-là.
  */
 function dayFromUrl() {
-  const day = new URLSearchParams(location.search).get('day');
-  if (!day || !DAY_RE.test(day)) return null;
-  history.replaceState(null, '', location.pathname);
-  return day;
+  const params = new URLSearchParams(location.search);
+  const day = params.get('day');
+  if (!day) return null;
+  params.delete('day');
+  // Le reste de l'adresse — un lien partagé — n'est pas à nous : on le laisse.
+  const rest = params.toString();
+  history.replaceState(null, '', rest ? `${location.pathname}?${rest}` : location.pathname);
+  return DAY_RE.test(day) ? day : null;
 }
 const requestedDay = dayFromUrl();
+
+/*
+ * Lien partagé (voir `share.js`). Qui a déjà son emploi du temps voit tout de
+ * suite celui du lien — son identité, et donc ses notifications, n'en bougent
+ * pas. Un lien vers une formation entière ouvre seulement le sélecteur dessus.
+ * Le nom arrive avec la vérification du lien ; si le lien ne mène plus à rien,
+ * on revient à ce qu'on regardait.
+ */
+const sharedLink = readShareLink(location.search);
+const settingsBeforeLink = settings.value;
+if (sharedLink?.kind && settings.value.identity) {
+  settings.value = { ...settings.value, ...sharedLink, resourceName: null };
+}
 
 const focusedDay = ref(requestedDay ?? today());
 /** Choix de l'identité. Bloquant tant qu'elle n'est pas faite. */
 const identityOpen = ref(!settings.value.identity);
+
+/**
+ * Lien reçu avant d'avoir choisi son identité : la fenêtre d'identité le
+ * présente et ouvre l'arbre dessus. Une fois l'identité choisie, c'est lui qui
+ * s'affiche, sauf si l'on a choisi sa classe dedans.
+ */
+const invite = ref(null);
+/** On ne propose « c'est ma classe » que pour un TD ou un TP : une promo entière n'est la classe de personne. */
+const inviteConfirmable = computed(() => invite.value?.kind === 'groups' && invite.value.depth >= 2);
 
 /*
  * Zone réellement visible de la page. Sur iPhone, le clavier recouvre le bas
@@ -293,6 +320,7 @@ let currentDay = today();
 
 onMounted(() => {
   reloadAll();
+  applySharedLink();
   // L'état « cours en cours » se rafraîchit sans recharger les données.
   ticker = setInterval(() => {
     now.value = Date.now();
@@ -330,6 +358,7 @@ onUnmounted(() => {
   clearInterval(ticker);
   clearInterval(refresher);
   clearTimeout(copiedTimer);
+  clearTimeout(shareTimer);
   document.removeEventListener('visibilitychange', onVisible);
   window.visualViewport?.removeEventListener('resize', measureVisibleArea);
   window.visualViewport?.removeEventListener('scroll', measureVisibleArea);
@@ -357,7 +386,12 @@ function onVisible() {
 
 /** Colonne que le sélecteur remplace : l'affichage principal, ou celle de droite. */
 const pickerTarget = ref('main');
-const pickerCurrent = computed(() => (pickerTarget.value === 'compare' && compare.value ? compare.value : settings.value));
+/** Point de départ imposé au sélecteur — une formation reçue par lien —, le temps d'une ouverture. */
+const pickerSeed = ref(null);
+const pickerCurrent = computed(() =>
+  pickerSeed.value ?? (pickerTarget.value === 'compare' && compare.value ? compare.value : settings.value),
+);
+watch(pickerOpen, (open) => { if (!open) pickerSeed.value = null; });
 
 function openPicker(target) {
   pickerTarget.value = target;
@@ -395,11 +429,93 @@ function closeColumn(side) {
  */
 function chooseIdentity({ department: dept, kind: pickedKind, resourceId: id, resourceName }) {
   const mine = { department: dept, kind: pickedKind, resourceId: id, resourceName };
-  settings.value = { ...settings.value, identity: mine, ...mine };
+  const link = invite.value;
+  invite.value = null;
+  // Sa classe trouvée dans celle du lien précise le lien : c'est la sienne qu'on montre.
+  const refines = link?.kind === 'groups' && pickedKind === 'groups' && dept === link.department && link.subtree.has(id);
+  const shown = link?.kind && !refines
+    ? { department: link.department, kind: link.kind, resourceId: link.resourceId, resourceName: link.resourceName }
+    : mine;
+  settings.value = { ...settings.value, identity: mine, ...shown };
   writeSettings(settings.value);
   identityOpen.value = false;
   menuOpen.value = false;
   focusedDay.value = today();
+}
+
+function confirmInvite() {
+  const link = invite.value;
+  chooseIdentity({ department: link.department, kind: link.kind, resourceId: link.resourceId, resourceName: link.resourceName });
+}
+
+async function applySharedLink() {
+  if (!sharedLink) return;
+  let link = null;
+  try {
+    link = await resolveShareLink(sharedLink);
+  } catch {
+    // Hors ligne ou serveur indisponible : le lien est ignoré.
+  }
+  // Lien mort, ou classe disparue d'ADE : on retrouve ce qu'on regardait avant.
+  if (!link?.kind && sharedLink.kind && settings.value.identity) settings.value = settingsBeforeLink;
+  if (!link) return;
+  if (!settings.value.identity) {
+    invite.value = link;
+    return;
+  }
+  if (!link.kind) {
+    pickerSeed.value = { department: link.department, kind: 'groups', resourceId: null };
+    openPicker('main');
+    return;
+  }
+  settings.value = { ...settings.value, resourceName: link.resourceName };
+  writeSettings(settings.value);
+}
+
+/*
+ * L'adresse suit ce qu'on regarde : la copier depuis le navigateur suffit à
+ * partager, et une page rechargée rouvre au même endroit.
+ */
+watch(
+  () => [settings.value.identity, settings.value.department, settings.value.kind, settings.value.resourceId],
+  ([mine, dept, viewedKind, id]) => {
+    // Avant l'identité, l'adresse garde le lien reçu : il reste à présenter.
+    if (!mine || !dept || !id) return;
+    const path = sharePath({ department: dept, kind: viewedKind, resourceId: id });
+    if (`${location.pathname}${location.search}` !== path) history.replaceState(null, '', path);
+  },
+  { immediate: true },
+);
+
+/**
+ * Partage : la feuille de partage du téléphone quand elle existe, sinon le
+ * presse-papiers. `what` dit ce qu'on partage — l'emploi du temps affiché, ou
+ * toute sa formation pour que chacun y trouve sa classe.
+ */
+const shareCopied = ref(null);
+let shareTimer;
+async function share(what) {
+  const s = settings.value;
+  const target = what === 'department' ? { department: s.department } : s;
+  const url = shareUrl(target);
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: what === 'department' ? t('share.department') : s.resourceName, url });
+      menuOpen.value = false;
+    } catch {
+      // Partage annulé : rien à faire.
+    }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    window.prompt(t('share.view'), url);
+    return;
+  }
+  shareCopied.value = what;
+  clearTimeout(shareTimer);
+  shareTimer = setTimeout(() => { shareCopied.value = null; }, 2500);
 }
 
 /** Ramène l'affichage sur son propre emploi du temps, sans changer de jour. */
@@ -614,6 +730,12 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <a v-if="webcalUrl" role="menuitem" :href="webcalUrl">{{ t('app.subscribe') }}</a>
       <button v-if="calendarUrl" type="button" role="menuitem" @click="copyCalendarLink">
         {{ linkCopied ? t('app.linkCopied') : t('app.copyCalendarLink') }}
+      </button>
+      <button v-if="settings.resourceId" type="button" role="menuitem" @click="share('view')">
+        {{ shareCopied === 'view' ? t('app.linkCopied') : t('share.view') }}
+      </button>
+      <button v-if="settings.kind === 'groups' && settings.department" type="button" role="menuitem" @click="share('department')">
+        {{ shareCopied === 'department' ? t('app.linkCopied') : t('share.department') }}
       </button>
       <button type="button" role="menuitem" @click="reloadAll(true); menuOpen = false">{{ t('app.refresh') }}</button>
 
@@ -861,8 +983,26 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         <div class="gate-head">
           <div>
             <h1 class="gate-title">{{ t('gate.title') }}</h1>
-            <p class="gate-intro">{{ t('gate.intro') }}</p>
-            <p class="gate-intro">{{ t('gate.subjects') }}</p>
+            <!-- Un lien reçu : on dit ce qu'il montre, et ce qu'on attend avant de l'afficher. -->
+            <div v-if="invite" class="invite">
+              <template v-if="invite.kind">
+                <p class="invite-name">
+                  <span class="invite-label">{{ t('share.received') }}</span>
+                  {{ invite.resourceName }}
+                </p>
+                <template v-if="inviteConfirmable">
+                  <button class="invite-yes" type="button" @click="confirmInvite">{{ t('share.yes') }}</button>
+                  <p class="gate-intro">{{ t('share.orPick') }}</p>
+                </template>
+                <p v-else-if="invite.kind === 'groups'" class="gate-intro">{{ t('share.pickInPromo') }}</p>
+                <p v-else class="gate-intro">{{ t('share.pickFirst', { name: invite.resourceName }) }}</p>
+              </template>
+              <p v-else class="gate-intro">{{ t('share.pickInDepartment', { name: invite.departmentLabel }) }}</p>
+            </div>
+            <template v-else>
+              <p class="gate-intro">{{ t('gate.intro') }}</p>
+              <p class="gate-intro">{{ t('gate.subjects') }}</p>
+            </template>
           </div>
           <button
             v-if="hasIdentity"
@@ -873,11 +1013,14 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           >✕</button>
         </div>
 
+        <!-- Un lien reçu ouvre l'arbre sur sa formation, et sur sa classe s'il en désigne une. -->
         <ResourcePicker
+          :key="invite ? 'invite' : 'identity'"
           identity-mode
-          :department="identity?.department ?? settings.department"
-          :kind="identity?.kind ?? settings.kind"
-          :resource-id="identity?.resourceId ?? null"
+          :department="invite ? invite.department : identity?.department ?? settings.department"
+          :kind="invite ? 'groups' : identity?.kind ?? settings.kind"
+          :resource-id="invite?.kind === 'groups' ? invite.resourceId : identity?.resourceId ?? null"
+          :open-current="Boolean(invite)"
           @choose="chooseIdentity"
           @close="hasIdentity && (identityOpen = false)"
         />
@@ -1160,6 +1303,21 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .gate-title { margin: 0 0 0.2rem; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
 .gate-intro + .gate-intro { margin-top: 0.35rem; }
 .gate-intro { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-muted); }
+
+/* Lien reçu : ce qu'il montre en évidence, puis la confirmation ou l'arbre. */
+.invite { display: flex; flex-direction: column; align-items: flex-start; gap: 0.45rem; margin-top: 0.3rem; }
+.invite .gate-intro + .gate-intro { margin-top: 0; }
+.invite-name { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+.invite-label { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.invite-yes {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 999px;
+}
+.invite-yes:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .gate-why { margin: 0; font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
 
 /*

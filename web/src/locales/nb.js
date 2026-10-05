@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Bytt ${name}`,
   'compare.close': ({ name }) => `Skjul ${name}`,
 
+  'share.view': 'Del denne timeplanen',
+  'share.department': 'Del en lenke til hele studieprogrammet',
+  'share.received': 'Delt lenke',
+  'share.yes': 'Ja, dette er klassen min',
+  'share.orPick': 'Er du i en bestemt labgruppe, eller er det ikke klassen din? Velg din nedenfor.',
+  'share.pickInPromo': 'Velg øvings- eller labgruppen din nedenfor.',
+  'share.pickFirst': ({ name }) => `Velg først klassen din, eller navnet ditt hvis du underviser: deretter vises ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Velg klassen din i ${name}.`,
+
   'install.short': 'Installer',
   'install.title': 'Legg til på Hjem-skjerm',
   'install.close': 'Lukk',

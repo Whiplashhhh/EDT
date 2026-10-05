@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `تغيير ${name}`,
   'compare.close': ({ name }) => `إخفاء ${name}`,
 
+  'share.view': 'مشاركة هذا الجدول',
+  'share.department': 'مشاركة رابط التخصص بأكمله',
+  'share.received': 'رابط مُشارَك',
+  'share.yes': 'نعم، هذا فوجي',
+  'share.orPick': 'هل أنت في فوج أعمال تطبيقية محدد، أو ليس هذا فوجك؟ اختر فوجك أدناه.',
+  'share.pickInPromo': 'اختر فوجك للأعمال الموجهة أو للأعمال التطبيقية أدناه.',
+  'share.pickFirst': ({ name }) => `اختر فوجك أولًا، أو اسمك إن كنت تُدرّس: سيُعرض ${name} بعد ذلك.`,
+  'share.pickInDepartment': ({ name }) => `اختر فوجك من بين أفواج ${name}.`,
+
   'install.short': 'تثبيت',
   'install.title': 'إضافة إلى الشاشة الرئيسية',
   'install.close': 'إغلاق',

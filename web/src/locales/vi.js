@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Đổi ${name}`,
   'compare.close': ({ name }) => `Ẩn ${name}`,
 
+  'share.view': 'Chia sẻ thời khoá biểu này',
+  'share.department': 'Chia sẻ liên kết của cả chương trình',
+  'share.received': 'Liên kết được chia sẻ',
+  'share.yes': 'Đúng, đây là lớp của tôi',
+  'share.orPick': 'Bạn thuộc một nhóm thực hành cụ thể, hoặc đây không phải lớp của bạn? Hãy chọn lớp của bạn bên dưới.',
+  'share.pickInPromo': 'Hãy chọn nhóm bài tập hoặc nhóm thực hành của bạn bên dưới.',
+  'share.pickFirst': ({ name }) => `Trước tiên hãy chọn lớp của bạn, hoặc tên mình nếu bạn giảng dạy: sau đó ${name} sẽ hiện ra.`,
+  'share.pickInDepartment': ({ name }) => `Hãy chọn lớp của bạn trong ${name}.`,
+
   'install.short': 'Cài đặt',
   'install.title': 'Thêm vào Màn hình chính',
   'install.close': 'Đóng',

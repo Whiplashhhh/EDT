@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Skift ${name}`,
   'compare.close': ({ name }) => `Skjul ${name}`,
 
+  'share.view': 'Del dette skema',
+  'share.department': 'Del et link til hele uddannelsen',
+  'share.received': 'Delt link',
+  'share.yes': 'Ja, det er mit hold',
+  'share.orPick': 'Er du på et bestemt laboratoriehold, eller er det ikke dit hold? Vælg dit nedenfor.',
+  'share.pickInPromo': 'Vælg dit øvelses- eller laboratoriehold nedenfor.',
+  'share.pickFirst': ({ name }) => `Vælg først dit hold, eller dit navn hvis du underviser: derefter vises ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Vælg dit hold blandt holdene på ${name}.`,
+
   'install.short': 'Installer',
   'install.title': 'Føj til hjemmeskærm',
   'install.close': 'Luk',

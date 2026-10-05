@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} ቀይር`,
   'compare.close': ({ name }) => `${name} ደብቅ`,
 
+  'share.view': 'ይህን መርሐግብር አጋራ',
+  'share.department': 'የሙሉውን የትምህርት መርሐግብር ዘርፍ አገናኝ አጋራ',
+  'share.received': 'የተጋራ አገናኝ',
+  'share.yes': 'አዎ፣ ይህ የእኔ ክፍል ነው',
+  'share.orPick': 'በተለየ የተግባር ቡድን ውስጥ ነህ ወይስ ይህ ክፍልህ አይደለም? ከታች የራስህን ምረጥ።',
+  'share.pickInPromo': 'ከታች የማጠናከሪያ ወይም የተግባር ቡድንህን ምረጥ።',
+  'share.pickFirst': ({ name }) => `መጀመሪያ ክፍልህን ምረጥ፣ የምታስተምር ከሆነ ደግሞ ስምህን ምረጥ፤ ከዚያ ${name} ይታያል።`,
+  'share.pickInDepartment': ({ name }) => `ከ${name} ክፍሎች መካከል ክፍልህን ምረጥ።`,
+
   'install.short': 'ጫን',
   'install.title': 'ወደ መነሻ ማያ ገጽ አክል',
   'install.close': 'ዝጋ',

@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Change ${name}`,
   'compare.close': ({ name }) => `Stop showing ${name}`,
 
+  'share.view': 'Share this timetable',
+  'share.department': 'Share a link to the whole programme',
+  'share.received': 'Shared link',
+  'share.yes': 'Yes, this is my class',
+  'share.orPick': 'In a specific lab group, or not your class? Pick yours below.',
+  'share.pickInPromo': 'Pick your tutorial or lab group below.',
+  'share.pickFirst': ({ name }) => `First pick your class, or your name if you teach: ${name} will show next.`,
+  'share.pickInDepartment': ({ name }) => `Pick your class from ${name}.`,
+
   'install.short': 'Install',
   'install.title': 'Add to Home Screen',
   'install.close': 'Close',

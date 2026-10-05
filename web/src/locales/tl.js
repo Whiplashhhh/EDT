@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Palitan ang ${name}`,
   'compare.close': ({ name }) => `Itago ang ${name}`,
 
+  'share.view': 'Ibahagi ang iskedyul na ito',
+  'share.department': 'Ibahagi ang link ng buong programa',
+  'share.received': 'Ibinahaging link',
+  'share.yes': 'Oo, ito ang klase ko',
+  'share.orPick': 'Nasa isang partikular na lab group ka ba, o hindi ito ang klase mo? Piliin ang sa iyo sa ibaba.',
+  'share.pickInPromo': 'Piliin ang iyong tutorial o lab group sa ibaba.',
+  'share.pickFirst': ({ name }) => `Piliin muna ang iyong klase, o ang iyong pangalan kung nagtuturo ka: pagkatapos ay lalabas ang ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Piliin ang iyong klase mula sa ${name}.`,
+
   'install.short': 'I-install',
   'install.title': 'Idagdag sa Home Screen',
   'install.close': 'Isara',

@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} を変更`,
   'compare.close': ({ name }) => `${name} を非表示`,
 
+  'share.view': 'この時間割を共有',
+  'share.department': '課程全体のリンクを共有',
+  'share.received': '共有されたリンク',
+  'share.yes': 'はい、自分のクラスです',
+  'share.orPick': '特定の実験グループに所属している場合や、自分のクラスでない場合は、下から自分のクラスを選んでください。',
+  'share.pickInPromo': '下から演習グループまたは実験グループを選んでください。',
+  'share.pickFirst': ({ name }) => `まず自分のクラスを選んでください（教えている場合は自分の名前）。その後 ${name} が表示されます。`,
+  'share.pickInDepartment': ({ name }) => `${name} のクラスから自分のクラスを選んでください。`,
+
   'install.short': 'インストール',
   'install.title': 'ホーム画面に追加',
   'install.close': '閉じる',

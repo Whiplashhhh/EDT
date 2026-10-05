@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Změnit ${name}`,
   'compare.close': ({ name }) => `Skrýt ${name}`,
 
+  'share.view': 'Sdílet tento rozvrh',
+  'share.department': 'Sdílet odkaz na celý studijní program',
+  'share.received': 'Sdílený odkaz',
+  'share.yes': 'Ano, to je moje skupina',
+  'share.orPick': 'Jsi v konkrétní skupině cvičení, nebo to není tvoje skupina? Vyber tu svou níže.',
+  'share.pickInPromo': 'Níže vyber svou skupinu pro semináře nebo cvičení.',
+  'share.pickFirst': ({ name }) => `Nejdřív vyber svou skupinu, nebo své jméno, pokud učíš: potom se zobrazí ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Vyber svou skupinu ze studijního programu ${name}.`,
+
   'install.short': 'Nainstalovat',
   'install.title': 'Přidat na plochu',
   'install.close': 'Zavřít',

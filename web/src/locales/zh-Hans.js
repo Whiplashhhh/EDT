@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `更换 ${name}`,
   'compare.close': ({ name }) => `不再显示 ${name}`,
 
+  'share.view': '分享此课程表',
+  'share.department': '分享整个专业的链接',
+  'share.received': '收到的链接',
+  'share.yes': '是的，这是我的班级',
+  'share.orPick': '你在某个实验小组，或者这不是你的班级？请在下方选择你的班级。',
+  'share.pickInPromo': '请在下方选择你的习题课小组或实验小组。',
+  'share.pickFirst': ({ name }) => `请先选择你的班级；如果你是任课教师，请选择自己的姓名。随后将显示 ${name}。`,
+  'share.pickInDepartment': ({ name }) => `请从 ${name} 的班级中选择你的班级。`,
+
   'install.short': '安装',
   'install.title': '添加到主屏幕',
   'install.close': '关闭',

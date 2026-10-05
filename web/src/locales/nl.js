@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} wijzigen`,
   'compare.close': ({ name }) => `${name} niet meer tonen`,
 
+  'share.view': 'Dit rooster delen',
+  'share.department': 'Link naar de hele opleiding delen',
+  'share.received': 'Gedeelde link',
+  'share.yes': 'Ja, dit is mijn klas',
+  'share.orPick': 'Zit je in een specifieke practicumgroep, of is dit niet je klas? Kies hieronder je eigen klas.',
+  'share.pickInPromo': 'Kies hieronder je werkcollege- of practicumgroep.',
+  'share.pickFirst': ({ name }) => `Kies eerst je klas, of je naam als je lesgeeft: daarna wordt ${name} getoond.`,
+  'share.pickInDepartment': ({ name }) => `Kies je klas binnen ${name}.`,
+
   'install.short': 'Installeren',
   'install.title': 'Zet op beginscherm',
   'install.close': 'Sluiten',

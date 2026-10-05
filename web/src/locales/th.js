@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `เปลี่ยน ${name}`,
   'compare.close': ({ name }) => `ซ่อน ${name}`,
 
+  'share.view': 'แชร์ตารางเรียนนี้',
+  'share.department': 'แชร์ลิงก์ของทั้งหลักสูตร',
+  'share.received': 'ลิงก์ที่ได้รับ',
+  'share.yes': 'ใช่ นี่คือชั้นเรียนของฉัน',
+  'share.orPick': 'อยู่ในกลุ่มปฏิบัติการเฉพาะ หรือนี่ไม่ใช่ชั้นเรียนของคุณ? เลือกของคุณด้านล่าง',
+  'share.pickInPromo': 'เลือกกลุ่มติวหรือกลุ่มปฏิบัติการของคุณด้านล่าง',
+  'share.pickFirst': ({ name }) => `เลือกชั้นเรียนของคุณก่อน หรือเลือกชื่อของคุณหากคุณเป็นผู้สอน จากนั้นจะแสดง ${name}`,
+  'share.pickInDepartment': ({ name }) => `เลือกชั้นเรียนของคุณจากหลักสูตร ${name}`,
+
   'install.short': 'ติดตั้ง',
   'install.title': 'เพิ่มไปยังหน้าจอโฮม',
   'install.close': 'ปิด',

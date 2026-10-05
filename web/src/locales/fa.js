@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `تغییر ${name}`,
   'compare.close': ({ name }) => `پنهان کردن ${name}`,
 
+  'share.view': 'هم‌رسانی این برنامه',
+  'share.department': 'هم‌رسانی پیوند کل رشته',
+  'share.received': 'پیوند دریافتی',
+  'share.yes': 'بله، این کلاس من است',
+  'share.orPick': 'در یک گروه آزمایشگاهی مشخص هستی یا این کلاس تو نیست؟ کلاس خودت را در پایین انتخاب کن.',
+  'share.pickInPromo': 'گروه حل تمرین یا آزمایشگاهت را در پایین انتخاب کن.',
+  'share.pickFirst': ({ name }) => `اول کلاست را انتخاب کن، یا اگر تدریس می‌کنی نامت را: بعد ${name} نمایش داده می‌شود.`,
+  'share.pickInDepartment': ({ name }) => `کلاست را از میان کلاس‌های ${name} انتخاب کن.`,
+
   'install.short': 'نصب',
   'install.title': 'افزودن به صفحهٔ اصلی',
   'install.close': 'بستن',

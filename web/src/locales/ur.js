@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} بدلیں`,
   'compare.close': ({ name }) => `${name} چھپائیں`,
 
+  'share.view': 'یہ ٹائم ٹیبل شیئر کریں',
+  'share.department': 'پورے پروگرام کا لنک شیئر کریں',
+  'share.received': 'شیئر کیا گیا لنک',
+  'share.yes': 'جی ہاں، یہ میری کلاس ہے',
+  'share.orPick': 'کسی مخصوص لیب گروپ میں ہیں، یا یہ آپ کی کلاس نہیں؟ نیچے اپنی کلاس منتخب کریں۔',
+  'share.pickInPromo': 'نیچے اپنا ٹیوٹوریل یا لیب گروپ منتخب کریں۔',
+  'share.pickFirst': ({ name }) => `پہلے اپنی کلاس منتخب کریں، یا اگر آپ پڑھاتے ہیں تو اپنا نام: اس کے بعد ${name} دکھایا جائے گا۔`,
+  'share.pickInDepartment': ({ name }) => `${name} کی کلاسوں میں سے اپنی کلاس منتخب کریں۔`,
+
   'install.short': 'انسٹال کریں',
   'install.title': 'ہوم اسکرین پر شامل کریں',
   'install.close': 'بند کریں',
