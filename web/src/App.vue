@@ -11,7 +11,7 @@ import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
 import { useEventDetail } from './composables/useEventDetail.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
-import { addDays, formatDayLong, mondayOf, today } from './dates.js';
+import { addDays, formatDayLong, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
 
@@ -116,7 +116,14 @@ const feedbackContext = computed(() => ({
   screen: `${window.innerWidth}×${window.innerHeight}`,
 }));
 
-const { eventsByDay, grid, loading, error, stale, load } = useSchedule(department, kind, resourceId, focusedDay);
+const { eventsByDay, grid, loading, error, stale, outdated, load } = useSchedule(department, kind, resourceId, focusedDay);
+/* Un emploi du temps qui n'est plus à jour reste un emploi du temps : on le dit
+   sans alarmer, et l'on garde le rouge pour quand il n'y a rien à montrer. */
+const outdatedText = computed(() =>
+  outdated.value
+    ? t(outdated.value.reason === 'ade' ? 'app.adeDown' : 'app.offline', { time: formatStamp(outdated.value.fetchedAt) })
+    : null,
+);
 
 /*
  * Comparaison : un second emploi du temps, affiché à droite du premier en vue
@@ -743,6 +750,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       </div>
 
       <p v-if="error" class="banner error" role="status">{{ error }}</p>
+      <p v-else-if="outdatedText" class="banner" role="status">{{ outdatedText }}</p>
       <p v-else-if="stale" class="banner" role="status">{{ t('app.stale') }}</p>
       <p v-if="comparing && compareError" class="banner error" role="status">{{ compare.resourceName }} · {{ compareError }}</p>
 

@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Actualiser',
   'app.loading': 'Chargement…',
   'app.stale': 'Données enregistrées sur l’appareil — actualisation en cours…',
+  'app.adeDown': ({ time }) => `Le site de l’ULCO ne répond pas pour l’instant — dernière mise à jour : ${time}.`,
+  'app.offline': ({ time }) => `Hors connexion — dernière mise à jour : ${time}.`,
   'app.welcome': 'Choisissez une classe, une salle ou un enseignant pour afficher son emploi du temps.',
   'app.theme': 'Thème',
   'app.themeSystem': 'Système',
@@ -151,7 +153,6 @@ export default {
 
   'error.generic': 'Une erreur est survenue.',
   'error.network': 'Impossible de contacter le serveur.',
-  'error.offline': 'Données hors ligne : impossible de contacter le serveur.',
   'error.schedule': 'Impossible de charger l’emploi du temps.',
   'error.groups': 'Impossible de charger la liste des groupes.',
   'error.rooms': 'Impossible de charger la liste des salles.',

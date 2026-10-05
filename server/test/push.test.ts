@@ -408,6 +408,41 @@ test('le planificateur annonce le prochain cours une seule fois', async () => {
   }
 });
 
+test('ADE injoignable : les rappels partent quand même, et ADE est relancé de moins en moins souvent', async () => {
+  const { store, cleanup } = storeWith([subscriber({ changes: false })]);
+  const sender = fakeSender();
+  let calls = 0;
+  let down = false;
+  const service = {
+    async schedule() {
+      calls += 1;
+      if (down) throw new Error('ADE ne répond pas');
+      return { events: DAY };
+    },
+    async facetSchedule() {
+      throw new Error('non utilisé dans ce test');
+    },
+  };
+  const notifier = new Notifier(service, fakeCrous(), store, sender, SILENT, { pollMs: 60_000 });
+  try {
+    const at = Date.parse(MORNING.start) - FIRST_COURSE_LEAD_MS;
+    await notifier.tick(at - 5 * 60_000);
+    assert.equal(calls, 1);
+
+    down = true;
+    await notifier.tick(at - 4 * 60_000); // échec n° 1 : prochain essai dans 1 min
+    await notifier.tick(at - 3 * 60_000); // échec n° 2 : prochain essai dans 2 min
+    await notifier.tick(at - 2 * 60_000); // en attente
+    assert.equal(calls, 3);
+
+    await notifier.tick(at);
+    assert.equal(sender.sent.length, 1, 'le rappel s’appuie sur le dernier emploi du temps connu');
+    assert.match(sender.sent[0].title, /Prochain cours à 08:00/);
+  } finally {
+    cleanup();
+  }
+});
+
 test('le premier relevé ne signale aucun changement', async () => {
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
   const sender = fakeSender();

@@ -103,6 +103,29 @@ test('TtlCache oublie une entrée expirée', async () => {
   assert.equal(cache.peek('k'), undefined);
 });
 
+test('TtlCache resert la dernière valeur connue quand le rechargement échoue', async () => {
+  const cache = new TtlCache<string>(-1, 10, { staleMs: 60_000, retryMs: 60_000 });
+  await cache.get('k', async () => 'ancienne');
+  let calls = 0;
+  const failing = async () => { calls += 1; throw new Error('ADE ne répond pas'); };
+
+  const first = await cache.lookup('k', failing);
+  assert.equal(first.value, 'ancienne');
+  assert.equal(first.stale, true);
+  assert.equal(calls, 1);
+
+  // Pendant `retryMs`, le secours est servi sans relancer ADE.
+  const second = await cache.lookup('k', failing);
+  assert.equal(second.stale, true);
+  assert.equal(calls, 1);
+});
+
+test('TtlCache sans secours laisse passer l’erreur', async () => {
+  const cache = new TtlCache<string>(-1);
+  await cache.get('k', async () => 'ancienne');
+  await assert.rejects(cache.get('k', async () => { throw new Error('ADE ne répond pas'); }), /ne répond pas/);
+});
+
 test("le flux iCalendar réexposé échappe les caractères spéciaux", async () => {
   // On recharge le module pour accéder à la route sans démarrer de serveur ADE réel.
   const { registerApi } = await import('../src/routes/api.ts');

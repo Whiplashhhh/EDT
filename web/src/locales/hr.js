@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Osvježi',
   'app.loading': 'Učitavanje…',
   'app.stale': 'Podaci spremljeni na uređaju — osvježavanje…',
+  'app.adeDown': ({ time }) => `Stranica ULCO-a trenutačno ne odgovara — zadnje ažuriranje: ${time}.`,
+  'app.offline': ({ time }) => `Izvan mreže — zadnje ažuriranje: ${time}.`,
   'app.welcome': 'Odaberi grupu, dvoranu ili nastavnika za prikaz rasporeda.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sustav',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Došlo je do pogreške.',
   'error.network': 'Poslužitelj nije dostupan.',
-  'error.offline': 'Izvanmrežni podaci: poslužitelj nije dostupan.',
   'error.schedule': 'Raspored se nije mogao učitati.',
   'error.groups': 'Popis grupa se nije mogao učitati.',
   'error.rooms': 'Popis dvorana se nije mogao učitati.',

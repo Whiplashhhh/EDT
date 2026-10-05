@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Vernieuwen',
   'app.loading': 'Laden…',
   'app.stale': 'Gegevens van dit apparaat — bezig met vernieuwen…',
+  'app.adeDown': ({ time }) => `De ULCO-website reageert momenteel niet — laatst bijgewerkt: ${time}.`,
+  'app.offline': ({ time }) => `Offline — laatst bijgewerkt: ${time}.`,
   'app.welcome': 'Kies een klas, een lokaal of een docent om het rooster te zien.',
   'app.theme': 'Thema',
   'app.themeSystem': 'Systeem',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Er is een fout opgetreden.',
   'error.network': 'De server is niet bereikbaar.',
-  'error.offline': 'Offlinegegevens: de server is niet bereikbaar.',
   'error.schedule': 'Het rooster kon niet worden geladen.',
   'error.groups': 'De lijst met groepen kon niet worden geladen.',
   'error.rooms': 'De lijst met lokalen kon niet worden geladen.',

@@ -72,6 +72,9 @@ export const formatDayShort = (iso) => fmt.value.dayShort.format(new Date(`${iso
 /** Jour et mois d'un instant ISO : « 28 décembre ». */
 export const formatDayMonth = (iso) => fmt.value.dayMonth.format(new Date(iso));
 export const dayNumber = (iso) => Number(iso.slice(8, 10));
+/** Heure d'un instant ISO, précédée de sa date s'il n'est pas d'aujourd'hui : « 14:32 », « 3 octobre, 14:32 ». */
+export const formatStamp = (iso) =>
+  isoDay(new Date(iso)) === today() ? formatTime(iso) : `${formatDayMonth(iso)}, ${formatTime(iso)}`;
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 

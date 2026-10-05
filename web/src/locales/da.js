@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Opdatér',
   'app.loading': 'Indlæser…',
   'app.stale': 'Data gemt på enheden — opdaterer…',
+  'app.adeDown': ({ time }) => `ULCO’s websted svarer ikke lige nu — senest opdateret: ${time}.`,
+  'app.offline': ({ time }) => `Offline — senest opdateret: ${time}.`,
   'app.welcome': 'Vælg et hold, et lokale eller en underviser for at se skemaet.',
   'app.theme': 'Tema',
   'app.themeSystem': 'System',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Der opstod en fejl.',
   'error.network': 'Serveren kunne ikke kontaktes.',
-  'error.offline': 'Offlinedata: serveren kunne ikke kontaktes.',
   'error.schedule': 'Skemaet kunne ikke indlæses.',
   'error.groups': 'Listen over hold kunne ikke indlæses.',
   'error.rooms': 'Listen over lokaler kunne ikke indlæses.',

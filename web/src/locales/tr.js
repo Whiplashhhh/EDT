@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Yenile',
   'app.loading': 'Yükleniyor…',
   'app.stale': 'Cihazda kayıtlı veriler — yenileniyor…',
+  'app.adeDown': ({ time }) => `ULCO sitesi şu anda yanıt vermiyor — son güncelleme: ${time}.`,
+  'app.offline': ({ time }) => `Çevrimdışı — son güncelleme: ${time}.`,
   'app.welcome': 'Ders programını görmek için bir sınıf, derslik veya öğretim elemanı seç.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistem',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Bir hata oluştu.',
   'error.network': 'Sunucuya ulaşılamadı.',
-  'error.offline': 'Çevrimdışı veri: sunucuya ulaşılamadı.',
   'error.schedule': 'Ders programı yüklenemedi.',
   'error.groups': 'Grup listesi yüklenemedi.',
   'error.rooms': 'Derslik listesi yüklenemedi.',

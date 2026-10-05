@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Obnoviť',
   'app.loading': 'Načítava sa…',
   'app.stale': 'Údaje uložené v zariadení — prebieha obnovenie…',
+  'app.adeDown': ({ time }) => `Web ULCO momentálne neodpovedá — naposledy aktualizované: ${time}.`,
+  'app.offline': ({ time }) => `Offline — naposledy aktualizované: ${time}.`,
   'app.welcome': 'Vyber skupinu, učebňu alebo vyučujúceho a uvidíš rozvrh.',
   'app.theme': 'Motív',
   'app.themeSystem': 'Systémový',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Nastala chyba.',
   'error.network': 'Server je nedostupný.',
-  'error.offline': 'Offline údaje: server je nedostupný.',
   'error.schedule': 'Rozvrh sa nepodarilo načítať.',
   'error.groups': 'Zoznam skupín sa nepodarilo načítať.',
   'error.rooms': 'Zoznam učební sa nepodarilo načítať.',

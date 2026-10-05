@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Làm mới',
   'app.loading': 'Đang tải…',
   'app.stale': 'Dữ liệu lưu trên thiết bị — đang làm mới…',
+  'app.adeDown': ({ time }) => `Trang web ULCO hiện không phản hồi — cập nhật lần cuối: ${time}.`,
+  'app.offline': ({ time }) => `Ngoại tuyến — cập nhật lần cuối: ${time}.`,
   'app.welcome': 'Chọn một lớp, một phòng học hoặc một giảng viên để xem thời khoá biểu.',
   'app.theme': 'Giao diện',
   'app.themeSystem': 'Theo hệ thống',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Đã xảy ra lỗi.',
   'error.network': 'Không liên lạc được với máy chủ.',
-  'error.offline': 'Dữ liệu ngoại tuyến: không liên lạc được với máy chủ.',
   'error.schedule': 'Không tải được thời khoá biểu.',
   'error.groups': 'Không tải được danh sách nhóm.',
   'error.rooms': 'Không tải được danh sách phòng học.',

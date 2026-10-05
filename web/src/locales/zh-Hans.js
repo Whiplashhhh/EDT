@@ -17,6 +17,8 @@ export default {
   'app.refresh': '刷新',
   'app.loading': '加载中…',
   'app.stale': '显示设备上保存的数据 — 正在刷新…',
+  'app.adeDown': ({ time }) => `ULCO 网站暂时没有响应 — 最后更新：${time}`,
+  'app.offline': ({ time }) => `离线 — 最后更新：${time}`,
   'app.welcome': '选择班级、教室或教师即可查看课程表。',
   'app.theme': '主题',
   'app.themeSystem': '跟随系统',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': '发生错误。',
   'error.network': '无法连接服务器。',
-  'error.offline': '离线数据：无法连接服务器。',
   'error.schedule': '无法加载课程表。',
   'error.groups': '无法加载班级列表。',
   'error.rooms': '无法加载教室列表。',

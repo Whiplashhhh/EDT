@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Actualizează',
   'app.loading': 'Se încarcă…',
   'app.stale': 'Date salvate pe dispozitiv — se actualizează…',
+  'app.adeDown': ({ time }) => `Site-ul ULCO nu răspunde momentan — ultima actualizare: ${time}.`,
+  'app.offline': ({ time }) => `Offline — ultima actualizare: ${time}.`,
   'app.welcome': 'Alege o grupă, o sală sau un profesor pentru a vedea orarul.',
   'app.theme': 'Temă',
   'app.themeSystem': 'Sistem',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'A apărut o eroare.',
   'error.network': 'Serverul nu poate fi contactat.',
-  'error.offline': 'Date offline: serverul nu poate fi contactat.',
   'error.schedule': 'Orarul nu a putut fi încărcat.',
   'error.groups': 'Lista grupelor nu a putut fi încărcată.',
   'error.rooms': 'Lista sălilor nu a putut fi încărcată.',

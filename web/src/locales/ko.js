@@ -17,6 +17,8 @@ export default {
   'app.refresh': '새로 고침',
   'app.loading': '불러오는 중…',
   'app.stale': '기기에 저장된 데이터 — 새로 고치는 중…',
+  'app.adeDown': ({ time }) => `현재 ULCO 사이트가 응답하지 않습니다 — 마지막 업데이트: ${time}.`,
+  'app.offline': ({ time }) => `오프라인 — 마지막 업데이트: ${time}.`,
   'app.welcome': '반, 강의실 또는 교수를 선택하면 시간표가 표시됩니다.',
   'app.theme': '테마',
   'app.themeSystem': '시스템',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': '오류가 발생했습니다.',
   'error.network': '서버에 연결할 수 없습니다.',
-  'error.offline': '오프라인 데이터: 서버에 연결할 수 없습니다.',
   'error.schedule': '시간표를 불러오지 못했습니다.',
   'error.groups': '반 목록을 불러오지 못했습니다.',
   'error.rooms': '강의실 목록을 불러오지 못했습니다.',

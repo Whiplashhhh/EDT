@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'تحديث',
   'app.loading': 'جارٍ التحميل…',
   'app.stale': 'بيانات محفوظة على الجهاز — جارٍ التحديث…',
+  'app.adeDown': ({ time }) => `موقع ULCO لا يستجيب حاليًا — آخر تحديث: ${time}.`,
+  'app.offline': ({ time }) => `غير متصل — آخر تحديث: ${time}.`,
   'app.welcome': 'اختر فوجًا أو قاعة أو أستاذًا لعرض جدول الحصص.',
   'app.theme': 'المظهر',
   'app.themeSystem': 'النظام',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'حدث خطأ.',
   'error.network': 'تعذّر الاتصال بالخادم.',
-  'error.offline': 'بيانات دون اتصال: تعذّر الاتصال بالخادم.',
   'error.schedule': 'تعذّر تحميل جدول الحصص.',
   'error.groups': 'تعذّر تحميل قائمة الأفواج.',
   'error.rooms': 'تعذّر تحميل قائمة القاعات.',

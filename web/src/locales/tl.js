@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'I-refresh',
   'app.loading': 'Naglo-load…',
   'app.stale': 'Datos na nakaimbak sa device — nire-refresh…',
+  'app.adeDown': ({ time }) => `Hindi tumutugon ang website ng ULCO sa ngayon — huling na-update: ${time}.`,
+  'app.offline': ({ time }) => `Offline — huling na-update: ${time}.`,
   'app.welcome': 'Pumili ng klase, silid o guro para makita ang iskedyul.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistema',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'May naganap na error.',
   'error.network': 'Hindi maabot ang server.',
-  'error.offline': 'Offline na datos: hindi maabot ang server.',
   'error.schedule': 'Hindi ma-load ang iskedyul.',
   'error.groups': 'Hindi ma-load ang listahan ng mga grupo.',
   'error.rooms': 'Hindi ma-load ang listahan ng mga silid.',

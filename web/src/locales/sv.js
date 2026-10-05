@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Uppdatera',
   'app.loading': 'Laddar…',
   'app.stale': 'Data sparad på enheten — uppdaterar…',
+  'app.adeDown': ({ time }) => `ULCO:s webbplats svarar inte just nu — senast uppdaterad: ${time}.`,
+  'app.offline': ({ time }) => `Offline — senast uppdaterad: ${time}.`,
   'app.welcome': 'Välj en klass, en sal eller en lärare för att se schemat.',
   'app.theme': 'Tema',
   'app.themeSystem': 'System',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Något gick fel.',
   'error.network': 'Servern kunde inte nås.',
-  'error.offline': 'Offlinedata: servern kunde inte nås.',
   'error.schedule': 'Schemat kunde inte laddas.',
   'error.groups': 'Listan över grupper kunde inte laddas.',
   'error.rooms': 'Listan över salar kunde inte laddas.',

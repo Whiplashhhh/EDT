@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Aggiorna',
   'app.loading': 'Caricamento…',
   'app.stale': 'Dati salvati sul dispositivo — aggiornamento in corso…',
+  'app.adeDown': ({ time }) => `Il sito dell’ULCO non risponde al momento — ultimo aggiornamento: ${time}.`,
+  'app.offline': ({ time }) => `Offline — ultimo aggiornamento: ${time}.`,
   'app.welcome': 'Scegli una classe, un’aula o un docente per vedere il suo orario.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistema',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Si è verificato un errore.',
   'error.network': 'Impossibile contattare il server.',
-  'error.offline': 'Dati offline: impossibile contattare il server.',
   'error.schedule': 'Impossibile caricare l’orario.',
   'error.groups': 'Impossibile caricare l’elenco dei gruppi.',
   'error.rooms': 'Impossibile caricare l’elenco delle aule.',

@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'አድስ',
   'app.loading': 'በመጫን ላይ…',
   'app.stale': 'በመሣሪያው የተቀመጠ መረጃ — በመታደስ ላይ…',
+  'app.adeDown': ({ time }) => `የULCO ድረ-ገጽ አሁን ምላሽ አይሰጥም — ለመጨረሻ ጊዜ የዘመነው፦ ${time}።`,
+  'app.offline': ({ time }) => `ከመስመር ውጭ — ለመጨረሻ ጊዜ የዘመነው፦ ${time}።`,
   'app.welcome': 'መርሐግብሩን ለማየት ክፍል፣ አዳራሽ ወይም መምህር ምረጥ።',
   'app.theme': 'ገጽታ',
   'app.themeSystem': 'ሥርዓት',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'ስህተት ተፈጥሯል።',
   'error.network': 'አገልጋዩን ማግኘት አልተቻለም።',
-  'error.offline': 'ከመስመር ውጭ መረጃ፦ አገልጋዩን ማግኘት አልተቻለም።',
   'error.schedule': 'መርሐግብሩን መጫን አልተቻለም።',
   'error.groups': 'የክፍሎችን ዝርዝር መጫን አልተቻለም።',
   'error.rooms': 'የአዳራሾችን ዝርዝር መጫን አልተቻለም።',

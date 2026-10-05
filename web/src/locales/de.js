@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Aktualisieren',
   'app.loading': 'Wird geladen…',
   'app.stale': 'Auf dem Gerät gespeicherte Daten — wird aktualisiert…',
+  'app.adeDown': ({ time }) => `Die ULCO-Website antwortet gerade nicht — zuletzt aktualisiert: ${time}.`,
+  'app.offline': ({ time }) => `Offline — zuletzt aktualisiert: ${time}.`,
   'app.welcome': 'Wähle einen Kurs, einen Raum oder eine Lehrkraft, um den Stundenplan zu sehen.',
   'app.theme': 'Design',
   'app.themeSystem': 'System',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Ein Fehler ist aufgetreten.',
   'error.network': 'Der Server ist nicht erreichbar.',
-  'error.offline': 'Offline-Daten: der Server ist nicht erreichbar.',
   'error.schedule': 'Der Stundenplan konnte nicht geladen werden.',
   'error.groups': 'Die Gruppenliste konnte nicht geladen werden.',
   'error.rooms': 'Die Raumliste konnte nicht geladen werden.',

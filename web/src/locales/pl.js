@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Odśwież',
   'app.loading': 'Wczytywanie…',
   'app.stale': 'Dane zapisane na urządzeniu — trwa odświeżanie…',
+  'app.adeDown': ({ time }) => `Strona ULCO chwilowo nie odpowiada — ostatnia aktualizacja: ${time}.`,
+  'app.offline': ({ time }) => `Offline — ostatnia aktualizacja: ${time}.`,
   'app.welcome': 'Wybierz grupę, salę lub wykładowcę, aby zobaczyć plan zajęć.',
   'app.theme': 'Motyw',
   'app.themeSystem': 'Systemowy',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Wystąpił błąd.',
   'error.network': 'Nie można połączyć się z serwerem.',
-  'error.offline': 'Dane offline: nie można połączyć się z serwerem.',
   'error.schedule': 'Nie udało się wczytać planu zajęć.',
   'error.groups': 'Nie udało się wczytać listy grup.',
   'error.rooms': 'Nie udało się wczytać listy sal.',

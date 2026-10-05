@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Päivitä',
   'app.loading': 'Ladataan…',
   'app.stale': 'Laitteelle tallennetut tiedot — päivitetään…',
+  'app.adeDown': ({ time }) => `ULCO:n sivusto ei vastaa juuri nyt — päivitetty viimeksi: ${time}.`,
+  'app.offline': ({ time }) => `Ei yhteyttä — päivitetty viimeksi: ${time}.`,
   'app.welcome': 'Valitse ryhmä, tila tai opettaja nähdäksesi lukujärjestyksen.',
   'app.theme': 'Teema',
   'app.themeSystem': 'Järjestelmä',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Tapahtui virhe.',
   'error.network': 'Palvelimeen ei saatu yhteyttä.',
-  'error.offline': 'Offline-tiedot: palvelimeen ei saatu yhteyttä.',
   'error.schedule': 'Lukujärjestystä ei voitu ladata.',
   'error.groups': 'Ryhmäluetteloa ei voitu ladata.',
   'error.rooms': 'Tilaluetteloa ei voitu ladata.',
