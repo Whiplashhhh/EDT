@@ -10,8 +10,6 @@ import {
   MENU_LEAD_MS,
   changesWithin,
   diffSchedules,
-  mergeChanges,
-  splitChanges,
   dueMenuReminders,
   dueReminders,
   menuRemindersFor,
@@ -166,26 +164,23 @@ test('un emploi du temps inchangé ne produit aucun changement', () => {
   assert.deepEqual(diffSchedules(snapshotOf(DAY), snapshotOf([...DAY])), []);
 });
 
-test('dans la journée, seuls les changements du jour sont annoncés, ceux de demain attendent', () => {
+test('dans la journée, seuls les changements du jour sont annoncés', () => {
   // Lundi 21 septembre, 7 h à Paris.
   const now = Date.parse('2026-09-21T05:00:00.000Z');
 
   const past = course({ start: '2026-09-21T04:00:00.000Z', end: '2026-09-21T05:30:00.000Z', uid: 'past' });
   const today = course({ start: '2026-09-21T14:00:00.000Z', end: '2026-09-21T15:30:00.000Z', uid: 'today' });
   const tomorrowEvening = course({ start: '2026-09-22T16:00:00.000Z', end: '2026-09-22T17:30:00.000Z', uid: 'tomorrow' });
-  const afterTomorrow = course({ start: '2026-09-23T06:00:00.000Z', end: '2026-09-23T07:30:00.000Z', uid: 'after' });
 
-  const { due, deferred } = splitChanges(
+  const kept = changesWithin(
     [
       { kind: 'room', event: past },
       { kind: 'room', event: today },
       { kind: 'room', event: tomorrowEvening },
-      { kind: 'added', event: afterTomorrow },
     ],
     now,
   );
-  assert.deepEqual(due.map((c) => c.event.uid), ['today']);
-  assert.deepEqual(deferred.map((c) => c.event.uid), ['tomorrow']);
+  assert.deepEqual(kept.map((c) => c.event.uid), ['today']);
 });
 
 test('à partir de 20 h, les changements du lendemain sont annoncés', () => {
@@ -208,22 +203,6 @@ test('un cours d’aujourd’hui repoussé à demain est annoncé tout de suite'
   const after = { ...before, start: '2026-09-22T14:00:00.000Z', end: '2026-09-22T15:30:00.000Z' };
 
   assert.deepEqual(changesWithin([{ kind: 'time', event: after, previous: before }], now).map((c) => c.event.uid), ['moved']);
-});
-
-test('un cours modifié deux fois avant 20 h ne fait qu’une notification, depuis son état d’origine', () => {
-  const origin = course({ start: '2026-09-22T14:00:00.000Z', end: '2026-09-22T15:30:00.000Z', uid: 'c', room: 'S201' });
-  const first = { ...origin, room: 'S134' };
-  const second = { ...origin, room: 'S150' };
-
-  const merged = mergeChanges([{ kind: 'room', event: first, previous: origin }], [{ kind: 'room', event: second, previous: first }]);
-  assert.equal(merged.length, 1);
-  assert.equal(merged[0].previous?.room, 'S201');
-  assert.equal(merged[0].event.room, 'S150');
-
-  // Revenu à son état d'origine : plus rien à annoncer.
-  assert.deepEqual(mergeChanges(merged, [{ kind: 'room', event: origin, previous: second }]), []);
-  // Ajouté puis annulé avant d'avoir été annoncé : rien non plus.
-  assert.deepEqual(mergeChanges([{ kind: 'added', event: origin }], [{ kind: 'removed', event: origin }]), []);
 });
 
 /*
@@ -495,7 +474,7 @@ test('un changement au-delà de la journée de demain ne réveille personne', as
   }
 });
 
-test('un changement de demain repéré dans la journée est annoncé à 20 h', async () => {
+test('un changement de demain survenu avant 20 h n’est jamais annoncé', async () => {
   const tomorrow = course({ start: '2026-09-22T06:00:00.000Z', end: '2026-09-22T07:30:00.000Z', uid: 'tomorrow' });
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
   const sender = fakeSender();
@@ -508,22 +487,13 @@ test('un changement de demain repéré dans la journée est annoncé à 20 h', a
     { pollMs: 0 },
   );
   try {
-    // Lundi 10 h à Paris : le changement est repéré, mais il attend le soir.
+    // Lundi 10 h à Paris : le changement est repéré, mais il touche demain.
     const morning = Date.parse('2026-09-21T08:00:00.000Z');
     await notifier.tick(morning);
     await notifier.tick(morning + 60_000);
-    assert.deepEqual(sender.sent, [], 'pas de notification pour demain avant 20 h');
-
-    await notifier.tick(Date.parse('2026-09-21T17:59:00.000Z'));
-    assert.deepEqual(sender.sent, []);
-
+    // 20 h : il n'est pas rattrapé pour autant.
     await notifier.tick(Date.parse('2026-09-21T18:00:00.000Z'));
-    assert.equal(sender.sent.length, 1);
-    assert.match(sender.sent[0].title, /Changement de salle/);
-    assert.match(sender.sent[0].body, /S201 → S134/);
-
-    await notifier.tick(Date.parse('2026-09-21T18:01:00.000Z'));
-    assert.equal(sender.sent.length, 1, 'annoncé une seule fois');
+    assert.deepEqual(sender.sent, []);
   } finally {
     cleanup();
   }
