@@ -215,7 +215,7 @@ export function snapshotOf(events: CourseEvent[]): Map<string, CourseEvent> {
  * pas comme une suppression suivie d'un ajout.
  *
  * La comparaison porte sur *toute* la fenêtre connue, et le filtrage à la
- * journée concernée n'intervient qu'ensuite (`splitChanges`).
+ * journée concernée n'intervient qu'ensuite (`changesWithin`).
  * Comparer directement deux fenêtres glissantes ferait apparaître comme
  * « ajouté » tout cours que le simple passage du temps fait entrer dans la
  * fenêtre.
@@ -275,15 +275,6 @@ export function changeHorizon(now: number): number {
 }
 
 /**
- * Limite au-delà de laquelle un changement n'est jamais annoncé : la fin de la
- * journée de demain. Plus loin, un réaménagement d'emploi du temps n'a pas à
- * faire sonner un téléphone : il sera vu en ouvrant l'application.
- */
-function watchHorizon(now: number): number {
-  return startOfDay(addDays(dayOf(new Date(now).toISOString()), 2));
-}
-
-/**
  * Premier horaire encore à venir que touche un changement. Un cours déplacé
  * concerne son ancien créneau autant que le nouveau : avancé d'aujourd'hui à
  * demain, il libère un créneau d'aujourd'hui, et c'est aujourd'hui qu'il faut
@@ -298,60 +289,17 @@ function nextStartOf(change: ScheduleChange, now: number): number | null {
 }
 
 /**
- * Trie des changements selon le moment de les annoncer :
- *
- * - `due` : à annoncer maintenant, car ils touchent un cours d'ici la fin de
- *   la fenêtre (`changeHorizon`) ;
- * - `deferred` : ils touchent un cours de demain, mais il n'est pas encore
- *   20 h. Le planificateur les garde de côté et les annonce le soir venu.
- *
- * Le reste — cours passés, ou au-delà de demain — est abandonné.
+ * Ne garde que les changements qui touchent un cours à venir d'ici la fin de
+ * la fenêtre (`changeHorizon`). Un changement de demain repéré avant 20 h
+ * n'est pas annoncé, ni sur le moment ni plus tard : il sera vu en ouvrant
+ * l'application. Au-delà de demain, rien n'est jamais annoncé.
  */
-export function splitChanges(
-  changes: ScheduleChange[],
-  now: number,
-): { due: ScheduleChange[]; deferred: ScheduleChange[] } {
-  const horizon = changeHorizon(now);
-  const limit = watchHorizon(now);
-  const due: ScheduleChange[] = [];
-  const deferred: ScheduleChange[] = [];
-  for (const change of changes) {
-    const start = nextStartOf(change, now);
-    if (start === null || start >= limit) continue;
-    (start < horizon ? due : deferred).push(change);
-  }
-  due.sort((a, b) => a.event.start.localeCompare(b.event.start));
-  return { due, deferred };
-}
-
-/** Changements à annoncer maintenant (voir `splitChanges`). */
 export function changesWithin(changes: ScheduleChange[], now: number): ScheduleChange[] {
-  return splitChanges(changes, now).due;
-}
-
-/**
- * Ajoute de nouveaux changements à ceux qui attendent encore d'être annoncés.
- *
- * Un même cours modifié deux fois avant 20 h ne doit donner qu'une
- * notification, qui va de l'état d'origine — le dernier que l'abonné a pu
- * voir — à l'état actuel. Et un cours qui revient à son état d'origine
- * n'annonce plus rien.
- */
-export function mergeChanges(older: ScheduleChange[], newer: ScheduleChange[]): ScheduleChange[] {
-  const byUid = new Map<string, ScheduleChange | null>(older.map((change) => [change.event.uid, change]));
-  for (const change of newer) {
-    const first = byUid.get(change.event.uid);
-    byUid.set(change.event.uid, first ? combine(first, change) : change);
-  }
-  return [...byUid.values()].filter((change): change is ScheduleChange => change !== null);
-}
-
-/** Les deux changements successifs d'un même cours, résumés en un seul (ou en rien). */
-function combine(first: ScheduleChange, then: ScheduleChange): ScheduleChange | null {
-  // L'état d'avant le premier changement ; `null` si le cours n'existait pas.
-  const origin = first.kind === 'added' ? null : first.kind === 'removed' ? first.event : (first.previous ?? null);
-  if (then.kind === 'removed') return origin ? { kind: 'removed', event: origin } : null;
-  if (!origin) return { kind: 'added', event: then.event };
-  if (fingerprint(origin) === fingerprint(then.event)) return null;
-  return { kind: changeKind(origin, then.event), event: then.event, previous: origin };
+  const horizon = changeHorizon(now);
+  return changes
+    .filter((change) => {
+      const start = nextStartOf(change, now);
+      return start !== null && start < horizon;
+    })
+    .sort((a, b) => a.event.start.localeCompare(b.event.start));
 }

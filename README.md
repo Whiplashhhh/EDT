@@ -194,10 +194,9 @@ déjeune pas entre deux cours.
 **Changements.** Salle, horaire, intervenant, cours ajouté ou annulé : les
 abonnés de la classe concernée sont prévenus, mais **uniquement pour les cours
 du jour même** — et, **à partir de 20 h, pour ceux du lendemain**. Un changement
-touchant demain repéré dans la journée est gardé de côté et annoncé à 20 h,
-résumé en une seule notification s'il a bougé plusieurs fois. Au-delà de demain,
-un réaménagement se découvre en ouvrant l'application plutôt qu'en faisant
-sonner un téléphone.
+touchant demain qui survient avant 20 h n'est pas annoncé, pas plus qu'un
+changement au-delà de demain : il se découvre en ouvrant l'application plutôt
+qu'en faisant sonner un téléphone.
 
 ### Mise en service
 
