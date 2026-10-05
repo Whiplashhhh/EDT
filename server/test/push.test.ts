@@ -10,6 +10,8 @@ import {
   MENU_LEAD_MS,
   changesWithin,
   diffSchedules,
+  mergeChanges,
+  splitChanges,
   dueMenuReminders,
   dueReminders,
   menuRemindersFor,
@@ -164,8 +166,8 @@ test('un emploi du temps inchangé ne produit aucun changement', () => {
   assert.deepEqual(diffSchedules(snapshotOf(DAY), snapshotOf([...DAY])), []);
 });
 
-test('changesWithin s’arrête à la fin de la journée de demain, cours passés exclus', () => {
-  // Lundi 21 septembre, 7 h à Paris : la fenêtre court jusqu'au mardi 22 à minuit.
+test('dans la journée, seuls les changements du jour sont annoncés, ceux de demain attendent', () => {
+  // Lundi 21 septembre, 7 h à Paris.
   const now = Date.parse('2026-09-21T05:00:00.000Z');
 
   const past = course({ start: '2026-09-21T04:00:00.000Z', end: '2026-09-21T05:30:00.000Z', uid: 'past' });
@@ -173,7 +175,7 @@ test('changesWithin s’arrête à la fin de la journée de demain, cours passé
   const tomorrowEvening = course({ start: '2026-09-22T16:00:00.000Z', end: '2026-09-22T17:30:00.000Z', uid: 'tomorrow' });
   const afterTomorrow = course({ start: '2026-09-23T06:00:00.000Z', end: '2026-09-23T07:30:00.000Z', uid: 'after' });
 
-  const kept = changesWithin(
+  const { due, deferred } = splitChanges(
     [
       { kind: 'room', event: past },
       { kind: 'room', event: today },
@@ -182,19 +184,46 @@ test('changesWithin s’arrête à la fin de la journée de demain, cours passé
     ],
     now,
   );
-  assert.deepEqual(kept.map((c) => c.event.uid), ['today', 'tomorrow']);
+  assert.deepEqual(due.map((c) => c.event.uid), ['today']);
+  assert.deepEqual(deferred.map((c) => c.event.uid), ['tomorrow']);
 });
 
-/*
- * Un changement annoncé tard le soir ne doit pas voir sa fenêtre se réduire à
- * quelques heures : elle va toujours jusqu'à la fin de la journée suivante.
- */
-test('la fenêtre ne dépend pas de l’heure à laquelle on regarde', () => {
-  const lateEvening = Date.parse('2026-09-21T20:00:00.000Z');
+test('à partir de 20 h, les changements du lendemain sont annoncés', () => {
   const tomorrowEvening = course({ start: '2026-09-22T16:00:00.000Z', end: '2026-09-22T17:30:00.000Z', uid: 'tomorrow' });
+  const afterTomorrow = course({ start: '2026-09-23T06:00:00.000Z', end: '2026-09-23T07:30:00.000Z', uid: 'after' });
+  const changes = [
+    { kind: 'room' as const, event: tomorrowEvening },
+    { kind: 'added' as const, event: afterTomorrow },
+  ];
 
-  const kept = changesWithin([{ kind: 'room', event: tomorrowEvening }], lateEvening);
-  assert.deepEqual(kept.map((c) => c.event.uid), ['tomorrow']);
+  // 19 h 59 à Paris : pas encore.
+  assert.deepEqual(changesWithin(changes, Date.parse('2026-09-21T17:59:00.000Z')), []);
+  // 20 h à Paris : demain entre dans la fenêtre, après-demain toujours pas.
+  assert.deepEqual(changesWithin(changes, Date.parse('2026-09-21T18:00:00.000Z')).map((c) => c.event.uid), ['tomorrow']);
+});
+
+test('un cours d’aujourd’hui repoussé à demain est annoncé tout de suite', () => {
+  const now = Date.parse('2026-09-21T08:00:00.000Z');
+  const before = course({ start: '2026-09-21T14:00:00.000Z', end: '2026-09-21T15:30:00.000Z', uid: 'moved' });
+  const after = { ...before, start: '2026-09-22T14:00:00.000Z', end: '2026-09-22T15:30:00.000Z' };
+
+  assert.deepEqual(changesWithin([{ kind: 'time', event: after, previous: before }], now).map((c) => c.event.uid), ['moved']);
+});
+
+test('un cours modifié deux fois avant 20 h ne fait qu’une notification, depuis son état d’origine', () => {
+  const origin = course({ start: '2026-09-22T14:00:00.000Z', end: '2026-09-22T15:30:00.000Z', uid: 'c', room: 'S201' });
+  const first = { ...origin, room: 'S134' };
+  const second = { ...origin, room: 'S150' };
+
+  const merged = mergeChanges([{ kind: 'room', event: first, previous: origin }], [{ kind: 'room', event: second, previous: first }]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].previous?.room, 'S201');
+  assert.equal(merged[0].event.room, 'S150');
+
+  // Revenu à son état d'origine : plus rien à annoncer.
+  assert.deepEqual(mergeChanges(merged, [{ kind: 'room', event: origin, previous: second }]), []);
+  // Ajouté puis annulé avant d'avoir été annoncé : rien non plus.
+  assert.deepEqual(mergeChanges([{ kind: 'added', event: origin }], [{ kind: 'removed', event: origin }]), []);
 });
 
 /*
@@ -424,7 +453,8 @@ test('un changement de salle dans la fenêtre réveille les abonnés de la class
   // `pollMs: 0` force un relevé à chaque battement : le deuxième voit le changement.
   const notifier = new Notifier(fakeService([DAY, moved]), fakeCrous(), store, sender, SILENT, { pollMs: 0 });
   try {
-    const at = Date.parse('2026-09-20T09:00:00.000Z');
+    // Lundi 6 h à Paris : les cours touchés sont ceux du jour.
+    const at = Date.parse('2026-09-21T04:00:00.000Z');
     await notifier.tick(at);
     assert.equal(sender.sent.length, 0);
 
@@ -465,6 +495,40 @@ test('un changement au-delà de la journée de demain ne réveille personne', as
   }
 });
 
+test('un changement de demain repéré dans la journée est annoncé à 20 h', async () => {
+  const tomorrow = course({ start: '2026-09-22T06:00:00.000Z', end: '2026-09-22T07:30:00.000Z', uid: 'tomorrow' });
+  const { store, cleanup } = storeWith([subscriber({ nextCourse: false })]);
+  const sender = fakeSender();
+  const notifier = new Notifier(
+    fakeService([[tomorrow], [{ ...tomorrow, room: 'S134' }]]),
+    fakeCrous(),
+    store,
+    sender,
+    SILENT,
+    { pollMs: 0 },
+  );
+  try {
+    // Lundi 10 h à Paris : le changement est repéré, mais il attend le soir.
+    const morning = Date.parse('2026-09-21T08:00:00.000Z');
+    await notifier.tick(morning);
+    await notifier.tick(morning + 60_000);
+    assert.deepEqual(sender.sent, [], 'pas de notification pour demain avant 20 h');
+
+    await notifier.tick(Date.parse('2026-09-21T17:59:00.000Z'));
+    assert.deepEqual(sender.sent, []);
+
+    await notifier.tick(Date.parse('2026-09-21T18:00:00.000Z'));
+    assert.equal(sender.sent.length, 1);
+    assert.match(sender.sent[0].title, /Changement de salle/);
+    assert.match(sender.sent[0].body, /S201 → S134/);
+
+    await notifier.tick(Date.parse('2026-09-21T18:01:00.000Z'));
+    assert.equal(sender.sent.length, 1, 'annoncé une seule fois');
+  } finally {
+    cleanup();
+  }
+});
+
 test('un abonné qui n’a demandé que les changements ne reçoit pas les rappels', async () => {
   const { store, cleanup } = storeWith([subscriber({ nextCourse: false, changes: true })]);
   const sender = fakeSender();
@@ -494,7 +558,8 @@ test('une avalanche de changements se résume en une notification', async () => 
     maxChangeNotifications: 5,
   });
   try {
-    const at = Date.parse('2026-09-21T09:00:00.000Z');
+    // Lundi 20 h à Paris : les cours de mardi sont dans la fenêtre.
+    const at = Date.parse('2026-09-21T18:00:00.000Z');
     await notifier.tick(at);
     await notifier.tick(at + 60_000);
 

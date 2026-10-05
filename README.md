@@ -11,7 +11,7 @@ sa classe une fois, elle est mémorisée, et l'emploi du temps du jour s'affiche
 - La classe choisie est enregistrée en `localStorage`, uniquement sur l'appareil.
 - Installable sur l'écran d'accueil (PWA) et consultable hors ligne (dernières données vues).
 - Abonnement possible depuis l'app Calendrier du téléphone (flux `.ics`).
-- Notifications facultatives : prochain cours, changements d’aujourd’hui et de demain, menu du midi.
+- Notifications facultatives : prochain cours, changements du jour (et du lendemain à partir de 20 h), menu du midi.
 
 ## Architecture
 
@@ -193,8 +193,11 @@ déjeune pas entre deux cours.
 
 **Changements.** Salle, horaire, intervenant, cours ajouté ou annulé : les
 abonnés de la classe concernée sont prévenus, mais **uniquement pour les cours
-d'ici la fin de la journée de demain**. Au-delà, un réaménagement se découvre
-en ouvrant l'application plutôt qu'en faisant sonner un téléphone.
+du jour même** — et, **à partir de 20 h, pour ceux du lendemain**. Un changement
+touchant demain repéré dans la journée est gardé de côté et annoncé à 20 h,
+résumé en une seule notification s'il a bougé plusieurs fois. Au-delà de demain,
+un réaménagement se découvre en ouvrant l'application plutôt qu'en faisant
+sonner un téléphone.
 
 ### Mise en service
 

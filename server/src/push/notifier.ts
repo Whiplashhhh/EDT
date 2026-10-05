@@ -17,7 +17,7 @@ import {
   type Notification,
   type ScheduleChange,
 } from './messages.ts';
-import { changesWithin, dueMenuReminders, dueReminders, diffSchedules, snapshotOf } from './planner.ts';
+import { dueMenuReminders, dueReminders, diffSchedules, mergeChanges, snapshotOf, splitChanges } from './planner.ts';
 
 /** Ce que le planificateur attend du Crous : le menu, et rien d'autre. */
 export interface MenuSource {
@@ -64,6 +64,8 @@ interface Watched {
   /** Dernier état connu, indexé par UID : c'est lui qui sert de point de comparaison. */
   snapshot: Map<string, CourseEvent>;
   fetchedAt: number;
+  /** Changements touchant demain, repérés avant 20 h : ils seront annoncés le soir. */
+  pending: ScheduleChange[];
 }
 
 /** Durée pendant laquelle on se souvient d'avoir envoyé une notification. */
@@ -185,9 +187,11 @@ export class Notifier {
      * départ et n'annonce rien. Sans ce garde-fou, le premier abonné d'une
      * classe recevrait la semaine entière comme autant de « cours ajoutés ».
      */
-    const changes = known ? changesWithin(diffSchedules(known.snapshot, snapshot), now) : [];
+    const { due: changes, deferred: pending } = known
+      ? splitChanges(mergeChanges(known.pending, diffSchedules(known.snapshot, snapshot)), now)
+      : { due: [], deferred: [] };
 
-    const state: Watched = { events, snapshot, fetchedAt: now };
+    const state: Watched = { events, snapshot, fetchedAt: now, pending };
     this.#watched.set(key, state);
     return { state, changes };
   }
