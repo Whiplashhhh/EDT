@@ -44,8 +44,13 @@ export function sharePath(target) {
   return `${location.pathname}?${SHARE_PARAM}=${shareValue(target)}`;
 }
 
-export function shareUrl(target) {
-  return `${location.origin}${sharePath(target)}`;
+/**
+ * Adresse complète à partager. `day` ouvre sur une date précise — « ma
+ * journée du 7 », « ma semaine du 5 » — avec le paramètre que lisent déjà les
+ * notifications ; la vue jour ou semaine reste celle du destinataire.
+ */
+export function shareUrl(target, { day } = {}) {
+  return `${location.origin}${sharePath(target)}${day ? `&day=${day}` : ''}`;
 }
 
 /** Une ressource seule se nomme en entier ; plusieurs, par leurs seuls codes. */

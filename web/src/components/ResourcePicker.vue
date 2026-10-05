@@ -38,6 +38,11 @@ const props = defineProps({
   identityMode: { type: Boolean, default: false },
   /** Déplie aussi la classe courante : un lien reçu vers une promo montre ses TD. */
   openCurrent: { type: Boolean, default: false },
+  /**
+   * Formations seulement, une ligne chacune, sans les déplier : pour partager
+   * le lien d'une formation, où chacun trouvera ensuite sa classe.
+   */
+  departmentsOnly: { type: Boolean, default: false },
 });
 const emit = defineEmits(['choose', 'close']);
 
@@ -462,6 +467,8 @@ async function loadCity(city) {
 }
 
 async function loadResources() {
+  // Les formations viennent avec les villes : pas d'arbre à charger.
+  if (props.departmentsOnly) return;
   const kind = selectedKind.value;
   const city = selectedCity.value;
   if (kind === 'groups' && !city) return;
@@ -550,7 +557,7 @@ watch(loading, async (busy) => {
 
 <template>
   <div ref="root" class="picker" @keydown.esc.stop="emit('close')">
-    <div class="tabs" role="tablist" :aria-label="t('picker.mode')">
+    <div v-if="!departmentsOnly" class="tabs" role="tablist" :aria-label="t('picker.mode')">
       <button
         v-for="option in kinds"
         :key="option"
@@ -582,6 +589,7 @@ watch(loading, async (busy) => {
         </option>
       </select>
       <input
+        v-if="!departmentsOnly"
         ref="searchInput"
         v-model="query"
         type="search"
@@ -602,6 +610,16 @@ watch(loading, async (busy) => {
         <span class="name">{{ cityLabel(city) }}</span>
       </button>
     </div>
+
+    <!-- Formations de la ville : on en touche une, elle ne se déplie pas. -->
+    <ul v-else-if="departmentsOnly" class="tree" role="listbox">
+      <li v-for="dept in cityDepartments" :key="dept.id">
+        <button type="button" class="row lone flat" @click="emit('choose', { department: dept.id, resourceName: dept.label })">
+          <span class="name">{{ dept.label }}</span>
+        </button>
+      </li>
+      <li v-if="!cityDepartments.length" class="state">{{ t('picker.empty') }}</li>
+    </ul>
 
     <p v-else-if="loading" class="state">{{ t('picker.loading') }}</p>
     <p v-else-if="error" class="state error">{{ error }}</p>
@@ -729,7 +747,7 @@ watch(loading, async (busy) => {
     </div>
 
     <p v-if="isSubjects" class="hint">{{ t('picker.subjectsHint') }}</p>
-    <p v-else-if="identityMode || !resourceId" class="hint">
+    <p v-else-if="!departmentsOnly && (identityMode || !resourceId)" class="hint">
       {{ t(identityMode ? 'picker.identityHint' : 'picker.hint') }}
     </p>
     <div ref="thumb" class="scroll-thumb" aria-hidden="true" hidden></div>
@@ -850,6 +868,8 @@ watch(loading, async (busy) => {
   color: var(--text);
 }
 .row.lone { margin-inline-start: 2.05rem; }
+/* Liste sans arbre : rien à aligner sur des chevrons. */
+.row.lone.flat { margin-inline-start: 0; }
 .row.lone, .row.stack { flex-direction: column; align-items: flex-start; gap: 0.05rem; }
 /* En colonne, un long nom garderait sa largeur et ferait défiler la liste de côté. */
 .row.lone > *, .row.stack > * { max-width: 100%; }
