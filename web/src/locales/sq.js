@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Ndrysho ${name}`,
   'compare.close': ({ name }) => `Mos e shfaq më ${name}`,
 
+  'share.view': 'Ndaj këtë orar',
+  'share.department': 'Ndaj lidhjen e të gjithë programit të studimit',
+  'share.received': 'Lidhje e marrë',
+  'share.yes': 'Po, ky është grupi im',
+  'share.orPick': 'Je në një grup laboratori të caktuar, apo ky nuk është grupi yt? Zgjidh tëndin më poshtë.',
+  'share.pickInPromo': 'Zgjidh më poshtë grupin tënd të seminarit ose të laboratorit.',
+  'share.pickFirst': ({ name }) => `Zgjidh fillimisht grupin tënd, ose emrin tënd nëse jep mësim: më pas do të shfaqet ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Zgjidh grupin tënd nga ${name}.`,
+
   'install.short': 'Instalo',
   'install.title': 'Shto në ekranin bazë',
   'install.close': 'Mbyll',

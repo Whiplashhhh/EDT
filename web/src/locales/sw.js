@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Badilisha ${name}`,
   'compare.close': ({ name }) => `Ficha ${name}`,
 
+  'share.view': 'Shiriki ratiba hii',
+  'share.department': 'Shiriki kiungo cha programu nzima ya masomo',
+  'share.received': 'Kiungo kilichoshirikiwa',
+  'share.yes': 'Ndiyo, hiki ni kikundi changu',
+  'share.orPick': 'Uko katika kikundi maalum cha maabara, au hiki si kikundi chako? Chagua chako hapa chini.',
+  'share.pickInPromo': 'Chagua kikundi chako cha mafunzo au cha maabara hapa chini.',
+  'share.pickFirst': ({ name }) => `Kwanza chagua kikundi chako, au jina lako kama unafundisha: kisha ${name} itaonyeshwa.`,
+  'share.pickInDepartment': ({ name }) => `Chagua kikundi chako kutoka ${name}.`,
+
   'install.short': 'Sakinisha',
   'install.title': 'Ongeza kwenye skrini ya mwanzo',
   'install.close': 'Funga',

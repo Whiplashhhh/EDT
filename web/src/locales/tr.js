@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} değiştir`,
   'compare.close': ({ name }) => `${name} gizle`,
 
+  'share.view': 'Bu ders programını paylaş',
+  'share.department': 'Tüm programın bağlantısını paylaş',
+  'share.received': 'Paylaşılan bağlantı',
+  'share.yes': 'Evet, bu benim sınıfım',
+  'share.orPick': 'Belirli bir laboratuvar grubunda mısın, yoksa bu senin sınıfın değil mi? Aşağıdan kendininkini seç.',
+  'share.pickInPromo': 'Aşağıdan uygulama veya laboratuvar grubunu seç.',
+  'share.pickFirst': ({ name }) => `Önce sınıfını, ders veriyorsan adını seç: ardından ${name} gösterilecek.`,
+  'share.pickInDepartment': ({ name }) => `${name} içindeki sınıflardan kendininkini seç.`,
+
   'install.short': 'Yükle',
   'install.title': 'Ana Ekrana Ekle',
   'install.close': 'Kapat',

@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Промени ${name}`,
   'compare.close': ({ name }) => `Сакриј ${name}`,
 
+  'share.view': 'Подели овај распоред',
+  'share.department': 'Подели везу ка целом студијском програму',
+  'share.received': 'Подељена веза',
+  'share.yes': 'Да, то је моја група',
+  'share.orPick': 'Да ли си у одређеној групи за вежбе или ово није твоја група? Изабери своју испод.',
+  'share.pickInPromo': 'Испод изабери своју групу за семинаре или вежбе.',
+  'share.pickFirst': ({ name }) => `Прво изабери своју групу или своје име ако предајеш: затим ће се приказати ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Изабери своју групу са студијског програма ${name}.`,
+
   'install.short': 'Инсталирај',
   'install.title': 'Додај на почетни екран',
   'install.close': 'Затвори',

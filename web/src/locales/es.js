@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Cambiar ${name}`,
   'compare.close': ({ name }) => `Dejar de mostrar ${name}`,
 
+  'share.view': 'Compartir este horario',
+  'share.department': 'Compartir el enlace de toda la titulación',
+  'share.received': 'Enlace recibido',
+  'share.yes': 'Sí, es mi clase',
+  'share.orPick': '¿Estás en un grupo de prácticas concreto o no es tu clase? Elige la tuya abajo.',
+  'share.pickInPromo': 'Elige tu grupo de seminario o de prácticas abajo.',
+  'share.pickFirst': ({ name }) => `Elige primero tu clase, o tu nombre si das clase: después se mostrará ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Elige tu clase entre las de ${name}.`,
+
   'install.short': 'Instalar',
   'install.title': 'Añadir a la pantalla de inicio',
   'install.close': 'Cerrar',

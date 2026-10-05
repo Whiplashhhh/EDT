@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Tukar ${name}`,
   'compare.close': ({ name }) => `Sembunyikan ${name}`,
 
+  'share.view': 'Kongsi jadual ini',
+  'share.department': 'Kongsi pautan seluruh program pengajian',
+  'share.received': 'Pautan dikongsi',
+  'share.yes': 'Ya, ini kelas saya',
+  'share.orPick': 'Anda dalam kumpulan amali tertentu, atau ini bukan kelas anda? Pilih kelas anda di bawah.',
+  'share.pickInPromo': 'Pilih kumpulan tutorial atau amali anda di bawah.',
+  'share.pickFirst': ({ name }) => `Pilih kelas anda dahulu, atau nama anda jika anda mengajar: ${name} akan dipaparkan selepas itu.`,
+  'share.pickInDepartment': ({ name }) => `Pilih kelas anda daripada ${name}.`,
+
   'install.short': 'Pasang',
   'install.title': 'Tambah ke Skrin Utama',
   'install.close': 'Tutup',

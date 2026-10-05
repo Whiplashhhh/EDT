@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Byt ${name}`,
   'compare.close': ({ name }) => `Sluta visa ${name}`,
 
+  'share.view': 'Dela det här schemat',
+  'share.department': 'Dela en länk till hela utbildningen',
+  'share.received': 'Delad länk',
+  'share.yes': 'Ja, det är min klass',
+  'share.orPick': 'Är du i en viss labbgrupp, eller är det inte din klass? Välj din nedan.',
+  'share.pickInPromo': 'Välj din övnings- eller labbgrupp nedan.',
+  'share.pickFirst': ({ name }) => `Välj först din klass, eller ditt namn om du undervisar: sedan visas ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Välj din klass inom ${name}.`,
+
   'install.short': 'Installera',
   'install.title': 'Lägg till på hemskärmen',
   'install.close': 'Stäng',

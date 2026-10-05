@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Changer ${name}`,
   'compare.close': ({ name }) => `Ne plus afficher ${name}`,
 
+  'share.view': 'Partager cet emploi du temps',
+  'share.department': 'Partager le lien de toute la formation',
+  'share.received': 'Lien reçu',
+  'share.yes': 'Oui, c’est ma classe',
+  'share.orPick': 'Vous êtes dans un TP précis, ou ce n’est pas votre classe ? Choisissez la vôtre ci-dessous.',
+  'share.pickInPromo': 'Choisissez votre TD ou votre TP ci-dessous.',
+  'share.pickFirst': ({ name }) => `Choisissez d’abord votre classe, ou votre nom si vous enseignez : ${name} s’affichera ensuite.`,
+  'share.pickInDepartment': ({ name }) => `Choisissez votre classe parmi celles de ${name}.`,
+
   'install.short': 'Installer',
   'install.title': 'Ajouter à l’écran d’accueil',
   'install.close': 'Fermer',

@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} बदलें`,
   'compare.close': ({ name }) => `${name} छिपाएँ`,
 
+  'share.view': 'यह समय-सारणी शेयर करें',
+  'share.department': 'पूरे पाठ्यक्रम का लिंक शेयर करें',
+  'share.received': 'शेयर किया गया लिंक',
+  'share.yes': 'हाँ, यह मेरी कक्षा है',
+  'share.orPick': 'किसी विशेष लैब समूह में हैं, या यह आपकी कक्षा नहीं है? नीचे अपनी कक्षा चुनें।',
+  'share.pickInPromo': 'नीचे अपना ट्यूटोरियल या लैब समूह चुनें।',
+  'share.pickFirst': ({ name }) => `पहले अपनी कक्षा चुनें, या यदि आप पढ़ाते हैं तो अपना नाम: उसके बाद ${name} दिखेगा।`,
+  'share.pickInDepartment': ({ name }) => `${name} की कक्षाओं में से अपनी कक्षा चुनें।`,
+
   'install.short': 'इंस्टॉल करें',
   'install.title': 'होम स्क्रीन पर जोड़ें',
   'install.close': 'बंद करें',

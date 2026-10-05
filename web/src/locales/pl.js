@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Zmień ${name}`,
   'compare.close': ({ name }) => `Ukryj ${name}`,
 
+  'share.view': 'Udostępnij ten plan zajęć',
+  'share.department': 'Udostępnij link do całego kierunku',
+  'share.received': 'Udostępniony link',
+  'share.yes': 'Tak, to moja grupa',
+  'share.orPick': 'Jesteś w konkretnej grupie laboratoryjnej albo to nie twoja grupa? Wybierz swoją poniżej.',
+  'share.pickInPromo': 'Wybierz poniżej swoją grupę ćwiczeniową lub laboratoryjną.',
+  'share.pickFirst': ({ name }) => `Najpierw wybierz swoją grupę albo swoje nazwisko, jeśli prowadzisz zajęcia: potem wyświetli się ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Wybierz swoją grupę z kierunku ${name}.`,
+
   'install.short': 'Zainstaluj',
   'install.title': 'Dodaj do ekranu początkowego',
   'install.close': 'Zamknij',

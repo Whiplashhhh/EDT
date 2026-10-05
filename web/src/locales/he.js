@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `החלפת ${name}`,
   'compare.close': ({ name }) => `הסתרת ${name}`,
 
+  'share.view': 'שיתוף מערכת השעות הזו',
+  'share.department': 'שיתוף קישור לכל תוכנית הלימודים',
+  'share.received': 'קישור משותף',
+  'share.yes': 'כן, זו הכיתה שלי',
+  'share.orPick': 'אתה בקבוצת מעבדה מסוימת, או שזו לא הכיתה שלך? בחר את שלך למטה.',
+  'share.pickInPromo': 'בחר את קבוצת התרגול או המעבדה שלך למטה.',
+  'share.pickFirst': ({ name }) => `בחר קודם את הכיתה שלך, או את שמך אם אתה מלמד: לאחר מכן יופיע ${name}.`,
+  'share.pickInDepartment': ({ name }) => `בחר את הכיתה שלך מתוך ${name}.`,
+
   'install.short': 'התקנה',
   'install.title': 'הוספה למסך הבית',
   'install.close': 'סגירה',

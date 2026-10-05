@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `${name} 변경`,
   'compare.close': ({ name }) => `${name} 숨기기`,
 
+  'share.view': '이 시간표 공유',
+  'share.department': '학과 과정 전체 링크 공유',
+  'share.received': '공유받은 링크',
+  'share.yes': '네, 제 반입니다',
+  'share.orPick': '특정 실습 그룹에 속해 있거나 본인 반이 아닌가요? 아래에서 본인 반을 선택하세요.',
+  'share.pickInPromo': '아래에서 본인의 연습 분반 또는 실습 그룹을 선택하세요.',
+  'share.pickFirst': ({ name }) => `먼저 본인 반을, 강의를 하신다면 본인 이름을 선택하세요. 그다음 ${name} 시간표가 표시됩니다.`,
+  'share.pickInDepartment': ({ name }) => `${name}의 반 중에서 본인 반을 선택하세요.`,
+
   'install.short': '설치',
   'install.title': '홈 화면에 추가',
   'install.close': '닫기',

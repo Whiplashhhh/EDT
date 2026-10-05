@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Canza ${name}`,
   'compare.close': ({ name }) => `Ɓoye ${name}`,
 
+  'share.view': 'Raba wannan jadawalin',
+  'share.department': 'Raba hanyar dukkan shirin karatun',
+  'share.received': 'Hanyar da aka raba',
+  'share.yes': 'Eh, wannan ajina ne',
+  'share.orPick': 'Kana cikin wani rukunin dakin gwaji, ko wannan ba ajinka ba ne? Zaɓi naka a ƙasa.',
+  'share.pickInPromo': 'Zaɓi rukuninka na darasi ko na dakin gwaji a ƙasa.',
+  'share.pickFirst': ({ name }) => `Da farko zaɓi ajinka, ko sunanka idan kana koyarwa: sannan za a nuna ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Zaɓi ajinka daga cikin azuzuwan ${name}.`,
+
   'install.short': 'Saka',
   'install.title': 'Ƙara zuwa allon gida',
   'install.close': 'Rufe',

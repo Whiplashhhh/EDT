@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Ganti ${name}`,
   'compare.close': ({ name }) => `Sembunyikan ${name}`,
 
+  'share.view': 'Bagikan jadwal ini',
+  'share.department': 'Bagikan tautan seluruh program studi',
+  'share.received': 'Tautan yang dibagikan',
+  'share.yes': 'Ya, ini kelasku',
+  'share.orPick': 'Kamu di kelompok praktikum tertentu, atau ini bukan kelasmu? Pilih kelasmu di bawah.',
+  'share.pickInPromo': 'Pilih kelompok tutorial atau praktikummu di bawah.',
+  'share.pickFirst': ({ name }) => `Pilih dulu kelasmu, atau namamu jika kamu mengajar: setelah itu ${name} akan tampil.`,
+  'share.pickInDepartment': ({ name }) => `Pilih kelasmu dari ${name}.`,
+
   'install.short': 'Pasang',
   'install.title': 'Tambahkan ke Layar Utama',
   'install.close': 'Tutup',

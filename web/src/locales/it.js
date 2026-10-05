@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Cambia ${name}`,
   'compare.close': ({ name }) => `Non mostrare più ${name}`,
 
+  'share.view': 'Condividi questo orario',
+  'share.department': 'Condividi il link dell’intero corso di laurea',
+  'share.received': 'Link ricevuto',
+  'share.yes': 'Sì, è la mia classe',
+  'share.orPick': 'Sei in un gruppo di laboratorio specifico o non è la tua classe? Scegli la tua qui sotto.',
+  'share.pickInPromo': 'Scegli il tuo gruppo di esercitazione o di laboratorio qui sotto.',
+  'share.pickFirst': ({ name }) => `Scegli prima la tua classe, o il tuo nome se insegni: poi verrà mostrato ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Scegli la tua classe tra quelle di ${name}.`,
+
   'install.short': 'Installa',
   'install.title': 'Aggiungi alla schermata Home',
   'install.close': 'Chiudi',

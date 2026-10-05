@@ -36,6 +36,15 @@ export default {
   'compare.change': ({ name }) => `Mudar ${name}`,
   'compare.close': ({ name }) => `Deixar de mostrar ${name}`,
 
+  'share.view': 'Partilhar este horário',
+  'share.department': 'Partilhar a ligação de todo o curso',
+  'share.received': 'Ligação recebida',
+  'share.yes': 'Sim, é a minha turma',
+  'share.orPick': 'Estás num grupo de laboratório específico ou não é a tua turma? Escolhe a tua abaixo.',
+  'share.pickInPromo': 'Escolhe abaixo o teu grupo de aulas práticas ou de laboratório.',
+  'share.pickFirst': ({ name }) => `Escolhe primeiro a tua turma, ou o teu nome se dás aulas: depois será mostrado ${name}.`,
+  'share.pickInDepartment': ({ name }) => `Escolhe a tua turma entre as de ${name}.`,
+
   'install.short': 'Instalar',
   'install.title': 'Adicionar ao ecrã principal',
   'install.close': 'Fechar',
