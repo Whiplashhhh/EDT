@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { mondayOf } from '../dates.js';
 import { alignToSlots, gridDepartment } from '../slots.js';
-import { errorMessage, t } from '../i18n.js';
+import { errorMessage } from '../i18n.js';
 import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 
 /**
@@ -17,8 +17,15 @@ import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
 export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlot } = {}) {
   const published = ref([]);
   const loading = ref(false);
+  /** Rien à montrer : l'emploi du temps n'a pas pu être chargé. */
   const error = ref(null);
+  /** Chargement en cours, et en attendant, la copie enregistrée sur l'appareil. */
   const stale = ref(false);
+  /**
+   * Un emploi du temps s'affiche, mais pas à jour : `{ reason, fetchedAt }`, où
+   * `reason` vaut `ade` (l'ULCO ne répond pas) ou `offline` (notre serveur non plus).
+   */
+  const outdated = ref(null);
   const fetchedAt = ref(null);
   const windowStart = ref(null);
   let controller = null;
@@ -62,17 +69,25 @@ export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlo
 
     loading.value = true;
     error.value = null;
+    outdated.value = null;
     try {
       const data = await api.schedule(department.value, kind.value, resourceId.value, from, controller.signal);
+      stale.value = false;
+      // Le secours du serveur peut être plus ancien que la copie de l'appareil : on garde la plus récente.
+      if (data.stale && cached && cached.fetchedAt >= data.fetchedAt) {
+        outdated.value = { reason: 'ade', fetchedAt: cached.fetchedAt };
+        return;
+      }
       published.value = data.events;
       fetchedAt.value = data.fetchedAt;
       windowStart.value = from;
-      stale.value = false;
+      if (data.stale) outdated.value = { reason: 'ade', fetchedAt: data.fetchedAt };
       writeCachedSchedule({ ...data, from }, cacheSlot);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      error.value = cached ? t('error.offline') : errorMessage(err, 'error.schedule');
-      stale.value = Boolean(cached);
+      stale.value = false;
+      if (cached) outdated.value = { reason: err.code === 'ade' ? 'ade' : 'offline', fetchedAt: cached.fetchedAt };
+      else error.value = errorMessage(err, 'error.schedule');
     } finally {
       loading.value = false;
     }
@@ -85,5 +100,5 @@ export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlo
   });
   watch(focusedDay, () => load());
 
-  return { events, eventsByDay, grid, loading, error, stale, fetchedAt, load };
+  return { events, eventsByDay, grid, loading, error, stale, outdated, fetchedAt, load };
 }

@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Oppdater',
   'app.loading': 'Laster…',
   'app.stale': 'Data lagret på enheten — oppdaterer…',
+  'app.adeDown': ({ time }) => `ULCO-nettstedet svarer ikke akkurat nå — sist oppdatert: ${time}.`,
+  'app.offline': ({ time }) => `Frakoblet — sist oppdatert: ${time}.`,
   'app.welcome': 'Velg en klasse, et rom eller en lærer for å se timeplanen.',
   'app.theme': 'Tema',
   'app.themeSystem': 'System',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Det oppsto en feil.',
   'error.network': 'Fikk ikke kontakt med serveren.',
-  'error.offline': 'Offlinedata: fikk ikke kontakt med serveren.',
   'error.schedule': 'Kunne ikke laste timeplanen.',
   'error.groups': 'Kunne ikke laste listen over grupper.',
   'error.rooms': 'Kunne ikke laste listen over rom.',

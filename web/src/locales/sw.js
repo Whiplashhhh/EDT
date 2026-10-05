@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Onyesha upya',
   'app.loading': 'Inapakia…',
   'app.stale': 'Data iliyohifadhiwa kwenye kifaa — inasasishwa…',
+  'app.adeDown': ({ time }) => `Tovuti ya ULCO haijibu kwa sasa — ilisasishwa mwisho: ${time}.`,
+  'app.offline': ({ time }) => `Nje ya mtandao — ilisasishwa mwisho: ${time}.`,
   'app.welcome': 'Chagua kikundi, chumba au mwalimu ili kuona ratiba.',
   'app.theme': 'Mandhari',
   'app.themeSystem': 'Mfumo',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Hitilafu imetokea.',
   'error.network': 'Imeshindikana kufikia seva.',
-  'error.offline': 'Data ya nje ya mtandao: imeshindikana kufikia seva.',
   'error.schedule': 'Imeshindikana kupakia ratiba.',
   'error.groups': 'Imeshindikana kupakia orodha ya vikundi.',
   'error.rooms': 'Imeshindikana kupakia orodha ya vyumba.',

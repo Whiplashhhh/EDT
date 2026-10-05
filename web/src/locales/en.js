@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Refresh',
   'app.loading': 'Loading…',
   'app.stale': 'Showing data saved on this device — refreshing…',
+  'app.adeDown': ({ time }) => `The ULCO website isn’t responding right now — last updated: ${time}.`,
+  'app.offline': ({ time }) => `Offline — last updated: ${time}.`,
   'app.welcome': 'Pick a class, a room or a teacher to see its timetable.',
   'app.theme': 'Theme',
   'app.themeSystem': 'System',
@@ -151,7 +153,6 @@ export default {
 
   'error.generic': 'Something went wrong.',
   'error.network': 'Could not reach the server.',
-  'error.offline': 'Offline data: could not reach the server.',
   'error.schedule': 'Could not load the timetable.',
   'error.groups': 'Could not load the list of groups.',
   'error.rooms': 'Could not load the list of rooms.',

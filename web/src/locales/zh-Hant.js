@@ -17,6 +17,8 @@ export default {
   'app.refresh': '重新整理',
   'app.loading': '載入中…',
   'app.stale': '顯示裝置上儲存的資料 — 正在更新…',
+  'app.adeDown': ({ time }) => `ULCO 網站暫時沒有回應 — 最後更新：${time}`,
+  'app.offline': ({ time }) => `離線 — 最後更新：${time}`,
   'app.welcome': '選擇班級、教室或教師即可查看課表。',
   'app.theme': '主題',
   'app.themeSystem': '跟隨系統',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': '發生錯誤。',
   'error.network': '無法連線伺服器。',
-  'error.offline': '離線資料：無法連線伺服器。',
   'error.schedule': '無法載入課表。',
   'error.groups': '無法載入班級清單。',
   'error.rooms': '無法載入教室清單。',

@@ -72,6 +72,18 @@ const IFACE_CORE = 'com.adesoft.gwt.core.client.rpc.CorePlanningServiceProxy';
 export class AdeError extends Error {}
 
 /**
+ * `fetch` vers ADE. Un délai dépassé ou une connexion refusée deviennent des
+ * `AdeError` : c'est ADE qui ne répond pas, pas notre serveur qui a planté.
+ */
+export async function reach(url: string | URL, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (err) {
+    throw new AdeError('ADE ne répond pas', { cause: err });
+  }
+}
+
+/**
  * Session ADE. Une instance = un JSESSIONID côté serveur ADE ; elle est
  * volontairement à durée de vie courte (on l'ouvre, on lit, on la jette).
  */
@@ -89,7 +101,7 @@ export class AdeClient {
 
   async #rpc(service: string, strongName: string, body: string): Promise<string> {
     const payload = `7|0|${body}`;
-    const res = await fetch(`${this.#moduleBase}${service}`, {
+    const res = await reach(`${this.#moduleBase}${service}`, {
       method: 'POST',
       redirect: 'error',
       signal: AbortSignal.timeout(this.#opts.timeoutMs),

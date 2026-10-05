@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Rifresko',
   'app.loading': 'Duke u ngarkuar…',
   'app.stale': 'Të dhëna të ruajtura në pajisje — po rifreskohen…',
+  'app.adeDown': ({ time }) => `Faqja e ULCO-s nuk po përgjigjet tani — përditësimi i fundit: ${time}.`,
+  'app.offline': ({ time }) => `Jashtë linje — përditësimi i fundit: ${time}.`,
   'app.welcome': 'Zgjidh një grup, një sallë ose një pedagog për të parë orarin.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistemi',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Ndodhi një gabim.',
   'error.network': 'Serveri nuk u arrit.',
-  'error.offline': 'Të dhëna offline: serveri nuk u arrit.',
   'error.schedule': 'Orari nuk mund të ngarkohej.',
   'error.groups': 'Lista e grupeve nuk mund të ngarkohej.',
   'error.rooms': 'Lista e sallave nuk mund të ngarkohej.',

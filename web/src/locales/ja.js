@@ -17,6 +17,8 @@ export default {
   'app.refresh': '更新',
   'app.loading': '読み込み中…',
   'app.stale': '端末に保存されたデータを表示中 — 更新しています…',
+  'app.adeDown': ({ time }) => `ULCOのサイトが現在応答していません — 最終更新：${time}`,
+  'app.offline': ({ time }) => `オフライン — 最終更新：${time}`,
   'app.welcome': 'クラス・教室・教員を選ぶと時間割が表示されます。',
   'app.theme': 'テーマ',
   'app.themeSystem': 'システム',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'エラーが発生しました。',
   'error.network': 'サーバーに接続できません。',
-  'error.offline': 'オフラインのデータです。サーバーに接続できません。',
   'error.schedule': '時間割を読み込めませんでした。',
   'error.groups': 'クラス一覧を読み込めませんでした。',
   'error.rooms': '教室一覧を読み込めませんでした。',

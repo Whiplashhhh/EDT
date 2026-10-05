@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Muat semula',
   'app.loading': 'Memuatkan…',
   'app.stale': 'Data disimpan pada peranti — sedang dimuat semula…',
+  'app.adeDown': ({ time }) => `Laman web ULCO tidak bertindak balas buat masa ini — kemas kini terakhir: ${time}.`,
+  'app.offline': ({ time }) => `Luar talian — kemas kini terakhir: ${time}.`,
   'app.welcome': 'Pilih kelas, bilik atau pensyarah untuk melihat jadual waktunya.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistem',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Ralat telah berlaku.',
   'error.network': 'Pelayan tidak dapat dihubungi.',
-  'error.offline': 'Data luar talian: pelayan tidak dapat dihubungi.',
   'error.schedule': 'Jadual waktu tidak dapat dimuatkan.',
   'error.groups': 'Senarai kumpulan tidak dapat dimuatkan.',
   'error.rooms': 'Senarai bilik tidak dapat dimuatkan.',

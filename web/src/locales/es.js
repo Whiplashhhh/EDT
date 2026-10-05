@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Actualizar',
   'app.loading': 'Cargando…',
   'app.stale': 'Datos guardados en el dispositivo: actualizando…',
+  'app.adeDown': ({ time }) => `La web de la ULCO no responde en este momento. Última actualización: ${time}.`,
+  'app.offline': ({ time }) => `Sin conexión. Última actualización: ${time}.`,
   'app.welcome': 'Elige una clase, un aula o un profesor para ver su horario.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistema',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Se ha producido un error.',
   'error.network': 'No se ha podido contactar con el servidor.',
-  'error.offline': 'Datos sin conexión: no se ha podido contactar con el servidor.',
   'error.schedule': 'No se ha podido cargar el horario.',
   'error.groups': 'No se ha podido cargar la lista de grupos.',
   'error.rooms': 'No se ha podido cargar la lista de aulas.',

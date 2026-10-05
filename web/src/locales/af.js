@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Verfris',
   'app.loading': 'Laai tans…',
   'app.stale': 'Data op die toestel gestoor — verfris tans…',
+  'app.adeDown': ({ time }) => `Die ULCO-webwerf reageer tans nie — laas bygewerk: ${time}.`,
+  'app.offline': ({ time }) => `Vanlyn — laas bygewerk: ${time}.`,
   'app.welcome': 'Kies ’n klas, ’n lokaal of ’n dosent om die rooster te sien.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Stelsel',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Iets het verkeerd geloop.',
   'error.network': 'Kon nie die bediener bereik nie.',
-  'error.offline': 'Aflyn data: kon nie die bediener bereik nie.',
   'error.schedule': 'Kon nie die rooster laai nie.',
   'error.groups': 'Kon nie die lys groepe laai nie.',
   'error.rooms': 'Kon nie die lys lokale laai nie.',

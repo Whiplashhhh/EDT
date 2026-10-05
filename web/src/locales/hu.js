@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Frissítés',
   'app.loading': 'Betöltés…',
   'app.stale': 'Az eszközön tárolt adatok — frissítés folyamatban…',
+  'app.adeDown': ({ time }) => `Az ULCO webhelye most nem válaszol — utolsó frissítés: ${time}.`,
+  'app.offline': ({ time }) => `Offline — utolsó frissítés: ${time}.`,
   'app.welcome': 'Válassz csoportot, termet vagy oktatót az órarend megtekintéséhez.',
   'app.theme': 'Téma',
   'app.themeSystem': 'Rendszer',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Hiba történt.',
   'error.network': 'A kiszolgáló nem érhető el.',
-  'error.offline': 'Offline adatok: a kiszolgáló nem érhető el.',
   'error.schedule': 'Az órarendet nem sikerült betölteni.',
   'error.groups': 'A csoportok listáját nem sikerült betölteni.',
   'error.rooms': 'A termek listáját nem sikerült betölteni.',

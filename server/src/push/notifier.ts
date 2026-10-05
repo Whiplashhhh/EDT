@@ -69,6 +69,15 @@ interface Watched {
 /** Durée pendant laquelle on se souvient d'avoir envoyé une notification. */
 const SENT_MEMORY_MS = 12 * 60 * 60_000;
 
+/** Écart maximal entre deux tentatives quand ADE ne répond plus. */
+const MAX_BACKOFF_MS = 30 * 60_000;
+
+/** Échecs consécutifs d'une ressource, et le moment où l'on pourra retenter. */
+interface Failure {
+  count: number;
+  retryAt: number;
+}
+
 export class Notifier {
   readonly #service: AdeService;
   readonly #crous: MenuSource | null;
@@ -77,6 +86,7 @@ export class Notifier {
   readonly #options: NotifierOptions;
   readonly #log: FastifyBaseLogger;
   readonly #watched = new Map<string, Watched>();
+  readonly #failures = new Map<string, Failure>();
   /** Notifications déjà parties, avec leur date : évite de sonner deux fois pour la même chose. */
   readonly #sent = new Map<string, number>();
   #timer: NodeJS.Timeout | null = null;
@@ -131,8 +141,8 @@ export class Notifier {
         try {
           await this.#handleResource(key, subscriptions, now);
         } catch (err) {
-          // ADE indisponible pour une classe : les autres continuent d'être traitées.
-          this.#log.warn({ err, resource: key }, 'emploi du temps indisponible pour les notifications');
+          // Une classe en échec : les autres continuent d'être traitées.
+          this.#log.warn({ err, resource: key }, 'notifications en échec pour une ressource');
         }
       }
     } finally {
@@ -162,15 +172,38 @@ export class Notifier {
   ): Promise<{ state: Watched; changes: ScheduleChange[] }> {
     const known = this.#watched.get(key);
     if (known && now - known.fetchedAt < this.#options.pollMs) return { state: known, changes: [] };
+    /*
+     * ADE ne répond plus : on ne le relance qu'à l'échéance, et d'ici là les
+     * rappels partent sur le dernier emploi du temps connu — ils n'ont pas
+     * besoin d'ADE, seuls les changements en ont besoin.
+     */
+    const unchanged = { state: known ?? { events: [], snapshot: new Map(), fetchedAt: 0 }, changes: [] };
+    if (now < (this.#failures.get(key)?.retryAt ?? 0)) return unchanged;
 
     const from = mondayOf(new Date(now));
     const target =
       typeof sample.resourceId === 'number' ? sample.resourceId : parseSelection(sample.resourceId);
     if (target === null) throw new Error(`Sélection de ressources illisible : ${sample.resourceId}`);
-    const schedule =
-      sample.kind === 'groups' && typeof target === 'number'
-        ? await this.#service.schedule(sample.department, target, from)
-        : await this.#service.facetSchedule(sample.department, sample.kind, target, from);
+    let schedule;
+    try {
+      schedule =
+        sample.kind === 'groups' && typeof target === 'number'
+          ? await this.#service.schedule(sample.department, target, from)
+          : await this.#service.facetSchedule(sample.department, sample.kind, target, from);
+    } catch (err) {
+      const { count, retryAt } = this.#failed(key, now);
+      this.#log.warn(
+        { err, resource: key, failures: count, retryAt: new Date(retryAt).toISOString() },
+        'emploi du temps indisponible pour les notifications',
+      );
+      return unchanged;
+    }
+    // Une version de secours n'apprend rien de neuf : on la traite comme un échec.
+    if (schedule.stale) {
+      this.#failed(key, now);
+      return unchanged;
+    }
+    this.#failures.delete(key);
 
     /*
      * Les horaires d'ADE sont recalés sur la grille du département avant tout
@@ -260,10 +293,22 @@ export class Notifier {
     }
   }
 
+  /** Note un échec et repousse la prochaine tentative, de plus en plus loin. */
+  #failed(key: string, now: number): Failure {
+    const count = (this.#failures.get(key)?.count ?? 0) + 1;
+    const delay = Math.min(this.#options.pollMs * 2 ** (count - 1), MAX_BACKOFF_MS);
+    const failure = { count, retryAt: now + delay };
+    this.#failures.set(key, failure);
+    return failure;
+  }
+
   /** Oublie les ressources que plus personne ne suit. */
   #prune(groups: Map<string, PushSubscription[]>): void {
     for (const key of this.#watched.keys()) {
       if (!groups.has(key)) this.#watched.delete(key);
+    }
+    for (const key of this.#failures.keys()) {
+      if (!groups.has(key)) this.#failures.delete(key);
     }
   }
 }

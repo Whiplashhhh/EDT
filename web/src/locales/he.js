@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'רענון',
   'app.loading': 'טוען…',
   'app.stale': 'נתונים ששמורים במכשיר — מתרענן…',
+  'app.adeDown': ({ time }) => `האתר של ULCO אינו מגיב כרגע — עודכן לאחרונה: ${time}.`,
+  'app.offline': ({ time }) => `לא מקוון — עודכן לאחרונה: ${time}.`,
   'app.welcome': 'בחר כיתה, חדר או מרצה כדי לראות את מערכת השעות.',
   'app.theme': 'ערכת נושא',
   'app.themeSystem': 'מערכת',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'אירעה שגיאה.',
   'error.network': 'לא ניתן להגיע לשרת.',
-  'error.offline': 'נתונים לא מקוונים: לא ניתן להגיע לשרת.',
   'error.schedule': 'לא ניתן לטעון את מערכת השעות.',
   'error.groups': 'לא ניתן לטעון את רשימת הקבוצות.',
   'error.rooms': 'לא ניתן לטעון את רשימת החדרים.',

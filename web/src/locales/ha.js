@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Sabunta',
   'app.loading': 'Ana lodawa…',
   'app.stale': 'Bayanan da aka ajiye a na’urar — ana sabuntawa…',
+  'app.adeDown': ({ time }) => `Shafin ULCO ba ya amsawa a yanzu — sabuntawa ta ƙarshe: ${time}.`,
+  'app.offline': ({ time }) => `Babu haɗi — sabuntawa ta ƙarshe: ${time}.`,
   'app.welcome': 'Zaɓi aji, daki ko malami don ganin jadawalin.',
   'app.theme': 'Jigo',
   'app.themeSystem': 'Na na’ura',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'An samu matsala.',
   'error.network': 'An kasa tuntuɓar sabar.',
-  'error.offline': 'Bayanan waje: an kasa tuntuɓar sabar.',
   'error.schedule': 'An kasa loda jadawalin.',
   'error.groups': 'An kasa loda jerin ajujuwa.',
   'error.rooms': 'An kasa loda jerin dakuna.',

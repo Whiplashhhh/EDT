@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'تازہ کریں',
   'app.loading': 'لوڈ ہو رہا ہے…',
   'app.stale': 'ڈیوائس پر محفوظ ڈیٹا — تازہ کیا جا رہا ہے…',
+  'app.adeDown': ({ time }) => `ULCO کی ویب سائٹ اس وقت جواب نہیں دے رہی — آخری بار اپ ڈیٹ: ${time}۔`,
+  'app.offline': ({ time }) => `آف لائن — آخری بار اپ ڈیٹ: ${time}۔`,
   'app.welcome': 'ٹائم ٹیبل دیکھنے کے لیے کلاس، کمرہ یا استاد منتخب کریں۔',
   'app.theme': 'تھیم',
   'app.themeSystem': 'سسٹم',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'کوئی خرابی پیش آئی۔',
   'error.network': 'سرور تک رسائی نہ ہو سکی۔',
-  'error.offline': 'آف لائن ڈیٹا: سرور تک رسائی نہ ہو سکی۔',
   'error.schedule': 'ٹائم ٹیبل لوڈ نہ ہو سکا۔',
   'error.groups': 'گروپوں کی فہرست لوڈ نہ ہو سکی۔',
   'error.rooms': 'کمروں کی فہرست لوڈ نہ ہو سکی۔',

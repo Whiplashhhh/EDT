@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Cusboonaysii',
   'app.loading': 'Waa la soo raraya…',
   'app.stale': 'Xog qalabka lagu keydiyey — waa la cusboonaysiinayaa…',
+  'app.adeDown': ({ time }) => `Bogga ULCO hadda ma jawaabayo — cusboonaysiintii ugu dambaysay: ${time}.`,
+  'app.offline': ({ time }) => `Khadka kama baxsan — cusboonaysiintii ugu dambaysay: ${time}.`,
   'app.welcome': 'Dooro fasal, qol ama macallin si aad jadwalka u aragto.',
   'app.theme': 'Muuqaal',
   'app.themeSystem': 'Nidaamka',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Khalad ayaa dhacay.',
   'error.network': 'Lama gaari karin serferka.',
-  'error.offline': 'Xog offline ah: lama gaari karin serferka.',
   'error.schedule': 'Jadwalka lama soo rari karin.',
   'error.groups': 'Liiska kooxaha lama soo rari karin.',
   'error.rooms': 'Liiska qolalka lama soo rari karin.',

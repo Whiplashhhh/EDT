@@ -17,6 +17,8 @@ export default {
   'app.refresh': 'Segarkan',
   'app.loading': 'Memuat…',
   'app.stale': 'Data tersimpan di perangkat — sedang disegarkan…',
+  'app.adeDown': ({ time }) => `Situs ULCO sedang tidak merespons — terakhir diperbarui: ${time}.`,
+  'app.offline': ({ time }) => `Luring — terakhir diperbarui: ${time}.`,
   'app.welcome': 'Pilih kelas, ruang, atau dosen untuk melihat jadwalnya.',
   'app.theme': 'Tema',
   'app.themeSystem': 'Sistem',
@@ -150,7 +152,6 @@ export default {
 
   'error.generic': 'Terjadi kesalahan.',
   'error.network': 'Server tidak dapat dihubungi.',
-  'error.offline': 'Data luring: server tidak dapat dihubungi.',
   'error.schedule': 'Jadwal tidak dapat dimuat.',
   'error.groups': 'Daftar grup tidak dapat dimuat.',
   'error.rooms': 'Daftar ruang tidak dapat dimuat.',

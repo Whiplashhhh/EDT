@@ -1,8 +1,8 @@
-import { AdeClient, AdeError, type AdeResource } from './gwt.ts';
+import { AdeClient, AdeError, reach, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
 import { nameLike, teacherAliases } from './teachers.ts';
-import { TtlCache } from '../cache.ts';
+import { TtlCache, type CacheOptions, type Lookup } from '../cache.ts';
 import type { AppConfig } from '../config.ts';
 
 /**
@@ -124,6 +124,8 @@ export interface Schedule {
   from: string;
   fetchedAt: string;
   events: CourseEvent[];
+  /** Présent quand ADE ne répond pas : c'est alors la dernière version connue, datée par `fetchedAt`. */
+  stale?: true;
 }
 
 /**
@@ -140,6 +142,12 @@ const MAX_ICS_BYTES = 10 * 1024 * 1024;
  * en file, pas d'un seul coup.
  */
 const ADE_CONCURRENCY = 6;
+/**
+ * Quand ADE ne répond plus, on resert la dernière version connue — jusqu'à une
+ * semaine, de quoi couvrir une panne de week-end — et on ne le relance qu'au
+ * bout de deux minutes : chaque visiteur n'a pas à attendre le délai d'expiration.
+ */
+const FALLBACK: CacheOptions = { staleMs: 7 * 24 * 60 * 60 * 1000, retryMs: 2 * 60 * 1000 };
 
 export class NotFoundError extends Error {}
 
@@ -354,14 +362,14 @@ export class AdeService {
 
   constructor(config: AppConfig) {
     this.#config = config;
-    this.#composantes = new TtlCache<Composante[]>(config.catalogTtlMs, 1);
-    this.#catalogs = new TtlCache<Catalog>(config.catalogTtlMs, 64);
+    this.#composantes = new TtlCache<Composante[]>(config.catalogTtlMs, 1, FALLBACK);
+    this.#catalogs = new TtlCache<Catalog>(config.catalogTtlMs, 64, FALLBACK);
     // Les URL `.shu` publiées par ADE sont stables : on les garde une journée.
     // Il en faut une par nœud parcouru pour rassembler toute l'ULCO.
     this.#icsUrls = new TtlCache<string>(24 * 60 * 60 * 1000, 5000);
-    this.#schedules = new TtlCache<Schedule>(config.scheduleTtlMs, 300);
-    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 128);
-    this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32);
+    this.#schedules = new TtlCache<Schedule>(config.scheduleTtlMs, 300, FALLBACK);
+    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 128, FALLBACK);
+    this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32, FALLBACK);
   }
 
   #client(): AdeClient {
@@ -483,15 +491,16 @@ export class AdeService {
     const dept = await this.#department(departmentId);
     const group = await this.findGroup(dept.id, groupId);
 
-    return this.#schedules.get(`${dept.id}:${groupId}:${from}`, async () => ({
+    const { value, stale } = await this.#schedules.lookup(`${dept.id}:${groupId}:${from}`, async () => ({
       department: dept.id,
-      kind: 'groups',
+      kind: 'groups' as const,
       resourceId: groupId,
       resourceName: group.name,
       from,
       fetchedAt: new Date().toISOString(),
       events: await this.#gather(dept, group, from),
     }));
+    return stale ? { ...value, stale } : value;
   }
 
   /**
@@ -533,18 +542,23 @@ export class AdeService {
    * les cours de toute la formation, et on les dédoublonne : un cours partagé
    * par deux groupes est une seule et même séance (même UID).
    */
-  async #allEvents(departmentId: string, from: string): Promise<CourseEvent[]> {
+  async #allEvents(departmentId: string, from: string): Promise<Lookup<CourseEvent[]>> {
     if (departmentId === ALL_DEPARTMENTS) {
       const perDepartment = await Promise.all(
         (await this.#departmentIds(ALL_DEPARTMENTS)).map((id) => this.#allEvents(id, from)),
       );
       // Un cours mutualisé entre deux formations garde le même UID ADE :
       // le dédoublonnage vaut donc aussi entre départements.
-      return uniqueByUid(perDepartment.flat());
+      return {
+        value: uniqueByUid(perDepartment.flatMap((d) => d.value)),
+        // L'ensemble a l'âge de sa part la plus ancienne.
+        storedAt: Math.min(...perDepartment.map((d) => d.storedAt)),
+        stale: perDepartment.some((d) => d.stale),
+      };
     }
 
     const dept = await this.#department(departmentId);
-    return this.#aggregates.get(`${dept.id}:${from}`, async () => {
+    return this.#aggregates.lookup(`${dept.id}:${from}`, async () => {
       const catalog = await this.catalog(dept.id);
       return this.#gather(dept, { id: dept.node.id, children: catalog.groups }, from);
     });
@@ -566,7 +580,7 @@ export class AdeService {
     await this.#departmentIds(departmentId);
 
     return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
-      const events = await this.#allEvents(departmentId, from);
+      const { value: events } = await this.#allEvents(departmentId, from);
       const fetchedAt = new Date().toISOString();
       const until = events.reduce<string | null>((last, e) => (!last || e.end > last ? e.end : last), null);
       if (kind === 'subjects') {
@@ -653,7 +667,7 @@ export class AdeService {
     const rooms = new Set(entries.map((e) => roomKey(e.city ?? '', e.name)));
     const cities = kind === 'rooms' ? await this.#cities() : new Map<string, string>();
 
-    const events = await this.#allEvents(departmentId, from);
+    const { value: events, storedAt, stale } = await this.#allEvents(departmentId, from);
     const matches = events.filter((event) => {
       if (kind === 'rooms') {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;
@@ -676,8 +690,9 @@ export class AdeService {
       resourceId: Array.isArray(target) ? formatSelection(target) : target,
       resourceName: entries.map((e) => e.name).join(', '),
       from,
-      fetchedAt: new Date().toISOString(),
+      fetchedAt: new Date(storedAt).toISOString(),
       events: matches,
+      ...(stale ? { stale } : {}),
     };
   }
 
@@ -697,7 +712,7 @@ export class AdeService {
     if (target.origin !== this.#config.ade.origin) throw new AdeError('Flux iCalendar hors du domaine ADE attendu');
     target.searchParams.set('firstDate', from);
 
-    const res = await fetch(target, {
+    const res = await reach(target, {
       redirect: 'error',
       signal: AbortSignal.timeout(20_000),
       headers: { Accept: 'text/calendar' },
