@@ -40,8 +40,8 @@ export default {
   'share.department': '課程全体のリンクを共有',
   'share.received': '共有されたリンク',
   'share.yes': 'はい、自分のクラスです',
-  'share.orPick': '特定の実験グループに所属している場合や、自分のクラスでない場合は、下から自分のクラスを選んでください。',
-  'share.pickInPromo': '下から演習グループまたは実験グループを選んでください。',
+  'share.orPick': '自分のクラスがさらに細かい場合や、このクラスでない場合は、下から選んでください。',
+  'share.pickInPromo': '下から自分のクラスをできるだけ細かく選んでください。',
   'share.pickFirst': ({ name }) => `まず自分のクラスを選んでください（教えている場合は自分の名前）。その後 ${name} が表示されます。`,
   'share.pickInDepartment': ({ name }) => `${name} のクラスから自分のクラスを選んでください。`,
 

@@ -40,8 +40,8 @@ export default {
   'share.department': 'Raba hanyar dukkan shirin karatun',
   'share.received': 'Hanyar da aka raba',
   'share.yes': 'Eh, wannan ajina ne',
-  'share.orPick': 'Kana cikin wani rukunin dakin gwaji, ko wannan ba ajinka ba ne? Zaɓi naka a ƙasa.',
-  'share.pickInPromo': 'Zaɓi rukuninka na darasi ko na dakin gwaji a ƙasa.',
+  'share.orPick': 'Ajinka ya fi wannan takamaimai, ko wannan ba naka ba ne? Zaɓe shi a ƙasa.',
+  'share.pickInPromo': 'Zaɓi ajinka a ƙasa, daidai yadda zai yiwu.',
   'share.pickFirst': ({ name }) => `Da farko zaɓi ajinka, ko sunanka idan kana koyarwa: sannan za a nuna ${name}.`,
   'share.pickInDepartment': ({ name }) => `Zaɓi ajinka daga cikin azuzuwan ${name}.`,
 

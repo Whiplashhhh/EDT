@@ -40,8 +40,8 @@ export default {
   'share.department': 'Deel ’n skakel na die hele studieprogram',
   'share.received': 'Gedeelde skakel',
   'share.yes': 'Ja, dis my klas',
-  'share.orPick': 'In ’n spesifieke praktikumgroep, of is dit nie jou klas nie? Kies joune hieronder.',
-  'share.pickInPromo': 'Kies jou tutoriaal- of praktikumgroep hieronder.',
+  'share.orPick': 'Is jou klas meer spesifiek, of is dit nie joune nie? Kies dit hieronder.',
+  'share.pickInPromo': 'Kies jou klas hieronder, so presies as moontlik.',
   'share.pickFirst': ({ name }) => `Kies eers jou klas, of jou naam as jy klasgee: ${name} sal daarna wys.`,
   'share.pickInDepartment': ({ name }) => `Kies jou klas uit ${name}.`,
 

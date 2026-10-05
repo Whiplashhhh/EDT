@@ -40,8 +40,8 @@ export default {
   'share.department': 'Compartir el enlace de toda la titulación',
   'share.received': 'Enlace recibido',
   'share.yes': 'Sí, es mi clase',
-  'share.orPick': '¿Estás en un grupo de prácticas concreto o no es tu clase? Elige la tuya abajo.',
-  'share.pickInPromo': 'Elige tu grupo de seminario o de prácticas abajo.',
+  'share.orPick': '¿Tu clase es más concreta, o no es la tuya? Elígela abajo.',
+  'share.pickInPromo': 'Elige tu clase abajo, lo más concreta posible.',
   'share.pickFirst': ({ name }) => `Elige primero tu clase, o tu nombre si das clase: después se mostrará ${name}.`,
   'share.pickInDepartment': ({ name }) => `Elige tu clase entre las de ${name}.`,
 

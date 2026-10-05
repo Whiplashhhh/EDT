@@ -40,8 +40,8 @@ export default {
   'share.department': 'Podijeli poveznicu na cijeli studij',
   'share.received': 'Podijeljena poveznica',
   'share.yes': 'Da, to je moja grupa',
-  'share.orPick': 'Jesi li u određenoj grupi za vježbe ili ovo nije tvoja grupa? Odaberi svoju u nastavku.',
-  'share.pickInPromo': 'U nastavku odaberi svoju grupu za seminare ili vježbe.',
+  'share.orPick': 'Je li tvoja grupa uža ili ovo nije tvoja? Odaberi je u nastavku.',
+  'share.pickInPromo': 'U nastavku odaberi svoju grupu, što preciznije.',
   'share.pickFirst': ({ name }) => `Najprije odaberi svoju grupu ili svoje ime ako predaješ: zatim će se prikazati ${name}.`,
   'share.pickInDepartment': ({ name }) => `Odaberi svoju grupu sa studija ${name}.`,
 

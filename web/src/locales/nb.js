@@ -40,8 +40,8 @@ export default {
   'share.department': 'Del en lenke til hele studieprogrammet',
   'share.received': 'Delt lenke',
   'share.yes': 'Ja, dette er klassen min',
-  'share.orPick': 'Er du i en bestemt labgruppe, eller er det ikke klassen din? Velg din nedenfor.',
-  'share.pickInPromo': 'Velg øvings- eller labgruppen din nedenfor.',
+  'share.orPick': 'Er klassen din mer spesifikk, eller er dette ikke din? Velg den nedenfor.',
+  'share.pickInPromo': 'Velg klassen din nedenfor, så presist som mulig.',
   'share.pickFirst': ({ name }) => `Velg først klassen din, eller navnet ditt hvis du underviser: deretter vises ${name}.`,
   'share.pickInDepartment': ({ name }) => `Velg klassen din i ${name}.`,
 

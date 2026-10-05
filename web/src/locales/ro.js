@@ -40,8 +40,8 @@ export default {
   'share.department': 'Partajează linkul întregului program de studii',
   'share.received': 'Link primit',
   'share.yes': 'Da, e grupa mea',
-  'share.orPick': 'Ești într-o subgrupă de laborator anume sau nu e grupa ta? Alege-o pe a ta mai jos.',
-  'share.pickInPromo': 'Alege mai jos grupa de seminar sau subgrupa de laborator.',
+  'share.orPick': 'Grupa ta e mai specifică sau nu e a ta? Alege-o mai jos.',
+  'share.pickInPromo': 'Alege-ți grupa mai jos, cât mai precis.',
   'share.pickFirst': ({ name }) => `Alege mai întâi grupa ta sau numele tău, dacă predai: apoi se va afișa ${name}.`,
   'share.pickInDepartment': ({ name }) => `Alege-ți grupa din ${name}.`,
 

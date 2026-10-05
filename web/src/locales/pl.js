@@ -40,8 +40,8 @@ export default {
   'share.department': 'Udostępnij link do całego kierunku',
   'share.received': 'Udostępniony link',
   'share.yes': 'Tak, to moja grupa',
-  'share.orPick': 'Jesteś w konkretnej grupie laboratoryjnej albo to nie twoja grupa? Wybierz swoją poniżej.',
-  'share.pickInPromo': 'Wybierz poniżej swoją grupę ćwiczeniową lub laboratoryjną.',
+  'share.orPick': 'Twoja grupa jest węższa albo to nie twoja? Wybierz ją poniżej.',
+  'share.pickInPromo': 'Wybierz poniżej swoją grupę, jak najdokładniej.',
   'share.pickFirst': ({ name }) => `Najpierw wybierz swoją grupę albo swoje nazwisko, jeśli prowadzisz zajęcia: potem wyświetli się ${name}.`,
   'share.pickInDepartment': ({ name }) => `Wybierz swoją grupę z kierunku ${name}.`,
 

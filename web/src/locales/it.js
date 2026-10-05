@@ -40,8 +40,8 @@ export default {
   'share.department': 'Condividi il link dell’intero corso di laurea',
   'share.received': 'Link ricevuto',
   'share.yes': 'Sì, è la mia classe',
-  'share.orPick': 'Sei in un gruppo di laboratorio specifico o non è la tua classe? Scegli la tua qui sotto.',
-  'share.pickInPromo': 'Scegli il tuo gruppo di esercitazione o di laboratorio qui sotto.',
+  'share.orPick': 'La tua classe è più specifica, o non è la tua? Sceglila qui sotto.',
+  'share.pickInPromo': 'Scegli la tua classe qui sotto, nel modo più preciso possibile.',
   'share.pickFirst': ({ name }) => `Scegli prima la tua classe, o il tuo nome se insegni: poi verrà mostrato ${name}.`,
   'share.pickInDepartment': ({ name }) => `Scegli la tua classe tra quelle di ${name}.`,
 

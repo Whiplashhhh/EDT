@@ -40,8 +40,8 @@ export default {
   'share.department': 'Bagikan tautan seluruh program studi',
   'share.received': 'Tautan yang dibagikan',
   'share.yes': 'Ya, ini kelasku',
-  'share.orPick': 'Kamu di kelompok praktikum tertentu, atau ini bukan kelasmu? Pilih kelasmu di bawah.',
-  'share.pickInPromo': 'Pilih kelompok tutorial atau praktikummu di bawah.',
+  'share.orPick': 'Kelasmu lebih spesifik, atau ini bukan kelasmu? Pilih di bawah.',
+  'share.pickInPromo': 'Pilih kelasmu di bawah, setepat mungkin.',
   'share.pickFirst': ({ name }) => `Pilih dulu kelasmu, atau namamu jika kamu mengajar: setelah itu ${name} akan tampil.`,
   'share.pickInDepartment': ({ name }) => `Pilih kelasmu dari ${name}.`,
 

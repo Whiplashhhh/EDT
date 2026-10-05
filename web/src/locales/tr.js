@@ -40,8 +40,8 @@ export default {
   'share.department': 'Tüm programın bağlantısını paylaş',
   'share.received': 'Paylaşılan bağlantı',
   'share.yes': 'Evet, bu benim sınıfım',
-  'share.orPick': 'Belirli bir laboratuvar grubunda mısın, yoksa bu senin sınıfın değil mi? Aşağıdan kendininkini seç.',
-  'share.pickInPromo': 'Aşağıdan uygulama veya laboratuvar grubunu seç.',
+  'share.orPick': 'Sınıfın daha belirli mi, yoksa bu senin değil mi? Aşağıdan seç.',
+  'share.pickInPromo': 'Sınıfını aşağıdan olabildiğince kesin seç.',
   'share.pickFirst': ({ name }) => `Önce sınıfını, ders veriyorsan adını seç: ardından ${name} gösterilecek.`,
   'share.pickInDepartment': ({ name }) => `${name} içindeki sınıflardan kendininkini seç.`,
 

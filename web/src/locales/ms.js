@@ -40,8 +40,8 @@ export default {
   'share.department': 'Kongsi pautan seluruh program pengajian',
   'share.received': 'Pautan dikongsi',
   'share.yes': 'Ya, ini kelas saya',
-  'share.orPick': 'Anda dalam kumpulan amali tertentu, atau ini bukan kelas anda? Pilih kelas anda di bawah.',
-  'share.pickInPromo': 'Pilih kumpulan tutorial atau amali anda di bawah.',
+  'share.orPick': 'Kelas anda lebih khusus, atau ini bukan kelas anda? Pilih di bawah.',
+  'share.pickInPromo': 'Pilih kelas anda di bawah, setepat mungkin.',
   'share.pickFirst': ({ name }) => `Pilih kelas anda dahulu, atau nama anda jika anda mengajar: ${name} akan dipaparkan selepas itu.`,
   'share.pickInDepartment': ({ name }) => `Pilih kelas anda daripada ${name}.`,
 
