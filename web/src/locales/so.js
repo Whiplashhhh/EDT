@@ -40,8 +40,8 @@ export default {
   'share.department': 'La wadaag xiriirka barnaamijka waxbarasho oo dhan',
   'share.received': 'Xiriir la wadaagay',
   'share.yes': 'Haa, kani waa fasalkayga',
-  'share.orPick': 'Ma waxaad ku jirtaa koox shaybaar oo gaar ah, mise kani maaha fasalkaaga? Hoos ka dooro kaaga.',
-  'share.pickInPromo': 'Hoos ka dooro kooxdaada casharka ama shaybaarka.',
+  'share.orPick': 'Fasalkaagu ma ka sii gaar yahay, mise kani maaha kaaga? Hoos ka dooro.',
+  'share.pickInPromo': 'Hoos ka dooro fasalkaaga, sida ugu saxsan.',
   'share.pickFirst': ({ name }) => `Marka hore dooro fasalkaaga, ama magacaaga haddii aad wax dhigto: kadib ${name} ayaa soo bixi doona.`,
   'share.pickInDepartment': ({ name }) => `Dooro fasalkaaga oo ka mid ah ${name}.`,
 

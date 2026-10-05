@@ -40,8 +40,8 @@ export default {
   'share.department': 'Shiriki kiungo cha programu nzima ya masomo',
   'share.received': 'Kiungo kilichoshirikiwa',
   'share.yes': 'Ndiyo, hiki ni kikundi changu',
-  'share.orPick': 'Uko katika kikundi maalum cha maabara, au hiki si kikundi chako? Chagua chako hapa chini.',
-  'share.pickInPromo': 'Chagua kikundi chako cha mafunzo au cha maabara hapa chini.',
+  'share.orPick': 'Kikundi chako ni mahususi zaidi, au hiki si chako? Kichague hapa chini.',
+  'share.pickInPromo': 'Chagua kikundi chako hapa chini, kwa usahihi kadiri uwezavyo.',
   'share.pickFirst': ({ name }) => `Kwanza chagua kikundi chako, au jina lako kama unafundisha: kisha ${name} itaonyeshwa.`,
   'share.pickInDepartment': ({ name }) => `Chagua kikundi chako kutoka ${name}.`,
 

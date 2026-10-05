@@ -40,8 +40,8 @@ export default {
   'share.department': 'Ibahagi ang link ng buong programa',
   'share.received': 'Ibinahaging link',
   'share.yes': 'Oo, ito ang klase ko',
-  'share.orPick': 'Nasa isang partikular na lab group ka ba, o hindi ito ang klase mo? Piliin ang sa iyo sa ibaba.',
-  'share.pickInPromo': 'Piliin ang iyong tutorial o lab group sa ibaba.',
+  'share.orPick': 'Mas tiyak ba ang klase mo, o hindi ito sa iyo? Piliin ito sa ibaba.',
+  'share.pickInPromo': 'Piliin ang iyong klase sa ibaba, nang pinakatiyak na posible.',
   'share.pickFirst': ({ name }) => `Piliin muna ang iyong klase, o ang iyong pangalan kung nagtuturo ka: pagkatapos ay lalabas ang ${name}.`,
   'share.pickInDepartment': ({ name }) => `Piliin ang iyong klase mula sa ${name}.`,
 

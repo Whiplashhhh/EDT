@@ -180,6 +180,11 @@ de la journée, la reprise de l'après-midi, le retour après un trou — est an
 30 minutes avant son début : l'annoncer dès la fin du cours d'avant le ferait
 passer pour imminent alors qu'il reste une heure à attendre.
 
+Plusieurs cours qui commencent au même moment — une classe dédoublée en
+plusieurs salles — partent en une seule notification qui les liste tous (trois
+au plus, puis leur nombre). Quand on suit une classe, une ligne ajoute que
+choisir une classe plus précise n'afficherait que le sien.
+
 Les horaires employés sont ceux de la grille du département, et non les blocs
 publiés par ADE : au BUT INFO, le cours de 11 h 35 est annoncé à 11 h 30, quand
 le précédent s'achève réellement, et non à 11 h 25.

@@ -106,6 +106,26 @@ test('deux cours à la même heure ne font qu’un seul créneau', () => {
   assert.equal(remindersFor([MORNING, twin, LATE_MORNING]).length, 2);
 });
 
+test('un créneau à plusieurs cours les annonce tous, et suggère une classe plus précise', () => {
+  const twin = course({ start: MORNING.start, end: MORNING.end, uid: 'a-bis', room: 'S134' });
+  const [reminder] = remindersFor([MORNING, twin]);
+  assert.equal(reminder.events.length, 2);
+
+  const both = nextCourseNotification(reminder.events, 'fr', { suggestNarrower: true });
+  assert.match(both.body, /salle S201/);
+  assert.match(both.body, /salle S134/);
+  assert.match(both.body, /Plusieurs cours commencent en même temps/);
+  // Un enseignant n'a pas de classe plus précise à choisir.
+  assert.doesNotMatch(nextCourseNotification(reminder.events, 'fr').body, /Plusieurs cours/);
+  // Un seul cours : pas d'avertissement.
+  assert.doesNotMatch(nextCourseNotification([MORNING], 'fr', { suggestNarrower: true }).body, /Plusieurs cours/);
+
+  const many = [0, 1, 2, 3, 4].map((i) => course({ start: MORNING.start, end: MORNING.end, uid: `m${i}`, room: `S${i}` }));
+  const crowded = nextCourseNotification(many, 'fr', { suggestNarrower: true }).body.split('\n');
+  assert.equal(crowded.length, 3 + 2, 'trois cours détaillés, le compte des autres, l’avertissement');
+  assert.match(crowded[3], /et 2 autres cours/);
+});
+
 test('un rappel ne part jamais après le début du cours qu’il annonce', () => {
   // Cours qui se chevauchent : la fin du précédent tombe après le début du suivant.
   const long = course({ start: '2026-09-21T06:00:00.000Z', end: '2026-09-21T10:00:00.000Z', uid: 'long' });
@@ -233,13 +253,13 @@ test('une langue d’interface inconnue des notifications bascule en anglais', (
 });
 
 test('les notifications se lisent en français comme en anglais', () => {
-  const next = nextCourseNotification(MORNING, 'fr');
+  const next = nextCourseNotification([MORNING], 'fr');
   assert.match(next.title, /Prochain cours à 08:00/);
   assert.match(next.body, /R1-01 Dev \(TP\)/);
   assert.match(next.body, /salle S201/);
   assert.equal(next.day, '2026-09-21');
 
-  assert.match(nextCourseNotification(MORNING, 'en').title, /Next class at 08:00/);
+  assert.match(nextCourseNotification([MORNING], 'en').title, /Next class at 08:00/);
 
   const moved = changeNotification({ kind: 'room', event: { ...MORNING, room: 'S134' }, previous: MORNING }, 'fr');
   assert.match(moved.title, /Changement de salle/);

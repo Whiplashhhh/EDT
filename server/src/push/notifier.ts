@@ -227,7 +227,9 @@ export class Notifier {
 
   async #sendReminders(sub: PushSubscription, events: CourseEvent[], now: number): Promise<void> {
     for (const reminder of dueReminders(events, now, this.#options.graceMs)) {
-      await this.#deliver(sub, `next:${reminder.key}`, nextCourseNotification(reminder.event, langOf(sub)), now);
+      // Plusieurs cours d'une même classe à la même heure : elle se dédouble, on suggère d'en choisir une plus précise.
+      const notification = nextCourseNotification(reminder.events, langOf(sub), { suggestNarrower: sub.kind === 'groups' });
+      await this.#deliver(sub, `next:${reminder.key}`, notification, now);
     }
   }
 

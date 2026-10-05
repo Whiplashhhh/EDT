@@ -40,8 +40,8 @@ export default {
   'share.department': 'Partager le lien de toute la formation',
   'share.received': 'Lien reçu',
   'share.yes': 'Oui, c’est ma classe',
-  'share.orPick': 'Vous êtes dans un TP précis, ou ce n’est pas votre classe ? Choisissez la vôtre ci-dessous.',
-  'share.pickInPromo': 'Choisissez votre TD ou votre TP ci-dessous.',
+  'share.orPick': 'Votre classe est plus précise, ou ce n’est pas la vôtre ? Choisissez-la ci-dessous.',
+  'share.pickInPromo': 'Choisissez votre classe ci-dessous, au niveau le plus précis.',
   'share.pickFirst': ({ name }) => `Choisissez d’abord votre classe, ou votre nom si vous enseignez : ${name} s’affichera ensuite.`,
   'share.pickInDepartment': ({ name }) => `Choisissez votre classe parmi celles de ${name}.`,
 

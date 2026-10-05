@@ -40,8 +40,8 @@ export default {
   'share.department': 'Link zum ganzen Studiengang teilen',
   'share.received': 'Geteilter Link',
   'share.yes': 'Ja, das ist mein Kurs',
-  'share.orPick': 'In einer bestimmten Praktikumsgruppe oder nicht dein Kurs? Wähle unten deinen eigenen.',
-  'share.pickInPromo': 'Wähle unten deine Übungs- oder Praktikumsgruppe.',
+  'share.orPick': 'Ist dein Kurs genauer, oder ist das nicht deiner? Wähle ihn unten.',
+  'share.pickInPromo': 'Wähle unten deinen Kurs, so genau wie möglich.',
   'share.pickFirst': ({ name }) => `Wähle zuerst deinen Kurs oder, wenn du unterrichtest, deinen Namen: danach erscheint ${name}.`,
   'share.pickInDepartment': ({ name }) => `Wähle deinen Kurs im Studiengang ${name}.`,
 

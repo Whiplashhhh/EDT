@@ -40,8 +40,8 @@ export default {
   'share.department': '학과 과정 전체 링크 공유',
   'share.received': '공유받은 링크',
   'share.yes': '네, 제 반입니다',
-  'share.orPick': '특정 실습 그룹에 속해 있거나 본인 반이 아닌가요? 아래에서 본인 반을 선택하세요.',
-  'share.pickInPromo': '아래에서 본인의 연습 분반 또는 실습 그룹을 선택하세요.',
+  'share.orPick': '본인 반이 더 세분화되어 있거나 이 반이 아닌가요? 아래에서 선택하세요.',
+  'share.pickInPromo': '아래에서 본인 반을 최대한 정확하게 선택하세요.',
   'share.pickFirst': ({ name }) => `먼저 본인 반을, 강의를 하신다면 본인 이름을 선택하세요. 그다음 ${name} 시간표가 표시됩니다.`,
   'share.pickInDepartment': ({ name }) => `${name}의 반 중에서 본인 반을 선택하세요.`,
 

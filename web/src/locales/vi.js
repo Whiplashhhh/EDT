@@ -40,8 +40,8 @@ export default {
   'share.department': 'Chia sẻ liên kết của cả chương trình',
   'share.received': 'Liên kết được chia sẻ',
   'share.yes': 'Đúng, đây là lớp của tôi',
-  'share.orPick': 'Bạn thuộc một nhóm thực hành cụ thể, hoặc đây không phải lớp của bạn? Hãy chọn lớp của bạn bên dưới.',
-  'share.pickInPromo': 'Hãy chọn nhóm bài tập hoặc nhóm thực hành của bạn bên dưới.',
+  'share.orPick': 'Lớp của bạn cụ thể hơn, hoặc đây không phải lớp của bạn? Hãy chọn bên dưới.',
+  'share.pickInPromo': 'Hãy chọn lớp của bạn bên dưới, càng cụ thể càng tốt.',
   'share.pickFirst': ({ name }) => `Trước tiên hãy chọn lớp của bạn, hoặc tên mình nếu bạn giảng dạy: sau đó ${name} sẽ hiện ra.`,
   'share.pickInDepartment': ({ name }) => `Hãy chọn lớp của bạn trong ${name}.`,
 

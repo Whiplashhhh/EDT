@@ -40,8 +40,8 @@ export default {
   'share.department': 'Link megosztása a teljes képzéshez',
   'share.received': 'Megosztott link',
   'share.yes': 'Igen, ez az én csoportom',
-  'share.orPick': 'Egy adott laborcsoportban vagy, vagy ez nem a te csoportod? Válaszd ki a sajátodat lent.',
-  'share.pickInPromo': 'Válaszd ki lent a szemináriumi vagy laborcsoportodat.',
+  'share.orPick': 'Pontosabb a csoportod, vagy ez nem a tiéd? Válaszd ki lent.',
+  'share.pickInPromo': 'Válaszd ki lent a csoportodat, a lehető legpontosabban.',
   'share.pickFirst': ({ name }) => `Először válaszd ki a csoportodat, vagy a nevedet, ha oktatsz: ezután ${name} jelenik meg.`,
   'share.pickInDepartment': ({ name }) => `Válaszd ki a csoportodat ebből a képzésből: ${name}.`,
 

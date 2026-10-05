@@ -40,8 +40,8 @@ export default {
   'share.department': 'Sdílet odkaz na celý studijní program',
   'share.received': 'Sdílený odkaz',
   'share.yes': 'Ano, to je moje skupina',
-  'share.orPick': 'Jsi v konkrétní skupině cvičení, nebo to není tvoje skupina? Vyber tu svou níže.',
-  'share.pickInPromo': 'Níže vyber svou skupinu pro semináře nebo cvičení.',
+  'share.orPick': 'Je tvoje skupina užší, nebo tohle není tvoje? Vyber ji níže.',
+  'share.pickInPromo': 'Níže vyber svou skupinu, co nejpřesněji.',
   'share.pickFirst': ({ name }) => `Nejdřív vyber svou skupinu, nebo své jméno, pokud učíš: potom se zobrazí ${name}.`,
   'share.pickInDepartment': ({ name }) => `Vyber svou skupinu ze studijního programu ${name}.`,
 

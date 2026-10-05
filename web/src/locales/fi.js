@@ -40,8 +40,8 @@ export default {
   'share.department': 'Jaa linkki koko koulutusohjelmaan',
   'share.received': 'Jaettu linkki',
   'share.yes': 'Kyllä, tämä on ryhmäni',
-  'share.orPick': 'Oletko tietyssä laboratorioryhmässä, vai eikö tämä ole ryhmäsi? Valitse omasi alta.',
-  'share.pickInPromo': 'Valitse alta harjoitus- tai laboratorioryhmäsi.',
+  'share.orPick': 'Onko ryhmäsi tarkempi, vai eikö tämä ole sinun? Valitse se alta.',
+  'share.pickInPromo': 'Valitse ryhmäsi alta mahdollisimman tarkasti.',
   'share.pickFirst': ({ name }) => `Valitse ensin ryhmäsi, tai nimesi jos opetat: sen jälkeen näytetään ${name}.`,
   'share.pickInDepartment': ({ name }) => `Valitse ryhmäsi koulutusohjelmasta ${name}.`,
 

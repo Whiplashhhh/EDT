@@ -70,8 +70,10 @@ export function sessionsOf(events: CourseEvent[]): Session[] {
 export interface Reminder {
   /** Instant d'envoi (ms depuis l'époque). */
   at: number;
-  /** Cours annoncé : le premier du créneau. */
+  /** Premier cours du créneau : c'est son heure qu'on annonce. */
   event: CourseEvent;
+  /** Tous les cours du créneau — plusieurs quand une classe se dédouble en plusieurs salles. */
+  events: CourseEvent[];
   /** Clé de dédoublonnage : un créneau n'est annoncé qu'une fois. */
   key: string;
 }
@@ -106,7 +108,7 @@ export function remindersFor(events: CourseEvent[]): Reminder[] {
           : // Jamais après le début du cours annoncé : deux cours qui se chevauchent
             // ramèneraient sinon le rappel à un moment où l'on y est déjà.
             Math.min(previousEnd - BETWEEN_COURSES_LEAD_MS, start);
-      reminders.push({ at, event: session.events[0], key: session.start });
+      reminders.push({ at, event: session.events[0], events: session.events, key: session.start });
     });
   }
   return reminders.sort((a, b) => a.at - b.at);

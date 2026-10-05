@@ -40,8 +40,8 @@ export default {
   'share.department': 'Partilhar a ligação de todo o curso',
   'share.received': 'Ligação recebida',
   'share.yes': 'Sim, é a minha turma',
-  'share.orPick': 'Estás num grupo de laboratório específico ou não é a tua turma? Escolhe a tua abaixo.',
-  'share.pickInPromo': 'Escolhe abaixo o teu grupo de aulas práticas ou de laboratório.',
+  'share.orPick': 'A tua turma é mais específica, ou não é a tua? Escolhe-a abaixo.',
+  'share.pickInPromo': 'Escolhe abaixo a tua turma, o mais precisa possível.',
   'share.pickFirst': ({ name }) => `Escolhe primeiro a tua turma, ou o teu nome se dás aulas: depois será mostrado ${name}.`,
   'share.pickInDepartment': ({ name }) => `Escolhe a tua turma entre as de ${name}.`,
 

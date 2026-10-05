@@ -40,8 +40,8 @@ export default {
   'share.department': 'የሙሉውን የትምህርት መርሐግብር ዘርፍ አገናኝ አጋራ',
   'share.received': 'የተጋራ አገናኝ',
   'share.yes': 'አዎ፣ ይህ የእኔ ክፍል ነው',
-  'share.orPick': 'በተለየ የተግባር ቡድን ውስጥ ነህ ወይስ ይህ ክፍልህ አይደለም? ከታች የራስህን ምረጥ።',
-  'share.pickInPromo': 'ከታች የማጠናከሪያ ወይም የተግባር ቡድንህን ምረጥ።',
+  'share.orPick': 'ክፍልህ ይበልጥ የተለየ ነው ወይስ ይህ የአንተ አይደለም? ከታች ምረጠው።',
+  'share.pickInPromo': 'ከታች ክፍልህን በተቻለ መጠን በትክክል ምረጥ።',
   'share.pickFirst': ({ name }) => `መጀመሪያ ክፍልህን ምረጥ፣ የምታስተምር ከሆነ ደግሞ ስምህን ምረጥ፤ ከዚያ ${name} ይታያል።`,
   'share.pickInDepartment': ({ name }) => `ከ${name} ክፍሎች መካከል ክፍልህን ምረጥ።`,
 

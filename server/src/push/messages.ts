@@ -114,6 +114,8 @@ const T = {
   fr: {
     nextCourse: 'Prochain cours',
     startsAt: (time: string) => `à ${time}`,
+    otherCourses: (n: number) => `et ${n} autre${n > 1 ? 's' : ''} cours`,
+    severalCourses: 'Plusieurs cours commencent en même temps : choisir une classe plus précise n’afficherait que le vôtre.',
     room: (room: string) => `salle ${room}`,
     noRoom: 'salle non communiquée',
     added: 'Cours ajouté',
@@ -133,6 +135,8 @@ const T = {
   en: {
     nextCourse: 'Next class',
     startsAt: (time: string) => `at ${time}`,
+    otherCourses: (n: number) => `and ${n} more class${n > 1 ? 'es' : ''}`,
+    severalCourses: 'Several classes start at the same time: picking a more specific class would show only yours.',
     room: (room: string) => `room ${room}`,
     noRoom: 'no room given',
     added: 'Class added',
@@ -151,14 +155,29 @@ const T = {
   },
 } as const;
 
-/** « Prochain cours » : ce qui commence, quand, et où. */
-export function nextCourseNotification(event: CourseEvent, lang: Lang): Notification {
+/** Cours d'un même créneau détaillés dans la notification ; au-delà, on les compte. */
+export const MAX_LISTED_COURSES = 3;
+
+/**
+ * « Prochain cours » : ce qui commence, quand, et où.
+ *
+ * Plusieurs cours peuvent commencer au même moment : une classe suivie dans
+ * son ensemble contient ses sous-groupes, chacun dans sa salle. On les montre
+ * tous plutôt que d'en choisir un au hasard — et donc, pour la moitié des
+ * élèves, la mauvaise salle. À qui suit une classe, on suggère d'en choisir
+ * une plus précise.
+ */
+export function nextCourseNotification(events: CourseEvent[], lang: Lang, { suggestNarrower = false } = {}): Notification {
   const tr = T[lang];
+  const event = events[0];
   const time = formatTime(event.start, lang);
-  const place = event.room ? tr.room(event.room) : tr.noRoom;
+  const line = (e: CourseEvent) => `${courseLabel(e)} · ${e.room ? tr.room(e.room) : tr.noRoom}`;
+  const lines = events.slice(0, MAX_LISTED_COURSES).map(line);
+  if (events.length > MAX_LISTED_COURSES) lines.push(tr.otherCourses(events.length - MAX_LISTED_COURSES));
+  if (events.length > 1 && suggestNarrower) lines.push(tr.severalCourses);
   return {
     title: `${tr.nextCourse} ${tr.startsAt(time)}`,
-    body: `${courseLabel(event)} · ${place}`,
+    body: lines.join('\n'),
     // Un seul rappel « prochain cours » à la fois sur l'écran de verrouillage.
     tag: 'edt-next',
     day: dayOf(event.start),
