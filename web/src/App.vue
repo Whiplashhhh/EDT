@@ -11,7 +11,7 @@ import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
 import { useEventDetail } from './composables/useEventDetail.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
-import { addDays, formatDayLong, formatStamp, mondayOf, today } from './dates.js';
+import { addDays, formatDayLong, formatDayMonth, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
 import { readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
@@ -54,9 +54,9 @@ function dayFromUrl() {
   const params = new URLSearchParams(location.search);
   const day = params.get('day');
   if (!day) return null;
-  params.delete('day');
-  // Le reste de l'adresse — un lien partagé — n'est pas à nous : on le laisse.
-  const rest = params.toString();
+  // Le reste de l'adresse — un lien partagé — n'est pas à nous : on le laisse
+  // tel quel, sans le réencoder (ses barres resteraient sinon en `%2F`).
+  const rest = location.search.slice(1).split('&').filter((part) => !part.startsWith('day=')).join('&');
   history.replaceState(null, '', rest ? `${location.pathname}?${rest}` : location.pathname);
   return DAY_RE.test(day) ? day : null;
 }
@@ -399,6 +399,8 @@ function openPicker(target) {
 }
 
 function choose({ department: dept, kind: pickedKind, resourceId: id, resourceName }) {
+  if (pickerTarget.value === 'share') return shareLink({ department: dept, kind: pickedKind, resourceId: id }, { title: resourceName });
+  if (pickerTarget.value === 'share-department') return shareLink({ department: dept }, { title: resourceName });
   const picked = { department: dept, kind: pickedKind, resourceId: id, resourceName };
   if (pickerTarget.value === 'compare') {
     // On compare un jour précis : celui qu'on regardait reste à l'écran.
@@ -440,7 +442,8 @@ function chooseIdentity({ department: dept, kind: pickedKind, resourceId: id, re
   writeSettings(settings.value);
   identityOpen.value = false;
   menuOpen.value = false;
-  focusedDay.value = today();
+  // Un lien daté — « ma journée du 7 » — ouvre sur ce jour-là.
+  focusedDay.value = link ? requestedDay ?? today() : today();
 }
 
 function confirmInvite() {
@@ -487,21 +490,35 @@ watch(
   { immediate: true },
 );
 
-/**
- * Partage : la feuille de partage du téléphone quand elle existe, sinon le
- * presse-papiers. `what` dit ce qu'on partage — l'emploi du temps affiché, ou
- * toute sa formation pour que chacun y trouve sa classe.
+/*
+ * Partage, derrière l'icône de l'en-tête : l'emploi du temps affiché quand ce
+ * n'est pas le sien, sa journée ou sa semaine, n'importe quelle classe, salle
+ * ou enseignant, ou toute une formation pour que chacun y trouve sa classe.
  */
-const shareCopied = ref(null);
+const shareOpen = ref(false);
+
+/** « Ma journée du lundi 5 octobre » en vue jour, « Ma semaine du 5 octobre » en vue semaine. */
+const myDayLabel = computed(() =>
+  settings.value.view === 'week'
+    ? t('share.myWeek', { date: formatDayMonth(`${mondayOf(focusedDay.value)}T12:00:00Z`) })
+    : t('share.myDay', { date: formatDayLong(focusedDay.value) }),
+);
+
+/** Confirmation discrète d'un lien copié, quand le navigateur n'a pas de feuille de partage. */
+const shareToast = ref(false);
 let shareTimer;
-async function share(what) {
-  const s = settings.value;
-  const target = what === 'department' ? { department: s.department } : s;
-  const url = shareUrl(target);
+
+/**
+ * Partage un lien : la feuille de partage du téléphone quand elle existe,
+ * sinon le presse-papiers. Les panneaux se referment dans les deux cas.
+ */
+async function shareLink(target, { title, day } = {}) {
+  const url = shareUrl(target, { day });
+  shareOpen.value = false;
+  pickerOpen.value = false;
   if (navigator.share) {
     try {
-      await navigator.share({ title: what === 'department' ? t('share.department') : s.resourceName, url });
-      menuOpen.value = false;
+      await navigator.share({ title, url });
     } catch {
       // Partage annulé : rien à faire.
     }
@@ -510,12 +527,30 @@ async function share(what) {
   try {
     await navigator.clipboard.writeText(url);
   } catch {
-    window.prompt(t('share.view'), url);
+    window.prompt(t('share.open'), url);
     return;
   }
-  shareCopied.value = what;
+  shareToast.value = true;
   clearTimeout(shareTimer);
-  shareTimer = setTimeout(() => { shareCopied.value = null; }, 2500);
+  shareTimer = setTimeout(() => { shareToast.value = false; }, 2500);
+}
+
+function shareShown() {
+  shareLink(settings.value, { title: settings.value.resourceName });
+}
+
+function shareMine() {
+  shareLink(identity.value, { title: identity.value.resourceName, day: focusedDay.value });
+}
+
+/** Les deux derniers choix passent par le sélecteur : on y touche ce qu'on veut partager. */
+function pickToShare(target) {
+  shareOpen.value = false;
+  if (target === 'share-department') {
+    const dept = identity.value?.kind === 'groups' ? identity.value.department : settings.value.department;
+    pickerSeed.value = { department: dept, kind: 'groups', resourceId: null };
+  }
+  openPicker(target);
 }
 
 /** Ramène l'affichage sur son propre emploi du temps, sans changer de jour. */
@@ -636,6 +671,7 @@ function onKeydown(event) {
   if (event.key === 'Escape') {
     pickerOpen.value = false;
     menuOpen.value = false;
+    shareOpen.value = false;
     installGuideOpen.value = false;
     feedbackKind.value = null;
     closeDetail();
@@ -643,14 +679,15 @@ function onKeydown(event) {
     if (hasIdentity.value) identityOpen.value = false;
     return;
   }
-  if (pickerOpen.value || menuOpen.value || identityOpen.value || feedbackKind.value || detail.value) return;
+  if (pickerOpen.value || menuOpen.value || shareOpen.value || identityOpen.value || feedbackKind.value || detail.value) return;
   if (event.key === 'ArrowRight') step(1);
   if (event.key === 'ArrowLeft') step(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
 }
-watch(pickerOpen, (open) => { if (open) { menuOpen.value = false; identityOpen.value = false; } });
-watch(menuOpen, (open) => { if (open) pickerOpen.value = false; });
-watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.value = false; } });
+watch(pickerOpen, (open) => { if (open) { menuOpen.value = false; shareOpen.value = false; identityOpen.value = false; } });
+watch(menuOpen, (open) => { if (open) { pickerOpen.value = false; shareOpen.value = false; } });
+watch(shareOpen, (open) => { if (open) { pickerOpen.value = false; menuOpen.value = false; } });
+watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.value = false; shareOpen.value = false; } });
 </script>
 
 <template>
@@ -699,6 +736,16 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           type="button"
           @click="focusedDay = today()"
         >{{ t('app.today') }}</button>
+        <button
+          class="icon share-icon"
+          type="button"
+          :aria-expanded="shareOpen"
+          :aria-label="t('share.open')"
+          :title="t('share.open')"
+          @click="shareOpen = !shareOpen"
+        >
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8" /></svg>
+        </button>
         <button class="icon" type="button" :aria-expanded="menuOpen" :aria-label="t('app.options')" @click="menuOpen = !menuOpen">⋯</button>
       </div>
     </header>
@@ -707,12 +754,16 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     <div
       v-if="pickerOpen"
       class="dropdown picker-panel"
-      :class="{ right: pickerTarget === 'compare' }"
+      :class="{ right: pickerTarget !== 'main' }"
       role="dialog"
-      :aria-label="pickerTarget === 'compare' ? t('compare.pick') : t('app.pickResource')"
+      :aria-label="pickerTarget === 'compare' ? t('compare.pick') : pickerTarget.startsWith('share') ? t('share.open') : t('app.pickResource')"
     >
+      <!-- Choisir pour partager, pas pour afficher : on le dit avant la liste. -->
+      <p v-if="pickerTarget === 'share'" class="picker-note">{{ t('share.pickResource') }}</p>
+      <p v-else-if="pickerTarget === 'share-department'" class="picker-note">{{ t('share.pickDepartment') }}</p>
       <ResourcePicker
         :key="pickerTarget"
+        :departments-only="pickerTarget === 'share-department'"
         :department="pickerCurrent.department"
         :kind="pickerCurrent.kind"
         :resource-id="pickerCurrent.resourceId"
@@ -730,12 +781,6 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <a v-if="webcalUrl" role="menuitem" :href="webcalUrl">{{ t('app.subscribe') }}</a>
       <button v-if="calendarUrl" type="button" role="menuitem" @click="copyCalendarLink">
         {{ linkCopied ? t('app.linkCopied') : t('app.copyCalendarLink') }}
-      </button>
-      <button v-if="settings.resourceId" type="button" role="menuitem" @click="share('view')">
-        {{ shareCopied === 'view' ? t('app.linkCopied') : t('share.view') }}
-      </button>
-      <button v-if="settings.kind === 'groups' && settings.department" type="button" role="menuitem" @click="share('department')">
-        {{ shareCopied === 'department' ? t('app.linkCopied') : t('share.department') }}
       </button>
       <button type="button" role="menuitem" @click="reloadAll(true); menuOpen = false">{{ t('app.refresh') }}</button>
 
@@ -845,6 +890,19 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         </template>
       </div>
     </div>
+
+    <div v-if="shareOpen" class="menu-backdrop" @click="shareOpen = false"></div>
+    <div v-if="shareOpen" class="dropdown menu share-menu" role="menu" :aria-label="t('share.open')">
+      <p class="share-title">{{ t('share.open') }}</p>
+      <button v-if="viewingOther" type="button" role="menuitem" @click="shareShown">
+        {{ t('share.shown', { name: settings.resourceName }) }}
+      </button>
+      <button type="button" role="menuitem" @click="shareMine">{{ myDayLabel }}</button>
+      <button type="button" role="menuitem" @click="pickToShare('share')">{{ t('share.other') }}</button>
+      <button type="button" role="menuitem" @click="pickToShare('share-department')">{{ t('share.department') }}</button>
+    </div>
+
+    <p v-if="shareToast" class="toast" role="status">{{ t('app.linkCopied') }}</p>
 
     <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <div class="view-switch segmented" role="group" :aria-label="t('app.display')">
@@ -1067,11 +1125,16 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 .chev { font-size: 0.7rem; color: var(--text-muted); }
 /* Plusieurs ressources réunies font un long nom : il se tronque, l'en-tête garde ses boutons. */
-.identity { min-width: 0; }
+/*
+ * L'en-tête porte jusqu'à cinq boutons à droite. Le nom affiché garde de quoi
+ * se lire ; c'est le retour vers le sien, déjà connu, qui se tronque d'abord.
+ */
+.identity { min-width: min(8rem, 32vw); }
 .group-btn { max-width: 100%; }
 .group-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.actions { display: flex; align-items: center; gap: 0.4rem; }
+.actions { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
+.actions > * { flex-shrink: 0; }
 .pill {
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
@@ -1098,6 +1161,8 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   align-items: center;
   gap: 0.3rem;
   max-width: 9rem;
+  min-width: 0;
+  flex-shrink: 1;
   color: var(--text);
   background: var(--bg-sunken);
   border: 1px solid var(--line);
@@ -1175,6 +1240,26 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 /* Le sélecteur de la colonne de droite s'ouvre de son côté. */
 .picker-panel.right { inset-inline-start: auto; inset-inline-end: 0.85rem; }
+.picker-note { margin: 0.6rem 0.75rem 0.1rem; font-size: 0.8rem; color: var(--text-muted); }
+
+.share-title { margin: 0.35rem 0.7rem 0.25rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+
+/* Lien copié : un mot en bas de l'écran, qui s'efface de lui-même. */
+.toast {
+  position: fixed;
+  z-index: 6;
+  inset-inline: 0;
+  bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+}
 
 .menu > :where(button, a) {
   padding: 0.6rem 0.7rem;
