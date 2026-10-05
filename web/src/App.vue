@@ -496,6 +496,19 @@ watch(
  * ou enseignant, ou toute une formation pour que chacun y trouve sa classe.
  */
 const shareOpen = ref(false);
+/** Hauteur du panneau de partage : juste sous le bouton qui l'ouvre, où qu'il soit. */
+const shareTop = ref(null);
+
+function toggleShare(event) {
+  if (shareOpen.value) {
+    shareOpen.value = false;
+    return;
+  }
+  const button = event.currentTarget.getBoundingClientRect();
+  const app = event.currentTarget.closest('.app').getBoundingClientRect();
+  shareTop.value = `${button.bottom - app.top + 6}px`;
+  shareOpen.value = true;
+}
 
 /** « Ma journée du lundi 5 octobre » en vue jour, « Ma semaine du 5 octobre » en vue semaine. */
 const myDayLabel = computed(() =>
@@ -736,16 +749,6 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           type="button"
           @click="focusedDay = today()"
         >{{ t('app.today') }}</button>
-        <button
-          class="icon share-icon"
-          type="button"
-          :aria-expanded="shareOpen"
-          :aria-label="t('share.open')"
-          :title="t('share.open')"
-          @click="shareOpen = !shareOpen"
-        >
-          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8" /></svg>
-        </button>
         <button class="icon" type="button" :aria-expanded="menuOpen" :aria-label="t('app.options')" @click="menuOpen = !menuOpen">⋯</button>
       </div>
     </header>
@@ -892,7 +895,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </div>
 
     <div v-if="shareOpen" class="menu-backdrop" @click="shareOpen = false"></div>
-    <div v-if="shareOpen" class="dropdown menu share-menu" role="menu" :aria-label="t('share.open')">
+    <div v-if="shareOpen" class="dropdown menu share-menu" role="menu" :aria-label="t('share.open')" :style="{ top: shareTop }">
       <p class="share-title">{{ t('share.open') }}</p>
       <button v-if="viewingOther" type="button" role="menuitem" @click="shareShown">
         {{ t('share.shown', { name: settings.resourceName }) }}
@@ -905,15 +908,29 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     <p v-if="shareToast" class="toast" role="status">{{ t('app.linkCopied') }}</p>
 
     <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
-      <div class="view-switch segmented" role="group" :aria-label="t('app.display')">
+      <div class="view-bar">
+        <div class="view-switch segmented" role="group" :aria-label="t('app.display')">
+          <button
+            v-for="view in ['day', 'week']"
+            :key="view"
+            type="button"
+            :class="{ on: settings.view === view }"
+            :aria-pressed="settings.view === view"
+            @click="switchView(view)"
+          >{{ t(view === 'day' ? 'app.viewDay' : 'app.viewWeek') }}</button>
+        </div>
+        <!-- La vue semaine n'a pas de ligne de date : le partage se range au bout de celle-ci. -->
         <button
-          v-for="view in ['day', 'week']"
-          :key="view"
+          v-if="settings.view === 'week'"
+          class="icon share-icon"
           type="button"
-          :class="{ on: settings.view === view }"
-          :aria-pressed="settings.view === view"
-          @click="switchView(view)"
-        >{{ t(view === 'day' ? 'app.viewDay' : 'app.viewWeek') }}</button>
+          :aria-expanded="shareOpen"
+          :aria-label="t('share.open')"
+          :title="t('share.open')"
+          @click="toggleShare"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8" /></svg>
+        </button>
       </div>
 
       <div class="strip-stage">
@@ -937,9 +954,20 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <Transition :name="slideName" mode="out-in">
         <div :key="viewKey" class="view">
           <template v-if="settings.view === 'day'">
+            <!-- Le partage se tient sur la ligne de la date : c'est ce jour-là qu'on montre. -->
             <h2 class="day-title">
               {{ formatDayLong(focusedDay) }}
               <span v-if="isToday" class="badge">{{ t('app.todayBadge') }}</span>
+              <button
+                class="icon share-icon"
+                type="button"
+                :aria-expanded="shareOpen"
+                :aria-label="t('share.open')"
+                :title="t('share.open')"
+                @click="toggleShare"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8" /></svg>
+              </button>
             </h2>
             <!--
               Côte à côte, sur un même axe horaire : c'est la grille de la vue
@@ -1300,6 +1328,8 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .segmented button.on { color: var(--accent); background: var(--bg-elevated); box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
 
 /* Le choix jour / semaine reste sous la main, au-dessus de la semaine affichée. */
+.view-bar { position: relative; }
+.view-bar .share-icon { position: absolute; inset-inline-end: 0.85rem; top: 0; }
 .view-switch { width: fit-content; margin: 0 auto 0.4rem; }
 .view-switch button { padding: 0.3rem 0.9rem; }
 
@@ -1538,6 +1568,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 .compare-close:hover { background: var(--bg-elevated); color: var(--danger); }
 
 .day-title::first-letter { text-transform: uppercase; }
+.day-title .share-icon { margin-inline-start: auto; width: 2rem; height: 2rem; }
 
 .day-title {
   margin: 0.35rem 0.85rem 0.55rem;
