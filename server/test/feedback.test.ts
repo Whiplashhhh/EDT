@@ -157,7 +157,7 @@ test('route : désactivée sans SMTP', async () => {
 test('route : un échec d’envoi est signalé au client', async () => {
   const app = await makeApp(async () => { throw new Error('SMTP en panne'); });
   const res = await post(app, { kind: 'contact', message: 'Bonjour' });
-  assert.equal(res.statusCode, 502);
+  assert.equal(res.statusCode, 503);
 });
 
 test('route : quelques messages par heure, pas davantage', async () => {

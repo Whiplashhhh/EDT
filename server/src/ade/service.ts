@@ -161,6 +161,9 @@ const BREAKER_COOLDOWN_MS = 60 * 1000;
 
 export class NotFoundError extends Error {}
 
+/** Le contenu des caches, tel qu'il s'écrit sur disque : chaque cache, ses entrées. */
+export type CacheSnapshot = Record<string, Array<[string, unknown, number]>>;
+
 /**
  * File d'attente qui borne le nombre de tâches en cours. Elle ne doit envelopper
  * que des appels réseau, jamais une tâche qui en attend d'autres : celle-ci
@@ -413,6 +416,36 @@ export class AdeService {
    */
   #ade<T>(task: () => Promise<T>): Promise<T> {
     return this.#limiter.run(() => this.#breaker.run(task));
+  }
+
+  /** Tout ce qui vient d'ADE, sauf ce qui s'en déduit sans lui (les annuaires). */
+  #persisted(): Record<string, TtlCache<unknown>> {
+    return {
+      composantes: this.#composantes,
+      catalogs: this.#catalogs,
+      icsUrls: this.#icsUrls,
+      schedules: this.#schedules,
+      aggregates: this.#aggregates,
+    };
+  }
+
+  /** Change dès qu'une donnée d'ADE a été rechargée : il est alors temps de sauvegarder. */
+  get revision(): number {
+    return Object.values(this.#persisted()).reduce((sum, cache) => sum + cache.revision, 0);
+  }
+
+  /**
+   * Les données d'ADE, pour les écrire sur disque. Un redémarrage pendant une
+   * panne d'ADE garde ainsi de quoi servir, et ne reparcourt pas tout l'arbre.
+   */
+  snapshot(): CacheSnapshot {
+    return Object.fromEntries(Object.entries(this.#persisted()).map(([name, cache]) => [name, cache.dump()]));
+  }
+
+  restore(snapshot: CacheSnapshot): void {
+    for (const [name, cache] of Object.entries(this.#persisted())) {
+      for (const [key, value, storedAt] of snapshot[name] ?? []) cache.restore(key, value, storedAt);
+    }
   }
 
   #client(): AdeClient {

@@ -68,7 +68,7 @@ export async function registerFeedbackRoutes(app: FastifyInstance, opts: Feedbac
       } catch (err) {
         req.log.error({ err }, 'envoi du message de contact impossible');
         throw Object.assign(new Error('Le message n’a pas pu être envoyé.'), {
-          statusCode: 502,
+          statusCode: 503,
           code: 'feedback-send',
         });
       }
