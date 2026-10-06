@@ -6,12 +6,18 @@
  * rechargement échoue, on la resert, marquée `stale`, plutôt que l'erreur. On
  * attend ensuite `retryMs` avant de retenter, pour qu'un ADE qui ne répond plus
  * ne fasse pas patienter chaque visiteur jusqu'au délai d'expiration.
+ *
+ * Avec `patienceMs`, on n'attend même pas l'échec : si le rechargement d'une
+ * entrée qui a un secours tarde au-delà, on sert le secours tout de suite et le
+ * rechargement se poursuit en arrière-plan pour les visiteurs suivants.
  */
 export interface CacheOptions {
   /** Combien de temps, après expiration, une entrée peut encore servir de secours. */
   staleMs?: number;
   /** Délai avant de retenter un chargement qui a échoué alors qu'un secours existait. */
   retryMs?: number;
+  /** Attente maximale d'un rechargement quand un secours existe ; au-delà, on sert le secours. */
+  patienceMs?: number;
 }
 
 export interface Lookup<T> {
@@ -33,12 +39,18 @@ export class TtlCache<T> {
   readonly #maxEntries: number;
   readonly #staleMs: number;
   readonly #retryMs: number;
+  readonly #patienceMs: number;
 
-  constructor(ttlMs: number, maxEntries = 500, { staleMs = 0, retryMs = 60_000 }: CacheOptions = {}) {
+  constructor(
+    ttlMs: number,
+    maxEntries = 500,
+    { staleMs = 0, retryMs = 60_000, patienceMs = Infinity }: CacheOptions = {},
+  ) {
     this.#ttlMs = ttlMs;
     this.#maxEntries = maxEntries;
     this.#staleMs = staleMs;
     this.#retryMs = retryMs;
+    this.#patienceMs = patienceMs;
   }
 
   /** Entrée encore utilisable, fraîche ou de secours ; les trop vieilles sont oubliées. */
@@ -75,9 +87,20 @@ export class TtlCache<T> {
     const hit = this.#entry(key);
     if (hit && hit.expiresAt > Date.now()) return { value: hit.value, storedAt: hit.storedAt, stale: hit.stale };
 
-    const pending = this.#inFlight.get(key);
-    if (pending) return pending;
+    const promise = this.#inFlight.get(key) ?? this.#load(key, load);
+    if (!hit || !Number.isFinite(this.#patienceMs)) return promise;
 
+    // Un secours existe : on ne fait pas attendre le visiteur au-delà de `patienceMs`.
+    const fallback: Lookup<T> = { value: hit.value, storedAt: hit.storedAt, stale: true };
+    let timer: NodeJS.Timeout | undefined;
+    const impatient = new Promise<Lookup<T>>((resolve) => {
+      timer = setTimeout(() => resolve(fallback), this.#patienceMs);
+      timer.unref?.();
+    });
+    return Promise.race([promise, impatient]).finally(() => clearTimeout(timer));
+  }
+
+  #load(key: string, load: () => Promise<T>): Promise<Lookup<T>> {
     const promise = load()
       .then((value) => {
         this.set(key, value);
@@ -91,6 +114,8 @@ export class TtlCache<T> {
         return { value: fallback.value, storedAt: fallback.storedAt, stale: true };
       })
       .finally(() => this.#inFlight.delete(key));
+    // Servi par `patienceMs`, le visiteur n'attend plus ce chargement : son échec ne doit pas remonter.
+    promise.catch(() => {});
 
     this.#inFlight.set(key, promise);
     return promise;

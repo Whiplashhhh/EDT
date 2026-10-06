@@ -145,9 +145,19 @@ const ADE_CONCURRENCY = 6;
 /**
  * Quand ADE ne répond plus, on resert la dernière version connue — jusqu'à une
  * semaine, de quoi couvrir une panne de week-end — et on ne le relance qu'au
- * bout de deux minutes : chaque visiteur n'a pas à attendre le délai d'expiration.
+ * bout de deux minutes. Quand il est seulement lent, on n'attend pas plus de
+ * deux secondes et demie : passé ce délai, le visiteur reçoit la version connue
+ * pendant que la nouvelle se charge, pour le suivant.
  */
-const FALLBACK: CacheOptions = { staleMs: 7 * 24 * 60 * 60 * 1000, retryMs: 2 * 60 * 1000 };
+const FALLBACK: CacheOptions = { staleMs: 7 * 24 * 60 * 60 * 1000, retryMs: 2 * 60 * 1000, patienceMs: 2500 };
+/**
+ * Après trois échecs d'affilée, ADE est tenu pour en panne : on cesse de
+ * l'appeler pendant une minute. Les visiteurs reçoivent aussitôt la version
+ * connue au lieu d'attendre chacun un délai d'expiration, et un ADE qui peine à
+ * repartir n'est pas noyé sous les requêtes en attente.
+ */
+const BREAKER_THRESHOLD = 3;
+const BREAKER_COOLDOWN_MS = 60 * 1000;
 
 export class NotFoundError extends Error {}
 
@@ -173,6 +183,29 @@ class Limiter {
       const next = this.#queue.shift();
       if (next) next();
       else this.#free += 1;
+    }
+  }
+}
+
+/**
+ * Disjoncteur devant ADE. Ouvert, il refuse les appels sans toucher au réseau ;
+ * à la fin du délai, il laisse repasser les appels, et le premier échec le
+ * rouvre aussitôt — le premier succès le referme.
+ */
+class Breaker {
+  #failures = 0;
+  #openUntil = 0;
+
+  async run<T>(task: () => Promise<T>): Promise<T> {
+    if (Date.now() < this.#openUntil) throw new AdeError('ADE ne répond pas (appels suspendus)');
+    try {
+      const result = await task();
+      this.#failures = 0;
+      return result;
+    } catch (err) {
+      this.#failures += 1;
+      if (this.#failures >= BREAKER_THRESHOLD) this.#openUntil = Date.now() + BREAKER_COOLDOWN_MS;
+      throw err;
     }
   }
 }
@@ -352,7 +385,8 @@ function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
 
 export class AdeService {
   readonly #config: AppConfig;
-  readonly #ade = new Limiter(ADE_CONCURRENCY);
+  readonly #limiter = new Limiter(ADE_CONCURRENCY);
+  readonly #breaker = new Breaker();
   readonly #composantes: TtlCache<Composante[]>;
   readonly #catalogs: TtlCache<Catalog>;
   readonly #icsUrls: TtlCache<string>;
@@ -372,6 +406,15 @@ export class AdeService {
     this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32, FALLBACK);
   }
 
+  /**
+   * Un appel réseau à ADE : à son tour dans la file, et seulement si le
+   * disjoncteur le permet — vérifié au moment de partir, pas à l'entrée dans la
+   * file, pour qu'une file pleine se vide d'un coup quand ADE tombe.
+   */
+  #ade<T>(task: () => Promise<T>): Promise<T> {
+    return this.#limiter.run(() => this.#breaker.run(task));
+  }
+
   #client(): AdeClient {
     const { origin, token, projectId } = this.#config.ade;
     return new AdeClient({ origin, token, projectId });
@@ -387,8 +430,8 @@ export class AdeService {
   async #list(): Promise<Composante[]> {
     return this.#composantes.get('all', async () => {
       const client = this.#client();
-      await this.#ade.run(() => client.connect());
-      const roots = await this.#ade.run(() => client.children({ id: -1 }));
+      await this.#ade(() => client.connect());
+      const roots = await this.#ade(() => client.children({ id: -1 }));
       const taken = new Set<string>([ALL_DEPARTMENTS]);
       return roots.map((node) => {
         const label = decodeAdeName(node.name);
@@ -446,9 +489,9 @@ export class AdeService {
     const dept = await this.#department(departmentId);
     return this.#catalogs.get(dept.id, async () => {
       const client = this.#client();
-      await this.#ade.run(() => client.connect());
+      await this.#ade(() => client.connect());
       // La composante est au premier niveau de l'arbre ADE ; ses enfants, au second.
-      const children = await this.#ade.run(() => client.children({ ...dept.node, depth: 1 }));
+      const children = await this.#ade(() => client.children({ ...dept.node, depth: 1 }));
       const groups = await Promise.all(children.map((c) => this.#walk(client, c, 2)));
       return {
         department: dept.id,
@@ -461,7 +504,7 @@ export class AdeService {
 
   async #walk(client: AdeClient, node: AdeResource, depth: number): Promise<GroupNode> {
     const children =
-      depth >= MAX_DEPTH ? [] : await this.#ade.run(() => client.children({ ...node, depth }));
+      depth >= MAX_DEPTH ? [] : await this.#ade(() => client.children({ ...node, depth }));
     return {
       id: node.id,
       name: decodeAdeName(node.name),
@@ -527,10 +570,10 @@ export class AdeService {
   async #icsOf(resourceId: number, from: string): Promise<string | null> {
     const url = await this.#icsUrls.get(String(resourceId), async () => {
       const client = this.#client();
-      await this.#ade.run(() => client.connect());
-      return this.#ade.run(() => client.icsUrl(resourceId, from, from));
+      await this.#ade(() => client.connect());
+      return this.#ade(() => client.icsUrl(resourceId, from, from));
     });
-    return this.#ade.run(() => this.#fetchIcs(url, from));
+    return this.#ade(() => this.#fetchIcs(url, from));
   }
 
   /**

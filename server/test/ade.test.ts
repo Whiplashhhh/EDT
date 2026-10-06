@@ -120,6 +120,31 @@ test('TtlCache resert la dernière valeur connue quand le rechargement échoue',
   assert.equal(calls, 1);
 });
 
+test('TtlCache sert le secours sans attendre un rechargement trop lent', async () => {
+  const cache = new TtlCache<string>(-1, 10, { staleMs: 60_000, patienceMs: 20 });
+  await cache.get('k', async () => 'ancienne');
+  let finish!: (value: string) => void;
+  const slow = () => new Promise<string>((resolve) => { finish = resolve; });
+
+  const started = Date.now();
+  const served = await cache.lookup('k', slow);
+  assert.equal(served.value, 'ancienne');
+  assert.equal(served.stale, true);
+  assert.ok(Date.now() - started < 1000);
+
+  // Le rechargement s'est poursuivi : le visiteur suivant a la nouvelle version.
+  finish('nouvelle');
+  await new Promise((resolve) => setImmediate(resolve));
+  const next = await cache.lookup('k', async () => { throw new Error('ADE ne répond pas'); });
+  assert.equal(next.value, 'nouvelle');
+});
+
+test('TtlCache sans secours attend le chargement malgré `patienceMs`', async () => {
+  const cache = new TtlCache<string>(1000, 10, { staleMs: 60_000, patienceMs: 1 });
+  const value = await cache.get('k', () => new Promise((resolve) => setTimeout(() => resolve('première'), 20)));
+  assert.equal(value, 'première');
+});
+
 test('TtlCache sans secours laisse passer l’erreur', async () => {
   const cache = new TtlCache<string>(-1);
   await cache.get('k', async () => 'ancienne');
