@@ -165,6 +165,15 @@ test('TtlCache se sauvegarde et se reprend avec l’âge de ses entrées', async
   await assert.rejects(old.get('j', async () => { throw new Error('ADE ne répond pas'); }));
 });
 
+test('TtlCache sait si une entrée, même de secours, existe', () => {
+  const cache = new TtlCache<string>(60_000, 10, { staleMs: 60_000 });
+  assert.equal(cache.has('k'), false);
+  cache.restore('k', 'ancienne', Date.now() - 90_000);
+  assert.equal(cache.has('k'), true);
+  cache.restore('j', 'périmée', Date.now() - 200_000);
+  assert.equal(cache.has('j'), false);
+});
+
 test('TtlCache sans secours laisse passer l’erreur', async () => {
   const cache = new TtlCache<string>(-1);
   await cache.get('k', async () => 'ancienne');
