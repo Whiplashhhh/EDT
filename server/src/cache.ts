@@ -65,6 +65,11 @@ export class TtlCache<T> {
     return hit;
   }
 
+  /** Une entrée existe, fraîche ou de secours. */
+  has(key: string): boolean {
+    return this.#entry(key) !== undefined;
+  }
+
   peek(key: string): T | undefined {
     const hit = this.#entry(key);
     return hit && hit.expiresAt > Date.now() ? hit.value : undefined;

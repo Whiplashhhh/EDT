@@ -775,10 +775,14 @@ export class AdeService {
   /**
    * Remplit les caches au démarrage : l'arbre de toute l'ULCO compte plus de
    * trois mille nœuds, qu'il vaut mieux parcourir avant le premier visiteur
-   * qu'à sa place.
+   * qu'à sa place. Seules les formations absentes du disque sont parcourues :
+   * les autres, même anciennes, se rafraîchiront quand on les consultera — un
+   * redéploiement ne relance pas des milliers d'appels.
    */
   async warmUp(): Promise<void> {
-    for (const dept of await this.#list()) await this.catalog(dept.id);
+    for (const dept of await this.#list()) {
+      if (!this.#catalogs.has(dept.id)) await this.catalog(dept.id);
+    }
   }
 
   /** Le flux, ou `null` quand ADE renvoie sa page vide au lieu d'un calendrier. */
