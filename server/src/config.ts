@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { AdeRelay } from './ade/gwt.ts';
 
 /** Le lien ADE public qui ouvre l'arbre de tout l'établissement. */
 export interface AdeSource {
   origin: string;
   projectId: number;
   token: string;
+  /** Relais facultatif vers ADE, quand celui-ci refuse l'adresse du serveur. */
+  relay: AdeRelay | null;
 }
 
 export interface City {
@@ -111,7 +114,17 @@ function readSource(file: AdeFile): AdeSource {
   if (!/^[0-9a-f]{32,}$/i.test(token)) throw new Error('ADE_TOKEN absent ou invalide (paramètre `data=` du lien ADE public)');
   const projectId = Number(file.projectId);
   if (!Number.isInteger(projectId) || projectId < 0) throw new Error('ade.json : projectId invalide');
-  return { origin, projectId, token };
+  return { origin, projectId, token, relay: readRelay() };
+}
+
+/** Le relais va avec sa clé : l'un sans l'autre arrête le démarrage. */
+function readRelay(): AdeRelay | null {
+  const url = (process.env.ADE_RELAY_URL ?? '').replace(/\/+$/, '');
+  const key = process.env.ADE_RELAY_KEY ?? '';
+  if (!url && !key) return null;
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(url)) throw new Error('ADE_RELAY_URL doit être une URL https sans chemin');
+  if (key.length < 32) throw new Error('ADE_RELAY_KEY doit compter au moins 32 caractères');
+  return { url, key };
 }
 
 function readCampus(file: AdeFile): CampusConfig {

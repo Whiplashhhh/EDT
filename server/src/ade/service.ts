@@ -449,8 +449,8 @@ export class AdeService {
   }
 
   #client(): AdeClient {
-    const { origin, token, projectId } = this.#config.ade;
-    return new AdeClient({ origin, token, projectId });
+    const { origin, token, projectId, relay } = this.#config.ade;
+    return new AdeClient({ origin, token, projectId, relay });
   }
 
   /** Ville d'une composante : la table tenue à la main d'abord, puis son nom. */
@@ -792,7 +792,7 @@ export class AdeService {
       redirect: 'error',
       signal: AbortSignal.timeout(20_000),
       headers: { Accept: 'text/calendar' },
-    });
+    }, this.#config.ade.relay);
     if (!res.ok) throw new AdeError(`ADE a répondu ${res.status} pour le flux iCalendar`);
 
     const declared = Number(res.headers.get('content-length') ?? 0);

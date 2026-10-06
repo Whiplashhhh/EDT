@@ -62,6 +62,19 @@ export interface AdeClientOptions {
   projectId: number;
   /** Délai maximum par requête, en ms. */
   timeoutMs?: number;
+  /** Relais par lequel joindre ADE quand il refuse notre adresse (voir `AdeRelay`). */
+  relay?: AdeRelay | null;
+}
+
+/**
+ * Relais vers ADE — un Worker Cloudflare (`relay/worker.js`). Quand le pare-feu
+ * de l'ULCO refuse l'adresse du serveur, les appels passent par lui : même
+ * chemin, même requête, envoyés depuis le réseau de Cloudflare. La clé
+ * empêche qu'il serve de relais ouvert à n'importe qui.
+ */
+export interface AdeRelay {
+  url: string;
+  key: string;
 }
 
 const STRONG_NAME_DIRECT = '067818807965393FC5DCF6AECC2CA8EC';
@@ -75,9 +88,13 @@ export class AdeError extends Error {}
  * `fetch` vers ADE. Un délai dépassé ou une connexion refusée deviennent des
  * `AdeError` : c'est ADE qui ne répond pas, pas notre serveur qui a planté.
  */
-export async function reach(url: string | URL, init: RequestInit): Promise<Response> {
+export async function reach(url: string | URL, init: RequestInit, relay?: AdeRelay | null): Promise<Response> {
   try {
-    return await fetch(url, init);
+    if (!relay) return await fetch(url, init);
+    const target = new URL(url);
+    const headers = new Headers(init.headers);
+    headers.set('X-Relay-Key', relay.key);
+    return await fetch(`${relay.url}${target.pathname}${target.search}`, { ...init, headers });
   } catch (err) {
     throw new AdeError('ADE ne répond pas', { cause: err });
   }
@@ -94,7 +111,7 @@ export class AdeClient {
   #cookie = '';
 
   constructor(opts: AdeClientOptions) {
-    this.#opts = { timeoutMs: 15_000, ...opts };
+    this.#opts = { timeoutMs: 15_000, relay: null, ...opts };
     this.#moduleBase = `${opts.origin}/direct/gwtdirectplanning/`;
     this.#clientStamp = encodeGwtLong(Date.now());
   }
@@ -112,7 +129,7 @@ export class AdeClient {
         ...(this.#cookie ? { Cookie: this.#cookie } : {}),
       },
       body: payload,
-    });
+    }, this.#opts.relay);
     const setCookie = res.headers.get('set-cookie');
     if (setCookie) {
       const jsession = /JSESSIONID=([^;]+)/.exec(setCookie);
