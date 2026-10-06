@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Escolhe abaixo a tua turma, o mais precisa possível.',
   'share.pickFirst': ({ name }) => `Escolhe primeiro a tua turma, ou o teu nome se dás aulas: depois será mostrado ${name}.`,
   'share.pickInDepartment': ({ name }) => `Escolhe a tua turma entre as de ${name}.`,
+  'shared.eyebrow': 'Horário partilhado',
+  'shared.week': ({ date }) => `Semana de ${date}`,
+  'shared.pastWeek': 'Esta semana já terminou.',
+  'shared.pastDay': 'Este dia já terminou.',
+  'shared.print': 'Imprimir',
+  'shared.openApp': 'Abrir a aplicação',
+  'shared.gone': 'Esta ligação já não leva a nenhum horário.',
 
   'install.short': 'Instalar',
   'install.title': 'Adicionar ao ecrã principal',

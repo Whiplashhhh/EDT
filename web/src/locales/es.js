@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Elige tu clase abajo, lo más concreta posible.',
   'share.pickFirst': ({ name }) => `Elige primero tu clase, o tu nombre si das clase: después se mostrará ${name}.`,
   'share.pickInDepartment': ({ name }) => `Elige tu clase entre las de ${name}.`,
+  'shared.eyebrow': 'Horario compartido',
+  'shared.week': ({ date }) => `Semana del ${date}`,
+  'shared.pastWeek': 'Esta semana ya ha terminado.',
+  'shared.pastDay': 'Este día ya ha terminado.',
+  'shared.print': 'Imprimir',
+  'shared.openApp': 'Abrir la aplicación',
+  'shared.gone': 'Este enlace ya no lleva a ningún horario.',
 
   'install.short': 'Instalar',
   'install.title': 'Añadir a la pantalla de inicio',

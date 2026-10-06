@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Choisissez votre classe ci-dessous, au niveau le plus précis.',
   'share.pickFirst': ({ name }) => `Choisissez d’abord votre classe, ou votre nom si vous enseignez : ${name} s’affichera ensuite.`,
   'share.pickInDepartment': ({ name }) => `Choisissez votre classe parmi celles de ${name}.`,
+  'shared.eyebrow': 'Emploi du temps partagé',
+  'shared.week': ({ date }) => `Semaine du ${date}`,
+  'shared.pastWeek': 'Cette semaine est terminée.',
+  'shared.pastDay': 'Cette journée est terminée.',
+  'shared.print': 'Imprimer',
+  'shared.openApp': 'Ouvrir l’application',
+  'shared.gone': 'Ce lien ne mène plus à aucun emploi du temps.',
 
   'install.short': 'Installer',
   'install.title': 'Ajouter à l’écran d’accueil',

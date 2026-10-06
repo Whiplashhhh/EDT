@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Hãy chọn lớp của bạn bên dưới, càng cụ thể càng tốt.',
   'share.pickFirst': ({ name }) => `Trước tiên hãy chọn lớp của bạn, hoặc tên mình nếu bạn giảng dạy: sau đó ${name} sẽ hiện ra.`,
   'share.pickInDepartment': ({ name }) => `Hãy chọn lớp của bạn trong ${name}.`,
+  'shared.eyebrow': 'Thời khóa biểu được chia sẻ',
+  'shared.week': ({ date }) => `Tuần từ ${date}`,
+  'shared.pastWeek': 'Tuần này đã kết thúc.',
+  'shared.pastDay': 'Ngày này đã kết thúc.',
+  'shared.print': 'In',
+  'shared.openApp': 'Mở ứng dụng',
+  'shared.gone': 'Liên kết này không còn dẫn đến thời khóa biểu nào.',
 
   'install.short': 'Cài đặt',
   'install.title': 'Thêm vào Màn hình chính',

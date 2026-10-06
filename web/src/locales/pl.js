@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Wybierz poniżej swoją grupę, jak najdokładniej.',
   'share.pickFirst': ({ name }) => `Najpierw wybierz swoją grupę albo swoje nazwisko, jeśli prowadzisz zajęcia: potem wyświetli się ${name}.`,
   'share.pickInDepartment': ({ name }) => `Wybierz swoją grupę z kierunku ${name}.`,
+  'shared.eyebrow': 'Udostępniony plan zajęć',
+  'shared.week': ({ date }) => `Tydzień od ${date}`,
+  'shared.pastWeek': 'Ten tydzień już się skończył.',
+  'shared.pastDay': 'Ten dzień już się skończył.',
+  'shared.print': 'Drukuj',
+  'shared.openApp': 'Otwórz aplikację',
+  'shared.gone': 'Ten link nie prowadzi już do żadnego planu zajęć.',
 
   'install.short': 'Zainstaluj',
   'install.title': 'Dodaj do ekranu początkowego',

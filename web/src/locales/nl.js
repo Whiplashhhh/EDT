@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Kies hieronder je klas, zo precies mogelijk.',
   'share.pickFirst': ({ name }) => `Kies eerst je klas, of je naam als je lesgeeft: daarna wordt ${name} getoond.`,
   'share.pickInDepartment': ({ name }) => `Kies je klas binnen ${name}.`,
+  'shared.eyebrow': 'Gedeeld rooster',
+  'shared.week': ({ date }) => `Week van ${date}`,
+  'shared.pastWeek': 'Deze week is voorbij.',
+  'shared.pastDay': 'Deze dag is voorbij.',
+  'shared.print': 'Afdrukken',
+  'shared.openApp': 'App openen',
+  'shared.gone': 'Deze link leidt niet meer naar een rooster.',
 
   'install.short': 'Installeren',
   'install.title': 'Zet op beginscherm',

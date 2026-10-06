@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Hoos ka dooro fasalkaaga, sida ugu saxsan.',
   'share.pickFirst': ({ name }) => `Marka hore dooro fasalkaaga, ama magacaaga haddii aad wax dhigto: kadib ${name} ayaa soo bixi doona.`,
   'share.pickInDepartment': ({ name }) => `Dooro fasalkaaga oo ka mid ah ${name}.`,
+  'shared.eyebrow': 'Jadwal la wadaagay',
+  'shared.week': ({ date }) => `Toddobaadka ${date}`,
+  'shared.pastWeek': 'Toddobaadkan wuu dhammaaday.',
+  'shared.pastDay': 'Maalintan way dhammaatay.',
+  'shared.print': 'Daabac',
+  'shared.openApp': 'Fur barnaamijka',
+  'shared.gone': 'Xiriirkan hadda uma horseedo jadwal kasta.',
 
   'install.short': 'Ku rakib',
   'install.title': 'Ku dar shaashadda hore',

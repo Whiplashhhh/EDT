@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Velg klassen din nedenfor, så presist som mulig.',
   'share.pickFirst': ({ name }) => `Velg først klassen din, eller navnet ditt hvis du underviser: deretter vises ${name}.`,
   'share.pickInDepartment': ({ name }) => `Velg klassen din i ${name}.`,
+  'shared.eyebrow': 'Delt timeplan',
+  'shared.week': ({ date }) => `Uken fra ${date}`,
+  'shared.pastWeek': 'Denne uken er over.',
+  'shared.pastDay': 'Denne dagen er over.',
+  'shared.print': 'Skriv ut',
+  'shared.openApp': 'Åpne appen',
+  'shared.gone': 'Denne lenken fører ikke lenger til noen timeplan.',
 
   'install.short': 'Installer',
   'install.title': 'Legg til på Hjem-skjerm',

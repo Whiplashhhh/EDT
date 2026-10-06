@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'کلاست را در پایین، تا جای ممکن دقیق، انتخاب کن.',
   'share.pickFirst': ({ name }) => `اول کلاست را انتخاب کن، یا اگر تدریس می‌کنی نامت را: بعد ${name} نمایش داده می‌شود.`,
   'share.pickInDepartment': ({ name }) => `کلاست را از میان کلاس‌های ${name} انتخاب کن.`,
+  'shared.eyebrow': 'برنامهٔ هم‌رسانی‌شده',
+  'shared.week': ({ date }) => `هفتهٔ ${date}`,
+  'shared.pastWeek': 'این هفته به پایان رسیده است.',
+  'shared.pastDay': 'این روز به پایان رسیده است.',
+  'shared.print': 'چاپ',
+  'shared.openApp': 'باز کردن برنامه',
+  'shared.gone': 'این پیوند دیگر به هیچ برنامه‌ای نمی‌رسد.',
 
   'install.short': 'نصب',
   'install.title': 'افزودن به صفحهٔ اصلی',

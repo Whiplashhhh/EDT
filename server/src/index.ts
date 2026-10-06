@@ -1,5 +1,6 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -10,7 +11,8 @@ import { AdeService, NotFoundError } from './ade/service.ts';
 import { CrousService, CrousError } from './crous/service.ts';
 import { AdeError } from './ade/gwt.ts';
 import { readSnapshot, writeSnapshot } from './ade/snapshot.ts';
-import { registerApi } from './routes/api.ts';
+import { mondayOf, registerApi } from './routes/api.ts';
+import { describeShared, injectPreview, previewText, readSharedPage } from './share/preview.ts';
 import { registerPushRoutes } from './routes/push.ts';
 import { registerFeedbackRoutes } from './routes/feedback.ts';
 import { smtpMailer } from './feedback/mailer.ts';
@@ -173,9 +175,30 @@ if (existsSync(distDir)) {
     return payload;
   });
 
+  /*
+   * Une semaine ou une journée partagée reçoit son propre aperçu : c'est lui
+   * que WhatsApp ou Messenger affichent sous le lien. Le nom vient du cache
+   * d'ADE ; s'il tarde, l'aperçu s'en passe plutôt que de faire attendre.
+   */
+  const indexHtml = readFileSync(fileURLToPath(new URL('../../web/dist/index.html', import.meta.url)), 'utf8');
+  const PREVIEW_WAIT_MS = 1500;
+  const sendIndex = async (req: FastifyRequest, reply: FastifyReply) => {
+    const page = readSharedPage(req.query as Record<string, unknown>);
+    if (!page) return reply.sendFile('index.html');
+    let timer: NodeJS.Timeout | undefined;
+    const about = await Promise.race([
+      describeShared(service, page, mondayOf(new Date())).catch(() => null),
+      new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), PREVIEW_WAIT_MS); }),
+    ]);
+    clearTimeout(timer);
+    const html = injectPreview(indexHtml, { ...previewText(page, about ?? { name: null }), path: req.url });
+    return reply.type('text/html; charset=utf-8').send(html);
+  };
+  app.get('/', sendIndex);
+
   app.setNotFoundHandler((req, reply) => {
     if (req.url.startsWith('/api/')) return reply.code(404).send({ code: 'generic', error: 'Route inconnue.' });
-    return reply.sendFile('index.html');
+    return sendIndex(req, reply);
   });
 } else {
   app.log.warn('web/dist absent : lancez `npm run build` pour servir le front depuis ce serveur.');

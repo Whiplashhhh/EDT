@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': '請在下方選擇你的班級，盡量選到最細的一級。',
   'share.pickFirst': ({ name }) => `請先選擇你的班級；如果你是授課教師，請選擇自己的姓名。隨後將顯示 ${name}。`,
   'share.pickInDepartment': ({ name }) => `請從 ${name} 的班級中選擇你的班級。`,
+  'shared.eyebrow': '共享的課表',
+  'shared.week': ({ date }) => `${date}起的一週`,
+  'shared.pastWeek': '這一週已經結束。',
+  'shared.pastDay': '這一天已經結束。',
+  'shared.print': '列印',
+  'shared.openApp': '開啟應用程式',
+  'shared.gone': '此連結已不再指向任何課表。',
 
   'install.short': '安裝',
   'install.title': '加入主畫面',

@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Valitse ryhmäsi alta mahdollisimman tarkasti.',
   'share.pickFirst': ({ name }) => `Valitse ensin ryhmäsi, tai nimesi jos opetat: sen jälkeen näytetään ${name}.`,
   'share.pickInDepartment': ({ name }) => `Valitse ryhmäsi koulutusohjelmasta ${name}.`,
+  'shared.eyebrow': 'Jaettu lukujärjestys',
+  'shared.week': ({ date }) => `Viikko ${date} alkaen`,
+  'shared.pastWeek': 'Tämä viikko on päättynyt.',
+  'shared.pastDay': 'Tämä päivä on päättynyt.',
+  'shared.print': 'Tulosta',
+  'shared.openApp': 'Avaa sovellus',
+  'shared.gone': 'Tämä linkki ei enää johda mihinkään lukujärjestykseen.',
 
   'install.short': 'Asenna',
   'install.title': 'Lisää Koti-valikkoon',

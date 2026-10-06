@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Vælg dit hold nedenfor, så præcist som muligt.',
   'share.pickFirst': ({ name }) => `Vælg først dit hold, eller dit navn hvis du underviser: derefter vises ${name}.`,
   'share.pickInDepartment': ({ name }) => `Vælg dit hold blandt holdene på ${name}.`,
+  'shared.eyebrow': 'Delt skema',
+  'shared.week': ({ date }) => `Ugen fra ${date}`,
+  'shared.pastWeek': 'Denne uge er slut.',
+  'shared.pastDay': 'Denne dag er slut.',
+  'shared.print': 'Udskriv',
+  'shared.openApp': 'Åbn appen',
+  'shared.gone': 'Dette link fører ikke længere til et skema.',
 
   'install.short': 'Installer',
   'install.title': 'Føj til hjemmeskærm',

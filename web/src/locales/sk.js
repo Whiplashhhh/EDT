@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Nižšie si vyber svoju skupinu čo najpresnejšie.',
   'share.pickFirst': ({ name }) => `Najprv si vyber svoju skupinu alebo svoje meno, ak učíš: potom sa zobrazí ${name}.`,
   'share.pickInDepartment': ({ name }) => `Vyber si svoju skupinu zo študijného programu ${name}.`,
+  'shared.eyebrow': 'Zdieľaný rozvrh',
+  'shared.week': ({ date }) => `Týždeň od ${date}`,
+  'shared.pastWeek': 'Tento týždeň sa už skončil.',
+  'shared.pastDay': 'Tento deň sa už skončil.',
+  'shared.print': 'Tlačiť',
+  'shared.openApp': 'Otvoriť aplikáciu',
+  'shared.gone': 'Tento odkaz už nevedie k žiadnemu rozvrhu.',
 
   'install.short': 'Nainštalovať',
   'install.title': 'Pridať na plochu',

@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Chagua kikundi chako hapa chini, kwa usahihi kadiri uwezavyo.',
   'share.pickFirst': ({ name }) => `Kwanza chagua kikundi chako, au jina lako kama unafundisha: kisha ${name} itaonyeshwa.`,
   'share.pickInDepartment': ({ name }) => `Chagua kikundi chako kutoka ${name}.`,
+  'shared.eyebrow': 'Ratiba iliyoshirikiwa',
+  'shared.week': ({ date }) => `Wiki ya ${date}`,
+  'shared.pastWeek': 'Wiki hii imekwisha.',
+  'shared.pastDay': 'Siku hii imekwisha.',
+  'shared.print': 'Chapisha',
+  'shared.openApp': 'Fungua programu',
+  'shared.gone': 'Kiungo hiki hakielekezi tena kwenye ratiba yoyote.',
 
   'install.short': 'Sakinisha',
   'install.title': 'Ongeza kwenye skrini ya mwanzo',

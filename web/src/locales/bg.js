@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Избери своята група по-долу, възможно най-точно.',
   'share.pickFirst': ({ name }) => `Първо избери своята група или името си, ако преподаваш: след това ще се покаже ${name}.`,
   'share.pickInDepartment': ({ name }) => `Избери своята група от ${name}.`,
+  'shared.eyebrow': 'Споделено разписание',
+  'shared.week': ({ date }) => `Седмицата от ${date}`,
+  'shared.pastWeek': 'Тази седмица приключи.',
+  'shared.pastDay': 'Този ден приключи.',
+  'shared.print': 'Печат',
+  'shared.openApp': 'Отвори приложението',
+  'shared.gone': 'Тази връзка вече не води до разписание.',
 
   'install.short': 'Инсталирай',
   'install.title': 'Добавяне към началния екран',

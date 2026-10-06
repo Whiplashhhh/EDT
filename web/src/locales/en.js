@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Pick your class below, as precisely as you can.',
   'share.pickFirst': ({ name }) => `First pick your class, or your name if you teach: ${name} will show next.`,
   'share.pickInDepartment': ({ name }) => `Pick your class from ${name}.`,
+  'shared.eyebrow': 'Shared timetable',
+  'shared.week': ({ date }) => `Week of ${date}`,
+  'shared.pastWeek': 'This week is over.',
+  'shared.pastDay': 'This day is over.',
+  'shared.print': 'Print',
+  'shared.openApp': 'Open the app',
+  'shared.gone': 'This link no longer leads to a timetable.',
 
   'install.short': 'Install',
   'install.title': 'Add to Home Screen',
