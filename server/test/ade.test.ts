@@ -145,6 +145,26 @@ test('TtlCache sans secours attend le chargement malgré `patienceMs`', async ()
   assert.equal(value, 'première');
 });
 
+test('TtlCache se sauvegarde et se reprend avec l’âge de ses entrées', async () => {
+  const cache = new TtlCache<string>(60_000, 10, { staleMs: 60_000 });
+  await cache.get('k', async () => 'valeur');
+  const copy = new TtlCache<string>(60_000, 10, { staleMs: 60_000 });
+  for (const [key, value, storedAt] of cache.dump()) copy.restore(key, value, storedAt);
+  assert.equal(copy.peek('k'), 'valeur');
+
+  // Trop vieille pour être fraîche, assez récente pour servir de secours.
+  const old = new TtlCache<string>(60_000, 10, { staleMs: 60_000 });
+  old.restore('k', 'ancienne', Date.now() - 90_000);
+  assert.equal(old.peek('k'), undefined);
+  const served = await old.lookup('k', async () => { throw new Error('ADE ne répond pas'); });
+  assert.equal(served.value, 'ancienne');
+  assert.equal(served.stale, true);
+
+  // Au-delà du secours, elle est ignorée.
+  old.restore('j', 'périmée', Date.now() - 200_000);
+  await assert.rejects(old.get('j', async () => { throw new Error('ADE ne répond pas'); }));
+});
+
 test('TtlCache sans secours laisse passer l’erreur', async () => {
   const cache = new TtlCache<string>(-1);
   await cache.get('k', async () => 'ancienne');

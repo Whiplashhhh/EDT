@@ -40,6 +40,8 @@ export class TtlCache<T> {
   readonly #staleMs: number;
   readonly #retryMs: number;
   readonly #patienceMs: number;
+  /** Compte les écritures : dit à qui sauvegarde le cache s'il a changé depuis. */
+  #revision = 0;
 
   constructor(
     ttlMs: number,
@@ -76,6 +78,29 @@ export class TtlCache<T> {
     }
     const now = Date.now();
     this.#entries.set(key, { value, storedAt: now, expiresAt: now + this.#ttlMs, stale: false });
+    this.#revision += 1;
+  }
+
+  get revision(): number {
+    return this.#revision;
+  }
+
+  /** Les entrées encore utilisables, avec la date de leur chargement, pour les écrire sur disque. */
+  dump(): Array<[key: string, value: T, storedAt: number]> {
+    return [...this.#entries.keys()].flatMap((key) => {
+      const hit = this.#entry(key);
+      return hit ? [[key, hit.value, hit.storedAt] as [string, T, number]] : [];
+    });
+  }
+
+  /**
+   * Reprend une entrée lue sur disque, avec sa date d'origine : selon son âge,
+   * elle est encore fraîche, ne sert plus que de secours, ou est ignorée.
+   */
+  restore(key: string, value: T, storedAt: number): void {
+    if (storedAt + this.#ttlMs + this.#staleMs <= Date.now()) return;
+    if (!this.#entries.has(key) && this.#entries.size >= this.#maxEntries) return;
+    this.#entries.set(key, { value, storedAt, expiresAt: storedAt + this.#ttlMs, stale: false });
   }
 
   async get(key: string, load: () => Promise<T>): Promise<T> {

@@ -9,6 +9,7 @@ import { loadConfig } from './config.ts';
 import { AdeService, NotFoundError } from './ade/service.ts';
 import { CrousService, CrousError } from './crous/service.ts';
 import { AdeError } from './ade/gwt.ts';
+import { readSnapshot, writeSnapshot } from './ade/snapshot.ts';
 import { registerApi } from './routes/api.ts';
 import { registerPushRoutes } from './routes/push.ts';
 import { registerFeedbackRoutes } from './routes/feedback.ts';
@@ -19,6 +20,8 @@ import { Notifier } from './push/notifier.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
+// La dernière copie d'ADE, d'avant le redémarrage : de quoi servir même si ADE ne répond pas.
+service.restore(readSnapshot(config.adeCachePath));
 // Le menu suit le campus de la formation : c'est ADE qui sait où elle est.
 const crous = new CrousService(config, (department) => service.cityOf(department));
 
@@ -100,11 +103,13 @@ app.setErrorHandler((error, req, reply) => {
   if (error instanceof NotFoundError) return reply.code(404).send({ code: 'generic', error: error.message });
   if (error instanceof CrousError) {
     req.log.warn({ err: error }, 'menu Crous indisponible');
-    return reply.code(502).send({ code: 'crous', error: 'Le menu du Crous est momentanément indisponible.' });
+    return reply.code(503).send({ code: 'crous', error: 'Le menu du Crous est momentanément indisponible.' });
   }
   if (error instanceof AdeError) {
     req.log.warn({ err: error }, 'ADE indisponible');
-    return reply.code(502).send({ code: 'ade', error: "Le serveur d'emploi du temps de l'ULCO est injoignable." });
+    // 503 et non 502 : Cloudflare remplace les 502 par sa propre page, et le
+    // front perdrait le code qui lui fait dire que c'est l'ULCO qui ne répond pas.
+    return reply.code(503).send({ code: 'ade', error: "Le serveur d'emploi du temps de l'ULCO est injoignable." });
   }
   if (typeof error.statusCode === 'number' && error.statusCode < 500) {
     return reply.code(error.statusCode).send({ code: 'generic', error: error.message });
@@ -175,6 +180,24 @@ if (existsSync(distDir)) {
 } else {
   app.log.warn('web/dist absent : lancez `npm run build` pour servir le front depuis ce serveur.');
 }
+
+/*
+ * Sauvegarde des données d'ADE, quand elles ont changé : toutes les cinq
+ * minutes, et à l'arrêt.
+ */
+let savedRevision = service.revision;
+const saveAdeCache = async (): Promise<void> => {
+  const revision = service.revision;
+  if (revision === savedRevision) return;
+  try {
+    await writeSnapshot(config.adeCachePath, service.snapshot());
+    savedRevision = revision;
+  } catch (err) {
+    app.log.warn({ err }, 'sauvegarde du cache ADE en échec');
+  }
+};
+setInterval(() => void saveAdeCache(), 5 * 60 * 1000).unref();
+app.addHook('onClose', saveAdeCache);
 
 // Arrêt propre : un conteneur qu'on remplace ne doit pas perdre les derniers abonnements.
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {

@@ -72,6 +72,8 @@ export interface AppConfig {
   catalogTtlMs: number;
   /** Durée de vie d'un emploi du temps en cache (ms). */
   scheduleTtlMs: number;
+  /** Fichier où les données d'ADE survivent à un redémarrage. */
+  adeCachePath: string;
   /** Base de l'API publique qui republie les menus Crous. */
   crousApiBase: string;
   /**
@@ -210,6 +212,7 @@ export function loadConfig(): AppConfig {
     campus: readCampus(adeFile),
     catalogTtlMs: positiveInt(process.env.CATALOG_TTL_MS, 12 * 60 * 60 * 1000),
     scheduleTtlMs: positiveInt(process.env.SCHEDULE_TTL_MS, 10 * 60 * 1000),
+    adeCachePath: process.env.ADE_CACHE_PATH ?? fileURLToPath(new URL('../data/ade-cache.json', import.meta.url)),
     crousApiBase: (process.env.CROUS_API_BASE ?? 'https://api.croustillant.menu/v1').replace(/\/+$/, ''),
     // 1164 = R.U. de la Mi-Voix, le restaurant du campus de Calais.
     crousRestaurantId: positiveInt(process.env.CROUS_RESTAURANT_ID, 1164),
