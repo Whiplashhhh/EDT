@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': '아래에서 본인 반을 최대한 정확하게 선택하세요.',
   'share.pickFirst': ({ name }) => `먼저 본인 반을, 강의를 하신다면 본인 이름을 선택하세요. 그다음 ${name} 시간표가 표시됩니다.`,
   'share.pickInDepartment': ({ name }) => `${name}의 반 중에서 본인 반을 선택하세요.`,
+  'shared.eyebrow': '공유된 시간표',
+  'shared.week': ({ date }) => `${date}부터 한 주`,
+  'shared.pastWeek': '이번 주는 끝났습니다.',
+  'shared.pastDay': '이날은 끝났습니다.',
+  'shared.print': '인쇄',
+  'shared.openApp': '앱 열기',
+  'shared.gone': '이 링크는 더 이상 시간표로 연결되지 않습니다.',
 
   'install.short': '설치',
   'install.title': '홈 화면에 추가',

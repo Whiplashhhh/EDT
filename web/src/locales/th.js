@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'เลือกชั้นเรียนของคุณด้านล่าง ให้เจาะจงที่สุด',
   'share.pickFirst': ({ name }) => `เลือกชั้นเรียนของคุณก่อน หรือเลือกชื่อของคุณหากคุณเป็นผู้สอน จากนั้นจะแสดง ${name}`,
   'share.pickInDepartment': ({ name }) => `เลือกชั้นเรียนของคุณจากหลักสูตร ${name}`,
+  'shared.eyebrow': 'ตารางเรียนที่แชร์',
+  'shared.week': ({ date }) => `สัปดาห์ของวันที่ ${date}`,
+  'shared.pastWeek': 'สัปดาห์นี้สิ้นสุดแล้ว',
+  'shared.pastDay': 'วันนี้สิ้นสุดแล้ว',
+  'shared.print': 'พิมพ์',
+  'shared.openApp': 'เปิดแอป',
+  'shared.gone': 'ลิงก์นี้ไม่ได้นำไปยังตารางเรียนใดอีกแล้ว',
 
   'install.short': 'ติดตั้ง',
   'install.title': 'เพิ่มไปยังหน้าจอโฮม',

@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Sınıfını aşağıdan olabildiğince kesin seç.',
   'share.pickFirst': ({ name }) => `Önce sınıfını, ders veriyorsan adını seç: ardından ${name} gösterilecek.`,
   'share.pickInDepartment': ({ name }) => `${name} içindeki sınıflardan kendininkini seç.`,
+  'shared.eyebrow': 'Paylaşılan ders programı',
+  'shared.week': ({ date }) => `${date} haftası`,
+  'shared.pastWeek': 'Bu hafta sona erdi.',
+  'shared.pastDay': 'Bu gün sona erdi.',
+  'shared.print': 'Yazdır',
+  'shared.openApp': 'Uygulamayı aç',
+  'shared.gone': 'Bu bağlantı artık bir ders programına götürmüyor.',
 
   'install.short': 'Yükle',
   'install.title': 'Ana Ekrana Ekle',

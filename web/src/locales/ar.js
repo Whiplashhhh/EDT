@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'اختر فوجك أدناه بأدق ما يمكن.',
   'share.pickFirst': ({ name }) => `اختر فوجك أولًا، أو اسمك إن كنت تُدرّس: سيُعرض ${name} بعد ذلك.`,
   'share.pickInDepartment': ({ name }) => `اختر فوجك من بين أفواج ${name}.`,
+  'shared.eyebrow': 'جدول مُشارَك',
+  'shared.week': ({ date }) => `أسبوع ${date}`,
+  'shared.pastWeek': 'انتهى هذا الأسبوع.',
+  'shared.pastDay': 'انتهى هذا اليوم.',
+  'shared.print': 'طباعة',
+  'shared.openApp': 'فتح التطبيق',
+  'shared.gone': 'لم يعد هذا الرابط يؤدي إلى أي جدول.',
 
   'install.short': 'تثبيت',
   'install.title': 'إضافة إلى الشاشة الرئيسية',

@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Válaszd ki lent a csoportodat, a lehető legpontosabban.',
   'share.pickFirst': ({ name }) => `Először válaszd ki a csoportodat, vagy a nevedet, ha oktatsz: ezután ${name} jelenik meg.`,
   'share.pickInDepartment': ({ name }) => `Válaszd ki a csoportodat ebből a képzésből: ${name}.`,
+  'shared.eyebrow': 'Megosztott órarend',
+  'shared.week': ({ date }) => `${date} kezdetű hét`,
+  'shared.pastWeek': 'Ez a hét már véget ért.',
+  'shared.pastDay': 'Ez a nap már véget ért.',
+  'shared.print': 'Nyomtatás',
+  'shared.openApp': 'Az alkalmazás megnyitása',
+  'shared.gone': 'Ez a hivatkozás már nem vezet órarendhez.',
 
   'install.short': 'Telepítés',
   'install.title': 'Hozzáadás a főképernyőhöz',

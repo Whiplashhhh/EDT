@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Wähle unten deinen Kurs, so genau wie möglich.',
   'share.pickFirst': ({ name }) => `Wähle zuerst deinen Kurs oder, wenn du unterrichtest, deinen Namen: danach erscheint ${name}.`,
   'share.pickInDepartment': ({ name }) => `Wähle deinen Kurs im Studiengang ${name}.`,
+  'shared.eyebrow': 'Geteilter Stundenplan',
+  'shared.week': ({ date }) => `Woche ab ${date}`,
+  'shared.pastWeek': 'Diese Woche ist vorbei.',
+  'shared.pastDay': 'Dieser Tag ist vorbei.',
+  'shared.print': 'Drucken',
+  'shared.openApp': 'App öffnen',
+  'shared.gone': 'Dieser Link führt zu keinem Stundenplan mehr.',
 
   'install.short': 'Installieren',
   'install.title': 'Zum Home-Bildschirm hinzufügen',

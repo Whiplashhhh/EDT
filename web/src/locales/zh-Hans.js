@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': '请在下方选择你的班级，尽量选到最细的一级。',
   'share.pickFirst': ({ name }) => `请先选择你的班级；如果你是任课教师，请选择自己的姓名。随后将显示 ${name}。`,
   'share.pickInDepartment': ({ name }) => `请从 ${name} 的班级中选择你的班级。`,
+  'shared.eyebrow': '共享的课程表',
+  'shared.week': ({ date }) => `${date}起的一周`,
+  'shared.pastWeek': '这一周已经结束。',
+  'shared.pastDay': '这一天已经结束。',
+  'shared.print': '打印',
+  'shared.openApp': '打开应用',
+  'shared.gone': '此链接已不再指向任何课程表。',
 
   'install.short': '安装',
   'install.title': '添加到主屏幕',

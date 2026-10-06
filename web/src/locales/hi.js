@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'नीचे अपनी कक्षा चुनें, जितना हो सके सटीक रूप से।',
   'share.pickFirst': ({ name }) => `पहले अपनी कक्षा चुनें, या यदि आप पढ़ाते हैं तो अपना नाम: उसके बाद ${name} दिखेगा।`,
   'share.pickInDepartment': ({ name }) => `${name} की कक्षाओं में से अपनी कक्षा चुनें।`,
+  'shared.eyebrow': 'साझा की गई समय-सारणी',
+  'shared.week': ({ date }) => `${date} से शुरू होने वाला सप्ताह`,
+  'shared.pastWeek': 'यह सप्ताह समाप्त हो गया है।',
+  'shared.pastDay': 'यह दिन समाप्त हो गया है।',
+  'shared.print': 'प्रिंट करें',
+  'shared.openApp': 'ऐप खोलें',
+  'shared.gone': 'यह लिंक अब किसी समय-सारणी तक नहीं ले जाता।',
 
   'install.short': 'इंस्टॉल करें',
   'install.title': 'होम स्क्रीन पर जोड़ें',

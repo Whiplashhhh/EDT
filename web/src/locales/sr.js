@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Испод изабери своју групу, што прецизније.',
   'share.pickFirst': ({ name }) => `Прво изабери своју групу или своје име ако предајеш: затим ће се приказати ${name}.`,
   'share.pickInDepartment': ({ name }) => `Изабери своју групу са студијског програма ${name}.`,
+  'shared.eyebrow': 'Подељени распоред',
+  'shared.week': ({ date }) => `Недеља од ${date}`,
+  'shared.pastWeek': 'Ова недеља је завршена.',
+  'shared.pastDay': 'Овај дан је завршен.',
+  'shared.print': 'Штампај',
+  'shared.openApp': 'Отвори апликацију',
+  'shared.gone': 'Ова веза више не води ни до каквог распореда.',
 
   'install.short': 'Инсталирај',
   'install.title': 'Додај на почетни екран',

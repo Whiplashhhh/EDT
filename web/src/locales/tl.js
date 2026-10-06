@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Piliin ang iyong klase sa ibaba, nang pinakatiyak na posible.',
   'share.pickFirst': ({ name }) => `Piliin muna ang iyong klase, o ang iyong pangalan kung nagtuturo ka: pagkatapos ay lalabas ang ${name}.`,
   'share.pickInDepartment': ({ name }) => `Piliin ang iyong klase mula sa ${name}.`,
+  'shared.eyebrow': 'Ibinahaging iskedyul',
+  'shared.week': ({ date }) => `Linggo ng ${date}`,
+  'shared.pastWeek': 'Tapos na ang linggong ito.',
+  'shared.pastDay': 'Tapos na ang araw na ito.',
+  'shared.print': 'I-print',
+  'shared.openApp': 'Buksan ang app',
+  'shared.gone': 'Hindi na humahantong sa anumang iskedyul ang link na ito.',
 
   'install.short': 'I-install',
   'install.title': 'Idagdag sa Home Screen',

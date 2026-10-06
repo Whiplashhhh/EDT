@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Välj din klass nedan, så exakt som möjligt.',
   'share.pickFirst': ({ name }) => `Välj först din klass, eller ditt namn om du undervisar: sedan visas ${name}.`,
   'share.pickInDepartment': ({ name }) => `Välj din klass inom ${name}.`,
+  'shared.eyebrow': 'Delat schema',
+  'shared.week': ({ date }) => `Veckan från ${date}`,
+  'shared.pastWeek': 'Den här veckan är över.',
+  'shared.pastDay': 'Den här dagen är över.',
+  'shared.print': 'Skriv ut',
+  'shared.openApp': 'Öppna appen',
+  'shared.gone': 'Den här länken leder inte längre till något schema.',
 
   'install.short': 'Installera',
   'install.title': 'Lägg till på hemskärmen',

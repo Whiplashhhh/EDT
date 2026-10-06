@@ -8,9 +8,18 @@
  * qui sert aussi à vérifier que la ressource existe encore.
  */
 import { api } from './api.js';
+import { mondayOf } from './dates.js';
 import { formatSelection, parseSelection } from './subjects.js';
 
 export const SHARE_PARAM = 'edt';
+/**
+ * Une semaine ou une journée envoyée à quelqu'un qui n'a pas forcément
+ * d'emploi du temps à l'ULCO — un parent, un ami : `?edt=…&semaine=2026-10-05`
+ * ou `&jour=2026-10-07`. La page s'ouvre alors en lecture seule, sur cette
+ * période et rien d'autre (voir `SharedView.vue`).
+ */
+const PERIOD_PARAMS = { week: 'semaine', day: 'jour' };
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 const ALL_DEPARTMENTS = 'all';
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
@@ -45,12 +54,29 @@ export function sharePath(target) {
 }
 
 /**
- * Adresse complète à partager. `day` ouvre sur une date précise — « ma
- * journée du 7 », « ma semaine du 5 » — avec le paramètre que lisent déjà les
- * notifications ; la vue jour ou semaine reste celle du destinataire.
+ * Adresse complète à partager. Avec `period` (`week` ou `day`) et `day`, c'est
+ * la page en lecture seule de cette semaine — dont `day` peut être n'importe
+ * quel jour — ou de cette journée.
  */
-export function shareUrl(target, { day } = {}) {
-  return `${location.origin}${sharePath(target)}${day ? `&day=${day}` : ''}`;
+export function shareUrl(target, { period, day } = {}) {
+  const base = `${location.origin}${sharePath(target)}`;
+  if (!period) return base;
+  return `${base}&${PERIOD_PARAMS[period]}=${period === 'week' ? mondayOf(day) : day}`;
+}
+
+/**
+ * Lit une page en lecture seule : `{ link, period, day }`, où `day` est le
+ * lundi de la semaine ou le jour partagé. `null` si l'adresse n'en est pas une :
+ * il faut une ressource précise et une date valide.
+ */
+export function readSharedPage(search) {
+  const params = new URLSearchParams(search);
+  const period = Object.keys(PERIOD_PARAMS).find((key) => params.has(PERIOD_PARAMS[key]));
+  if (!period) return null;
+  const link = readShareLink(search);
+  const raw = params.get(PERIOD_PARAMS[period]);
+  if (!link?.kind || !DAY_RE.test(raw) || Number.isNaN(Date.parse(`${raw}T12:00:00Z`))) return null;
+  return { link, period, day: period === 'week' ? mondayOf(raw) : raw };
 }
 
 /** Une ressource seule se nomme en entier ; plusieurs, par leurs seuls codes. */

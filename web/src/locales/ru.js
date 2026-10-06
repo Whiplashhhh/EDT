@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Выбери свою группу ниже как можно точнее.',
   'share.pickFirst': ({ name }) => `Сначала выбери свою группу или свою фамилию, если ты преподаёшь: затем откроется ${name}.`,
   'share.pickInDepartment': ({ name }) => `Выбери свою группу из направления ${name}.`,
+  'shared.eyebrow': 'Общее расписание',
+  'shared.week': ({ date }) => `Неделя с ${date}`,
+  'shared.pastWeek': 'Эта неделя уже прошла.',
+  'shared.pastDay': 'Этот день уже прошёл.',
+  'shared.print': 'Печать',
+  'shared.openApp': 'Открыть приложение',
+  'shared.gone': 'Эта ссылка больше не ведёт ни к какому расписанию.',
 
   'install.short': 'Установить',
   'install.title': 'Добавить на экран «Домой»',

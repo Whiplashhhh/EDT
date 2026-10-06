@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Alege-ți grupa mai jos, cât mai precis.',
   'share.pickFirst': ({ name }) => `Alege mai întâi grupa ta sau numele tău, dacă predai: apoi se va afișa ${name}.`,
   'share.pickInDepartment': ({ name }) => `Alege-ți grupa din ${name}.`,
+  'shared.eyebrow': 'Orar partajat',
+  'shared.week': ({ date }) => `Săptămâna din ${date}`,
+  'shared.pastWeek': 'Această săptămână s-a încheiat.',
+  'shared.pastDay': 'Această zi s-a încheiat.',
+  'shared.print': 'Imprimă',
+  'shared.openApp': 'Deschide aplicația',
+  'shared.gone': 'Acest link nu mai duce la niciun orar.',
 
   'install.short': 'Instalează',
   'install.title': 'Adaugă pe ecranul principal',

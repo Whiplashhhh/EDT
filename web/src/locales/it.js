@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Scegli la tua classe qui sotto, nel modo più preciso possibile.',
   'share.pickFirst': ({ name }) => `Scegli prima la tua classe, o il tuo nome se insegni: poi verrà mostrato ${name}.`,
   'share.pickInDepartment': ({ name }) => `Scegli la tua classe tra quelle di ${name}.`,
+  'shared.eyebrow': 'Orario condiviso',
+  'shared.week': ({ date }) => `Settimana del ${date}`,
+  'shared.pastWeek': 'Questa settimana è terminata.',
+  'shared.pastDay': 'Questa giornata è terminata.',
+  'shared.print': 'Stampa',
+  'shared.openApp': 'Apri l’app',
+  'shared.gone': 'Questo link non porta più a nessun orario.',
 
   'install.short': 'Installa',
   'install.title': 'Aggiungi alla schermata Home',

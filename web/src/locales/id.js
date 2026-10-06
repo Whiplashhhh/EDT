@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Pilih kelasmu di bawah, setepat mungkin.',
   'share.pickFirst': ({ name }) => `Pilih dulu kelasmu, atau namamu jika kamu mengajar: setelah itu ${name} akan tampil.`,
   'share.pickInDepartment': ({ name }) => `Pilih kelasmu dari ${name}.`,
+  'shared.eyebrow': 'Jadwal yang dibagikan',
+  'shared.week': ({ date }) => `Minggu mulai ${date}`,
+  'shared.pastWeek': 'Minggu ini sudah berakhir.',
+  'shared.pastDay': 'Hari ini sudah berakhir.',
+  'shared.print': 'Cetak',
+  'shared.openApp': 'Buka aplikasi',
+  'shared.gone': 'Tautan ini tidak lagi mengarah ke jadwal mana pun.',
 
   'install.short': 'Pasang',
   'install.title': 'Tambahkan ke Layar Utama',

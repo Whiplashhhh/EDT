@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'U nastavku odaberi svoju grupu, što preciznije.',
   'share.pickFirst': ({ name }) => `Najprije odaberi svoju grupu ili svoje ime ako predaješ: zatim će se prikazati ${name}.`,
   'share.pickInDepartment': ({ name }) => `Odaberi svoju grupu sa studija ${name}.`,
+  'shared.eyebrow': 'Dijeljeni raspored',
+  'shared.week': ({ date }) => `Tjedan od ${date}`,
+  'shared.pastWeek': 'Ovaj je tjedan završio.',
+  'shared.pastDay': 'Ovaj je dan završio.',
+  'shared.print': 'Ispis',
+  'shared.openApp': 'Otvori aplikaciju',
+  'shared.gone': 'Ova poveznica više ne vodi ni do kakvog rasporeda.',
 
   'install.short': 'Instaliraj',
   'install.title': 'Dodaj na početni zaslon',

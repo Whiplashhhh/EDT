@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Обери свою групу нижче якомога точніше.',
   'share.pickFirst': ({ name }) => `Спершу обери свою групу або своє прізвище, якщо ти викладаєш: потім відкриється ${name}.`,
   'share.pickInDepartment': ({ name }) => `Обери свою групу зі спеціальності ${name}.`,
+  'shared.eyebrow': 'Спільний розклад',
+  'shared.week': ({ date }) => `Тиждень з ${date}`,
+  'shared.pastWeek': 'Цей тиждень уже минув.',
+  'shared.pastDay': 'Цей день уже минув.',
+  'shared.print': 'Друк',
+  'shared.openApp': 'Відкрити застосунок',
+  'shared.gone': 'Це посилання більше не веде до жодного розкладу.',
 
   'install.short': 'Встановити',
   'install.title': 'Додати на початковий екран',

@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'ከታች ክፍልህን በተቻለ መጠን በትክክል ምረጥ።',
   'share.pickFirst': ({ name }) => `መጀመሪያ ክፍልህን ምረጥ፣ የምታስተምር ከሆነ ደግሞ ስምህን ምረጥ፤ ከዚያ ${name} ይታያል።`,
   'share.pickInDepartment': ({ name }) => `ከ${name} ክፍሎች መካከል ክፍልህን ምረጥ።`,
+  'shared.eyebrow': 'የተጋራ የጊዜ ሰሌዳ',
+  'shared.week': ({ date }) => `ከ${date} ጀምሮ ያለው ሳምንት`,
+  'shared.pastWeek': 'ይህ ሳምንት አልፏል።',
+  'shared.pastDay': 'ይህ ቀን አልፏል።',
+  'shared.print': 'አትም',
+  'shared.openApp': 'መተግበሪያውን ክፈት',
+  'shared.gone': 'ይህ አገናኝ ከእንግዲህ ወደ ምንም የጊዜ ሰሌዳ አይወስድም።',
 
   'install.short': 'ጫን',
   'install.title': 'ወደ መነሻ ማያ ገጽ አክል',

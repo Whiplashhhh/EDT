@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'نیچے اپنی کلاس منتخب کریں، جتنا ممکن ہو درست۔',
   'share.pickFirst': ({ name }) => `پہلے اپنی کلاس منتخب کریں، یا اگر آپ پڑھاتے ہیں تو اپنا نام: اس کے بعد ${name} دکھایا جائے گا۔`,
   'share.pickInDepartment': ({ name }) => `${name} کی کلاسوں میں سے اپنی کلاس منتخب کریں۔`,
+  'shared.eyebrow': 'شیئر کیا گیا ٹائم ٹیبل',
+  'shared.week': ({ date }) => `${date} سے شروع ہونے والا ہفتہ`,
+  'shared.pastWeek': 'یہ ہفتہ ختم ہو چکا ہے۔',
+  'shared.pastDay': 'یہ دن ختم ہو چکا ہے۔',
+  'shared.print': 'پرنٹ کریں',
+  'shared.openApp': 'ایپ کھولیں',
+  'shared.gone': 'یہ لنک اب کسی ٹائم ٹیبل تک نہیں لے جاتا۔',
 
   'install.short': 'انسٹال کریں',
   'install.title': 'ہوم اسکرین پر شامل کریں',

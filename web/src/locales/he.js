@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'בחר את הכיתה שלך למטה, בצורה המדויקת ביותר.',
   'share.pickFirst': ({ name }) => `בחר קודם את הכיתה שלך, או את שמך אם אתה מלמד: לאחר מכן יופיע ${name}.`,
   'share.pickInDepartment': ({ name }) => `בחר את הכיתה שלך מתוך ${name}.`,
+  'shared.eyebrow': 'מערכת שעות משותפת',
+  'shared.week': ({ date }) => `השבוע שמתחיל ב-${date}`,
+  'shared.pastWeek': 'השבוע הזה הסתיים.',
+  'shared.pastDay': 'היום הזה הסתיים.',
+  'shared.print': 'הדפסה',
+  'shared.openApp': 'פתיחת האפליקציה',
+  'shared.gone': 'הקישור הזה כבר לא מוביל לשום מערכת שעות.',
 
   'install.short': 'התקנה',
   'install.title': 'הוספה למסך הבית',

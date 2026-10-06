@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Zaɓi ajinka a ƙasa, daidai yadda zai yiwu.',
   'share.pickFirst': ({ name }) => `Da farko zaɓi ajinka, ko sunanka idan kana koyarwa: sannan za a nuna ${name}.`,
   'share.pickInDepartment': ({ name }) => `Zaɓi ajinka daga cikin azuzuwan ${name}.`,
+  'shared.eyebrow': 'Jadawalin da aka raba',
+  'shared.week': ({ date }) => `Makon ${date}`,
+  'shared.pastWeek': 'Wannan makon ya wuce.',
+  'shared.pastDay': 'Wannan ranar ta wuce.',
+  'shared.print': 'Buga',
+  'shared.openApp': 'Buɗe manhajar',
+  'shared.gone': 'Wannan hanyar haɗin ba ta kai ga wani jadawali yanzu.',
 
   'install.short': 'Saka',
   'install.title': 'Ƙara zuwa allon gida',

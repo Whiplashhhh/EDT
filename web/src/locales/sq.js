@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'Zgjidh grupin tënd më poshtë, sa më saktë.',
   'share.pickFirst': ({ name }) => `Zgjidh fillimisht grupin tënd, ose emrin tënd nëse jep mësim: më pas do të shfaqet ${name}.`,
   'share.pickInDepartment': ({ name }) => `Zgjidh grupin tënd nga ${name}.`,
+  'shared.eyebrow': 'Orar i ndarë',
+  'shared.week': ({ date }) => `Java nga ${date}`,
+  'shared.pastWeek': 'Kjo javë ka mbaruar.',
+  'shared.pastDay': 'Kjo ditë ka mbaruar.',
+  'shared.print': 'Printo',
+  'shared.openApp': 'Hap aplikacionin',
+  'shared.gone': 'Kjo lidhje nuk të çon më te asnjë orar.',
 
   'install.short': 'Instalo',
   'install.title': 'Shto në ekranin bazë',

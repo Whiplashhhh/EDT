@@ -525,8 +525,8 @@ let shareTimer;
  * Partage un lien : la feuille de partage du téléphone quand elle existe,
  * sinon le presse-papiers. Les panneaux se referment dans les deux cas.
  */
-async function shareLink(target, { title, day } = {}) {
-  const url = shareUrl(target, { day });
+async function shareLink(target, { title, period, day } = {}) {
+  const url = shareUrl(target, { period, day });
   shareOpen.value = false;
   pickerOpen.value = false;
   if (navigator.share) {
@@ -552,8 +552,17 @@ function shareShown() {
   shareLink(settings.value, { title: settings.value.resourceName });
 }
 
+/*
+ * Sa journée ou sa semaine s'envoient surtout à qui n'a pas d'emploi du temps
+ * ici — ses parents, un ami : le lien ouvre une page en lecture seule, limitée
+ * à cette période. Un camarade y trouve de quoi ouvrir l'application.
+ */
 function shareMine() {
-  shareLink(identity.value, { title: identity.value.resourceName, day: focusedDay.value });
+  shareLink(identity.value, {
+    title: `${identity.value.resourceName} · ${myDayLabel.value}`,
+    period: settings.value.view === 'week' ? 'week' : 'day',
+    day: focusedDay.value,
+  });
 }
 
 /** Les deux derniers choix passent par le sélecteur : on y touche ce qu'on veut partager. */

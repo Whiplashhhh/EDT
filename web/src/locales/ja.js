@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': '下から自分のクラスをできるだけ細かく選んでください。',
   'share.pickFirst': ({ name }) => `まず自分のクラスを選んでください（教えている場合は自分の名前）。その後 ${name} が表示されます。`,
   'share.pickInDepartment': ({ name }) => `${name} のクラスから自分のクラスを選んでください。`,
+  'shared.eyebrow': '共有された時間割',
+  'shared.week': ({ date }) => `${date}からの週`,
+  'shared.pastWeek': 'この週は終了しました。',
+  'shared.pastDay': 'この日は終了しました。',
+  'shared.print': '印刷',
+  'shared.openApp': 'アプリを開く',
+  'shared.gone': 'このリンクはもう時間割につながっていません。',
 
   'install.short': 'インストール',
   'install.title': 'ホーム画面に追加',

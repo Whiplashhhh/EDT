@@ -50,6 +50,13 @@ export default {
   'share.pickInPromo': 'নিচে তোমার ক্লাস বেছে নাও, যতটা সম্ভব নির্দিষ্টভাবে।',
   'share.pickFirst': ({ name }) => `আগে তোমার ক্লাস বেছে নাও, বা তুমি পড়ালে তোমার নাম: তারপর ${name} দেখানো হবে।`,
   'share.pickInDepartment': ({ name }) => `${name}-এর ক্লাসগুলোর মধ্য থেকে তোমার ক্লাস বেছে নাও।`,
+  'shared.eyebrow': 'শেয়ার করা সময়সূচি',
+  'shared.week': ({ date }) => `${date} থেকে সপ্তাহ`,
+  'shared.pastWeek': 'এই সপ্তাহ শেষ হয়ে গেছে।',
+  'shared.pastDay': 'এই দিন শেষ হয়ে গেছে।',
+  'shared.print': 'প্রিন্ট করুন',
+  'shared.openApp': 'অ্যাপ খুলুন',
+  'shared.gone': 'এই লিংকটি আর কোনো সময়সূচিতে নিয়ে যায় না।',
 
   'install.short': 'ইনস্টল করো',
   'install.title': 'হোম স্ক্রিনে যোগ করো',

@@ -8,6 +8,8 @@ const props = defineProps({
   eventsByDay: { type: Map, required: true },
   /* En vue semaine, les en-têtes de colonnes nomment déjà les jours : la rangée ferait doublon. */
   showDays: { type: Boolean, default: true },
+  /* Une semaine partagée en lecture seule ne mène à aucune autre : pas de flèches. */
+  navigable: { type: Boolean, default: true },
 });
 const emit = defineEmits(['select', 'shift']);
 
@@ -21,13 +23,13 @@ const countOf = (day) => (props.eventsByDay.get(day) || []).length;
 
 <template>
   <nav class="strip" :aria-label="t('week.nav')">
-    <div class="head">
-      <button class="nav" type="button" :aria-label="t('week.previous')" @click="emit('shift', -7)">‹</button>
+    <div class="head" :class="{ fixed: !navigable }">
+      <button v-if="navigable" class="nav" type="button" :aria-label="t('week.previous')" @click="emit('shift', -7)">‹</button>
       <span class="title">
         <span class="month">{{ month }}</span>
         <span class="week">{{ label }}</span>
       </span>
-      <button class="nav" type="button" :aria-label="t('week.next')" @click="emit('shift', 7)">›</button>
+      <button v-if="navigable" class="nav" type="button" :aria-label="t('week.next')" @click="emit('shift', 7)">›</button>
     </div>
     <ol v-if="showDays" class="days">
       <li v-for="day in days" :key="day">
@@ -59,6 +61,7 @@ const countOf = (day) => (props.eventsByDay.get(day) || []).length;
   justify-content: space-between;
   padding: 0.25rem 0 0.5rem;
 }
+.head.fixed { justify-content: center; min-height: 2.5rem; }
 .title { display: grid; justify-items: center; gap: 0.05rem; line-height: 1.2; }
 .month { font-size: 1rem; font-weight: 700; letter-spacing: 0.01em; }
 .week { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
