@@ -4,7 +4,7 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, slugOf } from '../src/ade/service.ts';
+import { decodeAdeName, slugOf, windowFor } from '../src/ade/service.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -84,6 +84,15 @@ test('parseAdeIcs ignore un évènement sans date plutôt que d’échouer', () 
 test('parseAdeIcs trie les cours par heure de début', () => {
   const reversed = parseAdeIcs(SAMPLE.replace('20260921T063000Z', '20260921T163000Z').replace('20260921T080000Z', '20260921T180000Z'));
   assert.deepEqual(reversed.map((e) => e.uid), ['ADE-2', 'ADE-1']);
+});
+
+test('windowFor sert les onze semaines suivantes depuis la fenêtre en cours', () => {
+  const now = new Date('2026-10-07T10:00:00Z'); // un mercredi
+  assert.equal(windowFor('2026-10-05', now), '2026-10-05');
+  assert.equal(windowFor('2026-11-02', now), '2026-10-05');
+  assert.equal(windowFor('2026-12-21', now), '2026-10-05'); // 11e semaine après : encore dans la fenêtre
+  assert.equal(windowFor('2026-12-28', now), '2026-12-28'); // 12e : au-delà de ce qu'ADE a publié
+  assert.equal(windowFor('2026-09-28', now), '2026-09-28'); // le passé garde sa propre fenêtre
 });
 
 test('TtlCache ne lance qu’un chargement pour des appels simultanés', async () => {
