@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menu Crous',
   'crous.showHint': 'Dalam paparan harian, pada waktu makan tengah hari.',
   'last.show': 'Kelas terakhir sesuatu subjek',
-  'last.showHint': 'Menandakan kelas yang subjeknya tidak lagi muncul dalam dua belas minggu berikutnya.',
+  'last.showHint': 'Untuk minggu ini dan dua minggu berikutnya, menandakan kelas yang subjeknya tidak lagi muncul selepas itu dalam jadual.',
   'last.card': 'Mungkin kelas terakhir subjek ini',
-  'last.detail': 'Mungkin kelas terakhir subjek ini: ia tidak lagi muncul dalam dua belas minggu berikutnya.',
+  'last.detail': 'Mungkin kelas terakhir subjek ini: ia tidak lagi muncul selepas itu dalam jadual yang diterbitkan.',
 
   'about.section': 'Perihal',
   'about.notice': 'Laman tidak rasmi, dibina oleh Willem Vanbaelinghem. Data daripada ADE.',

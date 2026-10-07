@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Jedálny lístok Crous',
   'crous.showHint': 'V dennom zobrazení, v čase obeda.',
   'last.show': 'Posledná hodina predmetu',
-  'last.showHint': 'Označí hodinu, ktorej predmet sa v nasledujúcich dvanástich týždňoch už neobjavuje.',
+  'last.showHint': 'Pre tento a dva nasledujúce týždne označí hodinu, ktorej predmet sa ďalej v rozvrhu už neobjavuje.',
   'last.card': 'Možno posledná hodina tohto predmetu',
-  'last.detail': 'Možno posledná hodina tohto predmetu: v nasledujúcich dvanástich týždňoch sa už neobjavuje.',
+  'last.detail': 'Možno posledná hodina tohto predmetu: ďalej sa v zverejnenom rozvrhu už neobjavuje.',
 
   'about.section': 'O webe',
   'about.notice': 'Neoficiálna stránka, autor: Willem Vanbaelinghem. Údaje pochádzajú z ADE.',

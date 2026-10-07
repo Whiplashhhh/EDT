@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous-menü',
   'crous.showHint': 'Napi nézetben, ebédidőben.',
   'last.show': 'Egy tárgy utolsó órája',
-  'last.showHint': 'Megjelöli azt az órát, amelynek tárgya a következő tizenkét hétben már nem szerepel.',
+  'last.showHint': 'Erre és a következő két hétre megjelöli azt az órát, amelynek tárgya később már nem szerepel az órarendben.',
   'last.card': 'Talán a tárgy utolsó órája',
-  'last.detail': 'Talán a tárgy utolsó órája: a következő tizenkét hétben már nem szerepel.',
+  'last.detail': 'Talán a tárgy utolsó órája: később már nem szerepel a közzétett órarendben.',
 
   'about.section': 'Névjegy',
   'about.notice': 'Nem hivatalos oldal, Willem Vanbaelinghem készítette. Az adatok az ADE-ből származnak.',

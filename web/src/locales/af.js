@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous-spyskaart',
   'crous.showHint': 'In die dagaansig, rondom middagete.',
   'last.show': 'Laaste klas van ’n vak',
-  'last.showHint': 'Merk ’n klas waarvan die vak nie meer in die volgende twaalf weke verskyn nie.',
+  'last.showHint': 'Vir hierdie week en die volgende twee, merk ’n klas waarvan die vak nie later in die rooster verskyn nie.',
   'last.card': 'Moontlik die laaste klas van hierdie vak',
-  'last.detail': 'Moontlik die laaste klas van hierdie vak: dit verskyn nie meer in die volgende twaalf weke nie.',
+  'last.detail': 'Moontlik die laaste klas van hierdie vak: dit verskyn nie later in die gepubliseerde rooster nie.',
 
   'about.section': 'Oor',
   'about.notice': 'Nie-amptelike webwerf, gemaak deur Willem Vanbaelinghem. Data uit ADE.',

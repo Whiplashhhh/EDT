@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous 菜单',
   'crous.showHint': '在日视图中，午餐时间显示。',
   'last.show': '课程的最后一节',
-  'last.showHint': '标出该课程在之后十二周内不再出现的那一节课。',
+  'last.showHint': '在本周及之后两周内，标出该课程此后不再出现在课表中的那一节课。',
   'last.card': '可能是这门课的最后一节',
-  'last.detail': '可能是这门课的最后一节：之后十二周内不再出现。',
+  'last.detail': '可能是这门课的最后一节：此后不再出现在已发布的课表中。',
 
   'about.section': '关于',
   'about.notice': '非官方网站，由 Willem Vanbaelinghem 制作。数据来自 ADE。',

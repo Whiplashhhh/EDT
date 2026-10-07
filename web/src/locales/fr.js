@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menu du Crous',
   'crous.showHint': 'Dans la vue jour, à l’heure du déjeuner.',
   'last.show': 'Dernier cours d’une matière',
-  'last.showHint': 'Signale un cours dont la matière n’apparaît plus dans les douze semaines suivantes.',
+  'last.showHint': 'Sur cette semaine et les deux suivantes, signale un cours dont la matière n’apparaît plus ensuite dans l’emploi du temps.',
   'last.card': 'Peut-être le dernier cours de cette matière',
-  'last.detail': 'Peut-être le dernier cours de cette matière : elle n’apparaît plus dans les douze semaines suivantes.',
+  'last.detail': 'Peut-être le dernier cours de cette matière : elle n’apparaît plus ensuite dans l’emploi du temps publié.',
 
   'about.section': 'À propos',
   'about.notice': 'Site non officiel, réalisé par Willem Vanbaelinghem. Données issues d’ADE.',

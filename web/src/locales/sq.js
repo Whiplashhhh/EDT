@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menuja e Crous',
   'crous.showHint': 'Në pamjen ditore, në orën e drekës.',
   'last.show': 'Ora e fundit e një lënde',
-  'last.showHint': 'Shënon një orë, lënda e së cilës nuk shfaqet më në dymbëdhjetë javët në vijim.',
+  'last.showHint': 'Për këtë javë dhe dy të ardhshmet, shënon një orë, lënda e së cilës nuk shfaqet më më pas në orar.',
   'last.card': 'Ndoshta ora e fundit e kësaj lënde',
-  'last.detail': 'Ndoshta ora e fundit e kësaj lënde: nuk shfaqet më në dymbëdhjetë javët në vijim.',
+  'last.detail': 'Ndoshta ora e fundit e kësaj lënde: nuk shfaqet më më pas në orarin e publikuar.',
 
   'about.section': 'Rreth',
   'about.notice': 'Faqe jozyrtare, e krijuar nga Willem Vanbaelinghem. Të dhënat vijnë nga ADE.',

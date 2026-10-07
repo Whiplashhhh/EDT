@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menù del Crous',
   'crous.showHint': 'Nella vista giornaliera, all’ora di pranzo.',
   'last.show': 'Ultima lezione di una materia',
-  'last.showHint': 'Segnala una lezione la cui materia non compare più nelle dodici settimane successive.',
+  'last.showHint': 'Per questa settimana e le due successive, segnala una lezione la cui materia non compare più in seguito nell’orario.',
   'last.card': 'Forse l’ultima lezione di questa materia',
-  'last.detail': 'Forse l’ultima lezione di questa materia: non compare più nelle dodici settimane successive.',
+  'last.detail': 'Forse l’ultima lezione di questa materia: non compare più in seguito nell’orario pubblicato.',
 
   'about.section': 'Informazioni',
   'about.notice': 'Sito non ufficiale, realizzato da Willem Vanbaelinghem. Dati provenienti da ADE.',

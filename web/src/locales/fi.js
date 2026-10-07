@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crousin ruokalista',
   'crous.showHint': 'Päivänäkymässä, lounasaikaan.',
   'last.show': 'Oppiaineen viimeinen tunti',
-  'last.showHint': 'Merkitsee tunnin, jonka oppiainetta ei enää näy seuraavan kahdentoista viikon aikana.',
+  'last.showHint': 'Tällä ja kahdella seuraavalla viikolla merkitsee tunnin, jonka oppiainetta ei enää näy myöhemmin lukujärjestyksessä.',
   'last.card': 'Ehkä tämän oppiaineen viimeinen tunti',
-  'last.detail': 'Ehkä tämän oppiaineen viimeinen tunti: sitä ei enää näy seuraavan kahdentoista viikon aikana.',
+  'last.detail': 'Ehkä tämän oppiaineen viimeinen tunti: sitä ei enää näy myöhemmin julkaistussa lukujärjestyksessä.',
 
   'about.section': 'Tietoja',
   'about.notice': 'Epävirallinen sivusto, jonka on tehnyt Willem Vanbaelinghem. Tiedot ovat peräisin ADE:sta.',

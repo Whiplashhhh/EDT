@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Jerin abincin Crous',
   'crous.showHint': 'A duban rana, lokacin abincin rana.',
   'last.show': 'Darasi na ƙarshe na wani fanni',
-  'last.showHint': 'Yana nuna darasin da fanninsa ba ya bayyana a cikin makonni goma sha biyu masu zuwa.',
+  'last.showHint': 'Don wannan mako da biyu masu zuwa, yana nuna darasin da fanninsa ba ya sake bayyana a jadawalin daga baya.',
   'last.card': 'Wataƙila darasi na ƙarshe na wannan fanni',
-  'last.detail': 'Wataƙila darasi na ƙarshe na wannan fanni: ba ya bayyana a cikin makonni goma sha biyu masu zuwa.',
+  'last.detail': 'Wataƙila darasi na ƙarshe na wannan fanni: ba ya sake bayyana a jadawalin da aka wallafa daga baya.',
 
   'about.section': 'Game da shafin',
   'about.notice': 'Shafi ne marar hukuma, Willem Vanbaelinghem ne ya ƙirƙira shi. Bayanai daga ADE.',

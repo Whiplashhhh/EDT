@@ -106,10 +106,12 @@ test('markLastSessions signale la dernière séance d’une matière dans la fen
     course('b2', '2026-10-07T08:00:00Z', 'R1.02 Web TPB'), // deux sous-groupes en même temps
     course('c1', '2026-10-08T08:00:00Z', 'R1.03 Archi'),
     course('c2', '2026-11-26T08:00:00Z', 'R1.03 Archi'), // trop près de la fin de la fenêtre pour conclure
+    course('d1', '2026-10-23T08:00:00Z', 'R1.04 Maths'), // deuxième semaine après la semaine en cours
+    course('e1', '2026-10-26T08:00:00Z', 'R1.05 Anglais'), // troisième : déjà trop loin
   ];
   const last = (kind: 'groups' | 'rooms') =>
     markLastSessions(events, '2026-10-05', kind).filter((e) => e.last).map((e) => e.uid);
-  assert.deepEqual(last('groups'), ['a2', 'b1', 'b2']);
+  assert.deepEqual(last('groups'), ['a2', 'b1', 'b2', 'd1']);
   assert.deepEqual(last('rooms'), []);
 });
 

@@ -300,9 +300,9 @@ function subjectKey(event: CourseEvent): string | null {
  * peut-être le dernier de sa matière. Plus près de la fin de ce qu'ADE a
  * publié, une matière absente n'est pas finie : on ne voit simplement pas
  * encore sa suite. Avec une fenêtre de douze semaines, cela couvre la semaine
- * en cours et la suivante.
+ * en cours et les deux suivantes — ce que dit l'option côté client.
  */
-const LAST_LOOKAHEAD_WEEKS = 10;
+const LAST_LOOKAHEAD_WEEKS = 9;
 
 /**
  * Marque `last` les séances après lesquelles leur matière ne revient plus

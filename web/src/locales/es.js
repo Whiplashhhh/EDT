@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menú del Crous',
   'crous.showHint': 'En la vista diaria, a la hora de comer.',
   'last.show': 'Última clase de una asignatura',
-  'last.showHint': 'Señala una clase cuya asignatura ya no aparece en las doce semanas siguientes.',
+  'last.showHint': 'Para esta semana y las dos siguientes, señala una clase cuya asignatura ya no aparece después en el horario.',
   'last.card': 'Quizá la última clase de esta asignatura',
-  'last.detail': 'Quizá la última clase de esta asignatura: ya no aparece en las doce semanas siguientes.',
+  'last.detail': 'Quizá la última clase de esta asignatura: ya no aparece después en el horario publicado.',
 
   'about.section': 'Acerca de',
   'about.notice': 'Sitio no oficial, hecho por Willem Vanbaelinghem. Datos procedentes de ADE.',
