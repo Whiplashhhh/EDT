@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Choisir l’emploi du temps à comparer',
   'compare.change': ({ name }) => `Changer ${name}`,
   'compare.close': ({ name }) => `Ne plus afficher ${name}`,
+  'compare.recent': 'Récents',
+  'compare.forget': ({ name }) => `Retirer ${name} des récents`,
 
   'share.open': 'Partager',
   'share.shown': ({ name }) => `L’emploi du temps affiché : ${name}`,

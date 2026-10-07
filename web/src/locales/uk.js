@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Обери розклад для порівняння',
   'compare.change': ({ name }) => `Змінити ${name}`,
   'compare.close': ({ name }) => `Приховати ${name}`,
+  'compare.recent': 'Нещодавні',
+  'compare.forget': ({ name }) => `Прибрати ${name} з нещодавніх`,
 
   'share.open': 'Поширити',
   'share.shown': ({ name }) => `Розклад на екрані: ${name}`,

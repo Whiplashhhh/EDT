@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'موازنے کے لیے ٹائم ٹیبل چنیں',
   'compare.change': ({ name }) => `${name} بدلیں`,
   'compare.close': ({ name }) => `${name} چھپائیں`,
+  'compare.recent': 'حالیہ',
+  'compare.forget': ({ name }) => `${name} کو حالیہ سے ہٹائیں`,
 
   'share.open': 'شیئر کریں',
   'share.shown': ({ name }) => `اسکرین پر موجود ٹائم ٹیبل: ${name}`,

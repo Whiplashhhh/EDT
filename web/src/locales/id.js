@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Pilih jadwal untuk dibandingkan',
   'compare.change': ({ name }) => `Ganti ${name}`,
   'compare.close': ({ name }) => `Sembunyikan ${name}`,
+  'compare.recent': 'Terbaru',
+  'compare.forget': ({ name }) => `Hapus ${name} dari terbaru`,
 
   'share.open': 'Bagikan',
   'share.shown': ({ name }) => `Jadwal di layar: ${name}`,

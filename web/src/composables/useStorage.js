@@ -36,6 +36,11 @@ const EMPTY = {
    * quelle classe, salle ou enseignant, de n'importe quelle formation.
    */
   compare: null,
+  /**
+   * Derniers emplois du temps affichés à droite, du plus récent au plus ancien :
+   * le sélecteur de comparaison les propose avant l'arborescence.
+   */
+  compareHistory: [],
   view: 'day',
   /**
    * Vrai dès qu'on a choisi soi-même entre jour et semaine. Tant que ce n'est
@@ -114,6 +119,33 @@ function readCompare(raw) {
   };
 }
 
+/** Nombre d'emplois du temps gardés dans l'historique de comparaison. */
+const COMPARE_HISTORY_MAX = 6;
+
+const sameResource = (a, b) =>
+  a.department === b.department && a.kind === b.kind && a.resourceId === b.resourceId;
+
+/** Relit l'historique de comparaison, sans doublon ni entrée incomplète. */
+function readCompareHistory(raw) {
+  if (!Array.isArray(raw)) return [];
+  const history = [];
+  for (const item of raw) {
+    const entry = readCompare(item);
+    if (entry && !history.some((seen) => sameResource(seen, entry))) history.push(entry);
+  }
+  return history.slice(0, COMPARE_HISTORY_MAX);
+}
+
+/** Place un emploi du temps en tête de l'historique, sans le dupliquer. */
+export function rememberCompare(history, entry) {
+  return [entry, ...history.filter((seen) => !sameResource(seen, entry))].slice(0, COMPARE_HISTORY_MAX);
+}
+
+/** Retire un emploi du temps de l'historique. */
+export function forgetCompare(history, entry) {
+  return history.filter((seen) => !sameResource(seen, entry));
+}
+
 /**
  * Relit la vue. Avant `viewChosen`, « jour » était enregistré d'office : seule
  * « semaine » trahit un vrai choix. Une comparaison en cours n'existe qu'en vue
@@ -157,6 +189,7 @@ export function readSettings() {
         ? { department: kind === 'groups' ? department : 'all', kind, resourceId: id, resourceName: name ?? '' }
         : null);
     const compare = readCompare(parsed.compare);
+    const compareHistory = readCompareHistory(parsed.compareHistory);
     return {
       /*
        * Les salles et les enseignants se consultent toutes formations
@@ -171,6 +204,8 @@ export function readSettings() {
       identity,
       push: readPush(parsed.push),
       compare,
+      /* Ce qu'on compare déjà fait partie de l'historique, même enregistré avant lui. */
+      compareHistory: compare ? rememberCompare(compareHistory, compare) : compareHistory,
       ...readView(parsed, compare),
       crousMenu: parsed.crousMenu !== false,
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',

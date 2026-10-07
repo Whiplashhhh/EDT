@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'เลือกตารางที่จะเปรียบเทียบ',
   'compare.change': ({ name }) => `เปลี่ยน ${name}`,
   'compare.close': ({ name }) => `ซ่อน ${name}`,
+  'compare.recent': 'ล่าสุด',
+  'compare.forget': ({ name }) => `นำ ${name} ออกจากรายการล่าสุด`,
 
   'share.open': 'แชร์',
   'share.shown': ({ name }) => `ตารางเรียนที่แสดงอยู่: ${name}`,

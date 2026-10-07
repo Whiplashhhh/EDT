@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Pumili ng iskedyul na ihahambing',
   'compare.change': ({ name }) => `Palitan ang ${name}`,
   'compare.close': ({ name }) => `Itago ang ${name}`,
+  'compare.recent': 'Kamakailan',
+  'compare.forget': ({ name }) => `Alisin ang ${name} sa kamakailan`,
 
   'share.open': 'Ibahagi',
   'share.shown': ({ name }) => `Ang iskedyul sa screen: ${name}`,

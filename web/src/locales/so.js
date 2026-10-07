@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Dooro jadwalka la isbarbardhigayo',
   'compare.change': ({ name }) => `Beddel ${name}`,
   'compare.close': ({ name }) => `Qari ${name}`,
+  'compare.recent': 'Kuwii ugu dambeeyay',
+  'compare.forget': ({ name }) => `Ka saar ${name} kuwii ugu dambeeyay`,
 
   'share.open': 'La wadaag',
   'share.shown': ({ name }) => `Jadwalka shaashadda ku jira: ${name}`,

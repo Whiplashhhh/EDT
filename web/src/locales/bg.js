@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Избери разписание за сравнение',
   'compare.change': ({ name }) => `Смени ${name}`,
   'compare.close': ({ name }) => `Скрий ${name}`,
+  'compare.recent': 'Последни',
+  'compare.forget': ({ name }) => `Премахни ${name} от последните`,
 
   'share.open': 'Сподели',
   'share.shown': ({ name }) => `Разписанието на екрана: ${name}`,

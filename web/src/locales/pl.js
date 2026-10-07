@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Wybierz plan do porównania',
   'compare.change': ({ name }) => `Zmień ${name}`,
   'compare.close': ({ name }) => `Ukryj ${name}`,
+  'compare.recent': 'Ostatnie',
+  'compare.forget': ({ name }) => `Usuń ${name} z ostatnich`,
 
   'share.open': 'Udostępnij',
   'share.shown': ({ name }) => `Plan zajęć na ekranie: ${name}`,

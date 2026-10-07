@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Válaszd ki az összehasonlítandó órarendet',
   'compare.change': ({ name }) => `${name} módosítása`,
   'compare.close': ({ name }) => `${name} elrejtése`,
+  'compare.recent': 'Legutóbbiak',
+  'compare.forget': ({ name }) => `${name} eltávolítása a legutóbbiak közül`,
 
   'share.open': 'Megosztás',
   'share.shown': ({ name }) => `A képernyőn látható órarend: ${name}`,

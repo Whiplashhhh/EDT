@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Elige el horario que quieres comparar',
   'compare.change': ({ name }) => `Cambiar ${name}`,
   'compare.close': ({ name }) => `Dejar de mostrar ${name}`,
+  'compare.recent': 'Recientes',
+  'compare.forget': ({ name }) => `Quitar ${name} de recientes`,
 
   'share.open': 'Compartir',
   'share.shown': ({ name }) => `El horario en pantalla: ${name}`,

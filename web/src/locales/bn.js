@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'তুলনার জন্য রুটিন বেছে নাও',
   'compare.change': ({ name }) => `${name} বদলাও`,
   'compare.close': ({ name }) => `${name} লুকাও`,
+  'compare.recent': 'সাম্প্রতিক',
+  'compare.forget': ({ name }) => `সাম্প্রতিক থেকে ${name} সরান`,
 
   'share.open': 'শেয়ার করো',
   'share.shown': ({ name }) => `স্ক্রিনে থাকা রুটিন: ${name}`,

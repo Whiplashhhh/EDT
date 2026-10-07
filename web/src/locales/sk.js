@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Vyber rozvrh na porovnanie',
   'compare.change': ({ name }) => `Zmeniť ${name}`,
   'compare.close': ({ name }) => `Skryť ${name}`,
+  'compare.recent': 'Nedávne',
+  'compare.forget': ({ name }) => `Odstrániť ${name} z nedávnych`,
 
   'share.open': 'Zdieľať',
   'share.shown': ({ name }) => `Zobrazený rozvrh: ${name}`,

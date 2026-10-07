@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Kies ’n rooster om te vergelyk',
   'compare.change': ({ name }) => `Verander ${name}`,
   'compare.close': ({ name }) => `Versteek ${name}`,
+  'compare.recent': 'Onlangs',
+  'compare.forget': ({ name }) => `Verwyder ${name} uit onlangse`,
 
   'share.open': 'Deel',
   'share.shown': ({ name }) => `Die rooster op die skerm: ${name}`,

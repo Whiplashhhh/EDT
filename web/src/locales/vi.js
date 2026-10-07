@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Chọn thời khoá biểu để so sánh',
   'compare.change': ({ name }) => `Đổi ${name}`,
   'compare.close': ({ name }) => `Ẩn ${name}`,
+  'compare.recent': 'Gần đây',
+  'compare.forget': ({ name }) => `Xóa ${name} khỏi mục gần đây`,
 
   'share.open': 'Chia sẻ',
   'share.shown': ({ name }) => `Thời khoá biểu đang hiển thị: ${name}`,

@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Stundenplan zum Vergleichen wählen',
   'compare.change': ({ name }) => `${name} ändern`,
   'compare.close': ({ name }) => `${name} ausblenden`,
+  'compare.recent': 'Zuletzt',
+  'compare.forget': ({ name }) => `${name} aus „Zuletzt“ entfernen`,
 
   'share.open': 'Teilen',
   'share.shown': ({ name }) => `Der angezeigte Stundenplan: ${name}`,

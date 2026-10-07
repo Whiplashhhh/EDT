@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'בחירת מערכת שעות להשוואה',
   'compare.change': ({ name }) => `החלפת ${name}`,
   'compare.close': ({ name }) => `הסתרת ${name}`,
+  'compare.recent': 'אחרונים',
+  'compare.forget': ({ name }) => `הסרת ${name} מהאחרונים`,
 
   'share.open': 'שיתוף',
   'share.shown': ({ name }) => `מערכת השעות שעל המסך: ${name}`,

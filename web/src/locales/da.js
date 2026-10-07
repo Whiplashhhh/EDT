@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Vælg et skema at sammenligne',
   'compare.change': ({ name }) => `Skift ${name}`,
   'compare.close': ({ name }) => `Skjul ${name}`,
+  'compare.recent': 'Seneste',
+  'compare.forget': ({ name }) => `Fjern ${name} fra seneste`,
 
   'share.open': 'Del',
   'share.shown': ({ name }) => `Skemaet på skærmen: ${name}`,

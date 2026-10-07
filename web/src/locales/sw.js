@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Chagua ratiba ya kulinganisha',
   'compare.change': ({ name }) => `Badilisha ${name}`,
   'compare.close': ({ name }) => `Ficha ${name}`,
+  'compare.recent': 'Za hivi karibuni',
+  'compare.forget': ({ name }) => `Ondoa ${name} kwenye za hivi karibuni`,
 
   'share.open': 'Shiriki',
   'share.shown': ({ name }) => `Ratiba iliyo kwenye skrini: ${name}`,

@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Velg en timeplan å sammenligne',
   'compare.change': ({ name }) => `Bytt ${name}`,
   'compare.close': ({ name }) => `Skjul ${name}`,
+  'compare.recent': 'Nylige',
+  'compare.forget': ({ name }) => `Fjern ${name} fra nylige`,
 
   'share.open': 'Del',
   'share.shown': ({ name }) => `Timeplanen på skjermen: ${name}`,

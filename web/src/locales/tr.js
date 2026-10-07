@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Karşılaştırılacak programı seç',
   'compare.change': ({ name }) => `${name} değiştir`,
   'compare.close': ({ name }) => `${name} gizle`,
+  'compare.recent': 'Son kullanılanlar',
+  'compare.forget': ({ name }) => `${name} öğesini son kullanılanlardan kaldır`,
 
   'share.open': 'Paylaş',
   'share.shown': ({ name }) => `Ekrandaki ders programı: ${name}`,

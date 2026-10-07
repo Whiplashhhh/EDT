@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Διάλεξε πρόγραμμα για σύγκριση',
   'compare.change': ({ name }) => `Αλλαγή ${name}`,
   'compare.close': ({ name }) => `Απόκρυψη ${name}`,
+  'compare.recent': 'Πρόσφατα',
+  'compare.forget': ({ name }) => `Αφαίρεση του ${name} από τα πρόσφατα`,
 
   'share.open': 'Κοινοποίηση',
   'share.shown': ({ name }) => `Το πρόγραμμα στην οθόνη: ${name}`,
