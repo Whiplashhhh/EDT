@@ -14,7 +14,7 @@ import { forgetCompare, readSettings, rememberCompare, writeSettings } from './c
 import { addDays, formatDayLong, formatDayMonth, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
-import { readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
+import { PRINT_PARAM, readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
 
 const THEMES = ['system', 'light', 'dark'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -590,9 +590,18 @@ function pickToShare(target) {
 /*
  * Imprimer, c'est aussi partager : le jour ou la semaine affichés, sur papier.
  * Le menu se referme d'abord, pour ne pas finir sur la feuille.
+ *
+ * Installée sur l'écran d'accueil d'un iPhone, l'application n'a pas le droit
+ * d'imprimer : iOS y ignore `window.print()`. La page partagée de la même
+ * période s'ouvre alors dans le navigateur, qui lance l'impression lui-même.
  */
 async function printView() {
   shareOpen.value = false;
+  if (navigator.standalone === true && settings.value.kind) {
+    const url = shareUrl(settings.value, { period: settings.value.view === 'week' ? 'week' : 'day', day: focusedDay.value });
+    window.open(`${url}&${PRINT_PARAM}=1`, '_blank');
+    return;
+  }
   await nextTick();
   window.print();
 }
