@@ -1,23 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import { isResourceKind, type AdeService, type ResourceKind, type Schedule } from '../ade/service.ts';
 import { parseSelection, type SubjectPick } from '../ade/subjects.ts';
+import { mondayOf } from '../dates.ts';
 import type { CrousService } from '../crous/service.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Lundi de la semaine contenant `date`, en heure de Paris. */
-export function mondayOf(date: Date): string {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
-  }).formatToParts(date);
-  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const shift = days.indexOf(map.weekday as string);
-  const local = new Date(`${map.year}-${map.month}-${map.day}T00:00:00Z`);
-  local.setUTCDate(local.getUTCDate() - (shift < 0 ? 0 : shift));
-  return local.toISOString().slice(0, 10);
-}
+export { mondayOf };
 
 /** Valide et normalise le paramètre `from` : une date ISO, ramenée au lundi. */
 function normalizeFrom(raw: unknown): string {

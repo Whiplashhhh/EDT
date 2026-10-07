@@ -1,9 +1,10 @@
-import { AdeClient, AdeError, reach, type AdeResource } from './gwt.ts';
+import { AdeClient, AdeError, parisMidnight, reach, type AdeResource } from './gwt.ts';
 import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
 import { nameLike, teacherAliases } from './teachers.ts';
 import { TtlCache, type CacheOptions, type Lookup } from '../cache.ts';
 import type { AppConfig } from '../config.ts';
+import { mondayOf } from '../dates.ts';
 
 /**
  * Les façons de consulter un emploi du temps, telles qu'elles apparaissent dans
@@ -134,6 +135,14 @@ export interface Schedule {
  * licences de la CGU, descendent jusqu'au niveau 6.
  */
 const MAX_DEPTH = 9;
+/**
+ * ADE publie douze semaines à partir de la date demandée. Celles de la semaine
+ * en cours servent donc aussi pour les onze suivantes : avancer d'une semaine
+ * ne redemande rien à ADE (vérifié : les cours communs à deux fenêtres sont
+ * identiques).
+ */
+const WINDOW_WEEKS = 12;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** Taille maximale acceptée pour un flux ICS (10 Mo). */
 const MAX_ICS_BYTES = 10 * 1024 * 1024;
 /**
@@ -160,6 +169,24 @@ const BREAKER_THRESHOLD = 3;
 const BREAKER_COOLDOWN_MS = 60 * 1000;
 
 export class NotFoundError extends Error {}
+
+/**
+ * Fenêtre ADE d'où tirer la semaine `from` : celle de la semaine en cours quand
+ * `from` y tient tout entière, sinon la sienne propre — une semaine passée, ou
+ * trop lointaine.
+ */
+export function windowFor(from: string, now = new Date()): string {
+  const current = mondayOf(now);
+  const weeks = Math.round((Date.parse(from) - Date.parse(current)) / WEEK_MS);
+  return weeks >= 0 && weeks < WINDOW_WEEKS ? current : from;
+}
+
+/** Les cours d'une fenêtre à partir du lundi `from`, comme si ADE l'avait publiée depuis ce jour-là. */
+function eventsFrom(events: CourseEvent[], window: string, from: string): CourseEvent[] {
+  if (window === from) return events;
+  const start = new Date(parisMidnight(from)).toISOString();
+  return events.filter((event) => event.end > start);
+}
 
 /** Le contenu des caches, tel qu'il s'écrit sur disque : chaque cache, ses entrées. */
 export type CacheSnapshot = Record<string, Array<[string, unknown, number]>>;
@@ -401,11 +428,13 @@ export class AdeService {
     this.#config = config;
     this.#composantes = new TtlCache<Composante[]>(config.catalogTtlMs, 1, FALLBACK);
     this.#catalogs = new TtlCache<Catalog>(config.catalogTtlMs, 64, FALLBACK);
-    // Les URL `.shu` publiées par ADE sont stables : on les garde une journée.
-    // Il en faut une par nœud parcouru pour rassembler toute l'ULCO.
-    this.#icsUrls = new TtlCache<string>(24 * 60 * 60 * 1000, 5000);
+    // Les URL `.shu` publiées par ADE ne dépendent que du nœud — ni de la
+    // session, ni des dates demandées : on les garde une semaine. Il en faut
+    // une par nœud parcouru pour rassembler toute l'ULCO.
+    this.#icsUrls = new TtlCache<string>(7 * 24 * 60 * 60 * 1000, 5000);
     this.#schedules = new TtlCache<Schedule>(config.scheduleTtlMs, 300, FALLBACK);
-    this.#aggregates = new TtlCache<CourseEvent[]>(config.scheduleTtlMs, 128, FALLBACK);
+    // Toute l'ULCO coûte quelque trois cents flux : rassemblée moins souvent qu'une classe.
+    this.#aggregates = new TtlCache<CourseEvent[]>(config.aggregateTtlMs, 128, FALLBACK);
     this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32, FALLBACK);
   }
 
@@ -567,16 +596,18 @@ export class AdeService {
     const dept = await this.#department(departmentId);
     const group = await this.findGroup(dept.id, groupId);
 
-    const { value, stale } = await this.#schedules.lookup(`${dept.id}:${groupId}:${from}`, async () => ({
+    const window = windowFor(from);
+    const { value, stale } = await this.#schedules.lookup(`${dept.id}:${groupId}:${window}`, async () => ({
       department: dept.id,
       kind: 'groups' as const,
       resourceId: groupId,
       resourceName: group.name,
-      from,
+      from: window,
       fetchedAt: new Date().toISOString(),
-      events: await this.#gather(dept, group, from),
+      events: await this.#gather(dept, group, window),
     }));
-    return stale ? { ...value, stale } : value;
+    const schedule = window === from ? value : { ...value, from, events: eventsFrom(value.events, window, from) };
+    return stale ? { ...schedule, stale } : schedule;
   }
 
   /**
@@ -655,8 +686,10 @@ export class AdeService {
     // Valide `departmentId` : `all`, ou une formation connue.
     await this.#departmentIds(departmentId);
 
-    return this.#directories.get(`${departmentId}:${kind}:${from}`, async () => {
-      const { value: events } = await this.#allEvents(departmentId, from);
+    // L'annuaire se construit sur la fenêtre : le même pour toutes les semaines qu'elle couvre.
+    const window = windowFor(from);
+    return this.#directories.get(`${departmentId}:${kind}:${window}`, async () => {
+      const { value: events } = await this.#allEvents(departmentId, window);
       const fetchedAt = new Date().toISOString();
       const until = events.reduce<string | null>((last, e) => (!last || e.end > last ? e.end : last), null);
       if (kind === 'subjects') {
@@ -743,7 +776,9 @@ export class AdeService {
     const rooms = new Set(entries.map((e) => roomKey(e.city ?? '', e.name)));
     const cities = kind === 'rooms' ? await this.#cities() : new Map<string, string>();
 
-    const { value: events, storedAt, stale } = await this.#allEvents(departmentId, from);
+    const window = windowFor(from);
+    const { value: all, storedAt, stale } = await this.#allEvents(departmentId, window);
+    const events = eventsFrom(all, window, from);
     const matches = events.filter((event) => {
       if (kind === 'rooms') {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;
