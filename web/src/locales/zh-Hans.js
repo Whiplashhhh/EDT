@@ -35,6 +35,8 @@ export default {
   'compare.pick': '选择要对比的课程表',
   'compare.change': ({ name }) => `更换 ${name}`,
   'compare.close': ({ name }) => `不再显示 ${name}`,
+  'compare.recent': '最近',
+  'compare.forget': ({ name }) => `从最近中移除 ${name}`,
 
   'share.open': '分享',
   'share.shown': ({ name }) => `当前显示的课程表：${name}`,

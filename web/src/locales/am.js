@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'የሚነጻጸር መርሐግብር ምረጥ',
   'compare.change': ({ name }) => `${name} ቀይር`,
   'compare.close': ({ name }) => `${name} ደብቅ`,
+  'compare.recent': 'የቅርብ ጊዜ',
+  'compare.forget': ({ name }) => `${name}ን ከቅርብ ጊዜ ዝርዝር አስወግድ`,
 
   'share.open': 'አጋራ',
   'share.shown': ({ name }) => `በማያ ገጹ ላይ ያለው መርሐግብር፦ ${name}`,

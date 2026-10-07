@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Välj ett schema att jämföra',
   'compare.change': ({ name }) => `Byt ${name}`,
   'compare.close': ({ name }) => `Sluta visa ${name}`,
+  'compare.recent': 'Senaste',
+  'compare.forget': ({ name }) => `Ta bort ${name} från senaste`,
 
   'share.open': 'Dela',
   'share.shown': ({ name }) => `Schemat på skärmen: ${name}`,

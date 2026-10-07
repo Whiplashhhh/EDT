@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Изабери распоред за поређење',
   'compare.change': ({ name }) => `Промени ${name}`,
   'compare.close': ({ name }) => `Сакриј ${name}`,
+  'compare.recent': 'Недавно',
+  'compare.forget': ({ name }) => `Уклони ${name} из недавних`,
 
   'share.open': 'Подели',
   'share.shown': ({ name }) => `Распоред на екрану: ${name}`,

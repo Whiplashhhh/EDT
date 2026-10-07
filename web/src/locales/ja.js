@@ -35,6 +35,8 @@ export default {
   'compare.pick': '比較する時間割を選択',
   'compare.change': ({ name }) => `${name} を変更`,
   'compare.close': ({ name }) => `${name} を非表示`,
+  'compare.recent': '最近',
+  'compare.forget': ({ name }) => `${name} を最近から削除`,
 
   'share.open': '共有',
   'share.shown': ({ name }) => `表示中の時間割：${name}`,

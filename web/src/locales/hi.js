@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'तुलना के लिए समय-सारणी चुनें',
   'compare.change': ({ name }) => `${name} बदलें`,
   'compare.close': ({ name }) => `${name} छिपाएँ`,
+  'compare.recent': 'हाल के',
+  'compare.forget': ({ name }) => `${name} को हाल के से हटाएँ`,
 
   'share.open': 'शेयर करें',
   'share.shown': ({ name }) => `स्क्रीन पर दिख रही समय-सारणी: ${name}`,

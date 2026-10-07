@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Odaberi raspored za usporedbu',
   'compare.change': ({ name }) => `Promijeni ${name}`,
   'compare.close': ({ name }) => `Sakrij ${name}`,
+  'compare.recent': 'Nedavno',
+  'compare.forget': ({ name }) => `Ukloni ${name} iz nedavnih`,
 
   'share.open': 'Podijeli',
   'share.shown': ({ name }) => `Raspored na zaslonu: ${name}`,

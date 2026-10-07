@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Выбери расписание для сравнения',
   'compare.change': ({ name }) => `Изменить ${name}`,
   'compare.close': ({ name }) => `Скрыть ${name}`,
+  'compare.recent': 'Недавние',
+  'compare.forget': ({ name }) => `Убрать ${name} из недавних`,
 
   'share.open': 'Поделиться',
   'share.shown': ({ name }) => `Расписание на экране: ${name}`,

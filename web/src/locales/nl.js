@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Kies een rooster om te vergelijken',
   'compare.change': ({ name }) => `${name} wijzigen`,
   'compare.close': ({ name }) => `${name} niet meer tonen`,
+  'compare.recent': 'Recent',
+  'compare.forget': ({ name }) => `${name} uit recent verwijderen`,
 
   'share.open': 'Delen',
   'share.shown': ({ name }) => `Het rooster op het scherm: ${name}`,

@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'ஒப்பிட அட்டவணையைத் தேர்வுசெய்க',
   'compare.change': ({ name }) => `${name} மாற்று`,
   'compare.close': ({ name }) => `${name} மறை`,
+  'compare.recent': 'சமீபத்தியவை',
+  'compare.forget': ({ name }) => `சமீபத்தியவற்றிலிருந்து ${name} ஐ நீக்கு`,
 
   'share.open': 'பகிர்',
   'share.shown': ({ name }) => `திரையில் உள்ள அட்டவணை: ${name}`,

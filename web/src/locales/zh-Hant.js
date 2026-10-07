@@ -35,6 +35,8 @@ export default {
   'compare.pick': '選擇要比較的課表',
   'compare.change': ({ name }) => `更換 ${name}`,
   'compare.close': ({ name }) => `不再顯示 ${name}`,
+  'compare.recent': '最近',
+  'compare.forget': ({ name }) => `從最近中移除 ${name}`,
 
   'share.open': '分享',
   'share.shown': ({ name }) => `目前顯示的課表：${name}`,

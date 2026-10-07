@@ -35,6 +35,8 @@ export default {
   'compare.pick': '비교할 시간표 선택',
   'compare.change': ({ name }) => `${name} 변경`,
   'compare.close': ({ name }) => `${name} 숨기기`,
+  'compare.recent': '최근',
+  'compare.forget': ({ name }) => `최근 항목에서 ${name} 삭제`,
 
   'share.open': '공유',
   'share.shown': ({ name }) => `화면에 표시된 시간표: ${name}`,

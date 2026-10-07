@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Valitse verrattava lukujärjestys',
   'compare.change': ({ name }) => `Vaihda ${name}`,
   'compare.close': ({ name }) => `Piilota ${name}`,
+  'compare.recent': 'Viimeisimmät',
+  'compare.forget': ({ name }) => `Poista ${name} viimeisimmistä`,
 
   'share.open': 'Jaa',
   'share.shown': ({ name }) => `Näytöllä oleva lukujärjestys: ${name}`,

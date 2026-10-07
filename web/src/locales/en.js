@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Choose a timetable to compare',
   'compare.change': ({ name }) => `Change ${name}`,
   'compare.close': ({ name }) => `Stop showing ${name}`,
+  'compare.recent': 'Recent',
+  'compare.forget': ({ name }) => `Remove ${name} from recent`,
 
   'share.open': 'Share',
   'share.shown': ({ name }) => `The timetable on screen: ${name}`,

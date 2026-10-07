@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Alege orarul de comparat',
   'compare.change': ({ name }) => `Schimbă ${name}`,
   'compare.close': ({ name }) => `Nu mai afișa ${name}`,
+  'compare.recent': 'Recente',
+  'compare.forget': ({ name }) => `Elimină ${name} din recente`,
 
   'share.open': 'Partajează',
   'share.shown': ({ name }) => `Orarul afișat: ${name}`,

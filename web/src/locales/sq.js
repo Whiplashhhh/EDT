@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Zgjidh orarin për krahasim',
   'compare.change': ({ name }) => `Ndrysho ${name}`,
   'compare.close': ({ name }) => `Mos e shfaq më ${name}`,
+  'compare.recent': 'Të fundit',
+  'compare.forget': ({ name }) => `Hiq ${name} nga të fundit`,
 
   'share.open': 'Ndaj',
   'share.shown': ({ name }) => `Orari në ekran: ${name}`,

@@ -10,7 +10,7 @@ import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
 import { useEventDetail } from './composables/useEventDetail.js';
-import { readSettings, writeSettings } from './composables/useStorage.js';
+import { forgetCompare, readSettings, rememberCompare, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, formatDayMonth, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
@@ -404,7 +404,13 @@ function choose({ department: dept, kind: pickedKind, resourceId: id, resourceNa
   const picked = { department: dept, kind: pickedKind, resourceId: id, resourceName };
   if (pickerTarget.value === 'compare') {
     // On compare un jour précis : celui qu'on regardait reste à l'écran.
-    settings.value = { ...settings.value, compare: picked, view: 'day', viewChosen: true };
+    settings.value = {
+      ...settings.value,
+      compare: picked,
+      compareHistory: rememberCompare(settings.value.compareHistory, picked),
+      view: 'day',
+      viewChosen: true,
+    };
   } else {
     settings.value = { ...settings.value, ...picked };
     focusedDay.value = today();
@@ -412,6 +418,12 @@ function choose({ department: dept, kind: pickedKind, resourceId: id, resourceNa
   writeSettings(settings.value);
   pickerOpen.value = false;
   menuOpen.value = false;
+}
+
+/** Retire un emploi du temps des récents — un choix fait par erreur, par exemple. */
+function forgetRecentCompare(entry) {
+  settings.value = { ...settings.value, compareHistory: forgetCompare(settings.value.compareHistory, entry) };
+  writeSettings(settings.value);
 }
 
 /**
@@ -639,8 +651,11 @@ function onServiceWorkerMessage(event) {
 }
 
 function setView(view) {
-  // La comparaison n'existe qu'en vue jour : passer en semaine y met fin.
-  settings.value = { ...settings.value, view, viewChosen: true, ...(view === 'week' ? { compare: null } : {}) };
+  /*
+   * La comparaison ne s'affiche qu'en vue jour, mais passer en semaine ne
+   * l'oublie pas : elle revient avec la vue jour.
+   */
+  settings.value = { ...settings.value, view, viewChosen: true };
   writeSettings(settings.value);
 }
 
@@ -783,6 +798,20 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <!-- Choisir pour partager, pas pour afficher : on le dit avant la liste. -->
       <p v-if="pickerTarget === 'share'" class="picker-note">{{ t('share.pickResource') }}</p>
       <p v-else-if="pickerTarget === 'share-department'" class="picker-note">{{ t('share.pickDepartment') }}</p>
+      <!-- Les derniers emplois du temps comparés, à rouvrir d'une touche. -->
+      <section v-if="pickerTarget === 'compare' && settings.compareHistory.length" class="recents" :aria-label="t('compare.recent')">
+        <p class="share-title">{{ t('compare.recent') }}</p>
+        <div v-for="entry in settings.compareHistory" :key="`${entry.department}:${entry.kind}:${entry.resourceId}`" class="recent">
+          <button type="button" class="recent-name" @click="choose(entry)">{{ entry.resourceName }}</button>
+          <button
+            type="button"
+            class="recent-forget"
+            :aria-label="t('compare.forget', { name: entry.resourceName })"
+            :title="t('compare.forget', { name: entry.resourceName })"
+            @click="forgetRecentCompare(entry)"
+          >✕</button>
+        </div>
+      </section>
       <ResourcePicker
         :key="pickerTarget"
         :departments-only="pickerTarget === 'share-department'"
@@ -1289,6 +1318,40 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 /* Le sélecteur de la colonne de droite s'ouvre de son côté. */
 .picker-panel.right { inset-inline-start: auto; inset-inline-end: 0.85rem; }
 .picker-note { margin: 0.6rem 0.75rem 0.1rem; font-size: 0.8rem; color: var(--text-muted); }
+
+/* Récents du sélecteur de comparaison : au-dessus de l'arbre, sans le remplacer. */
+.recents {
+  flex: none;
+  /* Sur un écran bas, la liste défile plutôt que d'écraser l'arbre. */
+  max-height: min(11rem, 28vh);
+  overflow-y: auto;
+  padding: 0.25rem 0.35rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.recent { display: flex; align-items: center; gap: 0.15rem; }
+.recent-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+}
+.recent-name:hover { background: var(--bg-elevated); color: var(--accent); }
+.recent-forget {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-radius: 999px;
+}
+.recent-forget:hover { background: var(--bg-elevated); color: var(--danger); }
 
 .share-title { margin: 0.35rem 0.7rem 0.25rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
 

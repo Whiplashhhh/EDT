@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'برنامه‌ای برای مقایسه انتخاب کن',
   'compare.change': ({ name }) => `تغییر ${name}`,
   'compare.close': ({ name }) => `پنهان کردن ${name}`,
+  'compare.recent': 'اخیر',
+  'compare.forget': ({ name }) => `حذف ${name} از موارد اخیر`,
 
   'share.open': 'هم‌رسانی',
   'share.shown': ({ name }) => `برنامهٔ روی صفحه: ${name}`,

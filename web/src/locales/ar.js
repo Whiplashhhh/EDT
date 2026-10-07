@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'اختر الجدول المراد مقارنته',
   'compare.change': ({ name }) => `تغيير ${name}`,
   'compare.close': ({ name }) => `إخفاء ${name}`,
+  'compare.recent': 'الأخيرة',
+  'compare.forget': ({ name }) => `إزالة ${name} من الأخيرة`,
 
   'share.open': 'مشاركة',
   'share.shown': ({ name }) => `الجدول المعروض: ${name}`,

@@ -35,6 +35,8 @@ export default {
   'compare.pick': 'Zaɓi jadawalin da za a kwatanta',
   'compare.change': ({ name }) => `Canza ${name}`,
   'compare.close': ({ name }) => `Ɓoye ${name}`,
+  'compare.recent': 'Na kwanan nan',
+  'compare.forget': ({ name }) => `Cire ${name} daga na kwanan nan`,
 
   'share.open': 'Raba',
   'share.shown': ({ name }) => `Jadawalin da ke kan allo: ${name}`,
