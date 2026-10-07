@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Liiska cuntada Crous',
   'crous.showHint': 'Muuqaalka maalinta, waqtiga qadada.',
   'last.show': 'Casharka ugu dambeeya ee maaddo',
-  'last.showHint': 'Wuxuu calaamadeeyaa cashar maaddadiisu aanay ka muuqan laba iyo tobanka toddobaad ee xiga.',
+  'last.showHint': 'Toddobaadkan iyo labada xiga, wuxuu calaamadeeyaa cashar maaddadiisu aanay mar dambe ka muuqan jadwalka.',
   'last.card': 'Malaha casharka ugu dambeeya ee maaddadan',
-  'last.detail': 'Malaha casharka ugu dambeeya ee maaddadan: kama muuqato laba iyo tobanka toddobaad ee xiga.',
+  'last.detail': 'Malaha casharka ugu dambeeya ee maaddadan: mar dambe kama muuqato jadwalka la daabacay.',
 
   'about.section': 'Ku saabsan',
   'about.notice': 'Bog aan rasmi ahayn, uu sameeyay Willem Vanbaelinghem. Xogta waxaa laga soo qaatay ADE.',

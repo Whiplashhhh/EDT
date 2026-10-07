@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous-menyen',
   'crous.showHint': 'I dagsvisningen, rundt lunsjtid.',
   'last.show': 'Siste time i et fag',
-  'last.showHint': 'Markerer en time der faget ikke lenger dukker opp de neste tolv ukene.',
+  'last.showHint': 'For denne uken og de to neste markeres en time der faget ikke lenger dukker opp senere i timeplanen.',
   'last.card': 'Kanskje den siste timen i dette faget',
-  'last.detail': 'Kanskje den siste timen i dette faget: det dukker ikke lenger opp de neste tolv ukene.',
+  'last.detail': 'Kanskje den siste timen i dette faget: det dukker ikke lenger opp senere i den publiserte timeplanen.',
 
   'about.section': 'Om',
   'about.notice': 'Uoffisielt nettsted, laget av Willem Vanbaelinghem. Data fra ADE.',

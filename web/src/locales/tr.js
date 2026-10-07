@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous menüsü',
   'crous.showHint': 'Günlük görünümde, öğle yemeği saatinde.',
   'last.show': 'Bir dersin son oturumu',
-  'last.showHint': 'Dersi sonraki on iki hafta içinde artık görünmeyen oturumu işaretler.',
+  'last.showHint': 'Bu hafta ve sonraki iki hafta için, dersi daha sonra programda artık görünmeyen oturumu işaretler.',
   'last.card': 'Belki bu dersin son oturumu',
-  'last.detail': 'Belki bu dersin son oturumu: sonraki on iki hafta içinde artık görünmüyor.',
+  'last.detail': 'Belki bu dersin son oturumu: yayımlanan programda daha sonra artık görünmüyor.',
 
   'about.section': 'Hakkında',
   'about.notice': 'Resmî olmayan site, Willem Vanbaelinghem tarafından yapılmıştır. Veriler ADE’den alınır.',

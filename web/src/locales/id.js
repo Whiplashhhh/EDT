@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menu Crous',
   'crous.showHint': 'Di tampilan harian, saat jam makan siang.',
   'last.show': 'Kelas terakhir suatu mata kuliah',
-  'last.showHint': 'Menandai kelas yang mata kuliahnya tidak muncul lagi dalam dua belas minggu berikutnya.',
+  'last.showHint': 'Untuk minggu ini dan dua minggu berikutnya, menandai kelas yang mata kuliahnya tidak muncul lagi di jadwal setelahnya.',
   'last.card': 'Mungkin kelas terakhir mata kuliah ini',
-  'last.detail': 'Mungkin kelas terakhir mata kuliah ini: tidak muncul lagi dalam dua belas minggu berikutnya.',
+  'last.detail': 'Mungkin kelas terakhir mata kuliah ini: tidak muncul lagi setelahnya di jadwal yang diterbitkan.',
 
   'about.section': 'Tentang',
   'about.notice': 'Situs tidak resmi, dibuat oleh Willem Vanbaelinghem. Data dari ADE.',

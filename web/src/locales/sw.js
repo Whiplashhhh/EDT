@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menyu ya Crous',
   'crous.showHint': 'Katika mwonekano wa siku, wakati wa chakula cha mchana.',
   'last.show': 'Kipindi cha mwisho cha somo',
-  'last.showHint': 'Huonyesha kipindi ambacho somo lake halionekani tena katika wiki kumi na mbili zijazo.',
+  'last.showHint': 'Kwa wiki hii na mbili zijazo, huonyesha kipindi ambacho somo lake halionekani tena baadaye kwenye ratiba.',
   'last.card': 'Huenda ni kipindi cha mwisho cha somo hili',
-  'last.detail': 'Huenda ni kipindi cha mwisho cha somo hili: halionekani tena katika wiki kumi na mbili zijazo.',
+  'last.detail': 'Huenda ni kipindi cha mwisho cha somo hili: halionekani tena baadaye kwenye ratiba iliyochapishwa.',
 
   'about.section': 'Kuhusu',
   'about.notice': 'Tovuti isiyo rasmi, iliyotengenezwa na Willem Vanbaelinghem. Data kutoka ADE.',

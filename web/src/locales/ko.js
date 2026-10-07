@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous 메뉴',
   'crous.showHint': '일간 보기의 점심시간에 표시합니다.',
   'last.show': '과목의 마지막 수업',
-  'last.showHint': '이후 12주 동안 해당 과목이 더 이상 나타나지 않는 수업을 표시합니다.',
+  'last.showHint': '이번 주와 이후 2주 동안, 이후 시간표에 과목이 더 이상 나타나지 않는 수업을 표시합니다.',
   'last.card': '이 과목의 마지막 수업일 수 있음',
-  'last.detail': '이 과목의 마지막 수업일 수 있습니다: 이후 12주 동안 더 이상 나타나지 않습니다.',
+  'last.detail': '이 과목의 마지막 수업일 수 있습니다: 게시된 시간표에서 이후 더 이상 나타나지 않습니다.',
 
   'about.section': '정보',
   'about.notice': 'Willem Vanbaelinghem이(가) 만든 비공식 사이트입니다. 데이터 출처: ADE.',

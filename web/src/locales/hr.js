@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Jelovnik Crousa',
   'crous.showHint': 'U dnevnom prikazu, u vrijeme ručka.',
   'last.show': 'Zadnji sat predmeta',
-  'last.showHint': 'Označava sat čiji se predmet više ne pojavljuje u sljedećih dvanaest tjedana.',
+  'last.showHint': 'Za ovaj i sljedeća dva tjedna označava sat čiji se predmet kasnije više ne pojavljuje u rasporedu.',
   'last.card': 'Možda zadnji sat ovog predmeta',
-  'last.detail': 'Možda zadnji sat ovog predmeta: više se ne pojavljuje u sljedećih dvanaest tjedana.',
+  'last.detail': 'Možda zadnji sat ovog predmeta: kasnije se više ne pojavljuje u objavljenom rasporedu.',
 
   'about.section': 'O stranici',
   'about.notice': 'Neslužbena stranica, autor: Willem Vanbaelinghem. Podaci iz ADE-a.',

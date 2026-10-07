@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Menu ng Crous',
   'crous.showHint': 'Sa day view, sa oras ng tanghalian.',
   'last.show': 'Huling klase ng isang asignatura',
-  'last.showHint': 'Minamarkahan ang klaseng hindi na lumilitaw ang asignatura sa susunod na labindalawang linggo.',
+  'last.showHint': 'Para sa linggong ito at sa susunod na dalawa, minamarkahan ang klaseng hindi na lumilitaw ang asignatura pagkatapos sa iskedyul.',
   'last.card': 'Posibleng huling klase ng asignaturang ito',
-  'last.detail': 'Posibleng huling klase ng asignaturang ito: hindi na ito lumilitaw sa susunod na labindalawang linggo.',
+  'last.detail': 'Posibleng huling klase ng asignaturang ito: hindi na ito lumilitaw pagkatapos sa nailathalang iskedyul.',
 
   'about.section': 'Tungkol dito',
   'about.notice': 'Hindi opisyal na site, ginawa ni Willem Vanbaelinghem. Datos mula sa ADE.',

@@ -142,9 +142,9 @@ export default {
   'crous.show': 'Crous の献立',
   'crous.showHint': '日表示の昼食時間帯に表示します。',
   'last.show': '科目の最終授業',
-  'last.showHint': 'その科目が以降12週間に現れない授業に印を付けます。',
+  'last.showHint': '今週と続く2週間について、その後の時間割に科目が現れない授業に印を付けます。',
   'last.card': 'この科目の最終授業かもしれません',
-  'last.detail': 'この科目の最終授業かもしれません：以降12週間に現れません。',
+  'last.detail': 'この科目の最終授業かもしれません：公開済みの時間割で、その後に現れません。',
 
   'about.section': 'このサイトについて',
   'about.notice': 'Willem Vanbaelinghem が作成した非公式サイトです。データは ADE から取得しています。',
