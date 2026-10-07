@@ -94,7 +94,8 @@ const periodLabel = computed(() =>
 );
 const past = computed(() => last < today());
 
-watch([resourceName, periodLabel], ([name, label]) => {
+watch([resourceName, periodLabel], ([name, period]) => {
+  const label = period.charAt(0).toUpperCase() + period.slice(1);
   document.title = name ? `${name} · ${label}` : label;
 }, { immediate: true });
 

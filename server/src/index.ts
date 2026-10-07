@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import Fastify from 'fastify';
@@ -180,7 +181,8 @@ if (existsSync(distDir)) {
    * que WhatsApp ou Messenger affichent sous le lien. Le nom vient du cache
    * d'ADE ; s'il tarde, l'aperçu s'en passe plutôt que de faire attendre.
    */
-  const indexHtml = readFileSync(fileURLToPath(new URL('../../web/dist/index.html', import.meta.url)), 'utf8');
+  // Relue à chaque fois : un nouveau build sert aussitôt ses propres fichiers.
+  const indexPath = fileURLToPath(new URL('../../web/dist/index.html', import.meta.url));
   const PREVIEW_WAIT_MS = 1500;
   const sendIndex = async (req: FastifyRequest, reply: FastifyReply) => {
     const page = readSharedPage(req.query as Record<string, unknown>);
@@ -191,7 +193,7 @@ if (existsSync(distDir)) {
       new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), PREVIEW_WAIT_MS); }),
     ]);
     clearTimeout(timer);
-    const html = injectPreview(indexHtml, { ...previewText(page, about ?? { name: null }), path: req.url });
+    const html = injectPreview(await readFile(indexPath, 'utf8'), { ...previewText(page, about ?? { name: null }), path: req.url });
     return reply.type('text/html; charset=utf-8').send(html);
   };
   app.get('/', sendIndex);

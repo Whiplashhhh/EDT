@@ -170,4 +170,9 @@ const remaining = computed(() => {
 .groups { opacity: 0.85; }
 .notes { margin: 0.2rem 0 0; font-size: 0.82rem; font-style: italic; color: var(--text-muted); overflow-wrap: anywhere; }
 .live { margin: 0.35rem 0 0; font-size: 0.8rem; font-weight: 600; color: var(--kind); }
+
+/* Une feuille imprimée se lit plus tard : un cours passé y reste lisible. */
+@media print {
+  .card.past { opacity: 1; }
+}
 </style>

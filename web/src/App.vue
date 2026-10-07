@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import ResourcePicker from './components/ResourcePicker.vue';
 import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
@@ -575,6 +575,16 @@ function pickToShare(target) {
   openPicker(target);
 }
 
+/*
+ * Imprimer, c'est aussi partager : le jour ou la semaine affichés, sur papier.
+ * Le menu se referme d'abord, pour ne pas finir sur la feuille.
+ */
+async function printView() {
+  shareOpen.value = false;
+  await nextTick();
+  window.print();
+}
+
 /** Ramène l'affichage sur son propre emploi du temps, sans changer de jour. */
 function backToMine() {
   if (!identity.value) return;
@@ -912,6 +922,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <button type="button" role="menuitem" @click="shareMine">{{ myDayLabel }}</button>
       <button type="button" role="menuitem" @click="pickToShare('share')">{{ t('share.other') }}</button>
       <button type="button" role="menuitem" @click="pickToShare('share-department')">{{ t('share.department') }}</button>
+      <button type="button" role="menuitem" @click="printView">{{ t('shared.print') }}</button>
     </div>
 
     <p v-if="shareToast" class="toast" role="status">{{ t('app.linkCopied') }}</p>
@@ -1613,5 +1624,17 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
 @media (min-width: 760px) {
   .app { max-width: 62rem; margin: 0 auto; width: 100%; }
+}
+
+/*
+ * Impression : l'emploi du temps affiché et son nom, sans les boutons.
+ * L'en-tête cesse de coller au haut de la page, et la grille, qui défile en
+ * largeur sur téléphone, s'étale sur toute la feuille.
+ */
+@media print {
+  .top { position: static; backdrop-filter: none; background: none; }
+  .actions, .chev, .view-bar, .share-icon, .colophon, .banner, .compare-close, .toast { display: none; }
+  .main { overflow: visible; }
+  .main :deep(.scroller) { overflow: visible !important; }
 }
 </style>

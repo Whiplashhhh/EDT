@@ -110,4 +110,10 @@ const countOf = (day) => (props.eventsByDay.get(day) || []).length;
   color: var(--text-muted);
 }
 .day.active .count { color: var(--accent); }
+
+/* Sur papier, le mois et le numéro de semaine suffisent : ni flèches ni rangée de jours à toucher. */
+@media print {
+  .nav, .days { display: none; }
+  .head { justify-content: center; }
+}
 </style>
