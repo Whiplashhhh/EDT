@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Ementa não publicada para esse dia.',
   'crous.show': 'Ementa do Crous',
   'crous.showHint': 'Na vista diária, à hora de almoço.',
+  'last.show': 'Última aula de uma disciplina',
+  'last.showHint': 'Assinala uma aula cuja disciplina já não aparece nas doze semanas seguintes.',
+  'last.card': 'Talvez a última aula desta disciplina',
+  'last.detail': 'Talvez a última aula desta disciplina: já não aparece nas doze semanas seguintes.',
 
   'about.section': 'Sobre',
   'about.notice': 'Site não oficial, feito por Willem Vanbaelinghem. Dados provenientes do ADE.',

@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Arra a napra nincs közzétett étlap.',
   'crous.show': 'Crous-menü',
   'crous.showHint': 'Napi nézetben, ebédidőben.',
+  'last.show': 'Egy tárgy utolsó órája',
+  'last.showHint': 'Megjelöli azt az órát, amelynek tárgya a következő tizenkét hétben már nem szerepel.',
+  'last.card': 'Talán a tárgy utolsó órája',
+  'last.detail': 'Talán a tárgy utolsó órája: a következő tizenkét hétben már nem szerepel.',
 
   'about.section': 'Névjegy',
   'about.notice': 'Nem hivatalos oldal, Willem Vanbaelinghem készítette. Az adatok az ADE-ből származnak.',

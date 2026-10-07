@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Ingen menu offentliggjort for den dag.',
   'crous.show': 'Crous-menuen',
   'crous.showHint': 'I dagsvisningen, omkring frokosttid.',
+  'last.show': 'Sidste time i et fag',
+  'last.showHint': 'Markerer en time, hvis fag ikke længere optræder i de følgende tolv uger.',
+  'last.card': 'Måske den sidste time i dette fag',
+  'last.detail': 'Måske den sidste time i dette fag: det optræder ikke længere i de følgende tolv uger.',
 
   'about.section': 'Om',
   'about.notice': 'Uofficielt website, lavet af Willem Vanbaelinghem. Data fra ADE.',

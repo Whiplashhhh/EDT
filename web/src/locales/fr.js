@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Menu non communiqué pour ce jour.',
   'crous.show': 'Menu du Crous',
   'crous.showHint': 'Dans la vue jour, à l’heure du déjeuner.',
+  'last.show': 'Dernier cours d’une matière',
+  'last.showHint': 'Signale un cours dont la matière n’apparaît plus dans les douze semaines suivantes.',
+  'last.card': 'Peut-être le dernier cours de cette matière',
+  'last.detail': 'Peut-être le dernier cours de cette matière : elle n’apparaît plus dans les douze semaines suivantes.',
 
   'about.section': 'À propos',
   'about.notice': 'Site non officiel, réalisé par Willem Vanbaelinghem. Données issues d’ADE.',

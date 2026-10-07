@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Für diesen Tag ist kein Speiseplan veröffentlicht.',
   'crous.show': 'Crous-Speiseplan',
   'crous.showHint': 'In der Tagesansicht, zur Mittagszeit.',
+  'last.show': 'Letzte Stunde eines Fachs',
+  'last.showHint': 'Markiert eine Veranstaltung, deren Fach in den folgenden zwölf Wochen nicht mehr vorkommt.',
+  'last.card': 'Vielleicht die letzte Stunde in diesem Fach',
+  'last.detail': 'Vielleicht die letzte Stunde in diesem Fach: Es kommt in den folgenden zwölf Wochen nicht mehr vor.',
 
   'about.section': 'Über',
   'about.notice': 'Inoffizielle Website, erstellt von Willem Vanbaelinghem. Daten aus ADE.',

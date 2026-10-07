@@ -13,6 +13,8 @@
   --td: #37c2a4;
   --tp: #f0a43a;
   --ds: #ff6b6b;
+  /* Avertissement discret : ni l'erreur, ni la couleur d'un type de séance. */
+  --warn: #ffc14d;
   /* Rouge du Crous (#e2001a), éclairci pour rester lisible sur fond sombre. */
   --crous: #ff5566;
   --crous-strong: #e2001a;
@@ -51,6 +53,7 @@
     --td: #0d8f76;
     --tp: #b8720a;
     --ds: #d13a3a;
+    --warn: #9a5b00;
     --crous: #c30017;
     --crous-strong: #e2001a;
     --crous-soft: #ffeaec;
@@ -77,6 +80,7 @@
   --td: #0d8f76;
   --tp: #b8720a;
   --ds: #d13a3a;
+  --warn: #9a5b00;
   --crous: #c30017;
   --crous-strong: #e2001a;
   --crous-soft: #ffeaec;
@@ -162,6 +166,7 @@ button {
     --td: #0d8f76;
     --tp: #b8720a;
     --ds: #d13a3a;
+    --warn: #9a5b00;
     --crous: #c30017;
     --crous-strong: #e2001a;
     --crous-soft: #ffeaec;

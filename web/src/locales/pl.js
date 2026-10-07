@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Brak menu na ten dzień.',
   'crous.show': 'Menu Crous',
   'crous.showHint': 'W widoku dnia, w porze obiadowej.',
+  'last.show': 'Ostatnie zajęcia z przedmiotu',
+  'last.showHint': 'Oznacza zajęcia, których przedmiot nie pojawia się już w ciągu kolejnych dwunastu tygodni.',
+  'last.card': 'Być może ostatnie zajęcia z tego przedmiotu',
+  'last.detail': 'Być może ostatnie zajęcia z tego przedmiotu: nie pojawia się już w ciągu kolejnych dwunastu tygodni.',
 
   'about.section': 'O stronie',
   'about.notice': 'Nieoficjalna strona stworzona przez: Willem Vanbaelinghem. Dane pochodzą z ADE.',

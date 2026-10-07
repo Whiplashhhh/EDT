@@ -29,6 +29,13 @@ export interface CourseEvent {
    * transversale — une salle, un enseignant — en réunit plusieurs.
    */
   department?: string;
+  /**
+   * Plus aucune séance de la même matière d'ici la fin de la fenêtre publiée
+   * par ADE : c'est peut-être la dernière. Renseigné par le service, et
+   * seulement quand assez de semaines suivent le cours pour que l'absence dise
+   * quelque chose (voir `markLastSessions`).
+   */
+  last?: true;
 }
 
 /** Déplie les lignes iCalendar (RFC 5545 §3.1 : continuation par espace ou tabulation). */

@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Ingen meny publicerad för den dagen.',
   'crous.show': 'Crous-menyn',
   'crous.showHint': 'I dagsvyn, runt lunchtid.',
+  'last.show': 'Sista lektionen i ett ämne',
+  'last.showHint': 'Markerar en lektion vars ämne inte längre förekommer under de följande tolv veckorna.',
+  'last.card': 'Kanske den sista lektionen i det här ämnet',
+  'last.detail': 'Kanske den sista lektionen i det här ämnet: det förekommer inte längre under de följande tolv veckorna.',
 
   'about.section': 'Om',
   'about.notice': 'Inofficiell webbplats, gjord av Willem Vanbaelinghem. Data från ADE.',
