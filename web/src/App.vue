@@ -14,7 +14,8 @@ import { forgetCompare, readSettings, rememberCompare, writeSettings } from './c
 import { addDays, formatDayLong, formatDayMonth, formatStamp, mondayOf, today } from './dates.js';
 import { api } from './api.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
-import { PRINT_PARAM, readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
+import { readShareLink, resolveShareLink, sharePath, shareUrl } from './share.js';
+import { captureForPrint, printBlocked, shareFile } from './printImage.js';
 
 const THEMES = ['system', 'light', 'dark'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -591,19 +592,30 @@ function pickToShare(target) {
  * Imprimer, c'est aussi partager : le jour ou la semaine affichés, sur papier.
  * Le menu se referme d'abord, pour ne pas finir sur la feuille.
  *
- * Installée sur l'écran d'accueil d'un iPhone, l'application n'a pas le droit
- * d'imprimer : iOS y ignore `window.print()`. La page partagée de la même
- * période s'ouvre alors dans le navigateur, qui lance l'impression lui-même.
+ * Installée sur l'écran d'accueil d'un iPhone, l'application ne peut pas
+ * imprimer : elle passe par une image et la feuille de partage (voir
+ * `printImage.js`). Si la photo a trop tardé pour qu'iOS ouvre la feuille,
+ * un bouton la propose d'un second toucher.
  */
+const appEl = ref(null);
+const pendingPrint = ref(null);
+
 async function printView() {
   shareOpen.value = false;
-  if (navigator.standalone === true && settings.value.kind) {
-    const url = shareUrl(settings.value, { period: settings.value.view === 'week' ? 'week' : 'day', day: focusedDay.value });
-    window.open(`${url}&${PRINT_PARAM}=1`, '_blank');
+  await nextTick();
+  if (!printBlocked) {
+    window.print();
     return;
   }
-  await nextTick();
-  window.print();
+  const name = [settings.value.resourceName, focusedDay.value].filter(Boolean).join(' · ');
+  const file = await captureForPrint(appEl.value, name);
+  if (!(await shareFile(file))) pendingPrint.value = file;
+}
+
+async function sharePendingPrint() {
+  const file = pendingPrint.value;
+  pendingPrint.value = null;
+  await shareFile(file);
 }
 
 /** Ramène l'affichage sur son propre emploi du temps, sans changer de jour. */
@@ -747,7 +759,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 </script>
 
 <template>
-  <div class="app" tabindex="-1" @keydown="onKeydown">
+  <div ref="appEl" class="app" tabindex="-1" @keydown="onKeydown">
     <header v-if="hasIdentity" class="top">
       <div class="identity">
         <p class="eyebrow">{{ t(`app.eyebrow.${settings.kind}`) }}</p>
@@ -964,6 +976,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     </div>
 
     <p v-if="shareToast" class="toast" role="status">{{ t('app.linkCopied') }}</p>
+    <button v-if="pendingPrint" type="button" class="toast" @click="sharePendingPrint">{{ t('shared.print') }}</button>
 
     <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <div class="view-bar">
