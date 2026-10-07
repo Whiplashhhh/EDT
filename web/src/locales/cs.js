@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Pro ten den není zveřejněný jídelníček.',
   'crous.show': 'Jídelníček Crous',
   'crous.showHint': 'V denním zobrazení, v době oběda.',
+  'last.show': 'Poslední hodina předmětu',
+  'last.showHint': 'Označí hodinu, jejíž předmět se v následujících dvanácti týdnech už neobjevuje.',
+  'last.card': 'Možná poslední hodina tohoto předmětu',
+  'last.detail': 'Možná poslední hodina tohoto předmětu: v následujících dvanácti týdnech se už neobjevuje.',
 
   'about.section': 'O webu',
   'about.notice': 'Neoficiální web, autor: Willem Vanbaelinghem. Data pocházejí z ADE.',

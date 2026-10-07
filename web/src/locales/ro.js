@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Niciun meniu publicat pentru ziua aceea.',
   'crous.show': 'Meniul Crous',
   'crous.showHint': 'În vizualizarea pe zi, la ora prânzului.',
+  'last.show': 'Ultimul curs al unei materii',
+  'last.showHint': 'Semnalează un curs a cărui materie nu mai apare în următoarele douăsprezece săptămâni.',
+  'last.card': 'Poate ultimul curs al acestei materii',
+  'last.detail': 'Poate ultimul curs al acestei materii: nu mai apare în următoarele douăsprezece săptămâni.',
 
   'about.section': 'Despre',
   'about.notice': 'Site neoficial, realizat de Willem Vanbaelinghem. Date provenite din ADE.',

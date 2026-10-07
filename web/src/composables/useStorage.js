@@ -49,6 +49,12 @@ const EMPTY = {
   viewChosen: false,
   /** Menu du Crous dans la vue jour. Affiché par défaut ; on le masque si l'on n'y mange jamais. */
   crousMenu: true,
+  /**
+   * Signale le cours après lequel sa matière ne revient plus dans les semaines
+   * publiées. Éteint par défaut : hors contrôle continu, l'information ne sert
+   * guère.
+   */
+  lastCourse: false,
   theme: 'system',
 };
 
@@ -208,6 +214,7 @@ export function readSettings() {
       compareHistory: compare ? rememberCompare(compareHistory, compare) : compareHistory,
       ...readView(parsed, compare),
       crousMenu: parsed.crousMenu !== false,
+      lastCourse: parsed.lastCourse === true,
       theme: THEMES.includes(parsed.theme) ? parsed.theme : 'system',
       lang: LANGS.includes(parsed.lang) ? parsed.lang : preferredLocale(),
     };

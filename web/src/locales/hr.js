@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Za taj dan jelovnik nije objavljen.',
   'crous.show': 'Jelovnik Crousa',
   'crous.showHint': 'U dnevnom prikazu, u vrijeme ručka.',
+  'last.show': 'Zadnji sat predmeta',
+  'last.showHint': 'Označava sat čiji se predmet više ne pojavljuje u sljedećih dvanaest tjedana.',
+  'last.card': 'Možda zadnji sat ovog predmeta',
+  'last.detail': 'Možda zadnji sat ovog predmeta: više se ne pojavljuje u sljedećih dvanaest tjedana.',
 
   'about.section': 'O stranici',
   'about.notice': 'Neslužbena stranica, autor: Willem Vanbaelinghem. Podaci iz ADE-a.',

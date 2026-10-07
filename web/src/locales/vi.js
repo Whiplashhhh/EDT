@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Chưa công bố thực đơn cho ngày đó.',
   'crous.show': 'Thực đơn Crous',
   'crous.showHint': 'Trong chế độ xem ngày, vào giờ ăn trưa.',
+  'last.show': 'Buổi học cuối của một môn',
+  'last.showHint': 'Đánh dấu buổi học mà môn đó không còn xuất hiện trong mười hai tuần tiếp theo.',
+  'last.card': 'Có thể là buổi học cuối của môn này',
+  'last.detail': 'Có thể là buổi học cuối của môn này: môn không còn xuất hiện trong mười hai tuần tiếp theo.',
 
   'about.section': 'Giới thiệu',
   'about.notice': 'Trang web không chính thức, do Willem Vanbaelinghem thực hiện. Dữ liệu lấy từ ADE.',

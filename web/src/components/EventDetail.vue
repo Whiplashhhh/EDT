@@ -79,6 +79,7 @@ const remaining = computed(() => {
       </dl>
 
       <p v-if="notes.length" class="notes">{{ notes.join(' · ') }}</p>
+      <p v-if="event.last" class="last"><span aria-hidden="true">⚠</span> {{ t('last.detail') }}</p>
     </div>
   </div>
 </template>
@@ -199,5 +200,6 @@ const remaining = computed(() => {
   border-radius: 6px;
 }
 
+.last { margin: 0.8rem 0 0; font-size: 0.88rem; font-weight: 600; color: var(--warn); }
 .notes { margin: 0.8rem 0 0; font-size: 0.88rem; font-style: italic; color: var(--text-muted); overflow-wrap: anywhere; }
 </style>

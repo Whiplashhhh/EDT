@@ -144,7 +144,8 @@ const feedbackContext = computed(() => ({
   screen: `${window.innerWidth}×${window.innerHeight}`,
 }));
 
-const { eventsByDay, grid, loading, error, stale, outdated, load } = useSchedule(department, kind, resourceId, focusedDay);
+const flagLast = computed(() => settings.value.lastCourse);
+const { eventsByDay, grid, loading, error, stale, outdated, load } = useSchedule(department, kind, resourceId, focusedDay, { flagLast });
 /* Un emploi du temps qui n'est plus à jour reste un emploi du temps : on le dit
    sans alarmer, et l'on garde le rouge pour quand il n'y a rien à montrer. */
 const outdatedText = computed(() =>
@@ -171,7 +172,7 @@ const {
   computed(() => compare.value?.kind ?? 'groups'),
   computed(() => compare.value?.resourceId ?? null),
   focusedDay,
-  { cacheSlot: 'compare' },
+  { cacheSlot: 'compare', flagLast },
 );
 
 const compareSources = computed(() => [
@@ -231,6 +232,11 @@ function setCrousMenu(crousMenu) {
   settings.value = { ...settings.value, crousMenu };
   writeSettings(settings.value);
   if (!crousMenu && settings.value.push.menu) setPushOption('menu', false);
+}
+
+function setLastCourse(lastCourse) {
+  settings.value = { ...settings.value, lastCourse };
+  writeSettings(settings.value);
 }
 
 function setTheme(theme) {
@@ -919,6 +925,17 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
           <span class="toggle-text">
             <span class="toggle-title">{{ t('crous.show') }}</span>
             <span class="toggle-hint">{{ t('crous.showHint') }}</span>
+          </span>
+        </label>
+        <label class="toggle">
+          <input
+            type="checkbox"
+            :checked="settings.lastCourse"
+            @change="setLastCourse($event.target.checked)"
+          />
+          <span class="toggle-text">
+            <span class="toggle-title">{{ t('last.show') }}</span>
+            <span class="toggle-hint">{{ t('last.showHint') }}</span>
           </span>
         </label>
       </div>

@@ -6,6 +6,7 @@ import {
 } from '../dates.js';
 import { breaksOf, defaultRangeOf, snapRange, ticksBetween } from '../slots.js';
 import { courseStyle } from '../colors.js';
+import { t } from '../i18n.js';
 import { departmentTag } from '../departments.js';
 import { useEventDetail } from '../composables/useEventDetail.js';
 
@@ -308,6 +309,7 @@ const peopleOf = (event, context) =>
             <b v-if="block.event.kind" class="tag">{{ block.event.kind }}</b>
           </span>
           <span class="title">
+            <span v-if="block.event.last" class="last" :title="t('last.card')" aria-hidden="true">⚠</span>
             {{ block.event.subject }}
             <b v-if="block.event.kind" class="tag inline">{{ block.event.kind }}</b>
           </span>
@@ -430,6 +432,7 @@ const peopleOf = (event, context) =>
 .tag.inline { display: none; }
 .block.tiny .tag.inline { display: inline; }
 .title { font-weight: 650; overflow-wrap: anywhere; }
+.title .last { color: var(--warn); }
 /* La salle est l'information qu'on cherche en urgence : elle se détache. */
 .where {
   display: flex;

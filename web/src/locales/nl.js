@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'Geen menu bekend voor die dag.',
   'crous.show': 'Crous-menu',
   'crous.showHint': 'In de dagweergave, rond lunchtijd.',
+  'last.show': 'Laatste les van een vak',
+  'last.showHint': 'Markeert een les waarvan het vak in de volgende twaalf weken niet meer voorkomt.',
+  'last.card': 'Misschien de laatste les van dit vak',
+  'last.detail': 'Misschien de laatste les van dit vak: het komt in de volgende twaalf weken niet meer voor.',
 
   'about.section': 'Over',
   'about.notice': 'Onofficiële site, gemaakt door Willem Vanbaelinghem. Gegevens afkomstig uit ADE.',

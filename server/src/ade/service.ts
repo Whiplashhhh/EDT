@@ -296,6 +296,38 @@ function subjectKey(event: CourseEvent): string | null {
 }
 
 /**
+ * Semaines qu'il doit rester dans la fenêtre après un cours pour qu'on le dise
+ * peut-être le dernier de sa matière. Plus près de la fin de ce qu'ADE a
+ * publié, une matière absente n'est pas finie : on ne voit simplement pas
+ * encore sa suite. Avec une fenêtre de douze semaines, cela couvre la semaine
+ * en cours et la suivante.
+ */
+const LAST_LOOKAHEAD_WEEKS = 10;
+
+/**
+ * Marque `last` les séances après lesquelles leur matière ne revient plus
+ * d'ici la fin de la fenêtre `window` — sans rien demander de plus à ADE.
+ * Une salle n'est pas concernée : la suite d'une matière peut se tenir
+ * ailleurs.
+ */
+export function markLastSessions(events: CourseEvent[], window: string, kind: ResourceKind): CourseEvent[] {
+  if (kind === 'rooms') return events;
+  const horizon = parisMidnight(window) + WINDOW_WEEKS * WEEK_MS;
+  const keys = events.map(subjectKey);
+  const latest = new Map<string, string>();
+  events.forEach((event, i) => {
+    const key = keys[i];
+    if (key && event.start > (latest.get(key) ?? '')) latest.set(key, event.start);
+  });
+  return events.map((event, i) => {
+    const key = keys[i];
+    if (!key || event.start !== latest.get(key)) return event;
+    if (Date.parse(event.start) + LAST_LOOKAHEAD_WEEKS * WEEK_MS > horizon) return event;
+    return { ...event, last: true as const };
+  });
+}
+
+/**
  * Intitulé retenu pour une ressource, parmi ceux de ses séances : leur début
  * commun s'il y en a un (« Dev Web » pour « Dev Web Mme X » et
  * « Dev Web Symfony »), sinon le plus fréquent. Rien du tout si la plupart des
@@ -606,7 +638,8 @@ export class AdeService {
       fetchedAt: new Date().toISOString(),
       events: await this.#gather(dept, group, window),
     }));
-    const schedule = window === from ? value : { ...value, from, events: eventsFrom(value.events, window, from) };
+    const events = markLastSessions(eventsFrom(value.events, window, from), window, 'groups');
+    const schedule = { ...value, from, events };
     return stale ? { ...schedule, stale } : schedule;
   }
 
@@ -802,7 +835,7 @@ export class AdeService {
       resourceName: entries.map((e) => e.name).join(', '),
       from,
       fetchedAt: new Date(storedAt).toISOString(),
-      events: matches,
+      events: markLastSessions(matches, window, kind),
       ...(stale ? { stale } : {}),
     };
   }

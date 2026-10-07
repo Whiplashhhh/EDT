@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'ለዚያ ቀን የታተመ ምናሌ የለም።',
   'crous.show': 'የCrous ምናሌ',
   'crous.showHint': 'በቀን እይታ፣ በምሳ ሰዓት።',
+  'last.show': 'የአንድ ትምህርት የመጨረሻ ክፍለ ጊዜ',
+  'last.showHint': 'ትምህርቱ በሚቀጥሉት አሥራ ሁለት ሳምንታት ውስጥ የማይታይበትን ክፍለ ጊዜ ያመለክታል።',
+  'last.card': 'ምናልባት የዚህ ትምህርት የመጨረሻ ክፍለ ጊዜ',
+  'last.detail': 'ምናልባት የዚህ ትምህርት የመጨረሻ ክፍለ ጊዜ፦ በሚቀጥሉት አሥራ ሁለት ሳምንታት ውስጥ አይታይም።',
 
   'about.section': 'ስለ ጣቢያው',
   'about.notice': 'ኦፊሴላዊ ያልሆነ ጣቢያ፣ በWillem Vanbaelinghem የተሠራ። መረጃው ከADE የተወሰደ ነው።',

@@ -12,9 +12,10 @@ import { readCachedSchedule, writeCachedSchedule } from './useStorage.js';
  * en mémoire.
  *
  * `cacheSlot` sépare le cache hors ligne de deux emplois du temps chargés en
- * même temps.
+ * même temps. `flagLast` décide si l'on garde la marque `last` que le serveur
+ * pose sur le dernier cours d'une matière ; sans elle, on l'efface.
  */
-export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlot } = {}) {
+export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlot, flagLast } = {}) {
   const published = ref([]);
   const loading = ref(false);
   /** Rien à montrer : l'emploi du temps n'a pas pu être chargé. */
@@ -32,7 +33,11 @@ export function useSchedule(department, kind, resourceId, focusedDay, { cacheSlo
 
   /* ADE publie des blocs d'une heure et demie : on leur rend l'horaire réel du
      département avant de les montrer. */
-  const events = computed(() => alignToSlots(department.value, published.value));
+  const events = computed(() => {
+    const aligned = alignToSlots(department.value, published.value);
+    if (flagLast?.value) return aligned;
+    return aligned.map((event) => (event.last ? { ...event, last: undefined } : event));
+  });
 
   /* Sur quelle grille graduer la vue semaine : celle de la formation consultée,
      ou celle des cours affichés quand on regarde une salle ou un enseignant. */

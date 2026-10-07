@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
-import { parseAdeIcs } from '../src/ade/ics.ts';
+import { parseAdeIcs, type CourseEvent } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, slugOf, windowFor } from '../src/ade/service.ts';
+import { decodeAdeName, markLastSessions, slugOf, windowFor } from '../src/ade/service.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -93,6 +93,24 @@ test('windowFor sert les onze semaines suivantes depuis la fenêtre en cours', (
   assert.equal(windowFor('2026-12-21', now), '2026-10-05'); // 11e semaine après : encore dans la fenêtre
   assert.equal(windowFor('2026-12-28', now), '2026-12-28'); // 12e : au-delà de ce qu'ADE a publié
   assert.equal(windowFor('2026-09-28', now), '2026-09-28'); // le passé garde sa propre fenêtre
+});
+
+test('markLastSessions signale la dernière séance d’une matière dans la fenêtre', () => {
+  const course = (uid: string, start: string, title: string): CourseEvent => ({
+    uid, start, end: start, title, subject: title, kind: null, room: null, teachers: [], groups: [], notes: [], department: 'info',
+  });
+  const events = [
+    course('a1', '2026-10-06T08:00:00Z', 'R1.01 Dev TD1'),
+    course('a2', '2026-10-13T08:00:00Z', 'R1-01 Dev TPA'), // même ressource, autre écriture
+    course('b1', '2026-10-07T08:00:00Z', 'R1.02 Web'),
+    course('b2', '2026-10-07T08:00:00Z', 'R1.02 Web TPB'), // deux sous-groupes en même temps
+    course('c1', '2026-10-08T08:00:00Z', 'R1.03 Archi'),
+    course('c2', '2026-11-26T08:00:00Z', 'R1.03 Archi'), // trop près de la fin de la fenêtre pour conclure
+  ];
+  const last = (kind: 'groups' | 'rooms') =>
+    markLastSessions(events, '2026-10-05', kind).filter((e) => e.last).map((e) => e.uid);
+  assert.deepEqual(last('groups'), ['a2', 'b1', 'b2']);
+  assert.deepEqual(last('rooms'), []);
 });
 
 test('TtlCache ne lance qu’un chargement pour des appels simultanés', async () => {

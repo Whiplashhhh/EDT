@@ -77,6 +77,8 @@ const remaining = computed(() => {
       </p>
       <p v-if="notes.length" class="notes">{{ notes.join(' · ') }}</p>
       <p v-if="remaining" class="live">{{ remaining }}</p>
+      <!-- Sa matière ne revient plus dans les semaines publiées par ADE. -->
+      <p v-if="event.last" class="last"><span aria-hidden="true">⚠</span> {{ t('last.card') }}</p>
     </div>
   </article>
 </template>
@@ -170,6 +172,7 @@ const remaining = computed(() => {
 .groups { opacity: 0.85; }
 .notes { margin: 0.2rem 0 0; font-size: 0.82rem; font-style: italic; color: var(--text-muted); overflow-wrap: anywhere; }
 .live { margin: 0.35rem 0 0; font-size: 0.8rem; font-weight: 600; color: var(--kind); }
+.last { margin: 0.35rem 0 0; font-size: 0.8rem; font-weight: 600; color: var(--warn); }
 
 /* Une feuille imprimée se lit plus tard : un cours passé y reste lisible. */
 @media print {

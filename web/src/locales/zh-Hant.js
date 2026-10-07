@@ -141,6 +141,10 @@ export default {
   'crous.unknown': '當天未公布菜單。',
   'crous.show': 'Crous 菜單',
   'crous.showHint': '在日檢視中，午餐時間顯示。',
+  'last.show': '課程的最後一堂',
+  'last.showHint': '標出該課程在之後十二週內不再出現的那一堂課。',
+  'last.card': '可能是這門課的最後一堂',
+  'last.detail': '可能是這門課的最後一堂：之後十二週內不再出現。',
 
   'about.section': '關於',
   'about.notice': '非官方網站，由 Willem Vanbaelinghem 製作。資料來自 ADE。',

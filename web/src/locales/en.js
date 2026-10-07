@@ -141,6 +141,10 @@ export default {
   'crous.unknown': 'No menu published for that day.',
   'crous.show': 'Crous menu',
   'crous.showHint': 'In day view, around lunchtime.',
+  'last.show': 'Last class of a subject',
+  'last.showHint': 'Flags a class whose subject no longer appears in the following twelve weeks.',
+  'last.card': 'Possibly the last class of this subject',
+  'last.detail': 'Possibly the last class of this subject: it no longer appears in the following twelve weeks.',
 
   'about.section': 'About',
   'about.notice': 'Unofficial site, made by Willem Vanbaelinghem. Data from ADE.',
