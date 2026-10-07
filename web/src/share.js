@@ -19,6 +19,11 @@ export const SHARE_PARAM = 'edt';
  * période et rien d'autre (voir `SharedView.vue`).
  */
 const PERIOD_PARAMS = { week: 'semaine', day: 'jour' };
+/**
+ * `&imprimer=1` : la page s'imprime dès qu'elle est prête. C'est le détour de
+ * l'application installée sur iPhone, qui ne peut pas imprimer elle-même.
+ */
+export const PRINT_PARAM = 'imprimer';
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const KINDS = ['groups', 'rooms', 'teachers', 'subjects'];
 const ALL_DEPARTMENTS = 'all';
