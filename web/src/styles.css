@@ -142,3 +142,38 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Impression : toujours sur la palette claire, quel que soit le thème à
+ * l'écran — un texte clair sur papier blanc ne se lit pas. Les fonds des cours
+ * sont gardés : c'est leur couleur qui distingue CM, TD et TP.
+ */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-sunken: #eceff3;
+    --line: #dfe3ea;
+    --text: #131720;
+    --text-muted: #5d6675;
+    --accent: #1b6fe0;
+    --accent-soft: #e3edfd;
+    --cm: #4a5ae0;
+    --td: #0d8f76;
+    --tp: #b8720a;
+    --ds: #d13a3a;
+    --crous: #c30017;
+    --crous-strong: #e2001a;
+    --crous-soft: #ffeaec;
+    --tint-s: 58%;
+    --tint-l: 40%;
+    --tone-s: -6%;
+    --tone-l: 13%;
+    --tint-bg: 11%;
+    color-scheme: light;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

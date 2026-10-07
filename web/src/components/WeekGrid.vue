@@ -504,4 +504,11 @@ const peopleOf = (event, context) =>
   border-radius: 50%;
   background: var(--danger);
 }
+
+/* Sur papier, ni l'heure qu'il est ni le jour où l'on imprime ne veulent plus rien dire. */
+@media print {
+  .now { display: none; }
+  .col.today { background: none; }
+  .col-head.today .num { color: inherit; }
+}
 </style>
