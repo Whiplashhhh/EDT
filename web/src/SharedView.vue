@@ -7,7 +7,7 @@
  * la langue et au thème près : quelqu'un qui a déjà l'application retrouve la
  * sienne intacte.
  */
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import WeekStrip from './components/WeekStrip.vue';
 import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
@@ -17,7 +17,7 @@ import { useEventDetail } from './composables/useEventDetail.js';
 import { readSettings, writeSettings } from './composables/useStorage.js';
 import { addDays, formatDayLong, formatDayMonth, formatStamp, today } from './dates.js';
 import { LOCALES, LOCALE_REGIONS, setLocale, t } from './i18n.js';
-import { PRINT_PARAM, resolveShareLink, sharePath } from './share.js';
+import { resolveShareLink, sharePath } from './share.js';
 
 const props = defineProps({
   /** `{ link, period, day }`, tel que le lit `readSharedPage`. */
@@ -53,17 +53,9 @@ function savePreference(key, value) {
   writeSettings({ ...readSettings(), [key]: value });
 }
 
-/* Ouverte pour être imprimée (voir `PRINT_PARAM`) : une fois, puis le paramètre s'efface. */
-const params = new URLSearchParams(location.search);
-const printOnLoad = params.has(PRINT_PARAM);
-if (printOnLoad) {
-  params.delete(PRINT_PARAM);
-  history.replaceState(null, '', `${location.pathname}?${params}`);
-}
-
 const focusedDay = ref(isWeek && within(today()) ? today() : first);
-/* Une journée se montre en jour ; une semaine, comme l'appareil la montrerait — en grille si on l'imprime. */
-const view = ref(isWeek ? (printOnLoad ? 'week' : stored.view) : 'day');
+/* Une journée se montre en jour ; une semaine, comme l'appareil la montrerait. */
+const view = ref(isWeek ? stored.view : 'day');
 
 const { eventsByDay, grid, loading, error, stale, outdated, load } = useSchedule(
   computed(() => link.department),
@@ -169,7 +161,7 @@ let ticker;
 let refresher;
 
 onMounted(async () => {
-  const loaded = load();
+  load();
   ticker = setInterval(() => { now.value = Date.now(); }, 30_000);
   // Un cours annulé après l'envoi du lien doit se voir : la page se tient à jour.
   refresher = setInterval(() => {
@@ -181,11 +173,6 @@ onMounted(async () => {
     else gone.value = true;
   } catch {
     // Hors ligne : l'emploi du temps enregistré s'affiche, sans son nom.
-  }
-  if (printOnLoad) {
-    await loaded;
-    await nextTick();
-    window.print();
   }
 });
 onUnmounted(() => {
