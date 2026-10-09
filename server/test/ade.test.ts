@@ -4,7 +4,8 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs, type CourseEvent } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, markLastSessions, schoolYear, slugOf, subjectHours, windowFor, yearWindows } from '../src/ade/service.ts';
+import { decodeAdeName, markLastSessions, schoolYear, slugOf, subjectHours, windowFor, windowsFor } from '../src/ade/service.ts';
+import { WeekArchive } from '../src/ade/archive.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -335,15 +336,36 @@ test('slugOf garde aux départements d’IUT l’identifiant qu’ils avaient', 
   assert.ok(!long.endsWith('-'));
 });
 
-test('yearWindows couvre l’année universitaire en quatre fenêtres fixes', () => {
-  const autumn = yearWindows(new Date('2026-10-09T10:00:00Z'));
-  assert.deepEqual(autumn, ['2026-08-17', '2026-11-09', '2027-02-01', '2027-04-26']);
-  // Au printemps, c'est encore l'année commencée l'été précédent.
-  assert.deepEqual(yearWindows(new Date('2027-03-15T10:00:00Z')), autumn);
-  // Elle bascule au 1er août, heure de Paris.
-  assert.equal(yearWindows(new Date('2027-07-31T22:30:00Z'))[0], '2027-08-16');
-  assert.equal(yearWindows(new Date('2027-07-31T21:30:00Z'))[0], '2026-08-17');
+test('schoolYear bascule au 1er août, heure de Paris', () => {
+  assert.deepEqual(schoolYear(new Date('2026-10-09T10:00:00Z')), { from: '2026-08-01', to: '2027-08-01' });
   assert.deepEqual(schoolYear(new Date('2027-03-15T10:00:00Z')), { from: '2026-08-01', to: '2027-08-01' });
+  assert.equal(schoolYear(new Date('2027-07-31T22:30:00Z')).from, '2027-08-01');
+  assert.equal(schoolYear(new Date('2027-07-31T21:30:00Z')).from, '2026-08-01');
+});
+
+test('windowsFor lit la suite dans les fenêtres de l’emploi du temps, le passé à partir de sa première semaine', () => {
+  const anchor = '2026-10-05';
+  // Rien de passé à relire : la fenêtre en cours, puis celles qui la suivent.
+  assert.deepEqual(windowsFor(['2026-10-05', '2026-10-12', '2027-01-04'], anchor), ['2026-10-05', '2026-12-28']);
+  // Deux semaines passées absentes de l'archive : une fenêtre à partir de la première les couvre, et la suite avec.
+  assert.deepEqual(windowsFor(['2026-09-14', '2026-09-21', '2026-10-05', '2026-11-30'], anchor), ['2026-09-14']);
+  // Au-delà de ses douze semaines, la suite reprend dans la fenêtre de l'emploi du temps.
+  assert.deepEqual(windowsFor(['2026-09-14', '2026-12-07'], anchor), ['2026-09-14', '2026-10-05']);
+  assert.deepEqual(windowsFor([], anchor), []);
+});
+
+test('WeekArchive garde les semaines, vides comprises, et oublie les années terminées', () => {
+  const archive = new WeekArchive();
+  archive.set('iut-info:2349', '2026-09-14', []);
+  archive.set('iut-info:2349', '2025-09-15', []);
+  assert.deepEqual(archive.get('iut-info:2349', '2026-09-14'), []);
+  assert.equal(archive.get('iut-info:2349', '2026-09-21'), undefined);
+  archive.prune('2026-07-27');
+  assert.equal(archive.get('iut-info:2349', '2025-09-15'), undefined);
+  // Ce qui s'écrit sur disque se relit tel quel.
+  const copy = new WeekArchive();
+  for (const [key, value, storedAt] of archive.dump()) copy.restore(key, value, storedAt);
+  assert.deepEqual(copy.get('iut-info:2349', '2026-09-14'), []);
 });
 
 test('subjectHours compte les heures ADE passées et à venir par ressource', () => {
