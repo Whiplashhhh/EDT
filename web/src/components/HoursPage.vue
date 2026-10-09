@@ -2,8 +2,9 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { api } from '../api.js';
 import { courseStyle } from '../colors.js';
-import { formatDayMonth, formatMinutesSpan, formatStamp } from '../dates.js';
+import { formatMinutesSpan, formatStamp } from '../dates.js';
 import { errorMessage, t } from '../i18n.js';
+import SubjectHoursDetail from './SubjectHoursDetail.vue';
 
 /*
  * Bilan des heures d'une classe sur l'année : par ressource, ce qui est passé
@@ -42,10 +43,21 @@ async function load() {
 
 onMounted(load);
 onUnmounted(() => controller?.abort());
-watch(() => [props.department, props.resourceId], load);
+watch(() => [props.department, props.resourceId], () => {
+  opened.value = null;
+  load();
+});
 
-/** Une durée, ou un tiret quand il n'y a rien : « 0 min » se lirait comme une erreur. */
-const span = (minutes) => (minutes ? formatMinutesSpan(minutes) : '—');
+/** Une durée en heures, « 0 h » compris : « 0 min » se lirait comme une erreur. */
+const span = (minutes) => (minutes ? formatMinutesSpan(minutes) : formatMinutesSpan(60).replace('1', '0'));
+
+/** La ressource dont la fiche est ouverte, et l'instant qui sépare passé et à-venir. */
+const opened = ref(null);
+const openedAt = ref(0);
+function openSubject(row) {
+  openedAt.value = summary.value ? Date.parse(summary.value.now) : Date.now();
+  opened.value = row;
+}
 
 const rows = computed(() =>
   (summary.value?.subjects ?? []).map((subject) => {
@@ -120,34 +132,46 @@ const totals = computed(() => {
       <section v-for="section in sections" :key="section.id" class="group" :aria-label="section.title ?? undefined">
         <h3 v-if="section.title" class="group-title">{{ section.title }}</h3>
         <ul class="list">
-          <li v-for="row in section.rows" :key="row.key" class="row tinted" :style="row.style">
-            <div class="name-line">
-              <span class="code">{{ row.name }}</span>
-              <span v-if="row.label" class="label">{{ row.label }}</span>
-            </div>
-            <div
-              class="bar"
-              role="img"
-              :aria-label="t('hours.progress', { done: span(row.done.minutes), total: span(row.total) })"
-            >
-              <span class="bar-done" :style="{ width: `${row.share}%` }"></span>
-            </div>
-            <div class="figures">
-              <span class="figure">
-                <strong>{{ span(row.done.minutes) }}</strong>
-                {{ t('hours.doneShort', { n: row.done.courses }) }}
+          <li v-for="row in section.rows" :key="row.key">
+            <button type="button" class="row tinted" :style="row.style" @click="openSubject(row)">
+              <span class="name-line">
+                <span class="code">{{ row.name }}</span>
+                <span v-if="row.label" class="label">{{ row.label }}</span>
               </span>
-              <span class="figure planned">
-                <strong>{{ span(row.planned.minutes) }}</strong>
-                {{ t('hours.plannedShort', { n: row.planned.courses }) }}
+              <span
+                class="bar"
+                role="img"
+                :aria-label="t('hours.progress', { done: span(row.done.minutes), total: span(row.total) })"
+              >
+                <span class="bar-done" :style="{ width: `${row.share}%` }"></span>
               </span>
-            </div>
+              <!-- Rien de passé, ou plus rien à venir : on n'en parle pas. -->
+              <span class="figures">
+                <span v-if="row.done.courses" class="figure">
+                  <strong>{{ span(row.done.minutes) }}</strong>
+                  {{ t('hours.doneShort', { n: row.done.courses }) }}
+                </span>
+                <span v-if="row.planned.courses" class="figure planned">
+                  <strong>{{ span(row.planned.minutes) }}</strong>
+                  {{ t('hours.plannedShort', { n: row.planned.courses }) }}
+                </span>
+              </span>
+            </button>
           </li>
         </ul>
       </section>
 
-      <p class="note">{{ t('hours.note', { from: formatDayMonth(`${summary.from}T12:00:00Z`) }) }}</p>
+      <p class="note">{{ t('hours.note') }}</p>
     </template>
+
+    <SubjectHoursDetail
+      v-if="opened"
+      :key="opened.key"
+      :subject="opened"
+      :department="department"
+      :now="openedAt"
+      @close="opened = null"
+    />
   </section>
 </template>
 
@@ -155,7 +179,7 @@ const totals = computed(() => {
 .hours {
   flex: 1;
   width: 100%;
-  max-width: 40rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 0.6rem 0.85rem 1rem;
 }
@@ -224,14 +248,35 @@ const totals = computed(() => {
   text-transform: uppercase;
   color: var(--text-muted);
 }
-.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.totals { max-width: 40rem; }
+
+/* Une colonne au téléphone ; deux ou trois côte à côte sur un écran large. */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+  gap: 0.5rem;
+}
 
 .row {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
   padding: 0.55rem 0.7rem 0.6rem;
   background: color-mix(in srgb, var(--kind) var(--tint-bg), var(--bg-elevated));
   border-inline-start: 3px solid var(--kind);
   border-radius: var(--radius-sm);
 }
+.row:hover { background: color-mix(in srgb, var(--kind) calc(var(--tint-bg) + 6%), var(--bg-elevated)); }
+.row:focus-visible { outline: 2px solid var(--kind); outline-offset: 2px; }
 .name-line { display: flex; align-items: baseline; gap: 0.45rem; min-width: 0; }
 .code { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
 .label {
@@ -244,6 +289,7 @@ const totals = computed(() => {
 }
 
 .bar {
+  display: block;
   height: 6px;
   margin: 0.45rem 0 0.35rem;
   overflow: hidden;
@@ -252,17 +298,18 @@ const totals = computed(() => {
 }
 .bar-done { display: block; height: 100%; background: var(--kind); border-radius: inherit; }
 
+/* La durée au-dessus, le détail dessous : les cartes d'une grille restent alignées. */
 .figures {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.2rem 0.8rem;
-  font-size: 0.78rem;
+  gap: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.figure strong { color: var(--text); font-weight: 700; }
-.figure.planned { text-align: end; }
+.figure { display: flex; flex-direction: column; }
+.figure strong { color: var(--text); font-size: 0.95rem; font-weight: 700; }
+.figure.planned { margin-inline-start: auto; text-align: end; align-items: flex-end; }
 
 .empty { margin: 1rem 0; text-align: center; color: var(--text-muted); }
 .note { margin: 0.9rem 0 0; font-size: 0.75rem; line-height: 1.45; color: var(--text-muted); }

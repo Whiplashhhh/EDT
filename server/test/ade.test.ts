@@ -4,7 +4,7 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs, type CourseEvent } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, markLastSessions, slugOf, subjectHours, windowFor, yearWindows } from '../src/ade/service.ts';
+import { decodeAdeName, markLastSessions, schoolYear, slugOf, subjectHours, windowFor, yearWindows } from '../src/ade/service.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -343,6 +343,7 @@ test('yearWindows couvre l’année universitaire en quatre fenêtres fixes', ()
   // Elle bascule au 1er août, heure de Paris.
   assert.equal(yearWindows(new Date('2027-07-31T22:30:00Z'))[0], '2027-08-16');
   assert.equal(yearWindows(new Date('2027-07-31T21:30:00Z'))[0], '2026-08-17');
+  assert.deepEqual(schoolYear(new Date('2027-03-15T10:00:00Z')), { from: '2026-08-01', to: '2027-08-01' });
 });
 
 test('subjectHours compte les heures ADE passées et à venir par ressource', () => {
@@ -357,10 +358,16 @@ test('subjectHours compte les heures ADE passées et à venir par ressource', ()
     course('4', 'R5.A.04 Qualité Algo', '2026-10-06T12:00:00Z', '2026-10-06T15:00:00Z'),
     course('5', 'Rentrée BUT3 APP', '2026-09-01T07:00:00Z', '2026-09-01T08:00:00Z'),
   ], new Date('2026-10-09T09:00:00Z'));
-  assert.deepEqual(hours, [
-    // Le cours en cours n'est pas encore passé.
-    { name: 'R5.A.04', label: 'Qualité Algo', done: { courses: 1, minutes: 180 }, planned: { courses: 0, minutes: 0 } },
-    { name: 'R5.A.10', label: 'Paradigmes BDD', done: { courses: 1, minutes: 90 }, planned: { courses: 2, minutes: 180 } },
-    { name: 'Rentrée BUT3 APP', label: '', free: true, done: { courses: 1, minutes: 60 }, planned: { courses: 0, minutes: 0 } },
+  // Le cours en cours n'est pas encore passé.
+  assert.deepEqual(hours.map(({ sessions, ...rest }) => ({ ...rest, sessions: sessions.length })), [
+    { name: 'R5.A.04', label: 'Qualité Algo', done: { courses: 1, minutes: 180 }, planned: { courses: 0, minutes: 0 }, sessions: 1 },
+    { name: 'R5.A.10', label: 'Paradigmes BDD', done: { courses: 1, minutes: 90 }, planned: { courses: 2, minutes: 180 }, sessions: 3 },
+    { name: 'Rentrée BUT3 APP', label: '', free: true, done: { courses: 1, minutes: 60 }, planned: { courses: 0, minutes: 0 }, sessions: 1 },
+  ]);
+  // Les séances d'une ressource se lisent dans l'ordre, de quoi la détailler.
+  assert.deepEqual(hours[1].sessions.map((session) => session.start), [
+    '2026-10-05T08:00:00Z',
+    '2026-10-09T08:00:00Z',
+    '2026-10-12T08:00:00Z',
   ]);
 });

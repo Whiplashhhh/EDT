@@ -126,6 +126,16 @@ export interface SubjectHours {
   done: { courses: number; minutes: number };
   /** Séances en cours ou à venir, dans ce qu'ADE a publié. */
   planned: { courses: number; minutes: number };
+  /** Les séances elles-mêmes, dans l'ordre : de quoi détailler la ressource. */
+  sessions: HoursSession[];
+}
+
+export interface HoursSession {
+  start: string;
+  end: string;
+  kind: string | null;
+  room: string | null;
+  teachers: string[];
 }
 
 export interface HoursSummary {
@@ -169,6 +179,8 @@ const MAX_DEPTH = 9;
  * identiques).
  */
 const WINDOW_WEEKS = 12;
+/** Fenêtres révolues du bilan des heures : relues une fois par jour. */
+const ARCHIVE_TTL_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** Taille maximale acceptée pour un flux ICS (10 Mo). */
 const MAX_ICS_BYTES = 10 * 1024 * 1024;
@@ -432,17 +444,25 @@ function pickName(names: Map<string, number>): string {
 /**
  * Fenêtres ADE qui couvrent l'année universitaire en cours : quatre fois douze
  * semaines à partir de la mi-août, de quoi aller de la rentrée à la mi-juillet.
- * L'année bascule au 1er août. Les fenêtres sont fixes d'une semaine à l'autre :
- * le cache les retrouve, au lieu de tout redemander chaque lundi.
+ * Les fenêtres sont fixes d'une semaine à l'autre : le cache les retrouve, au
+ * lieu de tout redemander chaque lundi.
  */
 const YEAR_WINDOWS = 4;
 
-export function yearWindows(now = new Date()): string[] {
+/**
+ * L'année universitaire qui contient `now`, du 1er août au 1er août suivant
+ * (lundis ISO exclus) : elle bascule au 1er août, heure de Paris.
+ */
+export function schoolYear(now = new Date()): { from: string; to: string } {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' })
     .formatToParts(now);
   const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
   const year = value('month') >= 8 ? value('year') : value('year') - 1;
-  const first = mondayOf(new Date(`${year}-08-17T12:00:00Z`));
+  return { from: `${year}-08-01`, to: `${year + 1}-08-01` };
+}
+
+export function yearWindows(now = new Date()): string[] {
+  const first = mondayOf(new Date(`${schoolYear(now).from.slice(0, 4)}-08-17T12:00:00Z`));
   return Array.from({ length: YEAR_WINDOWS }, (_, i) =>
     new Date(Date.parse(first) + i * WINDOW_WEEKS * WEEK_MS).toISOString().slice(0, 10),
   );
@@ -461,6 +481,7 @@ export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
     labels: Map<string, number>;
     done: { courses: number; minutes: number };
     planned: { courses: number; minutes: number };
+    sessions: HoursSession[];
   };
   const byKey = new Map<string, Tally>();
   const count = (map: Map<string, number>, name: string) => map.set(name, (map.get(name) ?? 0) + 1);
@@ -476,6 +497,7 @@ export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
         labels: new Map(),
         done: { courses: 0, minutes: 0 },
         planned: { courses: 0, minutes: 0 },
+        sessions: [],
       };
       byKey.set(subject.key, entry);
     }
@@ -484,6 +506,13 @@ export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
     const side = event.end <= cut ? entry.done : entry.planned;
     side.courses += 1;
     side.minutes += Math.max(0, Math.round((Date.parse(event.end) - Date.parse(event.start)) / 60_000));
+    entry.sessions.push({
+      start: event.start,
+      end: event.end,
+      kind: event.kind,
+      room: event.room,
+      teachers: event.teachers,
+    });
   }
   return [...byKey.values()]
     .map((entry) => ({
@@ -492,6 +521,7 @@ export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
       ...(entry.free ? { free: true as const } : {}),
       done: entry.done,
       planned: entry.planned,
+      sessions: entry.sessions.sort((a, b) => a.start.localeCompare(b.start)),
     }))
     .sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
 }
@@ -549,6 +579,7 @@ export class AdeService {
   readonly #schedules: TtlCache<Schedule>;
   readonly #aggregates: TtlCache<CourseEvent[]>;
   readonly #directories: TtlCache<Directory>;
+  readonly #archives: TtlCache<Schedule>;
 
   constructor(config: AppConfig) {
     this.#config = config;
@@ -562,6 +593,9 @@ export class AdeService {
     // Toute l'ULCO coûte quelque trois cents flux : rassemblée moins souvent qu'une classe.
     this.#aggregates = new TtlCache<CourseEvent[]>(config.aggregateTtlMs, 128, FALLBACK);
     this.#directories = new TtlCache<Directory>(config.catalogTtlMs, 32, FALLBACK);
+    // Les semaines révolues d'une classe, pour le bilan des heures : elles ne
+    // bougent presque plus, une relecture par jour suffit.
+    this.#archives = new TtlCache<Schedule>(ARCHIVE_TTL_MS, 1000, FALLBACK);
   }
 
   /**
@@ -581,6 +615,7 @@ export class AdeService {
       icsUrls: this.#icsUrls,
       schedules: this.#schedules,
       aggregates: this.#aggregates,
+      archives: this.#archives,
     };
   }
 
@@ -730,8 +765,13 @@ export class AdeService {
   }
 
   /** Les cours d'un groupe sur la fenêtre de douze semaines qui commence le lundi `window`. */
-  #groupWindow(dept: Composante, group: GroupNode, window: string): Promise<Lookup<Schedule>> {
-    return this.#schedules.lookup(`${dept.id}:${group.id}:${window}`, async () => ({
+  #groupWindow(
+    dept: Composante,
+    group: GroupNode,
+    window: string,
+    cache: TtlCache<Schedule> = this.#schedules,
+  ): Promise<Lookup<Schedule>> {
+    return cache.lookup(`${dept.id}:${group.id}:${window}`, async () => ({
       department: dept.id,
       kind: 'groups' as const,
       resourceId: group.id,
@@ -745,14 +785,28 @@ export class AdeService {
   /**
    * Bilan des heures d'un groupe sur l'année universitaire : par ressource, ce
    * qui est passé et ce qu'ADE a déjà publié pour la suite. Il faut pour cela
-   * toute l'année, et non la seule fenêtre en cours — quatre flux ADE.
+   * toute l'année, et non la seule fenêtre en cours — quatre flux ADE. Une
+   * fenêtre entièrement passée n'est relue qu'une fois par jour : au fil de
+   * l'année, le bilan coûte de moins en moins d'appels.
    */
   async hours(departmentId: string, groupId: number, now = new Date()): Promise<HoursSummary> {
     const dept = await this.#department(departmentId);
     const group = await this.findGroup(dept.id, groupId);
     const windows = yearWindows(now);
-    const parts = await Promise.all(windows.map((window) => this.#groupWindow(dept, group, window)));
-    const events = uniqueByUid(parts.flatMap((part) => part.value.events));
+    const parts = await Promise.all(
+      windows.map((window) => {
+        const ended = parisMidnight(window) + WINDOW_WEEKS * WEEK_MS <= now.getTime();
+        return this.#groupWindow(dept, group, window, ended ? this.#archives : this.#schedules);
+      }),
+    );
+    // Rien d'une autre année universitaire, même si ADE en publiait : un
+    // rattrapage de juillet ne compte pas dans l'année qui commence.
+    const year = schoolYear(now);
+    const [yearStart, yearEnd] = [parisMidnight(year.from), parisMidnight(year.to)];
+    const events = uniqueByUid(parts.flatMap((part) => part.value.events)).filter((event) => {
+      const start = Date.parse(event.start);
+      return start >= yearStart && start < yearEnd;
+    });
     return {
       department: dept.id,
       resourceId: group.id,
