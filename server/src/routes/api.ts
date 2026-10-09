@@ -139,6 +139,14 @@ export async function registerApi(
     },
   );
 
+  // Heures passées et à venir par ressource, sur l'année : réservé aux classes.
+  app.get<{ Params: Record<string, string> }>('/:department/groups/:resourceId/hours', async (req, reply) => {
+    const { department, target } = parseIds({ ...req.params, kind: 'groups' });
+    const hours = await service.hours(department, target as number);
+    reply.header('Cache-Control', 'public, max-age=300');
+    return hours;
+  });
+
   // Flux iCalendar réexposé : permet de s'abonner depuis l'app Calendrier du téléphone.
   app.get<{ Params: Record<string, string> }>(
     '/:department/:kind/:resourceId/calendar.ics',

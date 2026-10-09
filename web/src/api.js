@@ -37,6 +37,9 @@ export const api = {
   directory: (department, kind, signal) => getJson(`/api/${seg(department)}/${seg(kind)}`, signal),
   schedule: (department, kind, resourceId, from, signal) =>
     getJson(`/api/${seg(department)}/${seg(kind)}/${ids(resourceId)}/schedule?from=${seg(from)}`, signal),
+  /** Heures passées et à venir par ressource, sur l'année : pour une classe seulement. */
+  hours: (department, resourceId, signal) =>
+    getJson(`/api/${seg(department)}/groups/${seg(resourceId)}/hours`, signal),
   // Le restaurant suit le campus de la formation : on donne la formation, le serveur choisit.
   crousMenu: (department, signal) =>
     getJson(department ? `/api/crous/menu?department=${seg(department)}` : '/api/crous/menu', signal),

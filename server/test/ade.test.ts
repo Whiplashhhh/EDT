@@ -4,7 +4,7 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs, type CourseEvent } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, markLastSessions, slugOf, windowFor } from '../src/ade/service.ts';
+import { decodeAdeName, markLastSessions, slugOf, subjectHours, windowFor, yearWindows } from '../src/ade/service.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -267,7 +267,7 @@ test('subjectOf réunit les séances d’une ressource sous un même code', () =
   // « CC1 » est une matière des GEII, pas un contrôle continu.
   assert.deepEqual(of('R3.02 CC3 - TP4'), { code: 'R3.02', key: 'R3.02', label: 'CC3' });
   // Sans code, l'intitulé lui-même fait office de ressource.
-  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', key: 'portfolio', label: '' });
+  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', key: 'portfolio', label: '', free: true });
   // Un type de séance n'est pas un code.
   assert.equal(of('TP2')?.code, undefined);
 });
@@ -333,4 +333,34 @@ test('slugOf garde aux départements d’IUT l’identifiant qu’ils avaient', 
   const long = slugOf('LP ASSURANCE BANQUE FINANCE : CHARGE DE CLIENTELE');
   assert.match(long, /^[a-z0-9][a-z0-9-]{0,31}$/);
   assert.ok(!long.endsWith('-'));
+});
+
+test('yearWindows couvre l’année universitaire en quatre fenêtres fixes', () => {
+  const autumn = yearWindows(new Date('2026-10-09T10:00:00Z'));
+  assert.deepEqual(autumn, ['2026-08-17', '2026-11-09', '2027-02-01', '2027-04-26']);
+  // Au printemps, c'est encore l'année commencée l'été précédent.
+  assert.deepEqual(yearWindows(new Date('2027-03-15T10:00:00Z')), autumn);
+  // Elle bascule au 1er août, heure de Paris.
+  assert.equal(yearWindows(new Date('2027-07-31T22:30:00Z'))[0], '2027-08-16');
+  assert.equal(yearWindows(new Date('2027-07-31T21:30:00Z'))[0], '2026-08-17');
+});
+
+test('subjectHours compte les heures ADE passées et à venir par ressource', () => {
+  const course = (uid: string, title: string, start: string, end: string): CourseEvent => ({
+    uid, title, subject: title, kind: null, room: null, teachers: [], groups: [], notes: [], start, end,
+  });
+  const hours = subjectHours([
+    // Un créneau ADE d'une heure et demie compte pour 90 minutes, pas pour l'horaire réel (1 h 25).
+    course('1', 'R5.A.10 Paradigmes BDD', '2026-10-05T08:00:00Z', '2026-10-05T09:30:00Z'),
+    course('2', 'R5.A.10 Paradigmes BDD TD', '2026-10-09T08:00:00Z', '2026-10-09T09:30:00Z'),
+    course('3', 'R5-A-10 Paradigmes BDD', '2026-10-12T08:00:00Z', '2026-10-12T09:30:00Z'),
+    course('4', 'R5.A.04 Qualité Algo', '2026-10-06T12:00:00Z', '2026-10-06T15:00:00Z'),
+    course('5', 'Rentrée BUT3 APP', '2026-09-01T07:00:00Z', '2026-09-01T08:00:00Z'),
+  ], new Date('2026-10-09T09:00:00Z'));
+  assert.deepEqual(hours, [
+    // Le cours en cours n'est pas encore passé.
+    { name: 'R5.A.04', label: 'Qualité Algo', done: { courses: 1, minutes: 180 }, planned: { courses: 0, minutes: 0 } },
+    { name: 'R5.A.10', label: 'Paradigmes BDD', done: { courses: 1, minutes: 90 }, planned: { courses: 2, minutes: 180 } },
+    { name: 'Rentrée BUT3 APP', label: '', free: true, done: { courses: 1, minutes: 60 }, planned: { courses: 0, minutes: 0 } },
+  ]);
 });

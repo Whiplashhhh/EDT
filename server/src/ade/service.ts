@@ -115,6 +115,33 @@ export interface Directory {
   entries: DirectoryEntry[];
 }
 
+/** Le temps passé et à venir dans une ressource, en minutes d'ADE. */
+export interface SubjectHours {
+  /** Le code (« R5.A.10 »), ou l'intitulé d'une séance sans code. */
+  name: string;
+  label: string;
+  /** Pas une ressource du programme : un intitulé sans code (« Rentrée BUT 1 »). */
+  free?: true;
+  /** Séances terminées : leur nombre et leur durée. */
+  done: { courses: number; minutes: number };
+  /** Séances en cours ou à venir, dans ce qu'ADE a publié. */
+  planned: { courses: number; minutes: number };
+}
+
+export interface HoursSummary {
+  department: string;
+  resourceId: number;
+  resourceName: string;
+  /** Début de l'année couverte (lundi ISO) et fin de la dernière fenêtre lue (exclue). */
+  from: string;
+  until: string;
+  /** Instant qui sépare le passé de l'à-venir. */
+  now: string;
+  fetchedAt: string;
+  subjects: SubjectHours[];
+  stale?: true;
+}
+
 export interface Schedule {
   department: string;
   kind: ResourceKind;
@@ -402,6 +429,73 @@ function pickName(names: Map<string, number>): string {
   )[0][0];
 }
 
+/**
+ * Fenêtres ADE qui couvrent l'année universitaire en cours : quatre fois douze
+ * semaines à partir de la mi-août, de quoi aller de la rentrée à la mi-juillet.
+ * L'année bascule au 1er août. Les fenêtres sont fixes d'une semaine à l'autre :
+ * le cache les retrouve, au lieu de tout redemander chaque lundi.
+ */
+const YEAR_WINDOWS = 4;
+
+export function yearWindows(now = new Date()): string[] {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' })
+    .formatToParts(now);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  const year = value('month') >= 8 ? value('year') : value('year') - 1;
+  const first = mondayOf(new Date(`${year}-08-17T12:00:00Z`));
+  return Array.from({ length: YEAR_WINDOWS }, (_, i) =>
+    new Date(Date.parse(first) + i * WINDOW_WEEKS * WEEK_MS).toISOString().slice(0, 10),
+  );
+}
+
+/**
+ * Heures par ressource, de part et d'autre de `now`. Les durées sont celles
+ * d'ADE, pas l'horaire réel recalé sur la grille du département : un créneau
+ * compte pour une heure et demie, pas pour 1 h 25. Une séance compte comme
+ * passée une fois terminée.
+ */
+export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
+  type Tally = {
+    free: boolean;
+    names: Map<string, number>;
+    labels: Map<string, number>;
+    done: { courses: number; minutes: number };
+    planned: { courses: number; minutes: number };
+  };
+  const byKey = new Map<string, Tally>();
+  const count = (map: Map<string, number>, name: string) => map.set(name, (map.get(name) ?? 0) + 1);
+  const cut = now.toISOString();
+  for (const event of events) {
+    const subject = subjectOf(event);
+    if (!subject) continue;
+    let entry = byKey.get(subject.key);
+    if (!entry) {
+      entry = {
+        free: Boolean(subject.free),
+        names: new Map(),
+        labels: new Map(),
+        done: { courses: 0, minutes: 0 },
+        planned: { courses: 0, minutes: 0 },
+      };
+      byKey.set(subject.key, entry);
+    }
+    count(entry.names, subject.code);
+    count(entry.labels, subject.label);
+    const side = event.end <= cut ? entry.done : entry.planned;
+    side.courses += 1;
+    side.minutes += Math.max(0, Math.round((Date.parse(event.end) - Date.parse(event.start)) / 60_000));
+  }
+  return [...byKey.values()]
+    .map((entry) => ({
+      name: pickName(entry.names),
+      label: pickLabel(entry.labels),
+      ...(entry.free ? { free: true as const } : {}),
+      done: entry.done,
+      planned: entry.planned,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
+}
+
 /** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
 function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
   type Tally = {
@@ -629,18 +723,48 @@ export class AdeService {
     const group = await this.findGroup(dept.id, groupId);
 
     const window = windowFor(from);
-    const { value, stale } = await this.#schedules.lookup(`${dept.id}:${groupId}:${window}`, async () => ({
+    const { value, stale } = await this.#groupWindow(dept, group, window);
+    const events = markLastSessions(eventsFrom(value.events, window, from), window, 'groups');
+    const schedule = { ...value, from, events };
+    return stale ? { ...schedule, stale } : schedule;
+  }
+
+  /** Les cours d'un groupe sur la fenêtre de douze semaines qui commence le lundi `window`. */
+  #groupWindow(dept: Composante, group: GroupNode, window: string): Promise<Lookup<Schedule>> {
+    return this.#schedules.lookup(`${dept.id}:${group.id}:${window}`, async () => ({
       department: dept.id,
       kind: 'groups' as const,
-      resourceId: groupId,
+      resourceId: group.id,
       resourceName: group.name,
       from: window,
       fetchedAt: new Date().toISOString(),
       events: await this.#gather(dept, group, window),
     }));
-    const events = markLastSessions(eventsFrom(value.events, window, from), window, 'groups');
-    const schedule = { ...value, from, events };
-    return stale ? { ...schedule, stale } : schedule;
+  }
+
+  /**
+   * Bilan des heures d'un groupe sur l'année universitaire : par ressource, ce
+   * qui est passé et ce qu'ADE a déjà publié pour la suite. Il faut pour cela
+   * toute l'année, et non la seule fenêtre en cours — quatre flux ADE.
+   */
+  async hours(departmentId: string, groupId: number, now = new Date()): Promise<HoursSummary> {
+    const dept = await this.#department(departmentId);
+    const group = await this.findGroup(dept.id, groupId);
+    const windows = yearWindows(now);
+    const parts = await Promise.all(windows.map((window) => this.#groupWindow(dept, group, window)));
+    const events = uniqueByUid(parts.flatMap((part) => part.value.events));
+    return {
+      department: dept.id,
+      resourceId: group.id,
+      resourceName: group.name,
+      from: windows[0],
+      until: new Date(Date.parse(windows[windows.length - 1]) + WINDOW_WEEKS * WEEK_MS).toISOString().slice(0, 10),
+      now: now.toISOString(),
+      // Le bilan a l'âge de sa part la plus ancienne.
+      fetchedAt: new Date(Math.min(...parts.map((part) => part.storedAt))).toISOString(),
+      subjects: subjectHours(events, now),
+      ...(parts.some((part) => part.stale) ? { stale: true as const } : {}),
+    };
   }
 
   /**
