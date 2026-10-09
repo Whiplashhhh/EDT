@@ -6,6 +6,7 @@ import DayAgenda from './components/DayAgenda.vue';
 import WeekGrid from './components/WeekGrid.vue';
 import FeedbackModal from './components/FeedbackModal.vue';
 import EventDetail from './components/EventDetail.vue';
+import HoursPage from './components/HoursPage.vue';
 import { useSchedule } from './composables/useSchedule.js';
 import { usePush } from './composables/usePush.js';
 import { useInstall } from './composables/useInstall.js';
@@ -102,6 +103,35 @@ function measureVisibleArea() {
 }
 const pickerOpen = ref(false);
 const menuOpen = ref(false);
+
+/*
+ * Bilan des heures de la classe affichée. C'est une page à part entière : elle
+ * prend une entrée dans l'historique, pour que le retour du téléphone ramène à
+ * l'emploi du temps au lieu de quitter l'application — et survit à un
+ * rechargement.
+ */
+const hoursOpen = ref(Boolean(history.state?.hours));
+const hoursAvailable = computed(() => settings.value.kind === 'groups' && Boolean(settings.value.resourceId));
+
+function openHours() {
+  menuOpen.value = false;
+  if (hoursOpen.value) return;
+  history.pushState({ ...history.state, hours: true }, '');
+  hoursOpen.value = true;
+  window.scrollTo(0, 0);
+}
+
+function closeHours() {
+  if (history.state?.hours) history.back();
+  else hoursOpen.value = false;
+}
+
+function onPopState() {
+  hoursOpen.value = Boolean(history.state?.hours);
+}
+
+// Une salle ou un enseignant n'a pas de bilan : on revient à son emploi du temps.
+watch(hoursAvailable, (available) => { if (!available && hoursOpen.value) closeHours(); });
 const now = ref(Date.now());
 
 const {
@@ -343,6 +373,7 @@ onMounted(() => {
     if (document.visibilityState === 'visible') reloadAll(true);
   }, 10 * 60_000);
   document.addEventListener('visibilitychange', onVisible);
+  window.addEventListener('popstate', onPopState);
   measureVisibleArea();
   window.visualViewport?.addEventListener('resize', measureVisibleArea);
   window.visualViewport?.addEventListener('scroll', measureVisibleArea);
@@ -367,6 +398,7 @@ onUnmounted(() => {
   clearTimeout(copiedTimer);
   clearTimeout(shareTimer);
   document.removeEventListener('visibilitychange', onVisible);
+  window.removeEventListener('popstate', onPopState);
   window.visualViewport?.removeEventListener('resize', measureVisibleArea);
   window.visualViewport?.removeEventListener('scroll', measureVisibleArea);
   if ('serviceWorker' in navigator) {
@@ -743,17 +775,21 @@ function onTouchEnd(event) {
 
 function onKeydown(event) {
   if (event.key === 'Escape') {
+    // Une fenêtre ouverte par-dessus se ferme d'abord : la page des heures reste.
+    const overlay = pickerOpen.value || menuOpen.value || shareOpen.value || installGuideOpen.value ||
+      feedbackKind.value || detail.value || identityOpen.value;
     pickerOpen.value = false;
     menuOpen.value = false;
     shareOpen.value = false;
     installGuideOpen.value = false;
     feedbackKind.value = null;
+    if (hoursOpen.value && !overlay) closeHours();
     closeDetail();
     // Tant qu'aucune identité n'est choisie, il n'y a rien derrière à découvrir.
     if (hasIdentity.value) identityOpen.value = false;
     return;
   }
-  if (pickerOpen.value || menuOpen.value || shareOpen.value || identityOpen.value || feedbackKind.value || detail.value) return;
+  if (pickerOpen.value || menuOpen.value || shareOpen.value || identityOpen.value || feedbackKind.value || detail.value || hoursOpen.value) return;
   if (event.key === 'ArrowRight') step(1);
   if (event.key === 'ArrowLeft') step(-1);
   if (event.key.toLowerCase() === 't') focusedDay.value = today();
@@ -855,6 +891,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
       <button type="button" role="menuitem" @click="openPicker('main')">{{ t('app.changeResource') }}</button>
       <button v-if="comparing" type="button" role="menuitem" @click="closeColumn('compare'); menuOpen = false">{{ t('compare.stop') }}</button>
       <button v-else type="button" role="menuitem" @click="openPicker('compare')">{{ t('compare.start') }}</button>
+      <button v-if="hoursAvailable" type="button" role="menuitem" @click="openHours">{{ t('hours.open') }}</button>
       <button type="button" role="menuitem" @click="identityOpen = true">{{ t('app.changeIdentity') }}</button>
       <a v-if="webcalUrl" role="menuitem" :href="webcalUrl">{{ t('app.subscribe') }}</a>
       <button v-if="calendarUrl" type="button" role="menuitem" @click="copyCalendarLink">
@@ -995,7 +1032,14 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     <p v-if="shareToast" class="toast" role="status">{{ t('app.linkCopied') }}</p>
     <button v-if="pendingPrint" type="button" class="toast" @click="sharePendingPrint">{{ t('shared.print') }}</button>
 
-    <main v-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+    <HoursPage
+      v-if="hoursOpen && hasIdentity && hoursAvailable"
+      :department="settings.department"
+      :resource-id="settings.resourceId"
+      :resource-name="settings.resourceName"
+      @close="closeHours"
+    />
+    <main v-else-if="hasIdentity && settings.resourceId" class="main" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
       <div class="view-bar">
         <div class="view-switch segmented" role="group" :aria-label="t('app.display')">
           <button

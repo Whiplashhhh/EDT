@@ -3,6 +3,7 @@ import { parseAdeIcs, type CourseEvent } from './ics.ts';
 import { NO_TEACHER, formatSelection, subjectOf, type SubjectPick } from './subjects.ts';
 import { nameLike, teacherAliases } from './teachers.ts';
 import { TtlCache, type CacheOptions, type Lookup } from '../cache.ts';
+import { WeekArchive } from './archive.ts';
 import type { AppConfig } from '../config.ts';
 import { mondayOf } from '../dates.ts';
 
@@ -115,6 +116,43 @@ export interface Directory {
   entries: DirectoryEntry[];
 }
 
+/** Le temps passé et à venir dans une ressource, en minutes d'ADE. */
+export interface SubjectHours {
+  /** Le code (« R5.A.10 »), ou l'intitulé d'une séance sans code. */
+  name: string;
+  label: string;
+  /** Pas une ressource du programme : un intitulé sans code (« Rentrée BUT 1 »). */
+  free?: true;
+  /** Séances terminées : leur nombre et leur durée. */
+  done: { courses: number; minutes: number };
+  /** Séances en cours ou à venir, dans ce qu'ADE a publié. */
+  planned: { courses: number; minutes: number };
+  /** Les séances elles-mêmes, dans l'ordre : de quoi détailler la ressource. */
+  sessions: HoursSession[];
+}
+
+export interface HoursSession {
+  start: string;
+  end: string;
+  kind: string | null;
+  room: string | null;
+  teachers: string[];
+}
+
+export interface HoursSummary {
+  department: string;
+  resourceId: number;
+  resourceName: string;
+  /** Début de l'année couverte (lundi ISO) et fin de la dernière fenêtre lue (exclue). */
+  from: string;
+  until: string;
+  /** Instant qui sépare le passé de l'à-venir. */
+  now: string;
+  fetchedAt: string;
+  subjects: SubjectHours[];
+  stale?: true;
+}
+
 export interface Schedule {
   department: string;
   kind: ResourceKind;
@@ -181,11 +219,38 @@ export function windowFor(from: string, now = new Date()): string {
   return weeks >= 0 && weeks < WINDOW_WEEKS ? current : from;
 }
 
-/** Les cours d'une fenêtre à partir du lundi `from`, comme si ADE l'avait publiée depuis ce jour-là. */
-function eventsFrom(events: CourseEvent[], window: string, from: string): CourseEvent[] {
-  if (window === from) return events;
-  const start = new Date(parisMidnight(from)).toISOString();
-  return events.filter((event) => event.end > start);
+/** Le lundi `count` semaines après le lundi `week` (ISO `YYYY-MM-DD`). */
+export function addWeeks(week: string, count: number): string {
+  return new Date(Date.parse(week) + count * WEEK_MS).toISOString().slice(0, 10);
+}
+
+/** Les lundis de `from` (inclus) à `to` (exclu). */
+function weeksBetween(from: string, to: string): string[] {
+  const weeks: string[] = [];
+  for (let week = from; week < to; week = addWeeks(week, 1)) weeks.push(week);
+  return weeks;
+}
+
+/** Lundi de la semaine où commence un cours, en heure de Paris. */
+const weekOf = (event: CourseEvent): string => mondayOf(new Date(event.start));
+
+/**
+ * Fenêtres ADE à lire pour couvrir les semaines `needed`, triées. Une semaine
+ * à venir se lit dans la fenêtre alignée sur `anchor` qui la contient — celle
+ * que l'emploi du temps a déjà demandée —, une semaine passée dans une fenêtre
+ * qui commence par elle. Chaque fenêtre couvre douze semaines.
+ */
+export function windowsFor(needed: string[], anchor: string): string[] {
+  const windows: string[] = [];
+  let coveredUntil = '';
+  for (const week of needed) {
+    if (week < coveredUntil) continue;
+    const steps = Math.floor((Date.parse(week) - Date.parse(anchor)) / (WINDOW_WEEKS * WEEK_MS));
+    const window = week >= anchor ? addWeeks(anchor, steps * WINDOW_WEEKS) : week;
+    windows.push(window);
+    coveredUntil = addWeeks(window, WINDOW_WEEKS);
+  }
+  return windows;
 }
 
 /** Le contenu des caches, tel qu'il s'écrit sur disque : chaque cache, ses entrées. */
@@ -402,6 +467,76 @@ function pickName(names: Map<string, number>): string {
   )[0][0];
 }
 
+/**
+ * L'année universitaire qui contient `now`, du 1er août au 1er août suivant
+ * (lundis ISO exclus) : elle bascule au 1er août, heure de Paris.
+ */
+export function schoolYear(now = new Date()): { from: string; to: string } {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' })
+    .formatToParts(now);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  const year = value('month') >= 8 ? value('year') : value('year') - 1;
+  return { from: `${year}-08-01`, to: `${year + 1}-08-01` };
+}
+
+/**
+ * Heures par ressource, de part et d'autre de `now`. Les durées sont celles
+ * d'ADE, pas l'horaire réel recalé sur la grille du département : un créneau
+ * compte pour une heure et demie, pas pour 1 h 25. Une séance compte comme
+ * passée une fois terminée.
+ */
+export function subjectHours(events: CourseEvent[], now: Date): SubjectHours[] {
+  type Tally = {
+    free: boolean;
+    names: Map<string, number>;
+    labels: Map<string, number>;
+    done: { courses: number; minutes: number };
+    planned: { courses: number; minutes: number };
+    sessions: HoursSession[];
+  };
+  const byKey = new Map<string, Tally>();
+  const count = (map: Map<string, number>, name: string) => map.set(name, (map.get(name) ?? 0) + 1);
+  const cut = now.toISOString();
+  for (const event of events) {
+    const subject = subjectOf(event);
+    if (!subject) continue;
+    let entry = byKey.get(subject.key);
+    if (!entry) {
+      entry = {
+        free: Boolean(subject.free),
+        names: new Map(),
+        labels: new Map(),
+        done: { courses: 0, minutes: 0 },
+        planned: { courses: 0, minutes: 0 },
+        sessions: [],
+      };
+      byKey.set(subject.key, entry);
+    }
+    count(entry.names, subject.code);
+    count(entry.labels, subject.label);
+    const side = event.end <= cut ? entry.done : entry.planned;
+    side.courses += 1;
+    side.minutes += Math.max(0, Math.round((Date.parse(event.end) - Date.parse(event.start)) / 60_000));
+    entry.sessions.push({
+      start: event.start,
+      end: event.end,
+      kind: event.kind,
+      room: event.room,
+      teachers: event.teachers,
+    });
+  }
+  return [...byKey.values()]
+    .map((entry) => ({
+      name: pickName(entry.names),
+      label: pickLabel(entry.labels),
+      ...(entry.free ? { free: true as const } : {}),
+      done: entry.done,
+      planned: entry.planned,
+      sessions: entry.sessions.sort((a, b) => a.start.localeCompare(b.start)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
+}
+
 /** Les ressources présentes dans `events`, chacune avec son intitulé et sa charge. */
 function subjectEntries(events: CourseEvent[]): DirectoryEntry[] {
   type Tally = {
@@ -455,6 +590,7 @@ export class AdeService {
   readonly #schedules: TtlCache<Schedule>;
   readonly #aggregates: TtlCache<CourseEvent[]>;
   readonly #directories: TtlCache<Directory>;
+  readonly #archive = new WeekArchive();
 
   constructor(config: AppConfig) {
     this.#config = config;
@@ -492,7 +628,7 @@ export class AdeService {
 
   /** Change dès qu'une donnée d'ADE a été rechargée : il est alors temps de sauvegarder. */
   get revision(): number {
-    return Object.values(this.#persisted()).reduce((sum, cache) => sum + cache.revision, 0);
+    return Object.values(this.#persisted()).reduce((sum, cache) => sum + cache.revision, this.#archive.revision);
   }
 
   /**
@@ -500,12 +636,20 @@ export class AdeService {
    * panne d'ADE garde ainsi de quoi servir, et ne reparcourt pas tout l'arbre.
    */
   snapshot(): CacheSnapshot {
-    return Object.fromEntries(Object.entries(this.#persisted()).map(([name, cache]) => [name, cache.dump()]));
+    // Une année universitaire terminée n'a plus rien à faire sur disque.
+    this.#archive.prune(mondayOf(new Date(`${schoolYear().from}T12:00:00Z`)));
+    return {
+      ...Object.fromEntries(Object.entries(this.#persisted()).map(([name, cache]) => [name, cache.dump()])),
+      archive: this.#archive.dump(),
+    };
   }
 
   restore(snapshot: CacheSnapshot): void {
     for (const [name, cache] of Object.entries(this.#persisted())) {
       for (const [key, value, storedAt] of snapshot[name] ?? []) cache.restore(key, value, storedAt);
+    }
+    for (const [key, value, storedAt] of snapshot.archive ?? []) {
+      this.#archive.restore(key, value as CourseEvent[], storedAt);
     }
   }
 
@@ -629,18 +773,137 @@ export class AdeService {
     const group = await this.findGroup(dept.id, groupId);
 
     const window = windowFor(from);
-    const { value, stale } = await this.#schedules.lookup(`${dept.id}:${groupId}:${window}`, async () => ({
+    const { value, storedAt, stale } = await this.#groupSpan(dept, group, from, addWeeks(window, WINDOW_WEEKS), window);
+    return {
+      department: dept.id,
+      kind: 'groups',
+      resourceId: group.id,
+      resourceName: group.name,
+      from,
+      fetchedAt: new Date(storedAt).toISOString(),
+      events: markLastSessions(value, window, 'groups'),
+      ...(stale ? { stale } : {}),
+    };
+  }
+
+  /** Les cours d'un groupe du lundi `from` au lundi `to` (exclu), archive comprise. */
+  #groupSpan(dept: Composante, group: GroupNode, from: string, to: string, anchor: string, now = new Date()) {
+    return this.#span(
+      `${dept.id}:${group.id}`,
+      async (window) => {
+        const { value, ...rest } = await this.#groupWindow(dept, group, window);
+        return { ...rest, value: value.events };
+      },
+      { from, to, anchor, now },
+    );
+  }
+
+  /**
+   * Les cours d'une source — une classe, une formation — du lundi `from` au
+   * lundi `to` (exclu).
+   *
+   * Les semaines révolues de l'année universitaire viennent de l'archive : un
+   * cours passé ne change plus, on ne le redemande pas à ADE. Une semaine y
+   * entre la première fois qu'on la lit après sa fin, et n'en sort qu'avec son
+   * année. La semaine en cours et la suite se lisent dans ADE, par fenêtres de
+   * douze semaines alignées sur `anchor` — mieux vaut celle de l'emploi du
+   * temps, que le cache a déjà.
+   */
+  async #span(
+    source: string,
+    fetchWindow: (window: string) => Promise<Lookup<CourseEvent[]>>,
+    range: { from: string; to: string; anchor: string; now: Date },
+  ): Promise<Lookup<CourseEvent[]>> {
+    const { from, to, now } = range;
+    const current = mondayOf(now);
+    const yearStart = mondayOf(new Date(`${schoolYear(now).from}T12:00:00Z`));
+    const anchor = range.anchor > current ? range.anchor : current;
+    // Une semaine se fige une fois finie, et seulement dans l'année en cours.
+    const freezable = (week: string) => week < current && week >= yearStart;
+
+    const weeks = weeksBetween(from, to);
+    const archived = new Map<string, CourseEvent[]>();
+    for (const week of weeks) {
+      const events = freezable(week) ? this.#archive.get(source, week) : undefined;
+      if (events) archived.set(week, events);
+    }
+    const needed = weeks.filter((week) => !archived.has(week));
+    const reads = await Promise.all(windowsFor(needed, anchor).map((window) => fetchWindow(window).then((read) => ({ window, read }))));
+
+    for (const { window, read } of reads) {
+      const covered = new Set(weeksBetween(window, addWeeks(window, WINDOW_WEEKS)));
+      for (const week of needed) {
+        // Une lecture faite avant la fin de la semaine — un secours, quand ADE
+        // ne répond pas — n'en dit pas le dernier état : on ne la fige pas.
+        if (!covered.has(week) || !freezable(week) || read.storedAt < parisMidnight(addWeeks(week, 1))) continue;
+        this.#archive.set(source, week, read.value.filter((event) => weekOf(event) === week), read.storedAt);
+      }
+    }
+
+    const [start, end] = [parisMidnight(from), parisMidnight(to)];
+    const events = uniqueByUid([...[...archived.values()].flat(), ...reads.flatMap(({ read }) => read.value)])
+      .filter((event) => {
+        const at = Date.parse(event.start);
+        return at >= start && at < end;
+      });
+    return {
+      value: events,
+      // Ce qui vient de l'archive est définitif : seul l'âge de ce qu'on a lu compte.
+      storedAt: reads.length ? Math.min(...reads.map(({ read }) => read.storedAt)) : now.getTime(),
+      stale: reads.some(({ read }) => read.stale),
+    };
+  }
+
+  /** Les cours d'un groupe sur la fenêtre de douze semaines qui commence le lundi `window`. */
+  #groupWindow(dept: Composante, group: GroupNode, window: string): Promise<Lookup<Schedule>> {
+    return this.#schedules.lookup(`${dept.id}:${group.id}:${window}`, async () => ({
       department: dept.id,
       kind: 'groups' as const,
-      resourceId: groupId,
+      resourceId: group.id,
       resourceName: group.name,
       from: window,
       fetchedAt: new Date().toISOString(),
       events: await this.#gather(dept, group, window),
     }));
-    const events = markLastSessions(eventsFrom(value.events, window, from), window, 'groups');
-    const schedule = { ...value, from, events };
-    return stale ? { ...schedule, stale } : schedule;
+  }
+
+  /**
+   * Bilan des heures d'un groupe sur l'année universitaire : par ressource, ce
+   * qui est passé et ce qu'ADE a déjà publié pour la suite. Il faut pour cela
+   * toute l'année, et non la seule fenêtre en cours : le passé vient de
+   * l'archive, la suite de fenêtres alignées sur celle de l'emploi du temps.
+   */
+  async hours(departmentId: string, groupId: number, now = new Date()): Promise<HoursSummary> {
+    const dept = await this.#department(departmentId);
+    const group = await this.findGroup(dept.id, groupId);
+    const year = schoolYear(now);
+    const monday = (iso: string) => mondayOf(new Date(`${iso}T12:00:00Z`));
+    const { value, storedAt, stale } = await this.#groupSpan(
+      dept,
+      group,
+      monday(year.from),
+      addWeeks(monday(year.to), 1),
+      mondayOf(now),
+      now,
+    );
+    // Rien d'une autre année universitaire, même si ADE en publiait : un
+    // rattrapage de juillet ne compte pas dans l'année qui commence.
+    const [yearStart, yearEnd] = [parisMidnight(year.from), parisMidnight(year.to)];
+    const events = value.filter((event) => {
+      const start = Date.parse(event.start);
+      return start >= yearStart && start < yearEnd;
+    });
+    return {
+      department: dept.id,
+      resourceId: group.id,
+      resourceName: group.name,
+      from: year.from,
+      until: year.to,
+      now: now.toISOString(),
+      fetchedAt: new Date(storedAt).toISOString(),
+      subjects: subjectHours(events, now),
+      ...(stale ? { stale: true as const } : {}),
+    };
   }
 
   /**
@@ -702,6 +965,25 @@ export class AdeService {
       const catalog = await this.catalog(dept.id);
       return this.#gather(dept, { id: dept.node.id, children: catalog.groups }, from);
     });
+  }
+
+  /**
+   * Tous les cours de la formation — ou de toutes — du lundi `from` au lundi
+   * `to` (exclu), les semaines révolues tirées de l'archive (voir `#span`).
+   * Chaque formation s'archive à part : c'est à leur échelle qu'ADE se lit.
+   */
+  async #allSpan(departmentId: string, from: string, to: string, anchor: string): Promise<Lookup<CourseEvent[]>> {
+    const now = new Date();
+    const perDepartment = await Promise.all(
+      (await this.#departmentIds(departmentId)).map((id) =>
+        this.#span(`${id}:*`, (window) => this.#allEvents(id, window), { from, to, anchor, now }),
+      ),
+    );
+    return {
+      value: uniqueByUid(perDepartment.flatMap((d) => d.value)),
+      storedAt: Math.min(...perDepartment.map((d) => d.storedAt)),
+      stale: perDepartment.some((d) => d.stale),
+    };
   }
 
   /** Ville de chaque formation, pour situer les salles. */
@@ -810,8 +1092,7 @@ export class AdeService {
     const cities = kind === 'rooms' ? await this.#cities() : new Map<string, string>();
 
     const window = windowFor(from);
-    const { value: all, storedAt, stale } = await this.#allEvents(departmentId, window);
-    const events = eventsFrom(all, window, from);
+    const { value: events, storedAt, stale } = await this.#allSpan(departmentId, from, addWeeks(window, WINDOW_WEEKS), window);
     const matches = events.filter((event) => {
       if (kind === 'rooms') {
         const city = cities.get(event.department ?? '') ?? OTHER_CITY;

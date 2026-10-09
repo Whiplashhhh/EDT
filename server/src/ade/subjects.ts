@@ -68,6 +68,8 @@ export interface Subject {
   key: string;
   /** Ce que l'intitulé dit de la matière, ex. « Dev » — vide quand il ne dit rien. */
   label: string;
+  /** Aucun code dans l'intitulé : « Rentrée BUT 1 », « Anglais » d'une licence. */
+  free?: true;
 }
 
 /**
@@ -81,7 +83,7 @@ export function subjectOf(event: Pick<CourseEvent, 'title' | 'subject'>): Subjec
   if (!m) {
     const name = clean(FREE_NOISE.reduce((text, re) => text.replace(re, ' '), (event.subject || title).trim()));
     const key = foldName(name);
-    return key ? { code: name, key, label: '' } : null;
+    return key ? { code: name, key, label: '', free: true } : null;
   }
   const raw = m[1] ? `${m[1]}${m[2]}` : `SAE${m[4]}`;
   // « R1-01 » et « R1.01 » sont la même ressource ; un type collé n'en fait pas partie.

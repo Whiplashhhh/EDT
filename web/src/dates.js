@@ -56,6 +56,7 @@ const fmt = computed(() => ({
   dayLong: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' }),
   dayShort: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'short' }),
   dayMonth: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, day: 'numeric', month: 'long' }),
+  dayDate: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' }),
   month: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long' }),
   monthYear: new Intl.DateTimeFormat(tag.value, { timeZone: TZ, month: 'long', year: 'numeric' }),
 }));
@@ -71,6 +72,8 @@ export const formatDayLong = (iso) => fmt.value.dayLong.format(new Date(`${iso}T
 export const formatDayShort = (iso) => fmt.value.dayShort.format(new Date(`${iso}T12:00:00Z`)).replace('.', '');
 /** Jour et mois d'un instant ISO : « 28 décembre ». */
 export const formatDayMonth = (iso) => fmt.value.dayMonth.format(new Date(iso));
+/** Jour abrégé d'un instant ISO : « ven. 9 oct. ». */
+export const formatDayDate = (iso) => fmt.value.dayDate.format(new Date(iso));
 export const dayNumber = (iso) => Number(iso.slice(8, 10));
 /** Heure d'un instant ISO, précédée de sa date s'il n'est pas d'aujourd'hui : « 14:32 », « 3 octobre, 14:32 ». */
 export const formatStamp = (iso) =>

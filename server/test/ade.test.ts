@@ -4,7 +4,8 @@ import { encodeGwtLong, parisMidnight } from '../src/ade/gwt.ts';
 import { parseAdeIcs, type CourseEvent } from '../src/ade/ics.ts';
 import { formatSelection, parseSelection, subjectOf } from '../src/ade/subjects.ts';
 import { mondayOf } from '../src/routes/api.ts';
-import { decodeAdeName, markLastSessions, slugOf, windowFor } from '../src/ade/service.ts';
+import { decodeAdeName, markLastSessions, schoolYear, slugOf, subjectHours, windowFor, windowsFor } from '../src/ade/service.ts';
+import { WeekArchive } from '../src/ade/archive.ts';
 import { TtlCache } from '../src/cache.ts';
 
 test('encodeGwtLong reproduit l’encodage observé du client ADE', () => {
@@ -267,7 +268,7 @@ test('subjectOf réunit les séances d’une ressource sous un même code', () =
   // « CC1 » est une matière des GEII, pas un contrôle continu.
   assert.deepEqual(of('R3.02 CC3 - TP4'), { code: 'R3.02', key: 'R3.02', label: 'CC3' });
   // Sans code, l'intitulé lui-même fait office de ressource.
-  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', key: 'portfolio', label: '' });
+  assert.deepEqual(of('PORTFOLIO - TP2'), { code: 'PORTFOLIO', key: 'portfolio', label: '', free: true });
   // Un type de séance n'est pas un code.
   assert.equal(of('TP2')?.code, undefined);
 });
@@ -333,4 +334,62 @@ test('slugOf garde aux départements d’IUT l’identifiant qu’ils avaient', 
   const long = slugOf('LP ASSURANCE BANQUE FINANCE : CHARGE DE CLIENTELE');
   assert.match(long, /^[a-z0-9][a-z0-9-]{0,31}$/);
   assert.ok(!long.endsWith('-'));
+});
+
+test('schoolYear bascule au 1er août, heure de Paris', () => {
+  assert.deepEqual(schoolYear(new Date('2026-10-09T10:00:00Z')), { from: '2026-08-01', to: '2027-08-01' });
+  assert.deepEqual(schoolYear(new Date('2027-03-15T10:00:00Z')), { from: '2026-08-01', to: '2027-08-01' });
+  assert.equal(schoolYear(new Date('2027-07-31T22:30:00Z')).from, '2027-08-01');
+  assert.equal(schoolYear(new Date('2027-07-31T21:30:00Z')).from, '2026-08-01');
+});
+
+test('windowsFor lit la suite dans les fenêtres de l’emploi du temps, le passé à partir de sa première semaine', () => {
+  const anchor = '2026-10-05';
+  // Rien de passé à relire : la fenêtre en cours, puis celles qui la suivent.
+  assert.deepEqual(windowsFor(['2026-10-05', '2026-10-12', '2027-01-04'], anchor), ['2026-10-05', '2026-12-28']);
+  // Deux semaines passées absentes de l'archive : une fenêtre à partir de la première les couvre, et la suite avec.
+  assert.deepEqual(windowsFor(['2026-09-14', '2026-09-21', '2026-10-05', '2026-11-30'], anchor), ['2026-09-14']);
+  // Au-delà de ses douze semaines, la suite reprend dans la fenêtre de l'emploi du temps.
+  assert.deepEqual(windowsFor(['2026-09-14', '2026-12-07'], anchor), ['2026-09-14', '2026-10-05']);
+  assert.deepEqual(windowsFor([], anchor), []);
+});
+
+test('WeekArchive garde les semaines, vides comprises, et oublie les années terminées', () => {
+  const archive = new WeekArchive();
+  archive.set('iut-info:2349', '2026-09-14', []);
+  archive.set('iut-info:2349', '2025-09-15', []);
+  assert.deepEqual(archive.get('iut-info:2349', '2026-09-14'), []);
+  assert.equal(archive.get('iut-info:2349', '2026-09-21'), undefined);
+  archive.prune('2026-07-27');
+  assert.equal(archive.get('iut-info:2349', '2025-09-15'), undefined);
+  // Ce qui s'écrit sur disque se relit tel quel.
+  const copy = new WeekArchive();
+  for (const [key, value, storedAt] of archive.dump()) copy.restore(key, value, storedAt);
+  assert.deepEqual(copy.get('iut-info:2349', '2026-09-14'), []);
+});
+
+test('subjectHours compte les heures ADE passées et à venir par ressource', () => {
+  const course = (uid: string, title: string, start: string, end: string): CourseEvent => ({
+    uid, title, subject: title, kind: null, room: null, teachers: [], groups: [], notes: [], start, end,
+  });
+  const hours = subjectHours([
+    // Un créneau ADE d'une heure et demie compte pour 90 minutes, pas pour l'horaire réel (1 h 25).
+    course('1', 'R5.A.10 Paradigmes BDD', '2026-10-05T08:00:00Z', '2026-10-05T09:30:00Z'),
+    course('2', 'R5.A.10 Paradigmes BDD TD', '2026-10-09T08:00:00Z', '2026-10-09T09:30:00Z'),
+    course('3', 'R5-A-10 Paradigmes BDD', '2026-10-12T08:00:00Z', '2026-10-12T09:30:00Z'),
+    course('4', 'R5.A.04 Qualité Algo', '2026-10-06T12:00:00Z', '2026-10-06T15:00:00Z'),
+    course('5', 'Rentrée BUT3 APP', '2026-09-01T07:00:00Z', '2026-09-01T08:00:00Z'),
+  ], new Date('2026-10-09T09:00:00Z'));
+  // Le cours en cours n'est pas encore passé.
+  assert.deepEqual(hours.map(({ sessions, ...rest }) => ({ ...rest, sessions: sessions.length })), [
+    { name: 'R5.A.04', label: 'Qualité Algo', done: { courses: 1, minutes: 180 }, planned: { courses: 0, minutes: 0 }, sessions: 1 },
+    { name: 'R5.A.10', label: 'Paradigmes BDD', done: { courses: 1, minutes: 90 }, planned: { courses: 2, minutes: 180 }, sessions: 3 },
+    { name: 'Rentrée BUT3 APP', label: '', free: true, done: { courses: 1, minutes: 60 }, planned: { courses: 0, minutes: 0 }, sessions: 1 },
+  ]);
+  // Les séances d'une ressource se lisent dans l'ordre, de quoi la détailler.
+  assert.deepEqual(hours[1].sessions.map((session) => session.start), [
+    '2026-10-05T08:00:00Z',
+    '2026-10-09T08:00:00Z',
+    '2026-10-12T08:00:00Z',
+  ]);
 });
