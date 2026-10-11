@@ -374,3 +374,7 @@ plusieurs répliques enverraient chacune leur copie de la même notification.
   (`PUSH_POLL_MS`, cinq minutes par défaut) ni que le cache d'ADE.
 - iOS n'accepte les notifications push que si l'application a été ajoutée à l'écran
   d'accueil (iOS 16.4 ou plus récent). Dans Safari, l'interrupteur restera sans effet.
+
+## Licence
+
+Projet distribué sous licence MIT — voir le fichier [LICENSE](LICENSE).

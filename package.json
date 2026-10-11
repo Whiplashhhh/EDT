@@ -1,6 +1,7 @@
 {
   "name": "edt-ulco",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "workspaces": ["server", "web"],
   "engines": { "node": ">=22" },
