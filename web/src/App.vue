@@ -1198,6 +1198,33 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
     <div v-if="identityOpen" class="gate" :class="{ blocking: !hasIdentity }" :style="visibleArea">
       <div v-if="hasIdentity" class="gate-backdrop" @click="identityOpen = false"></div>
       <div class="gate-card" role="dialog" aria-modal="true" :aria-label="t('gate.title')">
+        <!--
+          Langue et thème se règlent avant de choisir sa classe : sans
+          identité, le menu d'options n'existe pas encore.
+        -->
+        <div v-if="!hasIdentity" class="gate-prefs">
+          <select
+            class="select"
+            :aria-label="t('app.language')"
+            :value="settings.lang"
+            @change="setLang($event.target.value)"
+          >
+            <optgroup v-for="group in localeGroups" :key="group.region" :label="t(`lang.${group.region}`)">
+              <option v-for="option in group.locales" :key="option.id" :value="option.id">{{ option.label }}</option>
+            </optgroup>
+          </select>
+          <div class="segmented" role="group" :aria-label="t('app.theme')">
+            <button
+              v-for="mode in THEMES"
+              :key="mode"
+              type="button"
+              :class="{ on: settings.theme === mode }"
+              :aria-pressed="settings.theme === mode"
+              @click="setTheme(mode)"
+            >{{ t(`app.theme${mode[0].toUpperCase()}${mode.slice(1)}`) }}</button>
+          </div>
+        </div>
+
         <div class="gate-head">
           <div>
             <h1 class="gate-title">{{ t('gate.title') }}</h1>
@@ -1580,6 +1607,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
 }
 
+.gate-prefs { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .gate-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 .gate-title { margin: 0 0 0.2rem; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
 .gate-intro + .gate-intro { margin-top: 0.35rem; }
@@ -1624,6 +1652,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
  * descendrait sous le doigt et le toucher tomberait à côté.
  */
 @media (pointer: coarse) {
+  .gate-card:has(input:is(:focus, :not(:placeholder-shown))) .gate-prefs,
   .gate-card:has(input:is(:focus, :not(:placeholder-shown))) .gate-intro,
   .gate-card:has(input:is(:focus, :not(:placeholder-shown))) .gate-why,
   .gate-card:has(input:is(:focus, :not(:placeholder-shown))) :deep(.hint) { display: none; }
