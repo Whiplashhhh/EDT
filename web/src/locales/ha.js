@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Zaɓi ajinka',
   'app.today': 'Yau',
   'app.todayBadge': 'yau',
+  'app.nextCourses': 'Darussa masu zuwa',
   'app.options': 'Zaɓuɓɓuka',
   'app.viewWeek': 'Kallon mako',
   'app.viewDay': 'Kallon rana',

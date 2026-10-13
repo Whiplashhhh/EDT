@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Kurs auswählen',
   'app.today': 'Heute',
   'app.todayBadge': 'heute',
+  'app.nextCourses': 'Nächste Kurse',
   'app.options': 'Optionen',
   'app.viewWeek': 'Wochenansicht',
   'app.viewDay': 'Tagesansicht',

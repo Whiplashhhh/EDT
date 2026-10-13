@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Избери своята група',
   'app.today': 'Днес',
   'app.todayBadge': 'днес',
+  'app.nextCourses': 'Следващи занятия',
   'app.options': 'Настройки',
   'app.viewWeek': 'Седмичен изглед',
   'app.viewDay': 'Дневен изглед',

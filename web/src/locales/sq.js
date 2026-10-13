@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Zgjidh grupin tënd',
   'app.today': 'Sot',
   'app.todayBadge': 'sot',
+  'app.nextCourses': 'Mësimet e ardhshme',
   'app.options': 'Opsionet',
   'app.viewWeek': 'Pamja javore',
   'app.viewDay': 'Pamja ditore',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Dooro fasalkaaga',
   'app.today': 'Maanta',
   'app.todayBadge': 'maanta',
+  'app.nextCourses': 'Casharrada soo socda',
   'app.options': 'Doorashooyin',
   'app.viewWeek': 'Muuqaalka toddobaadka',
   'app.viewDay': 'Muuqaalka maalinta',

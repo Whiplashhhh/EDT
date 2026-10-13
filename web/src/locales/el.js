@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Διάλεξε το τμήμα σου',
   'app.today': 'Σήμερα',
   'app.todayBadge': 'σήμερα',
+  'app.nextCourses': 'Επόμενα μαθήματα',
   'app.options': 'Επιλογές',
   'app.viewWeek': 'Εβδομαδιαία προβολή',
   'app.viewDay': 'Ημερήσια προβολή',

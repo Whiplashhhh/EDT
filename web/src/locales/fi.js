@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Valitse ryhmäsi',
   'app.today': 'Tänään',
   'app.todayBadge': 'tänään',
+  'app.nextCourses': 'Seuraavat tunnit',
   'app.options': 'Asetukset',
   'app.viewWeek': 'Viikkonäkymä',
   'app.viewDay': 'Päivänäkymä',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': '반 선택',
   'app.today': '오늘',
   'app.todayBadge': '오늘',
+  'app.nextCourses': '다음 수업',
   'app.options': '옵션',
   'app.viewWeek': '주간 보기',
   'app.viewDay': '일간 보기',

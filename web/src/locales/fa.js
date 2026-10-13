@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'کلاست را انتخاب کن',
   'app.today': 'امروز',
   'app.todayBadge': 'امروز',
+  'app.nextCourses': 'کلاس‌های بعدی',
   'app.options': 'گزینه‌ها',
   'app.viewWeek': 'نمای هفتگی',
   'app.viewDay': 'نمای روزانه',

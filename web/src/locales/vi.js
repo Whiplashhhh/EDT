@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Chọn lớp của bạn',
   'app.today': 'Hôm nay',
   'app.todayBadge': 'hôm nay',
+  'app.nextCourses': 'Các buổi học tiếp theo',
   'app.options': 'Tuỳ chọn',
   'app.viewWeek': 'Xem theo tuần',
   'app.viewDay': 'Xem theo ngày',

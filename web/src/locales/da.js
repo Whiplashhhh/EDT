@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Vælg dit hold',
   'app.today': 'I dag',
   'app.todayBadge': 'i dag',
+  'app.nextCourses': 'Næste timer',
   'app.options': 'Indstillinger',
   'app.viewWeek': 'Ugevisning',
   'app.viewDay': 'Dagsvisning',

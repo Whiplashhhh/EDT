@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'اختر فوجك',
   'app.today': 'اليوم',
   'app.todayBadge': 'اليوم',
+  'app.nextCourses': 'الحصص القادمة',
   'app.options': 'الخيارات',
   'app.viewWeek': 'عرض أسبوعي',
   'app.viewDay': 'عرض يومي',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Chagua kikundi chako',
   'app.today': 'Leo',
   'app.todayBadge': 'leo',
+  'app.nextCourses': 'Madarasa yajayo',
   'app.options': 'Mipangilio',
   'app.viewWeek': 'Mwonekano wa wiki',
   'app.viewDay': 'Mwonekano wa siku',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Pilih kelas anda',
   'app.today': 'Hari ini',
   'app.todayBadge': 'hari ini',
+  'app.nextCourses': 'Kelas seterusnya',
   'app.options': 'Pilihan',
   'app.viewWeek': 'Paparan mingguan',
   'app.viewDay': 'Paparan harian',

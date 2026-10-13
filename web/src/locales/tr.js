@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Sınıfını seç',
   'app.today': 'Bugün',
   'app.todayBadge': 'bugün',
+  'app.nextCourses': 'Sonraki dersler',
   'app.options': 'Seçenekler',
   'app.viewWeek': 'Hafta görünümü',
   'app.viewDay': 'Gün görünümü',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': '選擇班級',
   'app.today': '今天',
   'app.todayBadge': '今天',
+  'app.nextCourses': '接下來的課程',
   'app.options': '選項',
   'app.viewWeek': '週檢視',
   'app.viewDay': '日檢視',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Odaberi svoju grupu',
   'app.today': 'Danas',
   'app.todayBadge': 'danas',
+  'app.nextCourses': 'Sljedeća predavanja',
   'app.options': 'Postavke',
   'app.viewWeek': 'Tjedni prikaz',
   'app.viewDay': 'Dnevni prikaz',

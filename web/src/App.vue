@@ -291,14 +291,28 @@ function setLang(lang) {
  */
 // Un jour demandé par une notification est un choix explicite : on n'en bouge pas.
 let jumped = Boolean(requestedDay);
+/** Le jour où le saut a atterri : on y signale qu'on n'est pas sur aujourd'hui. */
+const jumpedTo = ref(null);
 watch(eventsByDay, (map) => {
   if (jumped || map.size === 0 || focusedDay.value !== today()) return;
   jumped = true;
   if (map.get(focusedDay.value)?.length) return;
   for (let i = 1; i <= 10; i += 1) {
     const day = addDays(today(), i);
-    if (map.get(day)?.length) { focusedDay.value = day; return; }
+    if (map.get(day)?.length) { focusedDay.value = day; jumpedTo.value = day; return; }
   }
+});
+
+/*
+ * On s'attend à voir aujourd'hui, ou la semaine en cours : quand le saut nous
+ * a menés ailleurs, une mention au-dessus de la journée dit que ce sont les
+ * prochains cours. En vue semaine, elle ne sert que si la semaine affichée
+ * n'est pas celle d'aujourd'hui.
+ */
+const showingNextCourses = computed(() => {
+  if (!jumpedTo.value) return false;
+  if (settings.value.view === 'day') return focusedDay.value === jumpedTo.value;
+  return mondayOf(focusedDay.value) === mondayOf(jumpedTo.value) && mondayOf(jumpedTo.value) !== mondayOf(today());
 });
 
 const dayEvents = computed(() => eventsByDay.value.get(focusedDay.value) || []);
@@ -1085,6 +1099,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 
       <Transition :name="slideName" mode="out-in">
         <div :key="viewKey" class="view">
+          <p v-if="showingNextCourses" class="next-courses">{{ t('app.nextCourses') }}</p>
           <template v-if="settings.view === 'day'">
             <!-- Le partage se tient sur la ligne de la date : c'est ce jour-là qu'on montre. -->
             <h2 class="day-title">
@@ -1762,6 +1777,15 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
 }
 .compare-close:hover { background: var(--bg-elevated); color: var(--danger); }
 
+/* Même registre que l'étiquette « reçu » des liens : une ligne discrète, au-dessus de la date. */
+.next-courses {
+  margin: 0.35rem 0.85rem -0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
 .day-title::first-letter { text-transform: uppercase; }
 .day-title .share-icon { margin-inline-start: auto; width: 2rem; height: 2rem; }
 

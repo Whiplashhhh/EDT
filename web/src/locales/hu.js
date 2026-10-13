@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Válaszd ki a csoportodat',
   'app.today': 'Ma',
   'app.todayBadge': 'ma',
+  'app.nextCourses': 'Következő órák',
   'app.options': 'Beállítások',
   'app.viewWeek': 'Heti nézet',
   'app.viewDay': 'Napi nézet',

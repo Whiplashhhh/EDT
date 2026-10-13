@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'ክፍልህን ምረጥ',
   'app.today': 'ዛሬ',
   'app.todayBadge': 'ዛሬ',
+  'app.nextCourses': 'ቀጣይ ክፍሎች',
   'app.options': 'አማራጮች',
   'app.viewWeek': 'የሳምንት እይታ',
   'app.viewDay': 'የቀን እይታ',

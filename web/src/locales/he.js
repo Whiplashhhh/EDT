@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'בחר את הכיתה שלך',
   'app.today': 'היום',
   'app.todayBadge': 'היום',
+  'app.nextCourses': 'השיעורים הבאים',
   'app.options': 'אפשרויות',
   'app.viewWeek': 'תצוגת שבוע',
   'app.viewDay': 'תצוגת יום',

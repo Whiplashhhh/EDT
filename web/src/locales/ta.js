@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'உங்கள் வகுப்பைத் தேர்வுசெய்க',
   'app.today': 'இன்று',
   'app.todayBadge': 'இன்று',
+  'app.nextCourses': 'அடுத்த வகுப்புகள்',
   'app.options': 'விருப்பங்கள்',
   'app.viewWeek': 'வார காட்சி',
   'app.viewDay': 'நாள் காட்சி',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Piliin ang iyong klase',
   'app.today': 'Ngayon',
   'app.todayBadge': 'ngayon',
+  'app.nextCourses': 'Susunod na klase',
   'app.options': 'Mga opsyon',
   'app.viewWeek': 'Lingguhang tanaw',
   'app.viewDay': 'Pang-araw na tanaw',

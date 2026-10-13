@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Alege-ți grupa',
   'app.today': 'Azi',
   'app.todayBadge': 'azi',
+  'app.nextCourses': 'Următoarele cursuri',
   'app.options': 'Opțiuni',
   'app.viewWeek': 'Vizualizare săptămână',
   'app.viewDay': 'Vizualizare zi',

@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Kies je klas',
   'app.today': 'Vandaag',
   'app.todayBadge': 'vandaag',
+  'app.nextCourses': 'Volgende lessen',
   'app.options': 'Opties',
   'app.viewWeek': 'Weekweergave',
   'app.viewDay': 'Dagweergave',

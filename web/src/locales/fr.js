@@ -7,6 +7,7 @@ export default {
   'app.pickResource': 'Choisir sa classe',
   'app.today': 'Aujourd’hui',
   'app.todayBadge': 'aujourd’hui',
+  'app.nextCourses': 'Prochains cours',
   'app.options': 'Options',
   'app.viewWeek': 'Vue semaine',
   'app.viewDay': 'Vue jour',
