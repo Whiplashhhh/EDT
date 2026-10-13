@@ -165,7 +165,8 @@ if (config.push.enabled) {
 // En production, le serveur sert aussi le front compilé (web/dist).
 const distDir = fileURLToPath(new URL('../../web/dist', import.meta.url));
 if (existsSync(distDir)) {
-  await app.register(fastifyStatic, { root: distDir, index: ['index.html'], cacheControl: false });
+  // `redirect` : /emploi-du-temps-ulco devient /emploi-du-temps-ulco/ au lieu de tomber sur l'application.
+  await app.register(fastifyStatic, { root: distDir, index: ['index.html'], cacheControl: false, redirect: true });
 
   // Les fichiers d'`assets` portent une empreinte dans leur nom : cache long.
   // `index.html` et le service worker doivent rester frais, sinon une mise à jour

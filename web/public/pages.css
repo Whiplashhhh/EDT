@@ -1,0 +1,57 @@
+/* Pages de présentation (hors application) : mêmes teintes que l'appli, thème du système. */
+:root {
+  --bg: #f6f7f9;
+  --text: #14171c;
+  --muted: #566070;
+  --accent: #1f64d6;
+  --line: #d9dde4;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --text: #eef1f6;
+    --muted: #9aa3b2;
+    --accent: #5b9bff;
+    --line: #262b35;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+a { color: var(--accent); }
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.brand { color: var(--text); font-weight: 700; text-decoration: none; }
+main, footer { max-width: 46rem; margin: 0 auto; padding: 0 1rem; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 2rem 0 1rem; }
+h2 { font-size: 1.3rem; margin: 2rem 0 .5rem; }
+h3 { font-size: 1.05rem; margin: 1.25rem 0 .25rem; }
+li { margin: .25rem 0; }
+.button {
+  display: inline-block;
+  padding: .7rem 1.2rem;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+footer {
+  margin-top: 3rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .9rem;
+}

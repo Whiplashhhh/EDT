@@ -296,6 +296,20 @@ invisible qui écarte les robots sans captcha, des longueurs bornées (objet 120
 message 4 000 caractères), un courriel en texte brut et des champs d'une ligne
 débarrassés des retours à la ligne, ce qui empêche d'injecter des en-têtes.
 
+## Référencement
+
+L'application est une page unique rendue côté navigateur : seule, elle ne dit rien aux
+moteurs de recherche. Ce qui les renseigne, sans rien changer à l'écran :
+
+- `web/index.html` : titre, description, `canonical` et données structurées (JSON-LD) ; le
+  `<noscript>` porte les liens vers les pages ci-dessous. Les `og:` ne bougent pas : ce sont
+  eux que WhatsApp affiche, et une page partagée garde son propre aperçu.
+- `web/public/emploi-du-temps-ulco*/index.html` : une page de présentation pour toute
+  l'ULCO et une par campus. Du HTML statique, sans le script de l'application, servi par le
+  même serveur (`redirect: true` dans `index.ts` pour les adresses sans `/` final).
+  Leur style est dans `pages.css` : la CSP interdit les styles en ligne.
+- `robots.txt` et `sitemap.xml`. Une page ajoutée doit aussi l'être au sitemap.
+
 ## Sécurité
 
 Choix faits pour que l'application puisse être exposée publiquement :

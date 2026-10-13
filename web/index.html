@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
-    <meta name="description" content="Une façon plus claire de consulter l'emploi du temps de l'ULCO." />
+    <meta name="description" content="EDT ULCO : l'emploi du temps de l'Université du Littoral Côte d'Opale (Calais, Dunkerque, Boulogne, Saint-Omer). Sans compte, rapide, installable, hors ligne." />
+    <link rel="canonical" href="https://edt-iut.online/" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="EDT" />
@@ -23,10 +24,46 @@
     <meta property="og:image:height" content="512" />
     <meta property="og:image:alt" content="Icône de l'application EDT ULCO : un calendrier bleu" />
     <meta name="twitter:card" content="summary" />
-    <title>EDT ULCO</title>
+    <title>EDT ULCO – Emploi du temps de l'Université du Littoral Côte d'Opale</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://edt-iut.online/#site",
+            "url": "https://edt-iut.online/",
+            "name": "EDT ULCO",
+            "alternateName": ["Emploi du temps ULCO", "EDT Université du Littoral Côte d'Opale"],
+            "inLanguage": "fr"
+          },
+          {
+            "@type": "WebApplication",
+            "name": "EDT ULCO",
+            "url": "https://edt-iut.online/",
+            "description": "Emploi du temps de l'Université du Littoral Côte d'Opale (ULCO) à Calais, Dunkerque, Boulogne-sur-Mer et Saint-Omer.",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web, Android, iOS",
+            "inLanguage": "fr",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <h1>EDT ULCO – Emploi du temps de l'Université du Littoral Côte d'Opale</h1>
+      <p>EDT ULCO affiche l'emploi du temps de l'ULCO à Calais, Dunkerque, Boulogne-sur-Mer et Saint-Omer. Cette application a besoin de JavaScript.</p>
+      <ul>
+        <li><a href="/emploi-du-temps-ulco/">Emploi du temps ULCO</a></li>
+        <li><a href="/emploi-du-temps-ulco-calais/">Emploi du temps ULCO Calais</a></li>
+        <li><a href="/emploi-du-temps-ulco-dunkerque/">Emploi du temps ULCO Dunkerque</a></li>
+        <li><a href="/emploi-du-temps-ulco-boulogne-sur-mer/">Emploi du temps ULCO Boulogne-sur-Mer</a></li>
+        <li><a href="/emploi-du-temps-ulco-saint-omer/">Emploi du temps ULCO Saint-Omer</a></li>
+      </ul>
+    </noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
