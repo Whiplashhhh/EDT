@@ -64,6 +64,19 @@ export interface FeedbackConfig {
   smtp: { host: string; port: number; secure: boolean; user: string; pass: string };
 }
 
+/**
+ * Changement d'adresse du site. L'ancien nom de domaine reste branché sur le
+ * même serveur : ses pages renvoient vers la nouvelle adresse, et ses flux
+ * iCalendar, que les agendas abonnés suivent mal d'un domaine à l'autre,
+ * continuent d'être servis avec un avertissement.
+ */
+export interface MoveConfig {
+  /** Anciens noms de domaine (`edt-ulco.fr`). */
+  from: string[];
+  /** Nouvelle adresse, sans barre finale (`https://edt-ulco.fr`). */
+  to: string;
+}
+
 export interface AppConfig {
   host: string;
   port: number;
@@ -94,6 +107,8 @@ export interface AppConfig {
   crousTtlMs: number;
   push: PushConfig;
   feedback: FeedbackConfig;
+  /** `null` tant que le site n'a pas changé d'adresse. */
+  move: MoveConfig | null;
 }
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -212,6 +227,20 @@ function readFeedbackConfig(): FeedbackConfig {
   };
 }
 
+/** Les deux variables vont ensemble, comme pour VAPID et le SMTP. */
+function readMoveConfig(): MoveConfig | null {
+  const from = (process.env.OLD_HOSTS ?? '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  const to = (process.env.PUBLIC_URL ?? '').replace(/\/+$/, '');
+  if (!from.length && !to) return null;
+  if (!from.length || !/^https:\/\/[^/]+$/.test(to)) {
+    throw new Error('Changement d’adresse : OLD_HOSTS et PUBLIC_URL (https://domaine, sans chemin) vont ensemble');
+  }
+  return { from, to };
+}
+
 function positiveInt(value: string | undefined, fallback: number): number {
   const n = Number(value);
   return Number.isInteger(n) && n > 0 ? n : fallback;
@@ -238,5 +267,6 @@ export function loadConfig(): AppConfig {
     crousTtlMs: positiveInt(process.env.CROUS_TTL_MS, 60 * 60 * 1000),
     push: readPushConfig(),
     feedback: readFeedbackConfig(),
+    move: readMoveConfig(),
   };
 }

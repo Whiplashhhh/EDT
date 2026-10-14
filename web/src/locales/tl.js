@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Sino ka?',
   'gate.intro':
     'Piliin ang iyong klase para magsimula. Kung nagtuturo ka, piliin ang iyong pangalan: ang sarili mong iskedyul ang lalabas.',
+  'gate.moved':
+    'Lumipat na ang EDT ULCO sa edt-ulco.fr! Naiwan ang pinili mo sa lumang address: piliin muli ang iyong klase o pangalan. Kung na-install mo ang app, i-install ito muli mula sa pahinang ito. Patuloy na darating ang iyong mga notification, hindi na kailangang i-on muli.',
   'gate.why': 'Nananatili ang piniling ito sa device na ito. Ito ang default mong iskedyul at siyang nagtatakda ng mga abiso.',
   'gate.subjects': 'Nagtuturo ka pero wala ang pangalan mo sa ADE? Buksan ang tab na “Mga asignatura” at markahan ang mga itinuturo mo.',
   'gate.action': 'Piliin ang aking klase o pangalan',

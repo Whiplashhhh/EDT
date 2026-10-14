@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Kto si?',
   'gate.intro':
     'Začni výberom svojej skupiny. Ak učíš, vyber svoje meno: zobrazí sa tvoj vlastný rozvrh.',
+  'gate.moved':
+    'EDT ULCO sa presťahoval na edt-ulco.fr! Tvoja voľba zostala na starej adrese: vyber znova svoju triedu alebo svoje meno. Ak si mal(a) aplikáciu nainštalovanú, nainštaluj ju znova z tejto stránky. Upozornenia naďalej prichádzajú, netreba ich znova zapínať.',
   'gate.why': 'Voľba ostáva v tomto zariadení. Je to tvoj predvolený rozvrh a určuje oznámenia.',
   'gate.subjects': 'Učíte, ale vaše meno v ADE chýba? Otvorte kartu „Predmety“ a označte tie, ktoré vyučujete.',
   'gate.action': 'Vybrať skupinu alebo meno',

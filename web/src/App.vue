@@ -65,6 +65,20 @@ function dayFromUrl() {
 const requestedDay = dayFromUrl();
 
 /*
+ * Arrivée par l'ancienne adresse du site : le serveur y ajoute `demenage=1`.
+ * Ce qu'on avait choisi là-bas reste attaché à l'ancien domaine ; la fenêtre
+ * d'identité dit pourquoi il faut le refaire. Retiré aussitôt, comme `day`.
+ */
+function movedFromUrl() {
+  const parts = location.search.slice(1).split('&').filter(Boolean);
+  const rest = parts.filter((part) => !part.startsWith('demenage='));
+  if (rest.length === parts.length) return false;
+  history.replaceState(null, '', rest.length ? `${location.pathname}?${rest.join('&')}` : location.pathname);
+  return true;
+}
+const moved = movedFromUrl();
+
+/*
  * Lien partagé (voir `share.js`). Qui a déjà son emploi du temps voit tout de
  * suite celui du lien — son identité, et donc ses notifications, n'en bougent
  * pas. Un lien vers une formation entière ouvre seulement le sélecteur dessus.
@@ -1243,6 +1257,7 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
         <div class="gate-head">
           <div>
             <h1 class="gate-title">{{ t('gate.title') }}</h1>
+            <p v-if="moved" class="gate-moved" role="status">{{ t('gate.moved') }}</p>
             <!-- Un lien reçu : on dit ce qu'il montre, et ce qu'on attend avant de l'afficher. -->
             <div v-if="invite" class="invite">
               <template v-if="invite.kind">
@@ -1642,6 +1657,15 @@ watch(identityOpen, (open) => { if (open) { menuOpen.value = false; pickerOpen.v
   border-radius: 999px;
 }
 .invite-yes:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gate-moved {
+  margin: 0.3rem 0 0.5rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: var(--radius-sm);
+}
 .gate-why { margin: 0; font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
 
 /*

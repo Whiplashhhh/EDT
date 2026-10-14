@@ -20,6 +20,7 @@ import { smtpMailer } from './feedback/mailer.ts';
 import { SubscriptionStore } from './push/store.ts';
 import { PushSender } from './push/sender.ts';
 import { Notifier } from './push/notifier.ts';
+import { registerMove } from './move.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
@@ -64,6 +65,10 @@ await app.register(helmet, {
   crossOriginEmbedderPolicy: false,
   referrerPolicy: { policy: 'no-referrer' },
 });
+
+// Avant l'API et le front : l'ancien domaine ne sert plus que des redirections et des agendas.
+registerMove(app, config.move);
+if (config.move) app.log.info({ from: config.move.from, to: config.move.to }, 'changement d’adresse actif');
 
 await app.register(compress, { global: true, encodings: ['br', 'gzip'] });
 
@@ -121,7 +126,7 @@ app.setErrorHandler((error, req, reply) => {
   return reply.code(500).send({ code: 'generic', error: 'Erreur interne.' });
 });
 
-await app.register(registerApi, { prefix: '/api', service, crous });
+await app.register(registerApi, { prefix: '/api', service, crous, move: config.move });
 await app.register(registerPushRoutes, {
   prefix: '/api',
   service,

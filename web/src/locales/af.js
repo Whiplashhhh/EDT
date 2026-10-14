@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Wie is jy?',
   'gate.intro':
     'Kies jou klas om te begin. As jy klasgee, kies jou naam: jou eie rooster sal wys.',
+  'gate.moved':
+    'EDT ULCO het verskuif na edt-ulco.fr! Jou keuse het op die ou adres gebly: kies weer jou klas of jou naam. As jy die app geïnstalleer het, installeer dit weer van hierdie bladsy af. Jou kennisgewings kom steeds, jy hoef dit nie weer aan te skakel nie.',
   'gate.why': 'Hierdie keuse bly op die toestel. Dit is jou verstekrooster en bepaal die kennisgewings.',
   'gate.subjects': 'Gee jy klas, maar jou naam is nie in ADE nie? Maak die “Vakke”-oortjie oop en merk dié wat jy aanbied.',
   'gate.action': 'Kies my klas of my naam',

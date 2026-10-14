@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Quem és?',
   'gate.intro':
     'Escolhe a tua turma para começar. Se dás aulas, escolhe o teu nome: será mostrado o teu horário.',
+  'gate.moved':
+    'O EDT ULCO mudou-se para edt-ulco.fr! A tua escolha ficou no endereço antigo: escolhe de novo a tua turma ou o teu nome. Se tinhas instalado a aplicação, reinstala-a a partir desta página. As tuas notificações continuam a chegar, não é preciso reativá-las.',
   'gate.why': 'Esta escolha fica neste aparelho. Serve de horário por omissão e define as notificações.',
   'gate.subjects': 'Dá aulas mas o seu nome não aparece no ADE? Abra o separador «Unidades curriculares» e assinale as que leciona.',
   'gate.action': 'Escolher a minha turma ou o meu nome',

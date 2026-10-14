@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Bạn là ai?',
   'gate.intro':
     'Chọn lớp của bạn để bắt đầu. Nếu bạn giảng dạy, hãy chọn tên mình: thời khoá biểu của bạn sẽ hiện ra.',
+  'gate.moved':
+    'EDT ULCO đã chuyển sang edt-ulco.fr! Lựa chọn của bạn vẫn ở địa chỉ cũ: hãy chọn lại lớp hoặc tên của bạn. Nếu bạn đã cài ứng dụng, hãy cài lại từ trang này. Thông báo vẫn tiếp tục đến, không cần bật lại.',
   'gate.why': 'Lựa chọn này chỉ nằm trên thiết bị. Đó là thời khoá biểu mặc định và quyết định các thông báo.',
   'gate.subjects': 'Bạn giảng dạy nhưng tên không có trong ADE? Mở thẻ “Học phần” và đánh dấu các học phần bạn dạy.',
   'gate.action': 'Chọn lớp hoặc tên của tôi',

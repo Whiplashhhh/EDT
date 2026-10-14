@@ -74,6 +74,8 @@ export default {
   'gate.title': '¿Quién eres?',
   'gate.intro':
     'Elige tu clase para empezar. Si das clase, elige tu nombre: se mostrará tu propio horario.',
+  'gate.moved':
+    '¡EDT ULCO se ha mudado a edt-ulco.fr! Tu elección se quedó en la dirección anterior: vuelve a elegir tu clase o tu nombre. Si habías instalado la aplicación, reinstálala desde esta página. Tus notificaciones siguen llegando, no hace falta reactivarlas.',
   'gate.why': 'Esta elección se queda en el dispositivo. Es tu horario por defecto y decide tus notificaciones.',
   'gate.subjects': '¿Das clase pero tu nombre no aparece en ADE? Abre la pestaña «Asignaturas» y marca las que impartes.',
   'gate.action': 'Elegir mi clase o mi nombre',

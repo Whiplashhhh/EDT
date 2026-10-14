@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://edt-iut.online/sitemap.xml
+Sitemap: https://edt-ulco.fr/sitemap.xml

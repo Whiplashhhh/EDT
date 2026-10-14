@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Tko si ti?',
   'gate.intro':
     'Za početak odaberi svoju grupu. Ako predaješ, odaberi svoje ime: prikazat će se tvoj raspored.',
+  'gate.moved':
+    'EDT ULCO preselio se na edt-ulco.fr! Tvoj izbor ostao je na staroj adresi: ponovno odaberi svoj razred ili ime. Ako si imao instaliranu aplikaciju, ponovno je instaliraj s ove stranice. Obavijesti i dalje stižu, ne trebaš ih ponovno uključivati.',
   'gate.why': 'Odabir ostaje na ovom uređaju. To je tvoj zadani raspored i određuje obavijesti.',
   'gate.subjects': 'Predajete, ali vašeg imena nema u ADE-u? Otvorite karticu „Kolegiji” i označite one koje predajete.',
   'gate.action': 'Odaberi grupu ili ime',

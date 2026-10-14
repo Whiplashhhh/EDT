@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Kush je ti?',
   'gate.intro':
     'Zgjidh grupin tënd për të filluar. Nëse jep mësim, zgjidh emrin tënd: do të shfaqet orari yt.',
+  'gate.moved':
+    'EDT ULCO u zhvendos në edt-ulco.fr! Zgjedhja jote mbeti në adresën e vjetër: zgjidh përsëri klasën ose emrin tënd. Nëse e kishe instaluar aplikacionin, instaloje përsëri nga kjo faqe. Njoftimet vazhdojnë të vijnë, nuk ka nevojë t’i aktivizosh përsëri.',
   'gate.why': 'Zgjedhja mbetet në këtë pajisje. Është orari yt i parazgjedhur dhe përcakton njoftimet.',
   'gate.subjects': 'Jepni mësim, por emri juaj nuk është në ADE? Hapni skedën “Lëndë” dhe zgjidhni ato që jepni.',
   'gate.action': 'Zgjidh grupin ose emrin',

@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Vem är du?',
   'gate.intro':
     'Välj din klass för att börja. Om du undervisar, välj ditt namn: då visas ditt eget schema.',
+  'gate.moved':
+    'EDT ULCO har flyttat till edt-ulco.fr! Ditt val blev kvar på den gamla adressen: välj din klass eller ditt namn igen. Om du hade installerat appen, installera om den från den här sidan. Dina aviseringar fortsätter att komma, du behöver inte slå på dem igen.',
   'gate.why': 'Valet stannar på den här enheten. Det är ditt standardschema och styr aviseringarna.',
   'gate.subjects': 'Undervisar du men ditt namn finns inte i ADE? Öppna fliken ”Kurser” och kryssa i dem du undervisar i.',
   'gate.action': 'Välj klass eller namn',

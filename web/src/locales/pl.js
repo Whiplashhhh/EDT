@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Kim jesteś?',
   'gate.intro':
     'Wybierz swoją grupę, aby zacząć. Jeśli prowadzisz zajęcia, wybierz swoje nazwisko: zobaczysz własny plan.',
+  'gate.moved':
+    'EDT ULCO przeniósł się na edt-ulco.fr! Twój wybór został pod starym adresem: wybierz ponownie swoją grupę lub nazwisko. Jeśli aplikacja była zainstalowana, zainstaluj ją ponownie z tej strony. Powiadomienia nadal przychodzą, nie trzeba ich ponownie włączać.',
   'gate.why': 'Ten wybór zostaje na urządzeniu. Jest twoim domyślnym planem i decyduje o powiadomieniach.',
   'gate.subjects': 'Prowadzisz zajęcia, ale nie ma cię w ADE? Otwórz kartę „Przedmioty” i zaznacz te, które prowadzisz.',
   'gate.action': 'Wybierz grupę lub nazwisko',

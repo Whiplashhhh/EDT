@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Wer bist du?',
   'gate.intro':
     'Wähle deinen Kurs, um zu beginnen. Wenn du unterrichtest, wähle deinen Namen: dann erscheint dein eigener Stundenplan.',
+  'gate.moved':
+    'EDT ULCO ist umgezogen: edt-ulco.fr! Deine Auswahl ist unter der alten Adresse geblieben: Wähle deine Klasse oder deinen Namen erneut. Falls du die App installiert hattest, installiere sie von dieser Seite neu. Deine Benachrichtigungen kommen weiterhin an, du musst sie nicht erneut aktivieren.',
   'gate.why': 'Diese Auswahl bleibt auf dem Gerät. Sie ist dein Standard-Stundenplan und bestimmt die Benachrichtigungen.',
   'gate.subjects': 'Sie unterrichten, aber Ihr Name fehlt in ADE? Öffnen Sie den Reiter „Module“ und kreuzen Sie Ihre Module an.',
   'gate.action': 'Kurs oder Namen wählen',

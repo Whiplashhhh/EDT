@@ -272,7 +272,7 @@ Le serveur n'envoie pas lui-même (port 25 souvent fermé sur un VPS, aucune
 réputation d'expéditeur) : il passe par le SMTP d'un service d'envoi. Avec
 [Resend](https://resend.com) — gratuit jusqu'à 100 courriels par jour :
 
-1. Créer un compte, ajouter le domaine `edt-iut.online` et publier les
+1. Créer un compte, ajouter le domaine `edt-ulco.fr` et publier les
    enregistrements DNS proposés (SPF et DKIM, sur un sous-domaine qui ne gêne
    rien d'autre ; Resend sait les poser lui-même chez Cloudflare).
 2. Créer une clé d'API avec le seul droit d'envoi.
@@ -280,7 +280,7 @@ réputation d'expéditeur) : il passe par le SMTP d'un service d'envoi. Avec
 
    ```
    FEEDBACK_TO=votre-adresse@example.org
-   FEEDBACK_FROM=EDT ULCO <noreply@edt-iut.online>
+   FEEDBACK_FROM=EDT ULCO <noreply@edt-ulco.fr>
    SMTP_HOST=smtp.resend.com
    SMTP_PORT=465
    SMTP_USER=resend
@@ -356,7 +356,7 @@ réseau Docker du projet (`edt_default`). Le VPS n'a donc besoin d'aucun port
 entrant, et le certificat TLS est celui de Cloudflare — ni nginx ni certbot.
 
 Le tunnel est **géré depuis le tableau de bord** Cloudflare (Zero Trust →
-Networks → Tunnels) : il s'y déclare un *public hostname* `edt-iut.online` vers
+Networks → Tunnels) : il s'y déclare un *public hostname* `edt-ulco.fr` vers
 `http://edt:3000`, et le tableau de bord fournit un jeton. Le tunnel est le
 service `tunnel` de `compose.yaml` ; son jeton va dans `tunnel.env`
 (`TUNNEL_TOKEN=…`, en `chmod 600`), ignoré par git : il suffit à lui seul à se
@@ -366,6 +366,32 @@ dans le conteneur `edt`.
 ```bash
 docker compose up -d --build
 ```
+
+### Changement d'adresse
+
+Le site a quitté `edt-iut.online` pour `edt-ulco.fr`. L'ancien nom reste un
+second *public hostname* du même tunnel, et c'est le serveur qui fait la
+différence (`server/src/move.ts`), selon deux variables de `.env` :
+
+```
+PUBLIC_URL=https://edt-ulco.fr
+OLD_HOSTS=edt-iut.online,www.edt-iut.online
+```
+
+- Tout ce qui arrive par un ancien nom est renvoyé en **301** vers la même
+  adresse sur le nouveau : favoris, liens partagés et applications installées
+  suivent d'eux-mêmes, et les moteurs de recherche transfèrent le référencement.
+  Les pages reçoivent en plus `?demenage=1` : la fenêtre « Qui êtes-vous ? »
+  explique alors pourquoi il faut rechoisir sa classe — le stockage local du
+  navigateur est propre à chaque domaine et ne suit pas.
+- Les flux **iCalendar** ne sont pas redirigés : les agendas abonnés suivent mal
+  un changement de domaine. Ils restent servis, avec en plus, sur chaque jour de
+  cours, un événement « journée entière » qui invite à se réabonner.
+- Les notifications déjà activées continuent d'arriver : l'abonnement appartient
+  au service worker de l'ancien domaine, que la redirection ne touche pas.
+
+Garder l'ancien domaine tant que ses statistiques montrent encore du trafic,
+surtout sur `calendar.ics`. Ensuite, retirer `OLD_HOSTS` et `PUBLIC_URL`.
 
 Hors notifications, le service ne stocke rien et peut être redémarré librement.
 Avec elles, il tient un fichier d'abonnements : le volume `edt-data` doit suivre

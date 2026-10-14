@@ -3,6 +3,8 @@ import { isResourceKind, type AdeService, type ResourceKind, type Schedule } fro
 import { parseSelection, type SubjectPick } from '../ade/subjects.ts';
 import { mondayOf } from '../dates.ts';
 import type { CrousService } from '../crous/service.ts';
+import type { MoveConfig } from '../config.ts';
+import { viaOldHost } from '../move.ts';
 
 const DEPARTMENT_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -70,9 +72,10 @@ function parseIds(params: Record<string, string>): {
 
 export async function registerApi(
   app: FastifyInstance,
-  opts: { service: AdeService; crous: CrousService },
+  opts: { service: AdeService; crous: CrousService; move?: MoveConfig | null },
 ): Promise<void> {
   const { service, crous } = opts;
+  const move = opts.move ?? null;
 
   /** Un emploi du temps, quelle que soit la façon de le consulter. */
   const scheduleOf = (
@@ -154,12 +157,14 @@ export async function registerApi(
       const { department, kind, target } = parseIds(req.params);
       const from = mondayOf(new Date());
       const schedule = await scheduleOf(department, kind, target, from);
+      // Un agenda abonné à l'ancienne adresse ne la quittera pas de lui-même : on l'y prévient.
+      const movedTo = move && viaOldHost(move, req.hostname) ? move.to : null;
       reply
         .header('Content-Type', 'text/calendar; charset=utf-8')
         // Le nom vient d'ADE : on le réduit à un jeu de caractères sûr pour un en-tête.
         .header('Content-Disposition', `inline; filename="edt-${safeFilename(schedule.resourceName)}.ics"`)
         .header('Cache-Control', 'public, max-age=900');
-      return toIcs(schedule.resourceName, schedule.events);
+      return toIcs(schedule.resourceName, schedule.events, movedTo);
     },
   );
 }
@@ -180,7 +185,44 @@ function icsStamp(iso: string): string {
   return `${iso.slice(0, 19).replace(/[-:]/g, '')}Z`;
 }
 
-function toIcs(resourceName: string, events: Array<import('../ade/ics.ts').CourseEvent>): string {
+/** Jour, en heure de Paris, d'un instant ISO : `20260914`. */
+function parisDay(iso: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date(iso)).replace(/-/g, '');
+}
+
+/**
+ * Avertissement de changement d'adresse : un événement « journée entière » sur
+ * chaque jour de cours, affiché en tête de la journée dans l'agenda.
+ */
+function moveNotices(events: Array<import('../ade/ics.ts').CourseEvent>, movedTo: string): string[] {
+  const host = new URL(movedTo).host;
+  const days = [...new Set(events.map((event) => parisDay(event.start)))].sort();
+  return days.flatMap((day) => {
+    const next = new Date(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6)}T12:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    return [
+      'BEGIN:VEVENT',
+      `UID:demenagement-${day}@${host}`,
+      `DTSTAMP:${icsStamp(new Date().toISOString())}`,
+      `DTSTART;VALUE=DATE:${day}`,
+      `DTEND;VALUE=DATE:${next.toISOString().slice(0, 10).replace(/-/g, '')}`,
+      `SUMMARY:${icsEscape(`⚠️ L’EDT a changé d’adresse : réabonnez-vous sur ${host}`)}`,
+      `DESCRIPTION:${icsEscape(
+        `Cet agenda vient de l’ancienne adresse du site, qui fermera. Pour continuer à le recevoir : ` +
+          `ouvrez ${movedTo}, menu ⋯ → « S’abonner dans mon agenda », puis supprimez cet ancien abonnement.`,
+      )}`,
+      `URL:${movedTo}/`,
+      'TRANSP:TRANSPARENT',
+      'END:VEVENT',
+    ];
+  });
+}
+
+function toIcs(
+  resourceName: string,
+  events: Array<import('../ade/ics.ts').CourseEvent>,
+  movedTo: string | null = null,
+): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -202,6 +244,7 @@ function toIcs(resourceName: string, events: Array<import('../ade/ics.ts').Cours
       'END:VEVENT',
     );
   }
+  if (movedTo) lines.push(...moveNotices(events, movedTo));
   lines.push('END:VCALENDAR');
   // RFC 5545 : les lignes se terminent par CRLF.
   return `${lines.join('\r\n')}\r\n`;

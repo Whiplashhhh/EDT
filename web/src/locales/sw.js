@@ -74,6 +74,8 @@ export default {
   'gate.title': 'Wewe ni nani?',
   'gate.intro':
     'Chagua kikundi chako ili kuanza. Kama unafundisha, chagua jina lako: ratiba yako mwenyewe itaonyeshwa.',
+  'gate.moved':
+    'EDT ULCO imehamia edt-ulco.fr! Chaguo lako limebaki kwenye anwani ya zamani: chagua tena darasa lako au jina lako. Ikiwa ulikuwa umesakinisha programu, isakinishe upya kutoka ukurasa huu. Arifa zako zinaendelea kufika, hakuna haja ya kuziwasha tena.',
   'gate.why': 'Chaguo hili linabaki kwenye kifaa hiki. Ni ratiba yako ya kawaida na huamua arifa.',
   'gate.subjects': 'Unafundisha lakini jina lako halimo kwenye ADE? Fungua kichupo cha “Masomo” na uchague unayofundisha.',
   'gate.action': 'Chagua kikundi au jina langu',
