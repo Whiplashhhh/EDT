@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Velg klassen din for å komme i gang. Underviser du, velg navnet ditt: din egen timeplan vises.',
   'gate.moved':
-    'EDT ULCO har flyttet til edt-ulco.fr! Valget ditt ble igjen på den gamle adressen: velg klassen eller navnet ditt på nytt. Hvis du hadde installert appen, installer den på nytt fra denne siden. Varslene dine kommer fortsatt, du trenger ikke slå dem på igjen.',
+    'EDT ULCO har flyttet til edt-ulco.fr! Innstillingene dine ble igjen på den gamle adressen: velg klassen eller navnet ditt på nytt, og slå på varslene igjen i menyen ⋯. Hvis du hadde installert appen, installer den på nytt fra denne siden.',
   'gate.why': 'Valget blir værende på denne enheten. Det er standardtimeplanen din og styrer varslene.',
   'gate.subjects': 'Underviser du, men navnet ditt står ikke i ADE? Åpne fanen «Emner» og kryss av for dem du underviser i.',
   'gate.action': 'Velg klasse eller navn',

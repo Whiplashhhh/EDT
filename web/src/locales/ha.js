@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Zaɓi ajinka don farawa. Idan kana koyarwa, zaɓi sunanka: jadawalinka za a nuna.',
   'gate.moved':
-    'EDT ULCO ya koma edt-ulco.fr! Zaɓinka ya tsaya a tsohon adireshin: sake zaɓar ajinka ko sunanka. Idan ka shigar da manhajar, sake shigar da ita daga wannan shafin. Sanarwarka na ci gaba da zuwa, babu buƙatar sake kunna su.',
+    'EDT ULCO ya koma edt-ulco.fr! Saitunanka sun tsaya a tsohon adireshin: sake zaɓar ajinka ko sunanka, sannan ka sake kunna sanarwa daga menu ⋯. Idan ka shigar da manhajar, sake shigar da ita daga wannan shafin.',
   'gate.why': 'Wannan zaɓin zai kasance a wannan na’urar. Shi ne jadawalinka na asali kuma yana tantance sanarwa.',
   'gate.subjects': 'Kana koyarwa amma sunanka ba ya cikin ADE? Buɗe shafin “Darussa” ka zaɓi waɗanda kake koyarwa.',
   'gate.action': 'Zaɓi aji ko suna',

@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Başlamak için sınıfını seç. Ders veriyorsan adını seç: kendi ders programın gösterilir.',
   'gate.moved':
-    'EDT ULCO edt-ulco.fr adresine taşındı! Seçimin eski adreste kaldı: sınıfını veya adını yeniden seç. Uygulamayı yüklediysen bu sayfadan yeniden yükle. Bildirimlerin gelmeye devam ediyor, yeniden açmana gerek yok.',
+    'EDT ULCO edt-ulco.fr adresine taşındı! Ayarların eski adreste kaldı: sınıfını veya adını yeniden seç, ardından bildirimleri ⋯ menüsünden yeniden aç. Uygulamayı yüklediysen bu sayfadan yeniden yükle.',
   'gate.why': 'Bu seçim cihazda kalır. Varsayılan ders programındır ve bildirimleri belirler.',
   'gate.subjects': 'Ders veriyorsunuz ama adınız ADE’de yok mu? “Dersler” sekmesini açın ve verdiğiniz dersleri işaretleyin.',
   'gate.action': 'Sınıfımı veya adımı seç',

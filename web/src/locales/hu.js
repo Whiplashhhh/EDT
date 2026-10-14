@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Kezdésként válaszd ki a csoportodat. Ha oktatsz, a nevedet válaszd: a saját órarended jelenik meg.',
   'gate.moved':
-    'Az EDT ULCO új címre költözött: edt-ulco.fr! A választásod a régi címen maradt: válaszd ki újra az osztályodat vagy a neved. Ha telepítetted az alkalmazást, telepítsd újra erről az oldalról. Az értesítések továbbra is megérkeznek, nem kell újra bekapcsolni őket.',
+    'Az EDT ULCO új címre költözött: edt-ulco.fr! A beállításaid a régi címen maradtak: válaszd ki újra az osztályodat vagy a neved, majd kapcsold vissza az értesítéseket a ⋯ menüben. Ha telepítetted az alkalmazást, telepítsd újra erről az oldalról.',
   'gate.why': 'A választás ezen az eszközön marad. Ez az alapértelmezett órarended, és ez dönti el az értesítéseket.',
   'gate.subjects': 'Tanít, de a neve nem szerepel az ADE-ben? Nyissa meg a „Tantárgyak” lapot, és jelölje be, amelyeket tanít.',
   'gate.action': 'Csoport vagy név választása',

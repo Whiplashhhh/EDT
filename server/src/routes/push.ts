@@ -173,6 +173,7 @@ export async function registerPushRoutes(app: FastifyInstance, opts: PushRoutesO
       changes: parseFlag(body.changes),
       menu: parseOptionalFlag(body.menu),
       lang: readLang(body.lang),
+      host: req.hostname.toLowerCase(),
       updatedAt: new Date().toISOString(),
     };
 

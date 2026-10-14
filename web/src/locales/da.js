@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Vælg dit hold for at komme i gang. Underviser du, så vælg dit navn: dit eget skema bliver vist.',
   'gate.moved':
-    'EDT ULCO er flyttet til edt-ulco.fr! Dit valg blev på den gamle adresse: vælg din klasse eller dit navn igen. Hvis du havde installeret appen, så installer den igen fra denne side. Dine notifikationer kommer stadig, du behøver ikke slå dem til igen.',
+    'EDT ULCO er flyttet til edt-ulco.fr! Dine indstillinger blev på den gamle adresse: vælg din klasse eller dit navn igen, og slå notifikationerne til igen i menuen ⋯. Hvis du havde installeret appen, så installer den igen fra denne side.',
   'gate.why': 'Valget bliver på denne enhed. Det er dit standardskema og bestemmer dine notifikationer.',
   'gate.subjects': 'Underviser du, men står dit navn ikke i ADE? Åbn fanen “Fag”, og markér dem, du underviser i.',
   'gate.action': 'Vælg hold eller navn',

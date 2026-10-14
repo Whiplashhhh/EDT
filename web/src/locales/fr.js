@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Choisissez votre classe pour commencer. Si vous enseignez, choisissez votre nom : c’est votre emploi du temps qui s’affichera.',
   'gate.moved':
-    'EDT ULCO a déménagé sur edt-ulco.fr ! Votre choix est resté sur l’ancienne adresse : choisissez à nouveau votre classe ou votre nom. Si vous aviez installé l’application, réinstallez-la depuis cette page. Vos notifications continuent d’arriver, inutile de les réactiver.',
+    'EDT ULCO a déménagé sur edt-ulco.fr ! Vos réglages sont restés sur l’ancienne adresse : choisissez à nouveau votre classe ou votre nom, puis réactivez vos notifications dans le menu ⋯. Si vous aviez installé l’application, réinstallez-la depuis cette page.',
   'gate.why': 'Ce choix reste sur cet appareil. Il sert d’emploi du temps par défaut et décide des notifications.',
   'gate.subjects': 'Vous enseignez mais votre nom n’apparaît pas dans ADE ? Ouvrez l’onglet « Ressources » et cochez celles que vous assurez.',
   'gate.action': 'Choisir ma classe ou mon nom',

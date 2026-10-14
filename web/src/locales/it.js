@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Scegli la tua classe per iniziare. Se insegni, scegli il tuo nome: verrà mostrato il tuo orario.',
   'gate.moved':
-    'EDT ULCO si è trasferito su edt-ulco.fr! La tua scelta è rimasta sul vecchio indirizzo: scegli di nuovo la tua classe o il tuo nome. Se avevi installato l’app, reinstallala da questa pagina. Le notifiche continuano ad arrivare, non serve riattivarle.',
+    'EDT ULCO si è trasferito su edt-ulco.fr! Le tue impostazioni sono rimaste sul vecchio indirizzo: scegli di nuovo la tua classe o il tuo nome, poi riattiva le notifiche dal menu ⋯. Se avevi installato l’app, reinstallala da questa pagina.',
   'gate.why': 'La scelta resta su questo dispositivo. È il tuo orario predefinito e decide le notifiche.',
   'gate.subjects': 'Insegni ma il tuo nome non compare in ADE? Apri la scheda «Insegnamenti» e seleziona quelli che tieni.',
   'gate.action': 'Scegli la classe o il nome',

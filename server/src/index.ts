@@ -21,6 +21,7 @@ import { SubscriptionStore } from './push/store.ts';
 import { PushSender } from './push/sender.ts';
 import { Notifier } from './push/notifier.ts';
 import { registerMove } from './move.ts';
+import { announceMove } from './push/move.ts';
 
 const config = loadConfig();
 const service = new AdeService(config);
@@ -157,6 +158,26 @@ if (config.push.enabled) {
   });
   notifier.start();
   app.log.info({ subscriptions: subscriptions.size }, 'notifications push actives');
+
+  // Abonnés de l'ancien domaine : une dernière notification, en journée, puis plus rien.
+  if (config.move) {
+    const move = config.move;
+    let announcing = false;
+    const announce = async (): Promise<void> => {
+      if (announcing) return;
+      announcing = true;
+      try {
+        const { sent, failed } = await announceMove(subscriptions, sender, move);
+        if (sent || failed) app.log.info({ sent, failed }, 'anciens abonnés prévenus du changement d’adresse');
+      } finally {
+        announcing = false;
+      }
+    };
+    void announce();
+    const timer = setInterval(() => void announce(), config.push.tickMs);
+    timer.unref();
+    app.addHook('onClose', async () => clearInterval(timer));
+  }
 
   app.addHook('onClose', async () => {
     notifier.stop();

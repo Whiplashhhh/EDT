@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import Fastify from 'fastify';
 import { movedUrl, registerMove } from '../src/move.ts';
+import { announceMove } from '../src/push/move.ts';
+import { SubscriptionStore, type PushSubscription } from '../src/push/store.ts';
 import { registerApi } from '../src/routes/api.ts';
 
 const MOVE = { from: ['edt-iut.online'], to: 'https://edt-ulco.fr' };
@@ -67,4 +72,57 @@ test('l’agenda de l’ancien domaine reste servi, avec un avertissement par jo
   const fresh = await app.inject({ method: 'GET', url, headers: { host: 'edt-ulco.fr' } });
   assert.ok(!fresh.body.includes('demenagement'));
   await app.close();
+});
+
+/** Abonnés : un d'avant le changement d'adresse, un arrivé par l'ancien domaine, un par le nouveau. */
+function farewellStore() {
+  const base = {
+    keys: { p256dh: 'k'.repeat(64), auth: 'a'.repeat(22) },
+    department: 'info', kind: 'groups' as const, resourceId: 12, resourceName: 'BUT1 TD1',
+    nextCourse: true, changes: true, menu: false, updatedAt: '2026-10-01T08:00:00.000Z',
+  };
+  const store = new SubscriptionStore(join(mkdtempSync(join(tmpdir(), 'edt-move-')), 'subscriptions.json'));
+  store.save({ ...base, endpoint: 'https://push.example.org/avant', lang: 'fr' });
+  store.save({ ...base, endpoint: 'https://push.example.org/ancien', lang: 'de', host: 'edt-iut.online' });
+  store.save({ ...base, endpoint: 'https://push.example.org/nouveau', lang: 'fr', host: 'edt-ulco.fr' });
+  return store;
+}
+
+test('les anciens abonnés reçoivent une seule notification, courte, puis sont oubliés', async () => {
+  const store = farewellStore();
+  const sent: Array<{ endpoint: string; title: string; body: string }> = [];
+  const sender = {
+    send: async (sub: PushSubscription, n: { title: string; body: string }) => {
+      sent.push({ endpoint: sub.endpoint, title: n.title, body: n.body });
+      return true;
+    },
+  };
+  // 14 h à Paris.
+  const afternoon = new Date('2026-10-15T12:00:00Z');
+
+  assert.deepEqual(await announceMove(store, sender, MOVE, afternoon), { sent: 2, failed: 0 });
+  assert.deepEqual(sent.map((s) => s.endpoint), ['https://push.example.org/avant', 'https://push.example.org/ancien']);
+  assert.equal(sent[0].title, 'EDT ULCO a déménagé');
+  assert.match(sent[0].body, /edt-ulco\.fr/);
+  assert.match(sent[1].title, /has moved/);
+  for (const s of sent) assert.ok(s.title.length + s.body.length <= 110, `trop long : ${s.body}`);
+  assert.deepEqual(store.all().map((s) => s.endpoint), ['https://push.example.org/nouveau']);
+
+  // Une seconde passe ne renvoie rien.
+  assert.deepEqual(await announceMove(store, sender, MOVE, afternoon), { sent: 0, failed: 0 });
+  assert.equal(sent.length, 2);
+});
+
+test('la notification d’adieu attend la journée, et un échec n’est pas retenté', async () => {
+  const store = farewellStore();
+  let calls = 0;
+  const failing = { send: async () => { calls++; throw new Error('service de push injoignable'); } };
+
+  // 3 h à Paris : on attend.
+  assert.deepEqual(await announceMove(store, failing, MOVE, new Date('2026-10-15T01:00:00Z')), { sent: 0, failed: 0 });
+  assert.equal(calls, 0);
+  assert.equal(store.size, 3);
+
+  assert.deepEqual(await announceMove(store, failing, MOVE, new Date('2026-10-15T08:00:00Z')), { sent: 0, failed: 2 });
+  assert.equal(store.size, 1);
 });

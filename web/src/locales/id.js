@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Pilih kelasmu untuk memulai. Jika kamu mengajar, pilih namamu: jadwalmu sendiri yang akan tampil.',
   'gate.moved':
-    'EDT ULCO pindah ke edt-ulco.fr! Pilihanmu tertinggal di alamat lama: pilih lagi kelas atau namamu. Jika kamu sudah memasang aplikasinya, pasang ulang dari halaman ini. Notifikasimu tetap datang, tidak perlu diaktifkan lagi.',
+    'EDT ULCO pindah ke edt-ulco.fr! Pengaturanmu tertinggal di alamat lama: pilih lagi kelas atau namamu, lalu aktifkan kembali notifikasi dari menu ⋯. Jika kamu sudah memasang aplikasinya, pasang ulang dari halaman ini.',
   'gate.why': 'Pilihan ini tersimpan di perangkat ini. Inilah jadwal bawaanmu dan penentu notifikasi.',
   'gate.subjects': 'Mengajar tetapi nama Anda tidak ada di ADE? Buka tab “Mata kuliah” lalu centang yang Anda ajar.',
   'gate.action': 'Pilih kelas atau namaku',

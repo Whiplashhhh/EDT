@@ -387,8 +387,15 @@ OLD_HOSTS=edt-iut.online,www.edt-iut.online
 - Les flux **iCalendar** ne sont pas redirigés : les agendas abonnés suivent mal
   un changement de domaine. Ils restent servis, avec en plus, sur chaque jour de
   cours, un événement « journée entière » qui invite à se réabonner.
-- Les notifications déjà activées continuent d'arriver : l'abonnement appartient
-  au service worker de l'ancien domaine, que la redirection ne touche pas.
+- Les abonnés aux notifications de l'ancien domaine — ceux dont l'abonnement
+  ne porte pas `host`, enregistré depuis — reçoivent **une seule** notification
+  courte annonçant la nouvelle adresse, en journée (8 h – 20 h, heure de Paris),
+  puis sont retirés du registre (`server/src/push/move.ts`). Leur abonnement
+  appartient au service worker de l'ancienne adresse, qui ne se met plus à jour :
+  ils réactivent leurs notifications sur la nouvelle, comme le leur dit la
+  fenêtre « Qui êtes-vous ? ». Un abonné du nouveau domaine sans `host` (inscrit
+  avant cette version) le retrouve en rouvrant l'application, qui renvoie son
+  abonnement à chaque ouverture.
 
 Garder l'ancien domaine tant que ses statistiques montrent encore du trafic,
 surtout sur `calendar.ics`. Ensuite, retirer `OLD_HOSTS` et `PUBLIC_URL`.

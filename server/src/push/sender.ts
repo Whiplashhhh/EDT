@@ -37,15 +37,16 @@ export class PushSender {
    * push répond alors 404 ou 410, et c'est le seul signal qu'on aura — on
    * supprime l'abonnement plutôt que de le réessayer indéfiniment.
    *
+   * @param ttl durée de garde, en secondes, par le service de push
    * @returns `true` si la notification est partie, `false` si l'abonnement est mort.
    */
-  async send(sub: PushSubscription, notification: Notification): Promise<boolean> {
+  async send(sub: PushSubscription, notification: Notification, { ttl = TTL_SECONDS } = {}): Promise<boolean> {
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: sub.keys },
         JSON.stringify(notification),
         {
-          TTL: TTL_SECONDS,
+          TTL: ttl,
           urgency: 'normal',
           vapidDetails: {
             subject: this.#keys.subject,

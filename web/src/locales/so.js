@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Dooro fasalkaaga si aad u bilowdo. Haddii aad wax dhigto, dooro magacaaga: jadwalkaaga ayaa soo bixi doona.',
   'gate.moved':
-    'EDT ULCO waxay u guurtay edt-ulco.fr! Doorashadaadu waxay ku hadhay cinwaankii hore: mar kale dooro fasalkaaga ama magacaaga. Haddii aad rakibtay barnaamijka, dib uga rakib boggan. Ogeysiisyadaadu way sii imanayaan, uma baahnid inaad dib u shidid.',
+    'EDT ULCO waxay u guurtay edt-ulco.fr! Dejimahaagu waxay ku hadheen cinwaankii hore: mar kale dooro fasalkaaga ama magacaaga, kadibna dib u shid ogeysiisyada liiska ⋯. Haddii aad rakibtay barnaamijka, dib uga rakib boggan.',
   'gate.why': 'Doorashadu waxay ku hartaa qalabkan. Waa jadwalkaaga caadiga ah, wuxuuna go’aamiyaa ogeysiisyada.',
   'gate.subjects': 'Wax ma bartaa laakiin magacaagu kuma jiro ADE? Fur tabka “Maaddooyin” oo calaamadee kuwa aad dhigto.',
   'gate.action': 'Dooro fasalkayga ama magacayga',

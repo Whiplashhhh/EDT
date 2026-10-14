@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Kies je klas om te beginnen. Geef je les, kies dan je naam: je eigen rooster wordt getoond.',
   'gate.moved':
-    'EDT ULCO is verhuisd naar edt-ulco.fr! Je keuze is op het oude adres gebleven: kies opnieuw je klas of je naam. Had je de app geïnstalleerd, installeer hem dan opnieuw vanaf deze pagina. Je meldingen blijven binnenkomen, je hoeft ze niet opnieuw aan te zetten.',
+    'EDT ULCO is verhuisd naar edt-ulco.fr! Je instellingen zijn op het oude adres gebleven: kies opnieuw je klas of je naam en zet je meldingen weer aan via het menu ⋯. Had je de app geïnstalleerd, installeer hem dan opnieuw vanaf deze pagina.',
   'gate.why': 'Deze keuze blijft op dit apparaat. Het is je standaardrooster en bepaalt je meldingen.',
   'gate.subjects': 'Je geeft les, maar je naam staat niet in ADE? Open het tabblad ‘Vakken’ en vink aan welke je geeft.',
   'gate.action': 'Mijn klas of naam kiezen',

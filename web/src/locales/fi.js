@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Aloita valitsemalla ryhmäsi. Jos opetat, valitse nimesi: näet oman lukujärjestyksesi.',
   'gate.moved':
-    'EDT ULCO on muuttanut osoitteeseen edt-ulco.fr! Valintasi jäi vanhaan osoitteeseen: valitse luokkasi tai nimesi uudelleen. Jos olit asentanut sovelluksen, asenna se uudelleen tältä sivulta. Ilmoitukset tulevat edelleen, niitä ei tarvitse ottaa uudelleen käyttöön.',
+    'EDT ULCO on muuttanut osoitteeseen edt-ulco.fr! Asetuksesi jäivät vanhaan osoitteeseen: valitse luokkasi tai nimesi uudelleen ja ota ilmoitukset taas käyttöön valikosta ⋯. Jos olit asentanut sovelluksen, asenna se uudelleen tältä sivulta.',
   'gate.why': 'Valinta jää tälle laitteelle. Se on oletuslukujärjestyksesi ja määrää ilmoitukset.',
   'gate.subjects': 'Opetatko, mutta nimesi puuttuu ADE:sta? Avaa ”Opintojaksot”-välilehti ja valitse opettamasi jaksot.',
   'gate.action': 'Valitse ryhmä tai nimi',

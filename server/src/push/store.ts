@@ -42,6 +42,11 @@ export interface PushSubscription extends PushIdentity {
   /** Menu du restaurant universitaire, avant la pause du midi. */
   menu: boolean;
   lang: string;
+  /**
+   * Nom de domaine par lequel l'abonnement est arrivé. Absent pour ceux d'avant
+   * le changement d'adresse : ceux-là appartiennent à l'ancien domaine.
+   */
+  host?: string;
   updatedAt: string;
 }
 

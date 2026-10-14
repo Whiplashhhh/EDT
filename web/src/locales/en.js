@@ -75,7 +75,7 @@ export default {
   'gate.intro':
     'Pick your class to get started. If you teach, pick your name instead — your own timetable will be shown.',
   'gate.moved':
-    'EDT ULCO has moved to edt-ulco.fr! Your choice stayed on the old address: pick your class or your name again. If you had installed the app, reinstall it from this page. Your notifications keep coming, no need to turn them on again.',
+    'EDT ULCO has moved to edt-ulco.fr! Your settings stayed on the old address: pick your class or your name again, then turn your notifications back on from the ⋯ menu. If you had installed the app, reinstall it from this page.',
   'gate.why': 'This stays on your device. It is your default timetable, and it decides what you get notified about.',
   'gate.subjects': 'Teaching, but your name isn’t in ADE? Open the “Subjects” tab and tick the ones you teach.',
   'gate.action': 'Pick my class or my name',
