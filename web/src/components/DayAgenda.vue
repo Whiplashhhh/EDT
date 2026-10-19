@@ -85,12 +85,15 @@ const columnKey = (event) => (event.groups?.length
   ? [...new Set(event.groups.map(familyOf))].sort().join(', ')
   : event.subject || '');
 
+/* Ordre naturel : BUT3-TD2 passe avant BUT3-TD10. */
+const collator = new Intl.Collator(undefined, { numeric: true });
+
 /**
- * Dispose les cours d'un bloc en grille : une colonne par classe, et une ligne par
- * tranche horaire. Une tranche vaut sa durée, mais s'agrandit si une carte a besoin
- * de plus de place : les proportions tiennent sans jamais rogner un libellé.
+ * Découpe un bloc en couloirs : un par classe, et un de plus si une classe se
+ * dédouble. Chaque couloir porte un repère — la classe et son rang — qui le
+ * retrouve d'un bloc à l'autre de la journée.
  */
-function placeCluster(cluster) {
+function laneCluster(cluster) {
   const origin = new Date(cluster.start).getTime();
   const items = cluster.events.map((event) => ({
     event,
@@ -98,24 +101,67 @@ function placeCluster(cluster) {
     to: (new Date(event.end).getTime() - origin) / 60_000,
   }));
 
-  // Une colonne par classe, et une colonne de plus si une classe se dédouble.
   const byClass = new Map();
   for (const item of items) {
     const key = columnKey(item.event);
     if (!byClass.has(key)) byClass.set(key, []);
     byClass.get(key).push(item);
   }
-  const columns = [];
-  for (const group of byClass.values()) {
-    const lanes = [];
+  const lanes = [];
+  for (const [key, group] of byClass) {
+    const classLanes = [];
     for (const item of group) {
-      let lane = lanes.find((candidate) => candidate.end <= item.from);
-      if (!lane) { lane = { end: -Infinity, items: [] }; lanes.push(lane); }
+      let lane = classLanes.find((candidate) => candidate.end <= item.from);
+      if (!lane) { lane = { end: -Infinity, items: [] }; classLanes.push(lane); }
       lane.items.push(item);
       lane.end = Math.max(lane.end, item.to);
     }
-    columns.push(...lanes.map((lane) => lane.items));
+    classLanes.forEach((lane, rank) => lanes.push({ id: `${key}\u0000${rank}`, key, rank, items: lane.items }));
   }
+  return { items, lanes };
+}
+
+/**
+ * La colonne d'une classe vaut pour toute la journée : le TD1 reste à gauche du
+ * matin au soir, au lieu de changer de place à chaque bloc. Les classes sont
+ * rangées dans l'ordre naturel, et chacune prend la première colonne laissée libre
+ * par celles qu'elle croise : deux groupes qui ne se retrouvent jamais en même
+ * temps se partagent une colonne plutôt que d'élargir la grille.
+ */
+const dayColumns = computed(() => {
+  const lanesOf = new Map();
+  const slots = new Map();
+  for (const cluster of clusters.value) {
+    if (cluster.events.length < 2) continue;
+    const laned = laneCluster(cluster);
+    lanesOf.set(cluster, laned);
+    for (const lane of laned.lanes) {
+      if (!slots.has(lane.id)) slots.set(lane.id, { ...lane, crosses: new Set() });
+      for (const other of laned.lanes) if (other.id !== lane.id) slots.get(lane.id).crosses.add(other.id);
+    }
+  }
+
+  const column = new Map();
+  const order = [...slots.values()].sort((a, b) => collator.compare(a.key, b.key) || a.rank - b.rank);
+  for (const slot of order) {
+    const taken = new Set([...slot.crosses].map((id) => column.get(id)));
+    let index = 0;
+    while (taken.has(index)) index += 1;
+    column.set(slot.id, index);
+  }
+
+  return { lanesOf, column, count: Math.max(0, ...column.values()) + 1 };
+});
+
+/**
+ * Dispose les cours d'un bloc en grille : les colonnes sont celles de la journée,
+ * et une ligne par tranche horaire. Une tranche vaut sa durée, mais s'agrandit si
+ * une carte a besoin de plus de place : les proportions tiennent sans jamais rogner
+ * un libellé.
+ */
+function placeCluster(cluster) {
+  const { lanesOf, column, count } = dayColumns.value;
+  const { items, lanes } = lanesOf.get(cluster);
 
   /* Les lignes de la grille : les instants où un cours commence ou s'arrête
      découpent le bloc, et chaque tranche garde la hauteur de sa durée. */
@@ -123,23 +169,25 @@ function placeCluster(cluster) {
   const line = new Map(marks.map((at, index) => [at, index + 1]));
 
   const cards = [];
-  columns.forEach((column, index) => {
-    for (const item of column) {
+  for (const lane of lanes) {
+    for (const item of lane.items) {
       cards.push({
         event: item.event,
         style: {
-          gridColumn: `${index + 1}`,
+          gridColumn: `${column.get(lane.id) + 1}`,
           gridRow: `${line.get(item.from)} / ${line.get(item.to)}`,
         },
       });
     }
-  });
+  }
+  // L'ordre du document suit celui des colonnes, pour la lecture au clavier.
+  cards.sort((a, b) => a.style.gridColumn - b.style.gridColumn);
 
   return {
     cards,
-    compact: columns.length > 1,
+    compact: count > 1,
     grid: {
-      gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`,
       gridTemplateRows: marks.slice(1)
         .map((at, index) => `minmax(${Math.round((at - marks[index]) * PX_PER_MIN)}px, auto)`)
         .join(' '),
