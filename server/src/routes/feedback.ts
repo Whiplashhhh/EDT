@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import {
   bodyText,
   isBot,
+  MAX_BODY_BYTES,
   parseFeedback,
   subjectLine,
   type DepartmentInfo,
@@ -14,8 +15,8 @@ import type { SendMail } from '../feedback/mailer.ts';
  *
  * Le message part du formulaire de l'application, et c'est le serveur qui le
  * transmet par courriel à l'exploitant : personne n'a à connaître son adresse,
- * ni à donner la sienne. Rien n'est conservé ici — le message est relayé, puis
- * oublié.
+ * ni à donner la sienne. Rien n'est conservé ici — le message, avec ses pièces
+ * jointes éventuelles, est relayé, puis oublié.
  */
 
 export interface FeedbackRoutesOptions {
@@ -41,6 +42,8 @@ export async function registerFeedbackRoutes(app: FastifyInstance, opts: Feedbac
     {
       // En plus de la limite générale : quelques messages par heure suffisent à un humain.
       config: { rateLimit: { max: maxPerHour, timeWindow: '1 hour' } },
+      // Le reste de l'API refuse tout corps de plus de 8 Ko ; seul ce formulaire accepte des fichiers.
+      bodyLimit: MAX_BODY_BYTES,
     },
     async (req, reply) => {
       if (!send) {
@@ -64,6 +67,7 @@ export async function registerFeedbackRoutes(app: FastifyInstance, opts: Feedbac
           subject: subjectLine(feedback),
           text: bodyText(feedback, department, new Date()),
           replyTo: feedback.email,
+          attachments: feedback.attachments,
         });
       } catch (err) {
         req.log.error({ err }, 'envoi du message de contact impossible');
@@ -72,7 +76,7 @@ export async function registerFeedbackRoutes(app: FastifyInstance, opts: Feedbac
           code: 'feedback-send',
         });
       }
-      req.log.info({ kind: feedback.kind }, 'message de contact transmis');
+      req.log.info({ kind: feedback.kind, attachments: feedback.attachments.length }, 'message de contact transmis');
       return reply.code(204).send();
     },
   );

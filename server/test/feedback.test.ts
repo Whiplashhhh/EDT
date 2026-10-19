@@ -168,3 +168,82 @@ test('route : quelques messages par heure, pas davantage', async () => {
   // La limite ne touche que l'envoi : la configuration reste lisible.
   assert.equal((await app.inject('/api/feedback/config')).statusCode, 200);
 });
+
+/** Les premiers octets d'un vrai fichier de chaque format, suivis de remplissage. */
+const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(32)]);
+const PDF = Buffer.concat([Buffer.from('%PDF-1.7\n'), Buffer.alloc(32)]);
+const attach = (name: string, bytes: Buffer) => ({ name, data: bytes.toString('base64') });
+
+test('pièces jointes : le format se lit dans le fichier, pas dans son nom', () => {
+  const f = parseFeedback({
+    kind: 'bug',
+    message: 'abc',
+    attachments: [attach('capture.exe', PNG), attach('../../etc/rapport.PDF', PDF)],
+  });
+  assert.deepEqual(f.attachments.map((a) => [a.filename, a.contentType]), [
+    ['capture.png', 'image/png'],
+    ['rapport.pdf', 'application/pdf'],
+  ]);
+  assert.equal(f.attachments[0].content.equals(PNG), true);
+});
+
+test('pièces jointes : nom nettoyé, nom de repli', () => {
+  const f = parseFeedback({
+    kind: 'bug',
+    message: 'abc',
+    attachments: [attach('a\r\nBcc: x@y.fr.png', PNG), attach('', PNG), attach('.png', PNG)],
+  });
+  assert.deepEqual(f.attachments.map((a) => a.filename), ['a Bcc x@y.fr.png', 'piece-jointe-2.png', 'piece-jointe-3.png']);
+});
+
+test('pièces jointes : refus d’un format exécutable ou ambigu', () => {
+  const html = Buffer.from('<html><script>alert(1)</script></html>');
+  const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>');
+  const exe = Buffer.concat([Buffer.from('MZ'), Buffer.alloc(32)]);
+  for (const bytes of [html, svg, exe]) {
+    assert.throws(
+      () => parseFeedback({ kind: 'bug', message: 'abc', attachments: [attach('capture.png', bytes)] }),
+      (err: Error & { code?: string }) => err.code === 'feedback-attachment',
+    );
+  }
+  for (const attachments of ['x', [{ data: 42 }], [{ data: '' }], [{ data: 'pas du base64 !' }], [null]]) {
+    assert.throws(
+      () => parseFeedback({ kind: 'bug', message: 'abc', attachments }),
+      (err: Error & { code?: string }) => err.code === 'feedback-attachment',
+    );
+  }
+});
+
+test('pièces jointes : nombre et poids bornés', () => {
+  const four = Array.from({ length: 4 }, () => attach('a.png', PNG));
+  assert.throws(
+    () => parseFeedback({ kind: 'bug', message: 'abc', attachments: four }),
+    (err: Error & { code?: string }) => err.code === 'feedback-attachment',
+  );
+  const big = Buffer.concat([PNG, Buffer.alloc(6 * 1024 * 1024)]);
+  assert.doesNotThrow(() => parseFeedback({ kind: 'bug', message: 'abc', attachments: [attach('a.png', big)] }));
+  assert.throws(
+    () => parseFeedback({ kind: 'bug', message: 'abc', attachments: [attach('a.png', big), attach('b.png', big)] }),
+    (err: Error & { code?: string; statusCode?: number }) => err.code === 'feedback-too-large' && err.statusCode === 413,
+  );
+});
+
+test('route : les pièces jointes suivent le courriel, et le corps les mentionne', async () => {
+  const sent: OutgoingMail[] = [];
+  const app = await makeApp(async (mail) => { sent.push(mail); });
+  const res = await post(app, { kind: 'bug', message: 'Voir la capture.', attachments: [attach('écran.png', PNG)] });
+  assert.equal(res.statusCode, 204);
+  assert.equal(sent[0].attachments?.length, 1);
+  assert.equal(sent[0].attachments?.[0].filename, 'écran.png');
+  assert.equal(sent[0].attachments?.[0].contentType, 'image/png');
+  assert.match(sent[0].text, /Pièces jointes : écran\.png \(1 Ko\)/);
+});
+
+test('route : une requête volumineuse passe ici, mais pas au-delà de la limite', async () => {
+  const app = await makeApp(async () => {});
+  const big = Buffer.concat([PNG, Buffer.alloc(4 * 1024 * 1024)]);
+  assert.equal((await post(app, { kind: 'bug', message: 'abc', attachments: [attach('a.png', big)] })).statusCode, 204);
+  const tooBig = Buffer.alloc(11 * 1024 * 1024);
+  const res = await post(app, { kind: 'bug', message: 'abc', attachments: [attach('a.png', tooBig)] });
+  assert.equal(res.statusCode, 413);
+});

@@ -7,6 +7,8 @@ export interface OutgoingMail {
   text: string;
   /** Adresse laissée par l'expéditeur, s'il veut une réponse. */
   replyTo: string | null;
+  /** Captures d'écran ou PDF joints, déjà vérifiés par `parseFeedback`. */
+  attachments?: { filename: string; content: Buffer; contentType: string }[];
 }
 
 export type SendMail = (mail: OutgoingMail) => Promise<void>;
@@ -31,13 +33,14 @@ export function smtpMailer(config: FeedbackConfig): SendMail {
     socketTimeout: 20_000,
   });
 
-  return async ({ subject, text, replyTo }) => {
+  return async ({ subject, text, replyTo, attachments }) => {
     await transport.sendMail({
       from: config.from,
       to: config.to,
       subject,
       text,
       ...(replyTo ? { replyTo } : {}),
+      ...(attachments?.length ? { attachments } : {}),
     });
   };
 }

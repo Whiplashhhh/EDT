@@ -6,10 +6,10 @@ import { reactive } from 'vue';
  * coûter un message à moitié écrit. Il ne vit qu'en mémoire — rien de ce qu'on
  * tape ici n'est enregistré sur l'appareil — et s'efface une fois envoyé.
  */
-const draft = reactive({ subject: '', message: '', email: '', status: '', name: '', withContext: true });
+const draft = reactive({ subject: '', message: '', email: '', status: '', name: '', withContext: true, files: [] });
 
 function clearDraft() {
-  Object.assign(draft, { subject: '', message: '', email: '' });
+  Object.assign(draft, { subject: '', message: '', email: '', files: [] });
 }
 </script>
 
@@ -30,6 +30,10 @@ const KINDS = ['contact', 'suggestion', 'bug'];
 const STATUSES = ['student', 'teacher', 'staff', 'other'];
 const MAX_SUBJECT = 120;
 const MAX_MESSAGE = 4000;
+/* Les mêmes bornes que le serveur (feedback/message.ts), qui les revérifie. */
+const MAX_FILES = 3;
+const MAX_FILES_BYTES = 10 * 1024 * 1024;
+const ACCEPT = 'image/png,image/jpeg,image/gif,image/webp,application/pdf';
 
 const kind = ref(KINDS.includes(props.kind) ? props.kind : 'contact');
 /** Champ piège : caché aux humains, rempli par les robots. */
@@ -38,6 +42,7 @@ const sending = ref(false);
 const sent = ref(false);
 const error = ref('');
 const messageField = ref(null);
+const filePicker = ref(null);
 
 const canSend = computed(() => draft.message.trim().length >= 3 && !sending.value);
 
@@ -46,6 +51,45 @@ const contextSummary = computed(() =>
   [props.context.identity, t('feedback.contextDevice')].filter(Boolean).join(' · '),
 );
 
+const filesBytes = computed(() => draft.files.reduce((sum, f) => sum + f.size, 0));
+
+function sizeLabel(bytes) {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} Ko` : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+}
+
+/** Ajoute les fichiers choisis ; ce qui dépasse est refusé en bloc, avec la raison. */
+function addFiles(event) {
+  const picked = [...event.target.files];
+  // Vidé aussitôt : choisir à nouveau le même fichier doit redéclencher l'événement.
+  event.target.value = '';
+  error.value = '';
+  if (picked.length === 0) return;
+  if (picked.some((f) => !ACCEPT.split(',').includes(f.type))) {
+    error.value = t('error.feedback-attachment');
+  } else if (draft.files.length + picked.length > MAX_FILES) {
+    error.value = t('error.feedback-attachment');
+  } else if (filesBytes.value + picked.reduce((sum, f) => sum + f.size, 0) > MAX_FILES_BYTES) {
+    error.value = t('error.feedback-too-large');
+  } else {
+    draft.files.push(...picked);
+  }
+}
+
+function removeFile(index) {
+  draft.files.splice(index, 1);
+  error.value = '';
+}
+
+/** Le contenu du fichier en base64, sans l'en-tête `data:…;base64,`. */
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 onMounted(() => nextTick(() => messageField.value?.focus()));
 
 async function submit() {
@@ -53,6 +97,9 @@ async function submit() {
   sending.value = true;
   error.value = '';
   try {
+    const attachments = await Promise.all(
+      draft.files.map(async (file) => ({ name: file.name, data: await toBase64(file) })),
+    );
     await api.sendFeedback({
       kind: kind.value,
       subject: draft.subject,
@@ -61,6 +108,7 @@ async function submit() {
       status: draft.status || null,
       name: draft.name,
       context: draft.withContext ? props.context : null,
+      attachments,
       website: website.value,
     });
     clearDraft();
@@ -73,7 +121,8 @@ async function submit() {
 }
 
 function messageFor(err) {
-  if (err?.code === 'feedback-email' || err?.code === 'rate-limit' || err?.code === 'feedback-disabled') {
+  const known = ['feedback-email', 'feedback-attachment', 'feedback-too-large', 'rate-limit', 'feedback-disabled'];
+  if (known.includes(err?.code)) {
     return t(`error.${err.code}`);
   }
   // Une erreur de réseau n'a pas de code : le serveur n'a jamais répondu.
@@ -125,6 +174,25 @@ function messageFor(err) {
           ></textarea>
           <span v-if="draft.message.length > MAX_MESSAGE * 0.8" class="counter">{{ draft.message.length }} / {{ MAX_MESSAGE }}</span>
         </label>
+
+        <div class="field">
+          <span class="label">{{ t('feedback.attach') }}</span>
+          <ul v-if="draft.files.length" class="files">
+            <li v-for="(file, i) in draft.files" :key="`${file.name}-${i}`" class="file">
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">{{ sizeLabel(file.size) }}</span>
+              <button class="file-remove" type="button" :aria-label="t('feedback.attachRemove', { name: file.name })" @click="removeFile(i)">✕</button>
+            </li>
+          </ul>
+          <button
+            v-if="draft.files.length < MAX_FILES"
+            class="attach"
+            type="button"
+            @click="filePicker.click()"
+          >＋ {{ t('feedback.attachAdd') }}</button>
+          <input ref="filePicker" class="picker" type="file" :accept="ACCEPT" multiple tabindex="-1" aria-hidden="true" @change="addFiles" />
+          <span class="note">{{ t('feedback.attachHint') }}</span>
+        </div>
 
         <label class="field">
           <span class="label">{{ t('feedback.email') }}</span>
@@ -256,6 +324,39 @@ function messageFor(err) {
 .area { resize: vertical; min-height: 7rem; line-height: 1.45; }
 .counter { align-self: flex-end; font-size: 0.72rem; color: var(--text-muted); }
 .note { font-size: 0.72rem; line-height: 1.4; color: var(--text-muted); }
+
+.files { display: flex; flex-direction: column; gap: 0.3rem; margin: 0; padding: 0; list-style: none; }
+.file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.3rem 0.3rem 0.65rem;
+  font-size: 0.85rem;
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-size { flex: none; font-size: 0.75rem; color: var(--text-muted); }
+.file-remove {
+  flex: none;
+  width: 1.8rem; height: 1.8rem;
+  display: grid; place-items: center;
+  color: var(--text-muted);
+  border-radius: 999px;
+}
+.file-remove:hover { background: var(--bg-elevated); color: var(--text); }
+.attach {
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+}
+.attach:hover { background: var(--bg-sunken); }
+.picker { display: none; }
 
 .about { border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .about summary {

@@ -106,6 +106,10 @@ app.setErrorHandler((error, req, reply) => {
   if (own && typeof error.statusCode === 'number') {
     return reply.code(error.statusCode).send({ code: own, error: error.message });
   }
+  // Pièces jointes au-delà de ce que la route accepte : le front a un message pour ça.
+  if (error.code === 'FST_ERR_CTP_BODY_TOO_LARGE') {
+    return reply.code(413).send({ code: 'feedback-too-large', error: 'Pièces jointes trop volumineuses.' });
+  }
   if (error.statusCode === 429) {
     return reply.code(429).send({ code: 'rate-limit', error: 'Trop de requêtes, réessayez plus tard.' });
   }

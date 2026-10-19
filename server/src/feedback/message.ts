@@ -19,6 +19,13 @@ const MAX_NAME = 80;
 const MAX_EMAIL = 254;
 const MAX_CONTEXT = 200;
 
+/** Pièces jointes : quelques captures d'écran ou un PDF, pas de quoi remplir une boîte aux lettres. */
+export const MAX_ATTACHMENTS = 3;
+export const MAX_ATTACHMENTS_BYTES = 10 * 1024 * 1024;
+/** Taille maximale d'une requête avec pièces jointes : le base64 gonfle de un tiers, le reste est du texte. */
+export const MAX_BODY_BYTES = Math.ceil((MAX_ATTACHMENTS_BYTES * 4) / 3) + 64 * 1024;
+const MAX_FILENAME = 100;
+
 /** Ce qui figure dans l'objet du courriel, entre crochets. */
 const KIND_TAGS: Record<FeedbackKind, string> = {
   contact: 'contact',
@@ -46,6 +53,8 @@ export interface FeedbackBody {
   status?: unknown;
   name?: unknown;
   context?: unknown;
+  /** `[{ name, data }]`, `data` étant le contenu du fichier en base64. */
+  attachments?: unknown;
   /** Champ piège, invisible pour un humain : un robot qui remplit tout le renseigne. */
   website?: unknown;
 }
@@ -70,10 +79,17 @@ export interface Feedback {
   status: Status | null;
   name: string | null;
   context: FeedbackContext | null;
+  attachments: Attachment[];
 }
 
-function bad(message: string, code = 'generic'): Error {
-  return Object.assign(new Error(message), { statusCode: 400, code });
+export interface Attachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+}
+
+function bad(message: string, code = 'generic', statusCode = 400): Error {
+  return Object.assign(new Error(message), { statusCode, code });
 }
 
 /** Une ligne : sans retour à la ligne ni caractère de contrôle, espaces resserrés. */
@@ -124,6 +140,58 @@ function parseContext(raw: unknown): FeedbackContext | null {
   };
 }
 
+/**
+ * Ce que le fichier est vraiment, d'après ses premiers octets : le nom et le
+ * type annoncés par le client ne prouvent rien. Seuls les formats qu'un
+ * lecteur de courriel affiche sans exécuter quoi que ce soit sont admis.
+ */
+function sniff(bytes: Buffer): { contentType: string; extension: string } | null {
+  const starts = (magic: number[], offset = 0) => magic.every((b, i) => bytes[offset + i] === b);
+  if (starts([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return { contentType: 'image/png', extension: 'png' };
+  if (starts([0xff, 0xd8, 0xff])) return { contentType: 'image/jpeg', extension: 'jpg' };
+  if (starts([0x47, 0x49, 0x46, 0x38]) && (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61) {
+    return { contentType: 'image/gif', extension: 'gif' };
+  }
+  if (starts([0x52, 0x49, 0x46, 0x46]) && starts([0x57, 0x45, 0x42, 0x50], 8)) {
+    return { contentType: 'image/webp', extension: 'webp' };
+  }
+  if (starts([0x25, 0x50, 0x44, 0x46, 0x2d])) return { contentType: 'application/pdf', extension: 'pdf' };
+  return null;
+}
+
+/** Nom d'affichage : sans chemin ni caractère de contrôle, et toujours terminé par la vraie extension. */
+function safeFilename(raw: unknown, extension: string, index: number): string {
+  const base = typeof raw === 'string' ? raw.split(/[\\/]/).pop() ?? '' : '';
+  // eslint-disable-next-line no-control-regex
+  const cleaned = base.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029"<>:*?|]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const stem = cleaned.replace(/\.[^.]*$/, '').replace(/^\.+/, '').trim().slice(0, MAX_FILENAME);
+  return `${stem || `piece-jointe-${index + 1}`}.${extension}`;
+}
+
+function parseAttachments(raw: unknown): Attachment[] {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw bad('Pièces jointes invalides.', 'feedback-attachment');
+  if (raw.length > MAX_ATTACHMENTS) throw bad('Trop de pièces jointes.', 'feedback-attachment');
+
+  let total = 0;
+  return raw.map((item, index) => {
+    const data = (item as { data?: unknown } | null)?.data;
+    if (typeof data !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(data)) {
+      throw bad('Pièce jointe illisible.', 'feedback-attachment');
+    }
+    const content = Buffer.from(data, 'base64');
+    total += content.length;
+    if (total > MAX_ATTACHMENTS_BYTES) throw bad('Pièces jointes trop volumineuses.', 'feedback-too-large', 413);
+    const kind = sniff(content);
+    if (!kind) throw bad('Format de pièce jointe non accepté.', 'feedback-attachment');
+    return {
+      filename: safeFilename((item as { name?: unknown }).name, kind.extension, index),
+      content,
+      contentType: kind.contentType,
+    };
+  });
+}
+
 /** Vérifie le formulaire. Lève une erreur 400 si le message est inutilisable. */
 export function parseFeedback(body: FeedbackBody): Feedback {
   if (!(FEEDBACK_KINDS as readonly unknown[]).includes(body.kind)) throw bad('Type de message inconnu.');
@@ -142,6 +210,7 @@ export function parseFeedback(body: FeedbackBody): Feedback {
     status: (STATUSES as readonly unknown[]).includes(body.status) ? (body.status as Status) : null,
     name: oneLine(body.name, MAX_NAME) || null,
     context: parseContext(body.context),
+    attachments: parseAttachments(body.attachments),
   };
 }
 
@@ -173,6 +242,10 @@ const IDENTITY_KINDS: Record<string, string> = {
   subjects: 'ressources',
 };
 
+function formatSize(bytes: number): string {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} Ko` : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+}
+
 /** Corps du courriel, en texte brut. */
 export function bodyText(feedback: Feedback, department: DepartmentInfo | null, sentAt: Date): string {
   const lines: string[] = [];
@@ -197,6 +270,9 @@ export function bodyText(feedback: Feedback, department: DepartmentInfo | null, 
     if (c.installed !== null) row('Application installée', c.installed ? 'oui' : 'non');
     row('Écran', c.screen);
     row('Navigateur', c.userAgent);
+  }
+  if (feedback.attachments.length > 0) {
+    row('Pièces jointes', feedback.attachments.map((a) => `${a.filename} (${formatSize(a.content.length)})`).join(', '));
   }
   row(
     'Envoyé le',

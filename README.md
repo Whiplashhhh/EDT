@@ -142,7 +142,7 @@ Les autres réglages sont dans `.env.example`.
 | `POST /api/push/subscribe` | enregistre ou met à jour l'abonnement d'un appareil |
 | `POST /api/push/unsubscribe` | supprime l'abonnement d'un appareil |
 | `GET /api/feedback/config` | formulaire de contact proposé ? |
-| `POST /api/feedback` | transmet par courriel un message de contact, une suggestion ou un problème |
+| `POST /api/feedback` | transmet par courriel un message de contact, une suggestion ou un problème, avec d'éventuelles pièces jointes (JSON, fichiers en base64 ; jusqu'à 14 Mo, contre 8 Ko ailleurs) |
 
 `:dept` vaut `all` pour les salles et les enseignants : une salle est partagée
 par tout l'établissement, un enseignant intervient souvent dans plusieurs
@@ -253,8 +253,15 @@ de push relaie un message qu'il ne peut pas lire.
 Le pied de page et le menu ⋯ rappellent que le site n'est pas officiel, et proposent
 trois entrées : **Contact**, **Suggérer une amélioration**, **Signaler un problème**.
 Elles ouvrent la même fenêtre, sans quitter l'application : un objet facultatif,
-le message, et en option une adresse pour recevoir une réponse, le statut
-(étudiant, enseignant, personnel, autre) et le nom.
+le message, et en option des pièces jointes, une adresse pour recevoir une réponse,
+le statut (étudiant, enseignant, personnel, autre) et le nom.
+
+Les pièces jointes servent surtout aux captures d'écran : 3 fichiers au plus,
+10 Mo au total, en PNG, JPEG, GIF, WebP ou PDF. Le serveur reconnaît le format à
+ses premiers octets — le nom et le type annoncés par le navigateur ne comptent
+pas —, refuse tout le reste (pas de HTML, de SVG ni d'exécutable), et remplace
+l'extension du nom par la vraie. Les fichiers partent en pièces jointes du
+courriel ; vérifiez que le service d'envoi accepte cette taille (Resend : 40 Mo).
 
 L'application joint d'elle-même, sauf si on décoche la case, de quoi comprendre
 un problème : l'emploi du temps choisi, la formation, la langue, le navigateur,
@@ -264,7 +271,7 @@ Le message part au serveur, qui le relaie par courriel à `FEEDBACK_TO`, avec po
 objet `[EDT - contact]`, `[EDT - suggestion]` ou `[EDT - problème]` suivi de
 l'objet saisi. L'adresse de l'auteur du site n'apparaît nulle part dans la page ;
 celle de l'expéditeur, s'il en donne une, est mise en `Reply-To` : « Répondre »
-lui écrit directement. Rien n'est conservé sur le serveur.
+lui écrit directement. Rien n'est conservé sur le serveur, pièces jointes comprises.
 
 ### Mise en service
 
